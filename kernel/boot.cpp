@@ -1,0 +1,44 @@
+#include <stdint.h>
+#include "include/text_mode.h"
+#define LOAD_BASE 0x100000
+
+typedef struct{
+	uint32_t  magic;
+	uint32_t  flags;
+	uint32_t checksum;
+	uint32_t header_addr;
+	uint32_t load_addr;
+	uint32_t load_end_addr;
+	uint32_t bss_end_addr;
+	uint32_t entry_addr;
+	uint32_t mode_type;
+	uint32_t width;
+	uint32_t height;
+	uint32_t depth;
+} multiboot_header;
+int kernel_boot(void);
+
+__attribute__((section(".boot"))) const multiboot_header my_multiboot_header = {
+	0x1BADB002,
+	0x10003,
+	(uint32_t)-(0x10003 + 0x1BADB002),
+	(uint32_t)&my_multiboot_header,
+	LOAD_BASE,
+	0,
+	0,
+	(uint32_t)kernel_boot
+};
+
+
+__attribute__ ((section(".bootx"))) int kernel_boot(){
+	printf("hello world, form version 2");
+	asm("hlt");
+	while(1);
+	return 0xDEADC0DE;
+}
+ 
+	 
+
+
+
+ 
