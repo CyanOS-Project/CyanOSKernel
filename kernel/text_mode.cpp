@@ -12,7 +12,7 @@ uint8_t charColor = 0x0F;
 
 
 
-void SetMode(TerminalMode Mode) {
+void setMode(TerminalMode Mode) {
 	video_ram = (short*)VGATEXTMODE_BUFFER;
 }
 
@@ -22,7 +22,7 @@ inline uint8_t vga_entry_color(VGAColor fg, VGAColor bg) {
 inline uint16_t vga_entry(unsigned char uc, uint8_t color) {
 	return (uint16_t)uc | (uint16_t)color << 8;
 }
-void PageUp() {
+void pageUp() {
 	for (size_t i = 0; i < VGA_HEIGHT - 1; i++) {
 		memcpy((char*)(video_ram + VGA_WIDTH * i), (char*)(video_ram + VGA_WIDTH * (i + 1)), VGA_WIDTH * sizeof(short));
 	}
@@ -31,7 +31,7 @@ void PageUp() {
 void setColor(VGAColor color, VGAColor backcolor) {
 	charColor = vga_entry_color(color, backcolor);
 }
-void RemoveLine() {
+void removeLine() {
 
 	do {
 		if (hPosition != VGA_WIDTH)//Update Cursor
@@ -47,35 +47,35 @@ void RemoveLine() {
 	} while (video_ram[hPosition + vPosition * VGA_WIDTH] == 0 || hPosition != 0);
 	video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
 }
-void putchar(char str) {
+void putChar(char str) {
 	if (vPosition == VGA_HEIGHT) {
-		PageUp();
+		pageUp();
 		vPosition--;
 	}
 	if (str == '\n') {
-		InsertNewLine();
+		insertNewLine();
 	} else if (str == '\b') {
-		InsertBackSpace();
+		insertBackSpace();
 	} else {
-		InsertCharacter(str);
+		insertCharacter(str);
 	}
-	UpdateCursor();
+	updateCursor();
 }
-void UpdateCursor() {
+void updateCursor() {
 	video_ram[hPosition + vPosition * VGA_WIDTH] = vga_entry(0, vga_entry_color(VGA_COLOR_BLACK, VGA_COLOR_WHITE));
 }
-void InsertNewLine() {
+void insertNewLine() {
 	if (hPosition != VGA_WIDTH)//Update Cursor
 		video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
 	hPosition = 0;
 	vPosition++;
 }
-void InsertCharacter(char str) {
+void insertCharacter(char str) {
 	video_ram[hPosition + vPosition * VGA_WIDTH] = vga_entry(str, charColor);
 	hPosition = (hPosition + 1) % VGA_WIDTH;
 	vPosition = (vPosition + (hPosition == 0));
 }
-void InsertBackSpace() {
+void insertBackSpace() {
 	if (hPosition != VGA_WIDTH)//Update Cursor
 		video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
 	do {
@@ -90,7 +90,7 @@ void InsertBackSpace() {
 	} while (video_ram[hPosition + vPosition * VGA_WIDTH] == 0);
 	video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
 }
-void ClearScreen() {
+void clearScreen() {
 	for (size_t i = 0; i < VGA_WIDTH; i++) {
 		for (size_t i2 = 0; i2 < VGA_HEIGHT; i2++) {
 			video_ram[i + i2 * VGA_WIDTH] = 0;
@@ -107,13 +107,13 @@ void printf(const char* s, ...) {
 		if (c == 0)
 			break;
 		else if (c == '%') {
-			FormatEscapeCharacters(c, s, ap);
+			formatEscapeCharacters(c, s, ap);
 		} else
-			putchar(c);
+			putChar(c);
 	}
 	return;
 }
-void FormatEscapeCharacters(unsigned char c, const char* s, va_list ap) {
+void formatEscapeCharacters(unsigned char c, const char* s, va_list ap) {
 	int size = 0;
 	c = *s++;
 	if (c >= '0' && c <= '9') {

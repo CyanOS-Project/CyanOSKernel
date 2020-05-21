@@ -28,22 +28,22 @@ typedef enum {
 	VGA_COLOR_WHITE = 15,
 } VGAColor;
 
-void SetMode(TerminalMode Mode);
+void setMode(TerminalMode Mode);
 void setColor(VGAColor color, VGAColor backcolor);
 void printf(const char* s, ...);
-void putchar(char str);
-void ClearScreen();
+void putChar(char str);
+void clearScreen();
 void displayMemory(char* Address, int Size);
 void printSuccess(char* msg, bool Success);
-void RemoveLine();
-void PageUp();
-void FormatEscapeCharacters(unsigned char c, const char* s, va_list ap);
+void removeLine();
+void pageUp();
+void formatEscapeCharacters(unsigned char c, const char* s, va_list ap);
 void formatString(va_list ap);
 void formatPointer(va_list ap, int size);
 void formatHex(va_list ap, int size, unsigned char c);
 void formatUnsigned(va_list ap, int size);
 void formatDecimal(va_list ap, int size);
-void UpdateCursor();
-void InsertNewLine();
-void InsertCharacter(char str);
-void InsertBackSpace();
+void updateCursor();
+void insertNewLine();
+void insertCharacter(char str);
+void insertBackSpace();

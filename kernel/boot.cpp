@@ -31,7 +31,8 @@ __attribute__((section(".boot"))) const multiboot_header my_multiboot_header = {
 
 
 __attribute__ ((section(".bootx"))) int kernel_boot(){
-	printf("hello world, form version 2");
+	clearScreen();
+	printf("Welcome to CyanOS");
 	asm("hlt");
 	while(1);
 	return 0xDEADC0DE;
