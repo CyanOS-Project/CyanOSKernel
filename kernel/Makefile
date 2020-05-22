@@ -7,13 +7,12 @@ QEMU	:= qemu-system-i386
 
 BIN     := $(BUILD)/bin
 OBJ     := $(BUILD)/obj
-INCLUDE := ./include
-SRC     := ./src
-SRCS    := $(wildcard *.cpp)
+INCLUDE := .
+SRCS    := $(wildcard *.cpp */*.cpp */*/*.cpp)
 OBJS    := $(patsubst %.cpp,$(OBJ)/%.o,$(SRCS))
 EXE     := $(BIN)/kernel.out
 IMG		:= 	$(BIN)/kernel.img
-CFLAGS  := -I$(INCLUDE) -m32 -g --std=c++17 -fno-builtin -Og -MMD
+CFLAGS  := -I $(INCLUDE) -m32 -g --std=c++17 -fno-builtin -Og -MMD
 LDFLAGS := -T linker.ld
 QMFLAGS := -S -gdb tcp::1234
 
@@ -25,7 +24,6 @@ QMFLAGS := -S -gdb tcp::1234
 .PHONY: all run debug clean
 
 all: $(EXE)
-
 
 debug: $(EXE)
 	$(QEMU) -kernel $(IMG) $(QMFLAGS)

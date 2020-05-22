@@ -3,7 +3,7 @@
 #include "kernel_init.h"
 
 #define LOAD_BASE 0x100000
-typedef struct{
+typedef struct __attribute__((__packed__)) {
 	uint32_t  magic;
 	uint32_t  flags;
 	uint32_t checksum;
