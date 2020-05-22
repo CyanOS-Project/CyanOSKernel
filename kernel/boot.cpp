@@ -1,6 +1,6 @@
 
 #include <stdint.h>
-#include "include/kernel_init.h"
+#include "kernel_init.h"
 
 #define LOAD_BASE 0x100000
 typedef struct{

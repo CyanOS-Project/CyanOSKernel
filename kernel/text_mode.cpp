@@ -1,4 +1,4 @@
-#include "include/text_mode.h"
+#include "text_mode.h"
 
 
 

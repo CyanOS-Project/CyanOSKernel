@@ -1,4 +1,4 @@
-#include "include/stdlib.h"
+#include "stdlib.h"
 
 void memcpy(char* dest, char* source, unsigned int len) {
 	for (size_t i = 0; i < len; i++)

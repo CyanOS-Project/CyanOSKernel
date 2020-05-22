@@ -3,25 +3,25 @@
 SECTIONS
 {
 	. = 0x00100000;
-	.boot	:  { *(.boot)	}
+	.boot	:  ALIGN(4K) { *(.boot)	}
 
 	. = 0x00100040;
 	.bootx	: { *(.bootx)	}
 
-	.text	: {	*(.text)	}
-	.data 	: {	*(.data)	}
-	.rdata 	: {	*(.rdata)	}
-	.bss 	: {	*(.bss)		}
+	.text	: ALIGN(4K) {	*(.text)	}
+	.data 	: ALIGN(4K) {	*(.data)	}
+	.rdata 	: ALIGN(4K) {	*(.rdata)	}
+	.bss 	: ALIGN(4K) {	*(.bss)		}
 
-	.debug_info 	: { *(.debug_info)		}
-	.debug_ranges	: { *(.debug_ranges)	}
-	.debug_aranges	: { *(.debug_aranges)	}
-	.debug_abbrev	: { *(.debug_abbrev)	}
-	.debug_line		: { *(.debug_line)		}
-	.debug_str		: { *(.debug_str)		}
-	.eh_frame		: { *(.eh_frame)		}
+	.debug_info 	: ALIGN(4K) { *(.debug_info)		}
+	.debug_ranges	: ALIGN(4K) { *(.debug_ranges)	}
+	.debug_aranges	: ALIGN(4K) { *(.debug_aranges)	}
+	.debug_abbrev	: ALIGN(4K) { *(.debug_abbrev)	}
+	.debug_line		: ALIGN(4K) { *(.debug_line)		}
+	.debug_str		: ALIGN(4K) { *(.debug_str)		}
+	.eh_frame		: ALIGN(4K) { *(.eh_frame)		}
 
-	.ext : { *(.*)	}
+	.ext : ALIGN(4K) { *(.*)	}
 	
 
 }
