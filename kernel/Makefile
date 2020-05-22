@@ -13,12 +13,12 @@ SRCS    := $(wildcard *.cpp)
 OBJS    := $(patsubst %.cpp,$(OBJ)/%.o,$(SRCS))
 EXE     := $(BIN)/kernel.out
 IMG		:= 	$(BIN)/kernel.img
-CFLAGS  := -I$(INCLUDE) -g --std=c++17 -fno-builtin
+CFLAGS  := -I$(INCLUDE) -m32 -g --std=c++17 -fno-builtin -Og -MMD
 LDFLAGS := -T linker.ld
 QMFLAGS := -S -gdb tcp::1234
 
-INCOMM	:= 	$(INCLUDE)/memmap.h \
-			$(INCLUDE)/types.h \
+
+
 
 
 
@@ -36,6 +36,8 @@ run: $(EXE)
 $(EXE): $(OBJS) | $(BIN)
 	$(LD) $(LDFLAGS) $^ -o $@
 	$(OBCP) -O binary $@ $(IMG)
+
+-include $(OBJ)/*.d
 
 $(OBJ)/%.o: %.cpp | $(OBJ)
 	$(CC) $(CFLAGS) -c $< -o $@

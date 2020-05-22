@@ -1,7 +1,8 @@
-#include <stdint.h>
-#include "include/text_mode.h"
-#define LOAD_BASE 0x100000
 
+#include <stdint.h>
+#include "include/kernel_init.h"
+
+#define LOAD_BASE 0x100000
 typedef struct{
 	uint32_t  magic;
 	uint32_t  flags;
@@ -16,9 +17,9 @@ typedef struct{
 	uint32_t height;
 	uint32_t depth;
 } multiboot_header;
-int kernel_boot(void);
 
-__attribute__((section(".boot"))) const multiboot_header my_multiboot_header = {
+void kernel_boot(void);
+__attribute__((section(".boot"))) const volatile multiboot_header my_multiboot_header = {
 	0x1BADB002,
 	0x10003,
 	(uint32_t)-(0x10003 + 0x1BADB002),
@@ -30,12 +31,10 @@ __attribute__((section(".boot"))) const multiboot_header my_multiboot_header = {
 };
 
 
-__attribute__ ((section(".bootx"))) int kernel_boot(){
-	clearScreen();
-	printf("Welcome to CyanOS");
+__attribute__ ((section(".bootx"))) void kernel_boot(){
+	kernel_init();
 	asm("hlt");
-	while(1);
-	return 0xDEADC0DE;
+	return;
 }
  
 	 
