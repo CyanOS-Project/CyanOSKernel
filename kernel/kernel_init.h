@@ -1,4 +1,4 @@
 #pragma once
-#include "text_mode.h"
+#include "console.h"
 
 void kernel_init();

@@ -1,5 +1,5 @@
 #include "kernel_init.h"
-#include "arch/x86/gdt.h"
+#include "Arch/x86/gdt.h"
 
 void kernel_init(){
     clearScreen();

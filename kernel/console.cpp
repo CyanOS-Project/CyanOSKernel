@@ -1,4 +1,4 @@
-#include "text_mode.h"
+#include "console.h"
 
 
 
