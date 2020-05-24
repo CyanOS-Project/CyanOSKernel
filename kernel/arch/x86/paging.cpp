@@ -1,4 +1,0 @@
-
-void invalidate_pagetable(){
-    
-}
