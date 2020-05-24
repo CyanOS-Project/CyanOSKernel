@@ -3,8 +3,8 @@
 
 void kernel_init()
 {
-    setup_gdt();
-    clearScreen();
-    printf("Welcome to CyanOS");
-    asm("hlt");
+	setup_gdt();
+	clearScreen();
+	printf("Welcome to CyanOS");
+	asm("hlt");
 }
