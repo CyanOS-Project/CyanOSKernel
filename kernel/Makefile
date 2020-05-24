@@ -10,7 +10,7 @@ OBJ     := $(BUILD)/obj
 INCLUDE := .
 SRCS    := $(wildcard *.cpp */*.cpp */*/*.cpp)
 OBJS    := $(patsubst %.cpp,$(OBJ)/%.o,$(SRCS))
-DIRS    := $(sort  $(dir $(OBJS))) 
+DIRS    := $(sort  $(abspath $(dir $(OBJS)))) 
 EXE     := $(BIN)/kernel.out
 IMG		:= 	$(BIN)/kernel.img
 CFLAGS  := -T linker.ld -I $(INCLUDE) -m32 -g --std=c++17 -fno-builtin -Og -MMD -fno-pie -ffreestanding -nostdlib
