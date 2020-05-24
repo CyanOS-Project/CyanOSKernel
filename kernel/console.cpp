@@ -108,6 +108,7 @@ void printf(const char* s, ...) {
 			break;
 		else if (c == '%') {
 			formatEscapeCharacters(c, s, ap);
+			s++;
 		} else
 			putChar(c);
 	}

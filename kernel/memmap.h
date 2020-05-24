@@ -24,11 +24,7 @@
 
 #define PUSHADSIZE 0x20
 
-#define KCS_SELECTOR 0x08
-#define KDS_SELECTOR 0x10
-#define UCS_SELECTOR 0x1B
-#define UDS_SELECTOR 0x23
-#define TSS_SELECTOR 0x28
+
 
 
 
