@@ -11,4 +11,3 @@ int strlen(char* str);
 int toupper(char* str);
 int tolower(char* str);
 void itoa(char* buf, unsigned long int n, int base);
-

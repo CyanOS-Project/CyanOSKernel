@@ -1,4 +1,4 @@
 
-void invalidate_pagetable(){
-    
+void invalidate_pagetable()
+{
 }
