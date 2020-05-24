@@ -9,7 +9,7 @@
 * For emulating and testing the operating system you need to download 32bit version of [qemu](https://www.qemu.org/download/).
 * Add qemu main folder's path to the environment variables.
 #### Building
-Using `git` or `Cygwin` bash, enter the main source code directory and type the following commands
+Using `git` or `Cygwin` bash, type the following commands
 ```
 git clone https://github.com/AymenSekhri/CyanOS.git
 cd ./CyanOS
@@ -18,13 +18,13 @@ make clean && make run
 
 ### Linux (Ubuntu)
 #### Setting up
-Using bash type the following commands to install the required packages
+Using bash, type the following commands to install the required packages
 ```
 sudo apt-get update
 sudo apt-get install build-essential gcc-multilib g++-multilib qemu
 ```
 #### Building
-Using bash, enter the main source code directory and type the following commands
+
 ```
 git clone https://github.com/AymenSekhri/CyanOS.git
 cd ./CyanOS
