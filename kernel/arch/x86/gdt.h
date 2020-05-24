@@ -60,7 +60,7 @@ struct GDTEntry {
 #pragma pack()
 
 extern GDT gdt;
-extern GDTEntry gdt_entries[GDT_NUMBER_OF_ENTRIES];
+extern GDTEntry gdt_entries[];
 
 void setup_gdt();
 
