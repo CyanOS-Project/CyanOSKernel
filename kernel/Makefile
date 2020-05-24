@@ -1,5 +1,5 @@
-MKDIR   := mkdir
-RMDIR   := rmdir /S /Q
+MKDIR   := mkdir -p
+RMDIR   := rm -rf
 CC      := g++
 LD      := ld
 OBCP	:= objcopy
@@ -10,15 +10,11 @@ OBJ     := $(BUILD)/obj
 INCLUDE := .
 SRCS    := $(wildcard *.cpp */*.cpp */*/*.cpp)
 OBJS    := $(patsubst %.cpp,$(OBJ)/%.o,$(SRCS))
+DIRS    := $(sort  $(dir $(OBJS))) 
 EXE     := $(BIN)/kernel.out
 IMG		:= 	$(BIN)/kernel.img
-CFLAGS  := -I $(INCLUDE) -m32 -g --std=c++17 -fno-builtin -Og -MMD
-LDFLAGS := -T linker.ld
+CFLAGS  := -T linker.ld -I $(INCLUDE) -m32 -g --std=c++17 -fno-builtin -Og -MMD -fno-pie -ffreestanding -nostdlib
 QMFLAGS := -S -gdb tcp::1234
-
-
-
-
 
 
 .PHONY: all run debug clean
@@ -32,17 +28,17 @@ run: $(EXE)
 	$(QEMU) -kernel $(IMG)
 
 $(EXE): $(OBJS) | $(BIN)
-	$(LD) $(LDFLAGS) $^ -o $@
+	$(CC) $(CFLAGS) $^ -o $@
 	$(OBCP) -O binary $@ $(IMG)
 
--include $(OBJ)/*.d
 
-$(OBJ)/%.o: %.cpp | $(OBJ)
+$(OBJ)/%.o: %.cpp | $(DIRS)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-$(BIN) $(OBJ):
-	$(MKDIR) "$@"
+$(BIN) $(DIRS):
+	$(MKDIR) $@
 
+-include $(OBJ)/*.d
 
 clean:
 	$(RMDIR) "$(BUILD)"
