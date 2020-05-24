@@ -1,4 +1,4 @@
-# CyanOS: A Simple Hobbyist Operating System
+# CyanOS: A Hobbyist Operating System
 
 ## Building CyanOS
 ### Windows
@@ -9,25 +9,25 @@
 * For emulating and testing the operating system you need to download 32bit version of [qemu](https://www.qemu.org/download/).
 * Add qemu main folder's path to the environment variables.
 #### Building
-Using `git` or `Cygwin` bash, enter the main source code directory and type one of the following commands
+Using `git` or `Cygwin` bash, enter the main source code directory and type the following commands
 ```
-make        // To compile
-make run    // To compile and run the OS directly in qemu.
-make debug  // To compile and start a debugging session.
+git clone https://github.com/AymenSekhri/CyanOS.git
+cd ./CyanOS
+make clean && make run
 ```
 
 ### Linux (Ubuntu)
 #### Setting up
-Using bash type the following commands
+Using bash type the following commands to install the required packages
 ```
 sudo apt-get update
 sudo apt-get install build-essential gcc-multilib g++-multilib qemu
 ```
 #### Building
-Using bash, enter the main source code directory and type one of the following commands
+Using bash, enter the main source code directory and type the following commands
 ```
-make        // To compile
-make run    // To compile and run the OS directly in qemu.
-make debug  // To compile and start a debugging session.
+git clone https://github.com/AymenSekhri/CyanOS.git
+cd ./CyanOS
+make clean && make run
 ```
-You may need to change the name of qemu executable in /kernel/Makefile under the variable `QEMU` to your qemu name.
+You may need to change the name of Qemu's executable in /kernel/Makefile under the variable `QEMU` to your Qemu's name.
