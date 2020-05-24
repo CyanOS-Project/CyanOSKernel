@@ -10,11 +10,11 @@ void setup_gdt()
 	//Empty Entry
 	fill_gdt_entry(gdt_entries, 0, 0, 0, 0);
 	//Kernel Segments
-	fill_gdt_entry(&gdt_entries[SEGMENT_INDEX(KCS_SELECTOR)], 0, 0xFFFFF, 0x9B, 0x0D);
-	fill_gdt_entry(&gdt_entries[SEGMENT_INDEX(KDS_SELECTOR)], 0, 0xFFFFF, 0x93, 0x0D);
+	fill_gdt_entry(&gdt_entries[SEGMENT_INDEX(KCS_SELECTOR)], 0, 0xFFFFF, GDT_CODE_PL0, 0x0D);
+	fill_gdt_entry(&gdt_entries[SEGMENT_INDEX(KDS_SELECTOR)], 0, 0xFFFFF, GDT_DATA_PL0, 0x0D);
 	//User Entries
-	fill_gdt_entry(&gdt_entries[SEGMENT_INDEX(UCS_SELECTOR)], 0, 0xFFFFF, 0xFF, 0x0D);
-	fill_gdt_entry(&gdt_entries[SEGMENT_INDEX(UDS_SELECTOR)], 0, 0xFFFFF, 0xF3, 0x0D);
+	fill_gdt_entry(&gdt_entries[SEGMENT_INDEX(UCS_SELECTOR)], 0, 0xFFFFF, GDT_CODE_PL3, 0x0D);
+	fill_gdt_entry(&gdt_entries[SEGMENT_INDEX(UDS_SELECTOR)], 0, 0xFFFFF, GDT_DATA_PL3, 0x0D);
 
 	load_gdt(&gdt);
 	load_segments(KCS_SELECTOR, KDS_SELECTOR);
@@ -60,5 +60,5 @@ static void load_segments(uint16_t code_segment, uint16_t data_segment)
 		 farjmp:        \t\n\
 		 nop"
 		:
-		: "r"(code_segment) );
+		: "r"((uint32_t)code_segment) );
 }
