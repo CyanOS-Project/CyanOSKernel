@@ -13,8 +13,9 @@ void setup_idt()
 
 	fill_idt(&idt, (uint32_t)idt_entries, sizeof(idt_entries));
 
-	fill_idt_entry(&idt_entries[3], (uint32_t)testISR, KCS_SELECTOR,
-	               IDT_ENTRY_FLAGS::IDT_ENTRY_PRESENT | IDT_ENTRY_FLAGS::IDT_ENTRY_INTGATE);
+	for (size_t i = 0; i < NUMBER_OF_IDT_ENTRIES; i++)
+		fill_idt_entry(&idt_entries[i], (uint32_t)testISR, KCS_SELECTOR,
+		               IDT_ENTRY_FLAGS::PRESENT | IDT_ENTRY_FLAGS::GATE_32 | IDT_ENTRY_FLAGS::INT_GATE);
 
 	load_idt(&idt);
 }

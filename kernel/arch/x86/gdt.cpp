@@ -1,10 +1,11 @@
 #include "gdt.h"
 
-GDT gdt;
-GDTEntry gdt_entries[GDT_NUMBER_OF_ENTRIES];
+GDT gdt __attribute__((aligned(8)));
+GDTEntry gdt_entries[GDT_NUMBER_OF_ENTRIES] __attribute__((aligned(8)));
 
 void setup_gdt()
 {
+	int dd = sizeof(gdt);
 	fill_gdt(&gdt, (uint32_t)&gdt_entries, 5 * sizeof(GDTEntry));
 
 	// Empty Entry
