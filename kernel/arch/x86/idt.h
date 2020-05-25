@@ -2,7 +2,8 @@
 
 #include "types.h"
 
-#define NUMBER_OF_IDT_ENTRIES 255
+#define NUMBER_OF_IDT_ENTRIES         255
+#define NUMBER_OF_IDT_DEFINED_ENTRIES 20
 
 enum IDT_ENTRY_FLAGS {
 	PRESENT = 0x80,
@@ -30,9 +31,6 @@ struct IDTEntry {
 #pragma pack()
 
 void setup_idt();
-static void fill_idt(IDT* idt, uint32_t base, uint16_t limit);
-static void fill_idt_entry(IDTEntry* idt_entry, uint32_t address, uint16_t segment, uint8_t type);
-static void load_idt(IDT* idt);
-
-extern IDT idt;
-extern IDTEntry idt_entries[];
+static void fill_idt(volatile IDT* idt, uint32_t base, uint16_t limit);
+static void fill_idt_entry(volatile IDTEntry* idt_entry, uint32_t address, uint16_t segment, uint8_t type);
+static void load_idt(volatile IDT* idt);

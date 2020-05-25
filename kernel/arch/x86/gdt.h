@@ -59,12 +59,9 @@ struct GDTEntry {
 };
 #pragma pack()
 
-extern GDT gdt;
-extern GDTEntry gdt_entries[];
-
 void setup_gdt();
 
-static void fill_gdt(GDT* gdt, uint32_t base, uint16_t limit);
-static void fill_gdt_entry(GDTEntry* gdt_entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags);
+static void load_gdt(volatile GDT* gdt);
+static void fill_gdt_entry(volatile GDTEntry* gdt_entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags);
+static void fill_gdt(volatile GDT* gdt, uint32_t base, uint16_t limit);
 static void load_segments(uint16_t code_segment, uint16_t data_segment);
-static void load_gdt(GDT* gdt);

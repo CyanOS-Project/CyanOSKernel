@@ -1,11 +1,10 @@
 #include "gdt.h"
 
-GDT gdt __attribute__((aligned(8)));
-GDTEntry gdt_entries[GDT_NUMBER_OF_ENTRIES] __attribute__((aligned(8)));
+volatile GDT gdt __attribute__((aligned(8)));
+volatile GDTEntry gdt_entries[GDT_NUMBER_OF_ENTRIES] __attribute__((aligned(8)));
 
 void setup_gdt()
 {
-	int dd = sizeof(gdt);
 	fill_gdt(&gdt, (uint32_t)&gdt_entries, 5 * sizeof(GDTEntry));
 
 	// Empty Entry
@@ -21,7 +20,7 @@ void setup_gdt()
 	load_segments(KCS_SELECTOR, KDS_SELECTOR);
 }
 
-static void fill_gdt_entry(GDTEntry* gdt_entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags)
+static void fill_gdt_entry(volatile GDTEntry* gdt_entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags)
 {
 	gdt_entry->base0_15 = base & 0x0000FFFF;
 	gdt_entry->base16_23 = (base & 0x00FF0000) >> 16;
@@ -32,13 +31,13 @@ static void fill_gdt_entry(GDTEntry* gdt_entry, uint32_t base, uint32_t limit, u
 	gdt_entry->flags = flags;
 }
 
-static void fill_gdt(GDT* gdt, uint32_t base, uint16_t limit)
+static void fill_gdt(volatile GDT* gdt, uint32_t base, uint16_t limit)
 {
 	gdt->base = base;
 	gdt->limit = limit;
 }
 
-static void load_gdt(GDT* gdt)
+static void load_gdt(volatile GDT* gdt)
 {
 	asm volatile("LGDT (%0)" : : "r"(gdt));
 }
