@@ -56,6 +56,9 @@ void putChar(char str)
 		insertNewLine();
 	} else if (str == '\b') {
 		insertBackSpace();
+	} else if (str == '\t') {
+		for (size_t i = 0; i < 4; i++)
+			insertCharacter(' ');
 	} else {
 		insertCharacter(str);
 	}
