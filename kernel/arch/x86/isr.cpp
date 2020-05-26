@@ -42,10 +42,11 @@ void default_interrupt_handler(ISR_INFO info)
 		printf("Exception: ");
 		printf(exception_messages[info.irq_number]);
 		printf("\nContext Dump:\n");
-		printf("EIP=%X\t CS=%X\t ESP=%X\t\n", info.eip, info.cs, info.esp);
+		printf("EIP=%X\t CS=%d\t ESP=%X\t\n", info.eip, info.cs, info.esp);
 	} else if (info.irq_number < NUMBER_OF_IDT_EXCEPTIONS) {
 		printf("Reserved Exception Number\n");
 	} else {
+		printf("Undefined IRQ Number\n");
 	}
 }
 

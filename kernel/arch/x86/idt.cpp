@@ -2,8 +2,8 @@
 #include "gdt.h"
 #include "isr.h"
 
-volatile IDT idt;
-volatile IDTEntry idt_entries[NUMBER_OF_IDT_ENTRIES];
+volatile IDT idt __attribute__((aligned(4)));
+volatile IDTEntry idt_entries[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(4)));
 
 void testISR(ISR_INFO);
 

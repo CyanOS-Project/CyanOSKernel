@@ -120,14 +120,14 @@ void printf(const char* s, ...)
 		if (c == 0)
 			break;
 		else if (c == '%') {
-			formatEscapeCharacters(c, s, ap);
+			formatEscapeCharacters(c, s, va_arg(ap, int));
 			s++;
 		} else
 			putChar(c);
 	}
 	return;
 }
-void formatEscapeCharacters(unsigned char c, const char* s, va_list ap)
+void formatEscapeCharacters(unsigned char c, const char* s, int cur_arg)
 {
 	int size = 0;
 	c = *s++;
@@ -136,27 +136,26 @@ void formatEscapeCharacters(unsigned char c, const char* s, va_list ap)
 		c = *s++;
 	}
 	if (c == 'd') {
-		formatDecimal(ap, size);
+		formatDecimal(cur_arg, size);
 	} else if (c == 'u') {
-		formatUnsigned(ap, size);
+		formatUnsigned(cur_arg, size);
 	} else if (c == 'x' || c == 'X') {
-		formatHex(ap, size, c);
+		formatHex(cur_arg, size, c);
 	} else if (c == 'p') {
-		formatPointer(ap, size);
+		formatPointer(cur_arg, size);
 	} else if (c == 's') {
-		formatString(ap);
+		formatString((char*)cur_arg);
 	}
 }
-void formatString(va_list ap)
+
+void formatString(char* arg)
 {
-	printf((char*)va_arg(ap, int));
+	printf(arg);
 }
-void formatPointer(va_list ap, int size)
+void formatPointer(int arg, int size)
 {
 	char buf[16];
-	unsigned int uival;
-	uival = va_arg(ap, int);
-	itoa(buf, uival, 16);
+	itoa(buf, arg, 16);
 	size = 8;
 
 	int buflen = strlen(buf);
@@ -166,12 +165,10 @@ void formatPointer(va_list ap, int size)
 			buf[i] = (j >= 0) ? buf[j] : '0';
 	printf("0x%s", buf);
 }
-void formatHex(va_list ap, int size, unsigned char c)
+void formatHex(int arg, int size, unsigned char c)
 {
 	char buf[16];
-	unsigned int uival;
-	uival = va_arg(ap, int);
-	itoa(buf, uival, 16);
+	itoa(buf, arg, 16);
 
 	int buflen = strlen(buf);
 	int i, j;
@@ -182,12 +179,11 @@ void formatHex(va_list ap, int size, unsigned char c)
 		toupper(buf);
 	printf("0x%s", buf);
 }
-void formatUnsigned(va_list ap, int size)
+
+void formatUnsigned(int arg, int size)
 {
 	char buf[16];
-	unsigned int uival;
-	uival = va_arg(ap, int);
-	itoa(buf, uival, 10);
+	itoa(buf, arg, 10);
 
 	int buflen = strlen(buf);
 	int i, j;
@@ -196,19 +192,16 @@ void formatUnsigned(va_list ap, int size)
 			buf[i] = (j >= 0) ? buf[j] : '0';
 	printf(buf);
 }
-void formatDecimal(va_list ap, int size)
+void formatDecimal(int arg, int size)
 {
 	char buf[16];
 	int neg = 0;
-	unsigned int uival;
-	int ival;
-	ival = va_arg(ap, int);
-	if (ival < 0) {
-		uival = 0 - ival;
+	if (arg < 0) {
+		arg = 0 - arg;
 		neg++;
 	} else
-		uival = ival;
-	itoa(buf, uival, 10);
+		arg = arg;
+	itoa(buf, arg, 10);
 	int buflen = strlen(buf);
 	int i, j;
 	if (buflen < size)
