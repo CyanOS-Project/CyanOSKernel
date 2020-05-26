@@ -9,8 +9,11 @@ struct ISR_INFO {
 	uint32_t eip, cs, eflags, useresp, ss;
 };
 
-void initiate_isr_vector();
-void default_interrupt_handler(ISR_INFO info);
+typedef void (*isr_function)(ISR_INFO);
 
-extern uintptr_t interrupt_dispatcher_vector[];
+void initiate_isr_vector();
+void add_custom_isr(isr_function address, uint8_t irq_number);
+static void default_interrupt_handler(ISR_INFO info);
+
+extern uintptr_t isr_vector[];
 extern const char* exception_messages[];

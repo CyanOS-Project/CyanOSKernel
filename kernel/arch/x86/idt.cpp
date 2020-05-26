@@ -5,7 +5,7 @@
 volatile IDT idt;
 volatile IDTEntry idt_entries[NUMBER_OF_IDT_ENTRIES];
 
-void testISR();
+void testISR(ISR_INFO);
 
 void setup_idt()
 {
@@ -13,9 +13,9 @@ void setup_idt()
 	fill_idt(&idt, (uint32_t)idt_entries, sizeof(idt_entries) - 1);
 
 	for (size_t i = 0; i < NUMBER_OF_IDT_ENTRIES; i++)
-		fill_idt_entry(&idt_entries[i], (uint32_t)interrupt_dispatcher_vector[i], KCS_SELECTOR,
+		fill_idt_entry(&idt_entries[i], (uint32_t)isr_vector[i], KCS_SELECTOR,
 		               IDT_ENTRY_FLAGS::PRESENT | IDT_ENTRY_FLAGS::GATE_32 | IDT_ENTRY_FLAGS::INT_GATE);
-
+	// add_custom_isr(testISR, EXCEPTION_NUMBER::BP);
 	load_idt(&idt);
 }
 
@@ -39,11 +39,8 @@ static void load_idt(volatile IDT* idt)
 	asm volatile("LIDT (%0)" : : "r"(idt));
 }
 
-void testISR()
+void testISR(ISR_INFO info)
 {
-	while (1) {
-		asm("nop");
-	}
-
+	asm("nop");
 	return;
 }

@@ -50,8 +50,8 @@ ISR_NOERRCODE 	256
 
 
 
-global  isr_vector
-isr_vector:
+global  _isr_vector
+_isr_vector:
 ISR_ENTRY 	0
 ISR_ENTRY 	1
 ISR_ENTRY 	2
@@ -74,8 +74,8 @@ ISR_ENTRY 	18
 ISR_ENTRY 	19
 ISR_ENTRY 	20
 
-global generic_isr
-generic_isr:
+global _generic_isr
+_generic_isr:
 ISR_ENTRY 	256
 
 
