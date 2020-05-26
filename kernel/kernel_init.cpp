@@ -4,11 +4,12 @@
 
 void kernel_init()
 {
+	initiate_console();
 	setup_gdt();
 	setup_idt();
 
 	asm("int3");
-	clearScreen();
+
 	printf("Welcome to CyanOS");
 	asm("hlt");
 }

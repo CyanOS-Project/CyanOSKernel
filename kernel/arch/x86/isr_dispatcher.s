@@ -6,8 +6,9 @@ dd isr%1
 
 %macro ISR_NOERRCODE 1     
 	isr%1:
-		push byte 0
-		push word %1
+		push dword 0
+		push dword %1
+		pusha
 		call interrupt_dispatcher
 		popa
 	 	add esp, 8
@@ -16,7 +17,7 @@ dd isr%1
 
 %macro ISR_ERRCODE 1
 	isr%1:
-		push word %1
+		push dword %1
 		pusha
 		call interrupt_dispatcher
 		popa
@@ -24,28 +25,28 @@ dd isr%1
 		iret
 %endmacro
 
-ISR_ERRCODE 	0
-ISR_ERRCODE 	1
-ISR_ERRCODE 	2
-ISR_ERRCODE 	3
-ISR_ERRCODE 	4
-ISR_ERRCODE 	5
-ISR_ERRCODE 	6
-ISR_ERRCODE 	7
+ISR_NOERRCODE 	0
+ISR_NOERRCODE 	1
+ISR_NOERRCODE 	2
+ISR_NOERRCODE 	3
+ISR_NOERRCODE 	4
+ISR_NOERRCODE 	5
+ISR_NOERRCODE 	6
+ISR_NOERRCODE 	7
 ISR_ERRCODE  	8
-ISR_ERRCODE 	9
+ISR_NOERRCODE 	9
 ISR_ERRCODE   	10
 ISR_ERRCODE   	11
 ISR_ERRCODE   	12
 ISR_ERRCODE   	13
 ISR_ERRCODE   	14
-ISR_ERRCODE 	15
-ISR_ERRCODE 	16
+ISR_NOERRCODE 	15
+ISR_NOERRCODE 	16
 ISR_ERRCODE   	17
-ISR_ERRCODE 	18
-ISR_ERRCODE 	19
-ISR_ERRCODE 	20
-ISR_ERRCODE 	256
+ISR_NOERRCODE 	18
+ISR_NOERRCODE 	19
+ISR_NOERRCODE 	20
+ISR_NOERRCODE 	256
 
 
 

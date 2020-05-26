@@ -1,6 +1,5 @@
 {
     "tasks": [
-        
         {
             "isBackground": true,
             "label": "run in Qemu",
@@ -31,7 +30,7 @@
             "command": "taskkill",
             "args": [
                 "/IM",
-                "\"qemu-system-i386.exe\""
+                "qemu-system-i386.exe"
             ],
             "options": {
                 "cwd": "${workspaceRoot}"

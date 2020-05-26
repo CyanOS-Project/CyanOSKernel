@@ -30,6 +30,7 @@ void setColor(VGAColor color, VGAColor backcolor);
 void printf(const char* s, ...);
 void putChar(char str);
 void clearScreen();
+void initiate_console();
 void displayMemory(char* Address, int Size);
 void printSuccess(char* msg, bool Success);
 void removeLine();

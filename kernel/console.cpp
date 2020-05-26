@@ -2,13 +2,13 @@
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
-short* video_ram = (short*)VGATEXTMODE_BUFFER;
-int vPosition = 0, hPosition = 0;
+volatile uint16_t* video_ram = (uint16_t*)VGATEXTMODE_BUFFER;
+volatile int vPosition = 0, hPosition = 0;
 uint8_t charColor = 0x0F;
 
 void setMode(TerminalMode Mode)
 {
-	video_ram = (short*)VGATEXTMODE_BUFFER;
+	video_ram = (uint16_t*)VGATEXTMODE_BUFFER;
 }
 
 inline uint8_t vga_entry_color(VGAColor fg, VGAColor bg)
@@ -103,6 +103,10 @@ void clearScreen()
 	}
 	hPosition = 0;
 	vPosition = 0;
+}
+void initiate_console()
+{
+	clearScreen();
 }
 void printf(const char* s, ...)
 {
