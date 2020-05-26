@@ -1,6 +1,7 @@
 #include "kernel_init.h"
 #include "Arch/x86/gdt.h"
 #include "Arch/x86/idt.h"
+#include "Arch/x86/panic.h"
 
 void kernel_init()
 {
