@@ -22,7 +22,7 @@ void initiate_isr_vector()
 	}
 }
 
-void add_custom_isr(isr_function address, uint8_t irq_number)
+void register_isr_handler(isr_function address, uint8_t irq_number)
 {
 	interrupt_dispatcher_vector[irq_number] = (isr_function)address;
 }

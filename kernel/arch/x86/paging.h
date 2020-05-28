@@ -1,1 +1,45 @@
+#pragma once
+
+#include "types.h"
+
+#define NUMBER_OF_PAGE_DIRECOTRY_ENTRIES 1024
+#define NUMBER_OF_PAGE_TABLE_ENTRIES     1024
+#define MAX_KERNEL_SIZE                  0x40000000
+
+#define GET_FRAME(x)                                    x >> 12
+#define GET_PAGE(x)                                     (x >> 12) & 0x3FF
+#define GET_DIRECTORY(x)                                x >> 22
+#define GET_NUMBER_OF_DIRECTORIES(x)                    x >> 22
+#define GET_OFFSET(x)                                   x & 0xFFF
+#define GET_PAGE_VIRTUAL_ADDRESS(dir_index, page_index) (dir_index << 22) | (page_index << 12)
+
+struct PAGE_TABLE_ENTRY {
+	uint32_t present : 1;  // Page present in memory
+	uint32_t rw : 1;       // Read-only if clear, readwrite if set
+	uint32_t user : 1;     // Supervisor level only if clear
+	uint32_t accessed : 1; // Has the page been accessed since last refresh?
+	uint32_t dirty : 1;    // Has the page been written to since last refresh?
+	uint32_t unused : 7;   // Amalgamation of unused and reserved bits
+	uint32_t frame : 20;   // Frame address (shifted right 12 bits)
+};
+typedef PAGE_TABLE_ENTRY PAGE_DIRECTORY_ENTRY;
+
+struct PAGE_DIRECTORY {
+	PAGE_DIRECTORY_ENTRY page_directory_entries[NUMBER_OF_PAGE_DIRECOTRY_ENTRIES];
+};
+
+struct PAGE_TABLE {
+	PAGE_TABLE_ENTRY page_table_entries[NUMBER_OF_PAGE_TABLE_ENTRIES];
+};
+
+void setup_paging();
+void enable_paging();
+void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
+static void map_identity(volatile PAGE_DIRECTORY* page_direcotry, volatile PAGE_TABLE* page_tables);
 void invalidate_pagetable();
+uint32_t get_kernel_directories();
+void fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, bool user,
+                          bool writeable);
+void fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame, bool user,
+                           bool writeable);
+extern unsigned KERNEL_END;

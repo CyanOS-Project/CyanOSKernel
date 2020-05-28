@@ -12,7 +12,7 @@ struct ISR_INFO {
 typedef void (*isr_function)(ISR_INFO);
 
 void initiate_isr_vector();
-void add_custom_isr(isr_function address, uint8_t irq_number);
+void register_isr_handler(isr_function address, uint8_t irq_number);
 static void default_interrupt_handler(ISR_INFO info);
 
 extern uintptr_t isr_vector[];
