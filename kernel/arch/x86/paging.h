@@ -6,6 +6,10 @@
 #define NUMBER_OF_PAGE_TABLE_ENTRIES     1024
 #define MAX_KERNEL_SIZE                  0x40000000
 
+#define CR4_PSE    1 << 4
+#define CR0_PAGING 1 << 31
+#define CR0_WP     1 << 16
+
 #define GET_FRAME(x)                                    x >> 12
 #define GET_PAGE(x)                                     (x >> 12) & 0x3FF
 #define GET_DIRECTORY(x)                                x >> 22
@@ -19,7 +23,9 @@ struct PAGE_TABLE_ENTRY {
 	uint32_t user : 1;     // Supervisor level only if clear
 	uint32_t accessed : 1; // Has the page been accessed since last refresh?
 	uint32_t dirty : 1;    // Has the page been written to since last refresh?
-	uint32_t unused : 7;   // Amalgamation of unused and reserved bits
+	uint32_t unused1 : 2;  // Amalgamation of unused and reserved bits
+	uint32_t pse : 1;      // 4MB Page
+	uint32_t unused2 : 4;  // Amalgamation of unused and reserved bits
 	uint32_t frame : 20;   // Frame address (shifted right 12 bits)
 };
 typedef PAGE_TABLE_ENTRY PAGE_DIRECTORY_ENTRY;
@@ -33,6 +39,8 @@ struct PAGE_TABLE {
 };
 
 void setup_paging();
+void initialize_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
+void enable_PSE();
 void enable_paging();
 void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
 static void map_identity(volatile PAGE_DIRECTORY* page_direcotry, volatile PAGE_TABLE* page_tables);
@@ -42,4 +50,6 @@ void fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, u
                           bool writeable);
 void fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame, bool user,
                            bool writeable);
+void fill_directory_PSE_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, bool user,
+                              bool writeable);
 extern unsigned KERNEL_END;

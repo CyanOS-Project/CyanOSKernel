@@ -1,4 +1,5 @@
 
+#include "Arch/x86/boot_paging.h"
 #include "kernel_init.h"
 #include <stdint.h>
 
@@ -31,7 +32,7 @@ __attribute__((section(".boot"))) const volatile multiboot_header my_multiboot_h
 
 };
 
-__attribute__((section(".bootx"))) void kernel_boot()
+__attribute__((section(".bootstrap"))) void kernel_boot()
 {
 	kernel_init();
 	asm("hlt");
