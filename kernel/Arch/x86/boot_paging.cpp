@@ -1,13 +1,6 @@
 #include "boot_paging.h"
-//#include "kernel_map.h"
+#include "kernel_map.h"
 #include "paging.h"
-
-#define KERNEL_BASE             0xC0000000
-#define KERNEL_PHYSICAL_ADDRESS 0x00100000
-#define KERNEL_VIRTUAL_ADDRESS  KERNEL_BASE + KERNEL_PHYSICAL_ADDRESS
-#define VIR_TO_PHY(x)           (x - KERNEL_BASE)
-
-#define PAGE_4K 0x1000
 
 volatile PAGE_DIRECTORY startup_page_direcotry __attribute__((aligned(PAGE_4K)));
 
