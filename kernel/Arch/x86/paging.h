@@ -1,10 +1,11 @@
 #pragma once
 
+#include "kernel_map.h"
 #include "types.h"
 
 #define NUMBER_OF_PAGE_DIRECOTRY_ENTRIES 1024
 #define NUMBER_OF_PAGE_TABLE_ENTRIES     1024
-#define MAX_KERNEL_SIZE                  0x40000000
+#define RECURSIVE_ENTRY                  (NUMBER_OF_PAGE_DIRECOTRY_ENTRIES - 1)
 
 #define CR4_PSE    1 << 4
 #define CR0_PAGING 1 << 31
@@ -21,11 +22,13 @@ struct PAGE_TABLE_ENTRY {
 	uint32_t present : 1;  // Page present in memory
 	uint32_t rw : 1;       // Read-only if clear, readwrite if set
 	uint32_t user : 1;     // Supervisor level only if clear
+	uint32_t pwt : 1;      // Page-level write-through
+	uint32_t pcd : 1;      // Page-level cache disable
 	uint32_t accessed : 1; // Has the page been accessed since last refresh?
 	uint32_t dirty : 1;    // Has the page been written to since last refresh?
-	uint32_t unused1 : 2;  // Amalgamation of unused and reserved bits
 	uint32_t pse : 1;      // 4MB Page
-	uint32_t unused2 : 4;  // Amalgamation of unused and reserved bits
+	uint32_t global : 1;   // page is global
+	uint32_t unused : 3;   // Amalgamation of unused and reserved bits
 	uint32_t frame : 20;   // Frame address (shifted right 12 bits)
 };
 typedef PAGE_TABLE_ENTRY PAGE_DIRECTORY_ENTRY;

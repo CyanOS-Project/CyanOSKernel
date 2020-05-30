@@ -1,13 +1,15 @@
 #include "paging.h"
 
 volatile PAGE_DIRECTORY page_direcotry __attribute__((aligned(4)));
-volatile PAGE_TABLE page_tables[GET_NUMBER_OF_DIRECTORIES(MAX_KERNEL_SIZE)];
 
 void setup_paging()
 {
-	map_identity(&page_direcotry, page_tables);
-	load_page_directory(&page_direcotry);
+	// map_identity(&page_direcotry, page_tables);
+	// load_page_directory(&page_direcotry);
 	// enable_paging();
+	initialize_page_directory(&page_direcotry);
+	fill_directory_entry(&page_direcotry.page_directory_entries[RECURSIVE_ENTRY], VIR_TO_PHY((uint32_t)&page_direcotry),
+	                     0, 1);
 }
 void map_virtual_page(volatile PAGE_DIRECTORY* page_direcotry, uint32_t virtual_address, uint32_t physical_address)
 {
@@ -39,8 +41,10 @@ uint32_t get_kernel_directories()
 void fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, bool user,
                           bool writeable)
 {
-	page_direcotry_entry->unused1 = 0;
-	page_direcotry_entry->unused2 = 0;
+	page_direcotry_entry->unused = 0;
+	page_direcotry_entry->global = 0;
+	page_direcotry_entry->pwt = 0;
+	page_direcotry_entry->pcd = 0;
 	page_direcotry_entry->pse = 0;
 	page_direcotry_entry->present = 1;
 	page_direcotry_entry->rw = writeable;
@@ -51,8 +55,10 @@ void fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, u
 void fill_directory_PSE_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, bool user,
                               bool writeable)
 {
-	page_direcotry_entry->unused1 = 0;
-	page_direcotry_entry->unused2 = 0;
+	page_direcotry_entry->unused = 0;
+	page_direcotry_entry->global = 0;
+	page_direcotry_entry->pwt = 0;
+	page_direcotry_entry->pcd = 0;
 	page_direcotry_entry->pse = 1;
 	page_direcotry_entry->present = 1;
 	page_direcotry_entry->rw = writeable;
@@ -63,8 +69,10 @@ void fill_directory_PSE_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entr
 void fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame, bool user,
                            bool writeable)
 {
-	page_table_entry->unused1 = 0;
-	page_table_entry->unused2 = 0;
+	page_table_entry->unused = 0;
+	page_table_entry->global = 0;
+	page_table_entry->pwt = 0;
+	page_table_entry->pcd = 0;
 	page_table_entry->pse = 0;
 	page_table_entry->present = 1;
 	page_table_entry->rw = writeable;
