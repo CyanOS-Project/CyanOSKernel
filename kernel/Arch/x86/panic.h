@@ -1,5 +1,5 @@
+#include "asm.h"
 #include "console.h"
-#include "cpu.h"
 
 #define PANIC(str)                                                                                                     \
 	do {                                                                                                               \

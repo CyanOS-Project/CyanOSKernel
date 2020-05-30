@@ -1,40 +1,29 @@
 
+#include "boot.h"
+#include "Arch/x86/asm.h"
 #include "Arch/x86/boot_paging.h"
 #include "kernel_init.h"
-#include <stdint.h>
+#include "kernel_map.h"
 
-#define LOAD_BASE 0x100000
-typedef struct __attribute__((__packed__)) {
-	uint32_t magic;
-	uint32_t flags;
-	uint32_t checksum;
-	uint32_t header_addr;
-	uint32_t load_addr;
-	uint32_t load_end_addr;
-	uint32_t bss_end_addr;
-	uint32_t entry_addr;
-	uint32_t mode_type;
-	uint32_t width;
-	uint32_t height;
-	uint32_t depth;
-} multiboot_header;
-
-void kernel_boot(void);
 __attribute__((section(".boot"))) const volatile multiboot_header my_multiboot_header = { //
     0x1BADB002,                                                                           //
-    0x10003,
+    0x10003,                                                                              //
     (uint32_t) - (0x10003 + 0x1BADB002),
-    (uint32_t)&my_multiboot_header,
-    LOAD_BASE,
+    (uint32_t)VIR_TO_PHY((uint32_t)(&my_multiboot_header)),
+    KERNEL_PHYSICAL_ADDRESS,
     0,
     0,
-    (uint32_t)kernel_boot
+    (uint32_t)VIR_TO_PHY(kernel_boot)
 
 };
 
+extern uint32_t KERNEL_STACK;
+
 __attribute__((section(".bootstrap"))) void kernel_boot()
 {
-	kernel_init();
-	asm("hlt");
+	setup_startup_paging();
+	SET_STACK(&KERNEL_STACK);
+	JMP(kernel_init);
+	HLT();
 	return;
 }

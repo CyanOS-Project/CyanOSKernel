@@ -1,4 +1,4 @@
 #pragma once
 #include "console.h"
 
-void kernel_init();
+extern "C" void kernel_init();

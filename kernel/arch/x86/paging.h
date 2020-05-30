@@ -40,8 +40,8 @@ struct PAGE_TABLE {
 
 void setup_paging();
 void initialize_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
-void enable_PSE();
-void enable_paging();
+void enable_PSE();    // TODO: make it inline
+void enable_paging(); // TODO: make it inline
 void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
 static void map_identity(volatile PAGE_DIRECTORY* page_direcotry, volatile PAGE_TABLE* page_tables);
 void invalidate_pagetable();
