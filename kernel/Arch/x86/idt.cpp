@@ -3,7 +3,7 @@
 #include "isr.h"
 
 volatile IDT idt __attribute__((aligned(4)));
-volatile IDTEntry idt_entries[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(4)));
+volatile IDTEntry idt_entries[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(PAGE_4K)));
 
 void testISR(ISR_INFO);
 

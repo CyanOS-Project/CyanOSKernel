@@ -1,7 +1,7 @@
 #include "gdt.h"
 
 volatile GDT gdt __attribute__((aligned(8)));
-volatile GDTEntry gdt_entries[GDT_NUMBER_OF_ENTRIES] __attribute__((aligned(8)));
+volatile GDTEntry gdt_entries[GDT_NUMBER_OF_ENTRIES] __attribute__((aligned(PAGE_4K)));
 
 void setup_gdt()
 {

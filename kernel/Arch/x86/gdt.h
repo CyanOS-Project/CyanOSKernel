@@ -1,5 +1,6 @@
 #pragma once
 
+#include "kernel_map.h"
 #include "types.h"
 
 #define GDT_NUMBER_OF_ENTRIES              8192

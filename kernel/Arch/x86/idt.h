@@ -1,5 +1,6 @@
 #pragma once
 
+#include "kernel_map.h"
 #include "types.h"
 
 #define NUMBER_OF_IDT_ENTRIES         255
