@@ -15,7 +15,7 @@ void setup_idt()
 	for (size_t i = 0; i < NUMBER_OF_IDT_ENTRIES; i++)
 		fill_idt_entry(&idt_entries[i], (uint32_t)isr_vector[i], KCS_SELECTOR,
 		               IDT_ENTRY_FLAGS::PRESENT | IDT_ENTRY_FLAGS::GATE_32 | IDT_ENTRY_FLAGS::INT_GATE);
-	// add_custom_isr(testISR, EXCEPTION_NUMBER::BP);
+	// register_isr_handler(testISR, EXCEPTION_NUMBER::BP);
 	load_idt(&idt);
 }
 

@@ -13,7 +13,7 @@ __attribute__((section(".boot"))) const volatile multiboot_header my_multiboot_h
     KERNEL_PHYSICAL_ADDRESS,
     0,
     0,
-    (uint32_t)VIR_TO_PHY(kernel_boot)
+    (uint32_t)VIR_TO_PHY((uint32_t)kernel_boot)
 
 };
 
