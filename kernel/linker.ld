@@ -20,17 +20,24 @@ SECTIONS
 	.data	ALIGN(4K)	:
 	{	
 		*(.data)
-	}
-	.rdata 	ALIGN(4K) : 
-	{
 		*(.rdata)
 	}
 	.bss 	ALIGN(4K) :
 	{
 		*(.bss)
 	}
-	. = . + 4K;
-	PROVIDE(KERNEL_STACK = .);
+	PROVIDE(PAGE_TABLES_START = .);
+	.stack 	ALIGN(4K) :
+	{
+		
+	}
+	PROVIDE(PAGE_TABLES_END = .);
+	PROVIDE(KERNEL_STACK_START = .);
+	.pages 	ALIGN(4K) :
+	{
+		*(.pages)
+	}
+	PROVIDE(KERNEL_STACK_END = .);
 	PROVIDE(KERNEL_END = .);
 
 }

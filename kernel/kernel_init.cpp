@@ -9,7 +9,7 @@
 extern "C" void kernel_init()
 {
 	initiate_console();
-	setup_virtual_memory();
+	// setup_virtual_memory();
 	setup_gdt();
 	setup_idt();
 	// asm("int3");

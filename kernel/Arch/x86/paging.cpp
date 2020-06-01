@@ -1,6 +1,8 @@
 #include "paging.h"
 
-volatile PAGE_DIRECTORY page_direcotry __attribute__((aligned(PAGE_4K)));
+PAGE_DIRECTORY page_direcotry __attribute__((aligned(PAGE_4K)));
+__attribute__((section(".pages"))) PAGE_TABLE startup_page_tables[NUMBER_OF_PAGE_TABLE_ENTRIES]
+    __attribute__((aligned(PAGE_4K)));
 
 void load_pd()
 {
@@ -8,16 +10,35 @@ void load_pd()
 }
 void setup_paging()
 {
-
+	initialize_page_directory((PAGE_DIRECTORY*)VIR_TO_PHY((uint32_t)&page_direcotry));
+	// Link to page tables
+	for (size_t i = 0; i < NUMBER_OF_PAGE_DIRECOTRY_ENTRIES; i++) {
+		fill_directory_entry((PAGE_DIRECTORY_ENTRY*)VIR_TO_PHY((uint32_t)&page_direcotry.entries[i]),
+		                     GET_FRAME(VIR_TO_PHY((uint32_t)&startup_page_tables[i])), 0, 1);
+	}
 	// Set recursive entry
-	initialize_page_directory(&page_direcotry);
-	fill_directory_entry(&page_direcotry.entries[RECURSIVE_ENTRY], GET_FRAME(VIR_TO_PHY((uint32_t)&page_direcotry)), 0,
-	                     1);
-	// Setup all kernel page tables
-	for (size_t pde = GET_PDE_INDEX(KERNEL_VIRTUAL_ADDRESS);
-	     pde < GET_PDE_INDEX(KERNEL_VIRTUAL_ADDRESS) + GET_NUMBER_OF_DIRECTORIES(KERNEL_SPACE_SIZE); pde++) {
-		uint32_t page_table_frame = alloc_physical_page();
-		fill_directory_entry(&page_direcotry.entries[pde], page_table_frame, 0, 1);
+	fill_directory_entry((PAGE_DIRECTORY_ENTRY*)VIR_TO_PHY((uint32_t)&page_direcotry.entries[RECURSIVE_ENTRY]),
+	                     GET_FRAME(VIR_TO_PHY((uint32_t)&page_direcotry)), 0, 1);
+	// Map identity and higher half
+	map_boot_pages(KERNEL_PHYSICAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, get_kernel_pages());
+	map_boot_pages(KERNEL_VIRTUAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, get_kernel_pages());
+	// Load page directory and enable paging
+	load_page_directory((PAGE_DIRECTORY*)VIR_TO_PHY((uint32_t)&page_direcotry));
+	enable_PSE();
+	enable_paging();
+}
+
+void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, int pages)
+{
+	uint32_t current_v_page = virtual_address;
+	uint32_t current_p_page = physical_address;
+	for (size_t i = 0; i < pages; i++) {
+		uint32_t pde = GET_PDE_INDEX(current_v_page);
+		uint32_t pte = GET_PTE_INDEX(current_v_page);
+		fill_page_table_entry((PAGE_TABLE_ENTRY*)VIR_TO_PHY((uint32_t)&startup_page_tables[pde].entries[pte]),
+		                      GET_FRAME(current_p_page), 0, 1);
+		current_v_page += PAGE_4K;
+		current_p_page += PAGE_4K;
 	}
 }
 
@@ -85,6 +106,14 @@ void fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t
 	page_table_entry->rw = writeable;
 	page_table_entry->user = user;
 	page_table_entry->frame = physical_frame;
+}
+
+uint32_t get_kernel_pages()
+{
+
+	uint32_t kernel_size = (uint32_t)&KERNEL_END - KERNEL_VIRTUAL_ADDRESS;
+	uint32_t pages = kernel_size / PAGE_4K + ((kernel_size % PAGE_4K == 0) ? 0 : 1);
+	return pages;
 }
 
 void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry)

@@ -46,11 +46,14 @@ void setup_paging();
 void initialize_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
 void map_virtual_page(uint32_t virtual_address, uint32_t physical_address);
 void map_virtual_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages);
+void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, int pages);
 void enable_PSE();    // TODO: make it inline
 void enable_paging(); // TODO: make it inline
 void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
 void load_pd();
 void invalidate_pagetable();
+uint32_t get_kernel_pages();
+
 uint32_t get_kernel_directories();
 void fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, bool user,
                           bool writeable);
