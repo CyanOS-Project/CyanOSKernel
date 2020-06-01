@@ -8,7 +8,7 @@ void setup_paging()
 {
 	PAGE_DIRECTORY* ph_page_direcotry = (PAGE_DIRECTORY*)VIR_TO_PHY((uint32_t)&page_direcotry);
 	PAGE_TABLE* ph_page_tables = (PAGE_TABLE*)VIR_TO_PHY((uint32_t)startup_page_tables);
-
+	initialize_physical_page();
 	initialize_page_directory(ph_page_direcotry);
 	// Link to page tables
 	for (size_t i = 0; i < NUMBER_OF_PAGE_DIRECOTRY_ENTRIES; i++) {
@@ -34,6 +34,7 @@ void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, int pag
 		uint32_t pde = GET_PDE_INDEX(current_v_page);
 		uint32_t pte = GET_PTE_INDEX(current_v_page);
 		fill_page_table_entry(&ph_page_tables[pde].entries[pte], GET_FRAME(current_p_page), 0, 1);
+		set_used_physical_page(GET_FRAME(current_p_page));
 		current_v_page += PAGE_4K;
 		current_p_page += PAGE_4K;
 	}
@@ -43,6 +44,7 @@ void map_virtual_page(uint32_t virtual_address, uint32_t physical_address)
 {
 	PAGE_TABLE* page_table = (PAGE_TABLE*)GET_PAGE_VIRTUAL_ADDRESS(RECURSIVE_ENTRY, GET_PDE_INDEX(virtual_address));
 	fill_page_table_entry(&page_table->entries[GET_PTE_INDEX(virtual_address)], GET_FRAME(physical_address), 0, 1);
+	invalidate_page(virtual_address);
 }
 
 void map_virtual_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages)
@@ -134,6 +136,7 @@ void enable_PSE()
 	    : "eax");
 }
 
-void invalidate_pagetable()
+void invalidate_page(uint32_t addr)
 {
+	asm volatile("invlpg (%0)" ::"r"(addr) : "memory");
 }

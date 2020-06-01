@@ -1,8 +1,10 @@
 #pragma once
-#include "memmap.h"
+#include "kernel_map.h"
 #include "stdlib.h"
 #include "types.h"
 #include <stdarg.h>
+
+#define VGATEXTMODE_BUFFER 0x000B8000
 
 typedef enum { MODE_80H25V = 0 } TerminalMode;
 

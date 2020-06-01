@@ -1,7 +1,7 @@
 
 #include "boot.h"
 #include "Arch/x86/asm.h"
-#include "Arch/x86/paging.h"
+#include "VirtualMemory/virtual.h"
 #include "kernel_init.h"
 #include "kernel_map.h"
 
@@ -17,13 +17,13 @@ __attribute__((section(".boot"))) const volatile multiboot_header my_multiboot_h
 
 };
 
-extern uint32_t PAGE_TABLES_END;
+extern uint32_t KERNEL_STACK_END;
 
 __attribute__((section(".bootstrap"))) void kernel_boot()
 {
-	SET_STACK(VIR_TO_PHY((uint32_t)&PAGE_TABLES_END));
-	setup_paging();
-	SET_STACK((uint32_t)&PAGE_TABLES_END);
+	SET_STACK(VIR_TO_PHY((uint32_t)&KERNEL_STACK_END));
+	setup_virtual_memory();
+	SET_STACK((uint32_t)&KERNEL_STACK_END);
 	JMP(kernel_init);
 	HLT();
 	return;

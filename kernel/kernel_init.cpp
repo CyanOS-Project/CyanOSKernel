@@ -8,6 +8,7 @@
 
 extern "C" void kernel_init()
 {
+	map_virtual_page(0xC00B8000, 0xB8000);
 	initiate_console();
 	// setup_virtual_memory();
 	setup_gdt();

@@ -1,4 +1,5 @@
 #include "console.h"
+#include "Arch/x86/paging.h"
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -109,6 +110,7 @@ void clearScreen()
 }
 void initiate_console()
 {
+	// map_virtual_page(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER, VGATEXTMODE_BUFFER);
 	clearScreen();
 }
 void printf(const char* s, ...)

@@ -50,7 +50,7 @@ void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, int pag
 void enable_PSE();    // TODO: make it inline
 void enable_paging(); // TODO: make it inline
 void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
-void invalidate_pagetable();
+void invalidate_page(uint32_t addr);
 uint32_t get_kernel_pages();
 
 uint32_t get_kernel_directories();
