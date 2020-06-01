@@ -3,7 +3,7 @@
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
-volatile uint16_t* video_ram = (uint16_t*)VGATEXTMODE_BUFFER;
+volatile uint16_t* video_ram = 0;
 volatile int vPosition = 0, hPosition = 0;
 uint8_t charColor = 0x0F;
 
@@ -110,7 +110,10 @@ void clearScreen()
 }
 void initiate_console()
 {
-	// map_virtual_page(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER, VGATEXTMODE_BUFFER);
+	hPosition = 0;
+	vPosition = 0;
+	map_virtual_page(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER, VGATEXTMODE_BUFFER);
+	video_ram = (uint16_t*)(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER);
 	clearScreen();
 }
 void printf(const char* s, ...)
