@@ -42,22 +42,18 @@ struct PAGE_TABLE {
 	PAGE_TABLE_ENTRY entries[NUMBER_OF_PAGE_TABLE_ENTRIES];
 };
 
-void setup_paging();
+void setup_paging(uint32_t num_kernel_pages);
 void initialize_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
 void map_virtual_page(uint32_t virtual_address, uint32_t physical_address);
 void map_virtual_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages);
 void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, int pages);
-void enable_PSE();    // TODO: make it inline
-void enable_paging(); // TODO: make it inline
-void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
-void invalidate_page(uint32_t addr);
-uint32_t get_kernel_pages();
-
-uint32_t get_kernel_directories();
 void fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, bool user,
                           bool writeable);
 void fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame, bool user,
                            bool writeable);
 void fill_directory_PSE_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, bool user,
                               bool writeable);
-extern unsigned KERNEL_END;
+void enable_PSE();    // TODO: make it inline
+void enable_paging(); // TODO: make it inline
+void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
+void invalidate_page(uint32_t addr);

@@ -2,7 +2,7 @@
 
 volatile uint8_t physical_memory_tracer[MAX_PHYSICAL_4K_PAGES / 8];
 
-void initialize_physical_page()
+void initialize_physical_memory()
 {
 	for (size_t i = 0; i < sizeof(physical_memory_tracer); i++) {
 		physical_memory_tracer[i] = 0;
@@ -68,6 +68,11 @@ void set_free_physical_page(uint32_t page_number)
 	physical_memory_tracer[page_number / 8] &= ~(1 << (page_number % 8));
 }
 
+void set_used_physical_page(uint32_t page_number)
+{
+	physical_memory_tracer[page_number / 8] |= 1 << (page_number % 8);
+}
+
 void set_used_physical_pages(uint32_t page_number, uint32_t count)
 {
 	uint32_t current_page = page_number;
@@ -75,8 +80,4 @@ void set_used_physical_pages(uint32_t page_number, uint32_t count)
 		physical_memory_tracer[current_page / 8] |= 1 << (current_page % 8);
 		current_page++;
 	}
-}
-void set_used_physical_page(uint32_t page_number)
-{
-	physical_memory_tracer[page_number / 8] |= 1 << (page_number % 8);
 }

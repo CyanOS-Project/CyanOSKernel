@@ -3,9 +3,8 @@
 
 #define MAX_PHYSICAL_4K_PAGES (1024 * 1024)
 
-void initialize_physical_page();
+void initialize_physical_memory();
 uint32_t alloc_physical_page();
-uint32_t alloc_contagious_physical_page();
 void free_physical_page(uint32_t page_number);
 void set_free_physical_page(uint32_t page_number);
 void set_used_physical_page(uint32_t page_number);

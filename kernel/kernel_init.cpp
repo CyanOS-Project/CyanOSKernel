@@ -9,8 +9,12 @@
 extern "C" void kernel_init()
 {
 	initiate_console();
+	printStatus("Setting up paging.", true);
+	printStatus("Setting up console.", true);
 	setup_gdt();
+	printStatus("Setting up GDT.", true);
 	setup_idt();
+	printStatus("Setting up IDT.", true);
 	printf("Welcome to CyanOS.\n");
 	HLT();
 }

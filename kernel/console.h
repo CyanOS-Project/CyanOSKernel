@@ -34,7 +34,7 @@ void putChar(char str);
 void clearScreen();
 void initiate_console();
 void displayMemory(char* Address, int Size);
-void printSuccess(char* msg, bool Success);
+void printStatus(char* msg, bool Success);
 void removeLine();
 void pageUp();
 void formatEscapeCharacters(unsigned char c, const char* s, int cur_arg);

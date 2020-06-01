@@ -1,5 +1,5 @@
 #include "console.h"
-#include "Arch/x86/paging.h"
+#include "VirtualMemory/virtual.h"
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -112,7 +112,7 @@ void initiate_console()
 {
 	hPosition = 0;
 	vPosition = 0;
-	map_virtual_page(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER, VGATEXTMODE_BUFFER);
+	virtual_map(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER, VGATEXTMODE_BUFFER, 0x1000, 0);
 	video_ram = (uint16_t*)(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER);
 	clearScreen();
 }
@@ -228,7 +228,7 @@ void displayMemory(char* Address, int Size)
 	}
 	printf("\n");
 }
-void printSuccess(char* msg, bool Success)
+void printStatus(char* msg, bool Success)
 {
 	printf("[");
 	if (Success) {

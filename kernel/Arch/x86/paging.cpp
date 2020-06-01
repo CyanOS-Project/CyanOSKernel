@@ -3,11 +3,11 @@
 PAGE_DIRECTORY page_direcotry __attribute__((aligned(PAGE_4K)));
 PAGE_TABLE startup_page_tables[NUMBER_OF_PAGE_TABLE_ENTRIES] __attribute__((aligned(PAGE_4K)));
 
-void setup_paging()
+void setup_paging(uint32_t num_kernel_pages)
 {
 	PAGE_DIRECTORY* ph_page_direcotry = (PAGE_DIRECTORY*)VIR_TO_PHY((uint32_t)&page_direcotry);
 	PAGE_TABLE* ph_page_tables = (PAGE_TABLE*)VIR_TO_PHY((uint32_t)startup_page_tables);
-	initialize_physical_page();
+	initialize_physical_memory();
 	initialize_page_directory(ph_page_direcotry);
 	// Link to page tables
 	for (size_t i = 0; i < NUMBER_OF_PAGE_DIRECOTRY_ENTRIES; i++) {
@@ -16,8 +16,8 @@ void setup_paging()
 	// Set recursive entry
 	fill_directory_entry(&ph_page_direcotry->entries[RECURSIVE_ENTRY], GET_FRAME((uint32_t)ph_page_direcotry), 0, 1);
 	// Map identity and higher half
-	map_boot_pages(KERNEL_PHYSICAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, get_kernel_pages());
-	map_boot_pages(KERNEL_VIRTUAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, get_kernel_pages());
+	map_boot_pages(KERNEL_PHYSICAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, num_kernel_pages);
+	map_boot_pages(KERNEL_VIRTUAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, num_kernel_pages);
 	// Load page directory and enable paging
 	load_page_directory(ph_page_direcotry);
 	enable_PSE();
@@ -100,14 +100,6 @@ void fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t
 	page_table_entry->rw = writeable;
 	page_table_entry->user = user;
 	page_table_entry->frame = physical_frame;
-}
-
-uint32_t get_kernel_pages()
-{
-
-	uint32_t kernel_size = (uint32_t)&KERNEL_END - KERNEL_VIRTUAL_ADDRESS;
-	uint32_t pages = kernel_size / PAGE_4K + ((kernel_size % PAGE_4K == 0) ? 0 : 1);
-	return pages;
 }
 
 void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry)
