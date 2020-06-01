@@ -1,8 +1,7 @@
 #include "paging.h"
 
 PAGE_DIRECTORY page_direcotry __attribute__((aligned(PAGE_4K)));
-__attribute__((section(".pages"))) PAGE_TABLE startup_page_tables[NUMBER_OF_PAGE_TABLE_ENTRIES]
-    __attribute__((aligned(PAGE_4K)));
+PAGE_TABLE startup_page_tables[NUMBER_OF_PAGE_TABLE_ENTRIES] __attribute__((aligned(PAGE_4K)));
 
 void setup_paging()
 {

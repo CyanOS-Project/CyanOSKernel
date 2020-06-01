@@ -26,16 +26,10 @@ SECTIONS
 	{
 		*(.bss)
 	}
-	PROVIDE(PAGE_TABLES_START = .);
+	PROVIDE(KERNEL_STACK_START = .);
 	.stack 	ALIGN(4K) :
 	{
-		
-	}
-	PROVIDE(PAGE_TABLES_END = .);
-	PROVIDE(KERNEL_STACK_START = .);
-	.pages 	ALIGN(4K) :
-	{
-		*(.pages)
+		. = . + 4K;
 	}
 	PROVIDE(KERNEL_STACK_END = .);
 	PROVIDE(KERNEL_END = .);

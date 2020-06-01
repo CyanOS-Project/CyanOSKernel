@@ -29,7 +29,7 @@
             "type": "shell",
             "command": "taskkill",
             "args": [
-                "/IM",
+                "//IM",
                 "qemu-system-i386.exe"
             ],
             "options": {
