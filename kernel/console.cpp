@@ -1,5 +1,5 @@
 #include "console.h"
-#include "VirtualMemory/virtual.h"
+#include "VirtualMemory/memory.h"
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -112,7 +112,7 @@ void initiate_console()
 {
 	hPosition = 0;
 	vPosition = 0;
-	virtual_map(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER, VGATEXTMODE_BUFFER, 0x1000, 0);
+	memory_map(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER, VGATEXTMODE_BUFFER, 0x1000, 0);
 	video_ram = (uint16_t*)(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER);
 	clearScreen();
 }

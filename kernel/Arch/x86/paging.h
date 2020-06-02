@@ -47,6 +47,10 @@ void initialize_page_table(volatile PAGE_TABLE* page_direcotry);
 void map_virtual_page(uint32_t virtual_address, uint32_t physical_address);
 void map_virtual_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages);
 void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, int pages);
+void unmap_virtual_page(uint32_t virtual_address);
+void unmap_virtual_pages(uint32_t virtual_address, uint32_t pages);
+bool check_page_present(uint32_t virtual_address);
+uint32_t get_physical_page(uint32_t virtual_address);
 void fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, bool user,
                           bool writeable);
 void fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame, bool user,

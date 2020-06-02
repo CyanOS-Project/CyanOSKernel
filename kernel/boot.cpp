@@ -1,7 +1,7 @@
 
 #include "boot.h"
 #include "Arch/x86/asm.h"
-#include "VirtualMemory/virtual.h"
+#include "VirtualMemory/memory.h"
 #include "kernel_init.h"
 #include "kernel_map.h"
 

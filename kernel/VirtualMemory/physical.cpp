@@ -1,4 +1,5 @@
 #include "physical.h"
+#include "Arch/x86/panic.h"
 
 volatile uint8_t physical_memory_tracer[MAX_PHYSICAL_4K_PAGES / 8];
 
@@ -26,6 +27,7 @@ uint32_t alloc_physical_page()
 			return free_page;
 		}
 	}
+	PANIC("No physical memory available!");
 }
 
 uint32_t alloc_contagious_physical_page(int count)

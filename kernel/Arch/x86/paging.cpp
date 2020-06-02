@@ -56,6 +56,34 @@ void map_virtual_pages(uint32_t virtual_address, uint32_t physical_address, uint
 	}
 }
 
+// Map a virtual page to a physical page.
+void unmap_virtual_page(uint32_t virtual_address)
+{
+	PAGE_TABLE* page_table = (PAGE_TABLE*)GET_PAGE_VIRTUAL_ADDRESS(RECURSIVE_ENTRY, GET_PDE_INDEX(virtual_address));
+	page_table->entries[GET_PTE_INDEX(virtual_address)].present = 0;
+	invalidate_page(virtual_address);
+}
+
+// Map contagious virtual pages to contagious physical pages.
+void unmap_virtual_pages(uint32_t virtual_address, uint32_t pages)
+{
+	for (size_t i = 0; i < pages; i++) {
+		unmap_virtual_page(virtual_address + PAGE_4K * i);
+	}
+}
+
+bool check_page_present(uint32_t virtual_address)
+{
+	PAGE_TABLE* page_table = (PAGE_TABLE*)GET_PAGE_VIRTUAL_ADDRESS(RECURSIVE_ENTRY, GET_PDE_INDEX(virtual_address));
+	return page_table->entries[GET_PTE_INDEX(virtual_address)].present;
+}
+
+uint32_t get_physical_page(uint32_t virtual_address)
+{
+	PAGE_TABLE* page_table = (PAGE_TABLE*)GET_PAGE_VIRTUAL_ADDRESS(RECURSIVE_ENTRY, GET_PDE_INDEX(virtual_address));
+	return page_table->entries[GET_PTE_INDEX(virtual_address)].frame;
+}
+
 // Zeroing page directory entries.
 void initialize_page_directory(volatile PAGE_DIRECTORY* page_direcotry)
 {
