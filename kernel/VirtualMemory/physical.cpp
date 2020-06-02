@@ -11,6 +11,7 @@ void initialize_physical_memory()
 
 uint32_t alloc_physical_page()
 {
+	// TODO: do function to find page and refactor it
 	for (size_t i = 0; i < sizeof(physical_memory_tracer); i++) {
 		if (physical_memory_tracer[i] == 0xFF)
 			continue;

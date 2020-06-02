@@ -3,14 +3,15 @@
 PAGE_DIRECTORY page_direcotry __attribute__((aligned(PAGE_4K)));
 PAGE_TABLE startup_page_tables[NUMBER_OF_PAGE_TABLE_ENTRIES] __attribute__((aligned(PAGE_4K)));
 
+// Initialize page direcotry and page tables.
 void setup_paging(uint32_t num_kernel_pages)
 {
 	PAGE_DIRECTORY* ph_page_direcotry = (PAGE_DIRECTORY*)VIR_TO_PHY((uint32_t)&page_direcotry);
 	PAGE_TABLE* ph_page_tables = (PAGE_TABLE*)VIR_TO_PHY((uint32_t)startup_page_tables);
-	initialize_physical_memory();
 	initialize_page_directory(ph_page_direcotry);
 	// Link to page tables
 	for (size_t i = 0; i < NUMBER_OF_PAGE_DIRECOTRY_ENTRIES; i++) {
+		initialize_page_table(&ph_page_tables[i]);
 		fill_directory_entry(&ph_page_direcotry->entries[i], GET_FRAME((uint32_t)&ph_page_tables[i]), 0, 1);
 	}
 	// Set recursive entry
@@ -24,6 +25,7 @@ void setup_paging(uint32_t num_kernel_pages)
 	enable_paging();
 }
 
+// Map virtual address range to physical address, can be used only at boot time.
 void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, int pages)
 {
 	PAGE_TABLE* ph_page_tables = (PAGE_TABLE*)VIR_TO_PHY((uint32_t)startup_page_tables);
@@ -33,12 +35,12 @@ void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, int pag
 		uint32_t pde = GET_PDE_INDEX(current_v_page);
 		uint32_t pte = GET_PTE_INDEX(current_v_page);
 		fill_page_table_entry(&ph_page_tables[pde].entries[pte], GET_FRAME(current_p_page), 0, 1);
-		set_used_physical_page(GET_FRAME(current_p_page));
 		current_v_page += PAGE_4K;
 		current_p_page += PAGE_4K;
 	}
 }
 
+// Map a virtual page to a physical page.
 void map_virtual_page(uint32_t virtual_address, uint32_t physical_address)
 {
 	PAGE_TABLE* page_table = (PAGE_TABLE*)GET_PAGE_VIRTUAL_ADDRESS(RECURSIVE_ENTRY, GET_PDE_INDEX(virtual_address));
@@ -46,6 +48,7 @@ void map_virtual_page(uint32_t virtual_address, uint32_t physical_address)
 	invalidate_page(virtual_address);
 }
 
+// Map contagious virtual pages to contagious physical pages.
 void map_virtual_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages)
 {
 	for (size_t i = 0; i < pages; i++) {
@@ -53,9 +56,18 @@ void map_virtual_pages(uint32_t virtual_address, uint32_t physical_address, uint
 	}
 }
 
+// Zeroing page directory entries.
 void initialize_page_directory(volatile PAGE_DIRECTORY* page_direcotry)
 {
 	for (size_t i = 0; i < NUMBER_OF_PAGE_DIRECOTRY_ENTRIES; i++) {
+		*((uint32_t*)&page_direcotry->entries[i]) = 0;
+	}
+}
+
+// Zeroing page table entries.
+void initialize_page_table(volatile PAGE_TABLE* page_direcotry)
+{
+	for (size_t i = 0; i < NUMBER_OF_PAGE_TABLE_ENTRIES; i++) {
 		*((uint32_t*)&page_direcotry->entries[i]) = 0;
 	}
 }

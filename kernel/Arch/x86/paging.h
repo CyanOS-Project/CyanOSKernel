@@ -1,7 +1,6 @@
 #pragma once
 
 #include "kernel_map.h"
-#include "physical.h"
 #include "types.h"
 
 #define NUMBER_OF_PAGE_DIRECOTRY_ENTRIES 1024
@@ -44,6 +43,7 @@ struct PAGE_TABLE {
 
 void setup_paging(uint32_t num_kernel_pages);
 void initialize_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
+void initialize_page_table(volatile PAGE_TABLE* page_direcotry);
 void map_virtual_page(uint32_t virtual_address, uint32_t physical_address);
 void map_virtual_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages);
 void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, int pages);

@@ -217,7 +217,7 @@ void formatDecimal(int arg, int size)
 	else
 		printf(buf);
 }
-void displayMemory(char* Address, int Size)
+void displayMemory(const char* Address, int Size)
 {
 	for (size_t i = 0; i < Size; i++) {
 		if ((i % 8 == 0))
@@ -228,7 +228,7 @@ void displayMemory(char* Address, int Size)
 	}
 	printf("\n");
 }
-void printStatus(char* msg, bool Success)
+void printStatus(const char* msg, bool Success)
 {
 	printf("[");
 	if (Success) {
