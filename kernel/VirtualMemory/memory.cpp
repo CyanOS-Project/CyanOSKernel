@@ -1,5 +1,7 @@
 #include "memory.h"
+#include "Arch/x86/isr.h"
 #include "Arch/x86/paging.h"
+#include "Arch/x86/panic.h"
 #include "physical.h"
 #include "virtual.h"
 
@@ -13,6 +15,21 @@ void setup_virtual_memory()
 	set_used_physical_pages(GET_FRAME(KERNEL_PHYSICAL_ADDRESS), get_kernel_pages());
 }
 
+void setup_page_fault_handler()
+{
+	register_isr_handler(page_fault_handler, IRQ_NUMBER::PF);
+}
+
+void page_fault_handler(ISR_INFO isr_info)
+{
+	if (!PF_PRESENT(isr_info.error_code)) {
+		PANIC("Page fault due accessing non-present page.");
+	} else if (PF_US(isr_info.error_code)) {
+		PANIC("Page fault due accessing kernel page from user mode.");
+	} else if (PF_WR(isr_info.error_code)) {
+		PANIC("Page fault due writing to read only page.");
+	}
+}
 uintptr_t memory_alloc(uint32_t size, uint32_t flags)
 {
 	uint32_t vAdd;
@@ -45,8 +62,9 @@ uintptr_t memory_map(uint32_t virtual_address, uint32_t physical_address, uint32
 	map_virtual_pages(virtual_address, physical_address, GET_PAGES(size, PAGE_4K));
 }
 
-uintptr_t memory_unmap(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags)
+void memory_unmap(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags)
 {
+	unmap_virtual_pages(virtual_address, GET_PAGES(size, PAGE_4K));
 }
 
 uint32_t virtual_memory_size()
@@ -55,6 +73,7 @@ uint32_t virtual_memory_size()
 
 uint32_t physical_memory_size()
 {
+	return get_physical_memory_size();
 }
 
 static uint32_t get_kernel_pages()

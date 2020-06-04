@@ -2,6 +2,7 @@
 #include "Arch/x86/panic.h"
 
 volatile uint8_t physical_memory_tracer[MAX_PHYSICAL_4K_PAGES / 8];
+uint32_t physical_memory_size = 0;
 
 void initialize_physical_memory()
 {
@@ -36,6 +37,7 @@ void set_free_physical_pages(uint32_t page_number, uint32_t count)
 		physical_memory_tracer[current_page / 8] &= ~(1 << (current_page % 8));
 		current_page++;
 	}
+	physical_memory_size -= count * PAGE_4K;
 }
 
 void set_used_physical_pages(uint32_t page_number, uint32_t count)
@@ -45,10 +47,12 @@ void set_used_physical_pages(uint32_t page_number, uint32_t count)
 		physical_memory_tracer[current_page / 8] |= 1 << (current_page % 8);
 		current_page++;
 	}
+	physical_memory_size += count * PAGE_4K;
 }
 
 uint32_t find_physical_pages(uint32_t count)
 {
+	// TODO: keep a pointer to the last allocated/freed page to improve the performance.
 	uint32_t first_free_page = 0;
 	uint32_t remaining_pages = count;
 	for (size_t i = 0; i < sizeof(physical_memory_tracer); i++) {
@@ -68,4 +72,9 @@ uint32_t find_physical_pages(uint32_t count)
 		}
 	}
 	PANIC("No physical memory available!");
+}
+
+uint32_t get_physical_memory_size()
+{
+	return physical_memory_size;
 }

@@ -11,3 +11,4 @@ void free_physical_pages(uint32_t page_number, uint32_t count);
 void set_free_physical_pages(uint32_t page_number, uint32_t count);
 void set_used_physical_pages(uint32_t page_number, uint32_t count);
 uint32_t find_physical_pages(uint32_t count);
+uint32_t get_physical_memory_size();

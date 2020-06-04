@@ -9,6 +9,7 @@
 
 extern "C" void kernel_init()
 {
+	//
 	initiate_console();
 	printStatus("Setting up paging.", true);
 	printStatus("Setting up console.", true);
@@ -16,6 +17,7 @@ extern "C" void kernel_init()
 	printStatus("Setting up GDT.", true);
 	setup_idt();
 	printStatus("Setting up IDT.", true);
+	setup_page_fault_handler();
 
 	volatile uintptr_t dd = memory_alloc(0x1000, MEMORY::KERNEL);
 	volatile uintptr_t dd2 = memory_alloc(0x4000, MEMORY::KERNEL);
