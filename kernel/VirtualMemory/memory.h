@@ -1,5 +1,7 @@
 #include "types.h"
 
+#define GET_PAGES(x, boundary) (x / boundary + ((x % boundary) == 0 ? 0 : 1))
+
 enum MEMORY {
 	KERNEL = 1,
 	WRITABLE = 2,

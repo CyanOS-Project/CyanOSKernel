@@ -17,7 +17,7 @@ extern "C" void kernel_init()
 	setup_idt();
 	printStatus("Setting up IDT.", true);
 
-	volatile uintptr_t dd = memory_alloc(0x1000, MEMORY::KERNEL);
+	volatile uintptr_t dd = memory_alloc(0x3000, MEMORY::KERNEL);
 	volatile uintptr_t dd2 = memory_alloc(0x1000, MEMORY::KERNEL);
 	volatile uintptr_t dd3 = memory_alloc(0x1000, MEMORY::KERNEL);
 	memory_free(dd2, 0x1000, 0);

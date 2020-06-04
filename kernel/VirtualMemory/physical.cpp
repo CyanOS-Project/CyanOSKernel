@@ -12,68 +12,30 @@ void initialize_physical_memory()
 
 uint32_t alloc_physical_page()
 {
-	// TODO: do function to find page and refactor it
-	for (size_t i = 0; i < sizeof(physical_memory_tracer); i++) {
-		if (physical_memory_tracer[i] == 0xFF)
-			continue;
-		uint8_t value = physical_memory_tracer[i];
-		for (size_t bit = 0; bit < 8; bit++) {
-			if (value & 1) {
-				value = value >> 1;
-				continue;
-			}
-			uint32_t free_page = bit + i * 8;
-			set_used_physical_page(free_page);
-			return free_page;
-		}
-	}
-	PANIC("No physical memory available!");
+	uint32_t physical_page = find_physical_pages(1);
+	set_used_physical_pages(physical_page, 1);
+	return physical_page * PAGE_4K;
 }
 
-uint32_t alloc_contagious_physical_page(int count)
+uint32_t alloc_contagious_physical_pages(int count)
 {
-	/*int remaining_pages = count;
-	int start_page = 0;
-	for (size_t i = 0; i < sizeof(physical_memory_tracer) / sizeof(uint8_t); i++) {
-	    if (physical_memory_tracer[i] != 0xFF) {
-	        uint8_t value = physical_memory_tracer[i];
-	        for (size_t bit = 0; bit < sizeof(uint8_t); bit++) {
-	            if (!(value & 1)) {
-	                remaining_pages--;
-	                if (!remaining_pages) {
-	                    uint32_t free_page = bit + i * sizeof(uint8_t);
-	                    set_used_physical_page(free_page);
-	                    return free_page;
-	                }
-	            } else {
-	                remaining_pages = count;
-	                value = value >> 1;
-	            }
-	        }
-	    }
-	}*/
-}
-
-void free_physical_page(uint32_t page_number)
-{
-	set_free_physical_page(page_number);
+	uint32_t physical_pages = find_physical_pages(count);
+	set_used_physical_pages(physical_pages, count);
+	return physical_pages * PAGE_4K;
 }
 
 void free_physical_pages(uint32_t page_number, uint32_t count)
 {
+	set_free_physical_pages(page_number, count);
+}
+
+void set_free_physical_pages(uint32_t page_number, uint32_t count)
+{
+	uint32_t current_page = page_number;
 	for (size_t i = 0; i < count; i++) {
-		free_physical_page(page_number + i);
+		physical_memory_tracer[current_page / 8] &= ~(1 << (current_page % 8));
+		current_page++;
 	}
-}
-
-void set_free_physical_page(uint32_t page_number)
-{
-	physical_memory_tracer[page_number / 8] &= ~(1 << (page_number % 8));
-}
-
-void set_used_physical_page(uint32_t page_number)
-{
-	physical_memory_tracer[page_number / 8] |= 1 << (page_number % 8);
 }
 
 void set_used_physical_pages(uint32_t page_number, uint32_t count)
@@ -83,4 +45,27 @@ void set_used_physical_pages(uint32_t page_number, uint32_t count)
 		physical_memory_tracer[current_page / 8] |= 1 << (current_page % 8);
 		current_page++;
 	}
+}
+
+uint32_t find_physical_pages(uint32_t count)
+{
+	uint32_t first_free_page = 0;
+	uint32_t remaining_pages = count;
+	for (size_t i = 0; i < sizeof(physical_memory_tracer); i++) {
+		if ((physical_memory_tracer[i] == 0xFF) && (remaining_pages != count)) {
+			remaining_pages = count;
+		} else {
+			for (size_t bit = 0; bit < 8; bit++) {
+				if (!CHECK_BIT(physical_memory_tracer[i], bit)) {
+					if (remaining_pages == count)
+						first_free_page = bit + i * 8;
+					if (!(--remaining_pages))
+						return first_free_page;
+				} else if (remaining_pages != count) {
+					remaining_pages = count;
+				}
+			}
+		}
+	}
+	PANIC("No physical memory available!");
 }
