@@ -17,16 +17,19 @@ uintptr_t memory_alloc(uint32_t size, uint32_t flags)
 {
 	uint32_t vAdd;
 	uint32_t pages_num = GET_PAGES(size, PAGE_4K);
+
 	if (flags & MEMORY::KERNEL) {
 		vAdd = virtual_find_pages(GET_FRAME(KERNEL_VIRTUAL_ADDRESS), 1024 * 1024,
-		                          pages_num); // TODO: do 1024 * 1024 dynamicly
+		                          1); // TODO: do 1024 * 1024 dynamicly
 	} else {
 		vAdd = virtual_find_pages(1, GET_FRAME(KERNEL_VIRTUAL_ADDRESS),
-		                          pages_num); // skip first page to detect null pointer
+		                          1); // skip first page to detect null pointer
 	}
+
 	for (size_t i = 0; i < pages_num; i++) {
+
 		uint32_t pAdd = alloc_physical_page();
-		map_virtual_pages(vAdd, pAdd, 1);
+		map_virtual_pages(vAdd + PAGE_4K * i, pAdd, 1);
 	}
 	return vAdd;
 }

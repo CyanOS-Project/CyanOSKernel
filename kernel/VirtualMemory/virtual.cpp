@@ -13,7 +13,7 @@ uintptr_t virtual_find_pages(uint32_t start_page, uint32_t end_page, uint32_t co
 			if (remaining_pages == count)
 				first_free_page = i;
 			if (!(--remaining_pages))
-				return uintptr_t(i * PAGE_4K);
+				return uintptr_t(first_free_page * PAGE_4K);
 		} else {
 			remaining_pages = count;
 		}
