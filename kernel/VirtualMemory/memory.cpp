@@ -20,10 +20,10 @@ uintptr_t memory_alloc(uint32_t size, uint32_t flags)
 
 	if (flags & MEMORY::KERNEL) {
 		vAdd = virtual_find_pages(GET_FRAME(KERNEL_VIRTUAL_ADDRESS), 1024 * 1024,
-		                          1); // TODO: do 1024 * 1024 dynamicly
+		                          pages_num); // TODO: do 1024 * 1024 dynamicly
 	} else {
 		vAdd = virtual_find_pages(1, GET_FRAME(KERNEL_VIRTUAL_ADDRESS),
-		                          1); // skip first page to detect null pointer
+		                          pages_num); // skip first page to detect null pointer
 	}
 
 	for (size_t i = 0; i < pages_num; i++) {
