@@ -1,5 +1,23 @@
 # CyanOS: A Hobbyist Operating System
 
+## Todo list
+- [x] Paging and virtual memory.
+- [x] Higher half kernel
+- [x] Interrupt dispatchers.
+- [x] Dynamic virtual/physical memory allocation.
+- [ ] APIC.
+- [ ] Keyboard/Mouse drivers.
+- [ ] Mutex/Semaphores.
+- [ ] User space.
+- [ ] System calls.
+- [ ] Multiprocessing.
+- [ ] Process signalling.
+- [ ] Filesystem.
+Distance Future:
+- [ ] GUI.
+- [ ] Network Driver.
+- [ ] USB.
+
 ## Building CyanOS
 ### Windows
 #### Setting up
