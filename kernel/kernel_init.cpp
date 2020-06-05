@@ -1,4 +1,5 @@
 #include "kernel_init.h"
+#include "Arch/x86/apic.h"
 #include "Arch/x86/asm.h"
 #include "Arch/x86/gdt.h"
 #include "Arch/x86/idt.h"
@@ -9,7 +10,6 @@
 
 extern "C" void kernel_init()
 {
-	//
 	initiate_console();
 	printStatus("Setting up paging.", true);
 	printStatus("Setting up console.", true);
@@ -18,6 +18,7 @@ extern "C" void kernel_init()
 	setup_idt();
 	printStatus("Setting up IDT.", true);
 	setup_page_fault_handler();
+	check_APIC();
 
 	volatile uintptr_t dd = memory_alloc(0x1000, MEMORY::KERNEL);
 	volatile uintptr_t dd2 = memory_alloc(0x4000, MEMORY::KERNEL);
