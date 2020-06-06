@@ -1,6 +1,7 @@
 
 #include "isr.h"
 #include "console.h"
+#include "gdt.h"
 #include "idt.h"
 
 static isr_function interrupt_dispatcher_vector[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(4)));
@@ -25,6 +26,8 @@ void initiate_isr_vector()
 void register_isr_handler(isr_function address, uint8_t irq_number)
 {
 	interrupt_dispatcher_vector[irq_number] = (isr_function)address;
+	fill_idt_entry(irq_number, (uint32_t)isr_vector[irq_number], KCS_SELECTOR,
+	               IDT_ENTRY_FLAGS::PRESENT | IDT_ENTRY_FLAGS::GATE_32 | IDT_ENTRY_FLAGS::INT_GATE);
 }
 
 extern "C" void __attribute__((cdecl)) interrupt_dispatcher(ISR_INFO info)

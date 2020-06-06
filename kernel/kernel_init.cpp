@@ -1,10 +1,11 @@
 #include "kernel_init.h"
-#include "Arch/x86/apic.h"
 #include "Arch/x86/asm.h"
 #include "Arch/x86/gdt.h"
 #include "Arch/x86/idt.h"
 #include "Arch/x86/paging.h"
 #include "Arch/x86/panic.h"
+#include "Arch/x86/pic.h"
+#include "Devices/Timer/pit.h"
 #include "VirtualMemory/memory.h"
 #include "VirtualMemory/virtual.h"
 
@@ -18,7 +19,8 @@ extern "C" void kernel_init()
 	setup_idt();
 	printStatus("Setting up IDT.", true);
 	setup_page_fault_handler();
-	check_APIC();
+	setup_pic();
+	setup_pit();
 
 	volatile uintptr_t dd = memory_alloc(0x1000, MEMORY::KERNEL);
 	volatile uintptr_t dd2 = memory_alloc(0x4000, MEMORY::KERNEL);

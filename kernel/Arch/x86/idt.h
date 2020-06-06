@@ -34,5 +34,6 @@ struct IDTEntry {
 
 void setup_idt();
 static void fill_idt(volatile IDT* idt, uint32_t base, uint16_t limit);
-static void fill_idt_entry(volatile IDTEntry* idt_entry, uint32_t address, uint16_t segment, uint8_t type);
 static void load_idt(volatile IDT* idt);
+bool is_idt_entry_present(uint8_t idt_entry);
+void fill_idt_entry(uint8_t idt_entry, uint32_t address, uint16_t segment, uint8_t type);
