@@ -21,16 +21,10 @@ extern "C" void kernel_init()
 	setup_page_fault_handler();
 	setup_pic();
 	setup_pit();
+	ENABLE_INTERRUPTS();
 
-	volatile uintptr_t dd = memory_alloc(0x1000, MEMORY::KERNEL);
-	volatile uintptr_t dd2 = memory_alloc(0x4000, MEMORY::KERNEL);
-	volatile uintptr_t dd3 = memory_alloc(0x1000, MEMORY::KERNEL);
-	memory_free(dd2, 0x4000, 0);
-	volatile uintptr_t dd4 = memory_alloc(0x1000, MEMORY::KERNEL);
-	volatile uintptr_t dd5 = memory_alloc(0x1000, MEMORY::KERNEL);
-	volatile uintptr_t dd6 = memory_alloc(0x1000, MEMORY::KERNEL);
-	volatile uintptr_t dd7 = memory_alloc(0x1000, MEMORY::KERNEL);
-	volatile uintptr_t dd8 = memory_alloc(0x1000, MEMORY::KERNEL);
 	printf("Welcome to CyanOS.\n");
-	HLT();
+	while (1) {
+		HLT();
+	}
 }

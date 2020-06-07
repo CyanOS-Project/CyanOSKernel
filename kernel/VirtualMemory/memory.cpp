@@ -2,6 +2,7 @@
 #include "Arch/x86/isr.h"
 #include "Arch/x86/paging.h"
 #include "Arch/x86/panic.h"
+#include "console.h"
 #include "physical.h"
 #include "virtual.h"
 
@@ -22,6 +23,8 @@ void setup_page_fault_handler()
 
 void page_fault_handler(ISR_INFO isr_info)
 {
+	printf("Page= %X EIP=%X\t CS=%X\t ESP=%X  SS=%X\t\n", isr_info.cr2, isr_info.eip, isr_info.cs, isr_info.esp,
+	       isr_info.ss);
 	if (!PF_PRESENT(isr_info.error_code)) {
 		PANIC("Page fault due accessing non-present page.");
 	} else if (PF_US(isr_info.error_code)) {

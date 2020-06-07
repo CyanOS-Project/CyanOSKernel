@@ -9,13 +9,12 @@ void testISR(ISR_INFO);
 
 void setup_idt()
 {
-	initiate_isr_vector();
+	initiate_isr_dispatcher_vector();
 	fill_idt(&idt, (uint32_t)idt_entries, sizeof(idt_entries) - 1);
 
 	for (size_t i = 0; i < NUMBER_OF_IDT_ENTRIES; i++)
 		fill_idt_entry(i, (uint32_t)isr_vector[i], KCS_SELECTOR,
 		               IDT_ENTRY_FLAGS::PRESENT | IDT_ENTRY_FLAGS::GATE_32 | IDT_ENTRY_FLAGS::INT_GATE);
-	// register_isr_handler(testISR, EXCEPTION_NUMBER::BP);
 	load_idt(&idt);
 }
 

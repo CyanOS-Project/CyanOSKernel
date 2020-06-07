@@ -6,13 +6,13 @@ int atomic_level = 0;
 void atomic_begin()
 {
 	atomic_level++;
-	CLI();
+	DISABLE_INTERRUPTS();
 }
 
 void atomic_end()
 {
 	if (atomic_level == 0) {
-		STI();
+		ENABLE_INTERRUPTS();
 	} else {
 		atomic_level--;
 	}

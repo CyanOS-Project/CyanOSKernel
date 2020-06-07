@@ -3,9 +3,8 @@
 #include "kernel_map.h"
 #include "types.h"
 
-#define NUMBER_OF_IDT_ENTRIES         255
-#define NUMBER_OF_IDT_DEFINED_ENTRIES 21
-#define NUMBER_OF_IDT_EXCEPTIONS      32
+#define NUMBER_OF_IDT_ENTRIES    256
+#define NUMBER_OF_IDT_EXCEPTIONS 32
 
 enum IDT_ENTRY_FLAGS {
 	PRESENT = 0x80,

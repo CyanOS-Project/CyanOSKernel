@@ -5,19 +5,11 @@
 #include "idt.h"
 
 static isr_function interrupt_dispatcher_vector[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(4)));
-uintptr_t isr_vector[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(4)));
 
-extern "C" uintptr_t _isr_vector[];
-extern "C" uintptr_t _generic_isr;
+extern "C" uintptr_t isr_vector[];
 
-void initiate_isr_vector()
+void initiate_isr_dispatcher_vector()
 {
-	for (size_t i = 0; i < NUMBER_OF_IDT_DEFINED_ENTRIES; i++) {
-		isr_vector[i] = _isr_vector[i];
-	}
-	for (size_t i = NUMBER_OF_IDT_DEFINED_ENTRIES; i < NUMBER_OF_IDT_ENTRIES; i++) {
-		isr_vector[i] = _generic_isr;
-	}
 	for (size_t i = 0; i < NUMBER_OF_IDT_ENTRIES; i++) {
 		interrupt_dispatcher_vector[i] = 0;
 	}
@@ -26,12 +18,11 @@ void initiate_isr_vector()
 void register_isr_handler(isr_function address, uint8_t irq_number)
 {
 	interrupt_dispatcher_vector[irq_number] = (isr_function)address;
-	fill_idt_entry(irq_number, (uint32_t)isr_vector[irq_number], KCS_SELECTOR,
-	               IDT_ENTRY_FLAGS::PRESENT | IDT_ENTRY_FLAGS::GATE_32 | IDT_ENTRY_FLAGS::INT_GATE);
 }
 
 extern "C" void __attribute__((cdecl)) interrupt_dispatcher(ISR_INFO info)
 {
+	asm("MOVL %%CR2,%0" : "=r"(info.cr2));
 	if (interrupt_dispatcher_vector[info.irq_number]) {
 		interrupt_dispatcher_vector[info.irq_number](info);
 	} else {
@@ -49,7 +40,7 @@ void default_interrupt_handler(ISR_INFO info)
 	} else if (info.irq_number < NUMBER_OF_IDT_EXCEPTIONS) {
 		printf("Reserved Exception Number\n");
 	} else {
-		printf("Undefined IRQ Number\n");
+		printf("Undefined IRQ Number (IRQ%d)\n", info.irq_number);
 	}
 }
 
