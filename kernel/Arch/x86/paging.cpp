@@ -1,7 +1,7 @@
 #include "paging.h"
 
-PAGE_DIRECTORY page_direcotry __attribute__((aligned(PAGE_4K)));
-PAGE_TABLE startup_page_tables[NUMBER_OF_PAGE_TABLE_ENTRIES] __attribute__((aligned(PAGE_4K)));
+PAGE_DIRECTORY page_direcotry __attribute__((aligned(PAGE_SIZE)));
+PAGE_TABLE startup_page_tables[NUMBER_OF_PAGE_TABLE_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
 
 // Initialize page direcotry and page tables.
 void setup_paging(uint32_t num_kernel_pages)
@@ -35,8 +35,8 @@ void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, int pag
 		uint32_t pde = GET_PDE_INDEX(current_v_page);
 		uint32_t pte = GET_PTE_INDEX(current_v_page);
 		fill_page_table_entry(&ph_page_tables[pde].entries[pte], GET_FRAME(current_p_page), 0, 1);
-		current_v_page += PAGE_4K;
-		current_p_page += PAGE_4K;
+		current_v_page += PAGE_SIZE;
+		current_p_page += PAGE_SIZE;
 	}
 }
 
@@ -52,7 +52,7 @@ void map_virtual_page(uint32_t virtual_address, uint32_t physical_address)
 void map_virtual_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages)
 {
 	for (size_t i = 0; i < pages; i++) {
-		map_virtual_page(virtual_address + PAGE_4K * i, physical_address + PAGE_4K * i);
+		map_virtual_page(virtual_address + PAGE_SIZE * i, physical_address + PAGE_SIZE * i);
 	}
 }
 
@@ -68,7 +68,7 @@ void unmap_virtual_page(uint32_t virtual_address)
 void unmap_virtual_pages(uint32_t virtual_address, uint32_t pages)
 {
 	for (size_t i = 0; i < pages; i++) {
-		unmap_virtual_page(virtual_address + PAGE_4K * i);
+		unmap_virtual_page(virtual_address + PAGE_SIZE * i);
 	}
 }
 

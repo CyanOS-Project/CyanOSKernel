@@ -1,4 +1,5 @@
 #include "physical.h"
+#include "Arch/x86/paging.h"
 #include "Arch/x86/panic.h"
 
 volatile uint8_t physical_memory_tracer[MAX_PHYSICAL_4K_PAGES / 8];
@@ -15,14 +16,14 @@ uint32_t alloc_physical_page()
 {
 	uint32_t physical_page = find_physical_pages(1);
 	set_used_physical_pages(physical_page, 1);
-	return physical_page * PAGE_4K;
+	return physical_page * PAGE_SIZE;
 }
 
 uint32_t alloc_contagious_physical_pages(int count)
 {
 	uint32_t physical_pages = find_physical_pages(count);
 	set_used_physical_pages(physical_pages, count);
-	return physical_pages * PAGE_4K;
+	return physical_pages * PAGE_SIZE;
 }
 
 void free_physical_pages(uint32_t page_number, uint32_t count)
@@ -37,7 +38,7 @@ void set_free_physical_pages(uint32_t page_number, uint32_t count)
 		physical_memory_tracer[current_page / 8] &= ~(1 << (current_page % 8));
 		current_page++;
 	}
-	physical_memory_size -= count * PAGE_4K;
+	physical_memory_size -= count * PAGE_SIZE;
 }
 
 void set_used_physical_pages(uint32_t page_number, uint32_t count)
@@ -47,7 +48,7 @@ void set_used_physical_pages(uint32_t page_number, uint32_t count)
 		physical_memory_tracer[current_page / 8] |= 1 << (current_page % 8);
 		current_page++;
 	}
-	physical_memory_size += count * PAGE_4K;
+	physical_memory_size += count * PAGE_SIZE;
 }
 
 uint32_t find_physical_pages(uint32_t count)

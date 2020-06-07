@@ -1,9 +1,10 @@
 #include "idt.h"
 #include "gdt.h"
 #include "isr.h"
+#include "paging.h"
 
 volatile IDT idt __attribute__((aligned(4)));
-volatile IDTEntry idt_entries[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(PAGE_4K)));
+volatile IDTEntry idt_entries[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
 
 void testISR(ISR_INFO);
 

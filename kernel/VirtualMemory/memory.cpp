@@ -36,7 +36,7 @@ void page_fault_handler(ISR_INFO isr_info)
 uintptr_t memory_alloc(uint32_t size, uint32_t flags)
 {
 	uint32_t vAdd;
-	uint32_t pages_num = GET_PAGES(size, PAGE_4K);
+	uint32_t pages_num = GET_PAGES(size, PAGE_SIZE);
 
 	if (flags & MEMORY::KERNEL) {
 		vAdd = virtual_find_pages(GET_FRAME(KERNEL_VIRTUAL_ADDRESS), 1024 * 1024,
@@ -49,25 +49,25 @@ uintptr_t memory_alloc(uint32_t size, uint32_t flags)
 	for (size_t i = 0; i < pages_num; i++) {
 
 		uint32_t pAdd = alloc_physical_page();
-		map_virtual_pages(vAdd + PAGE_4K * i, pAdd, 1);
+		map_virtual_pages(vAdd + PAGE_SIZE * i, pAdd, 1);
 	}
 	return vAdd;
 }
 
 uintptr_t memory_free(uintptr_t address, uint32_t size, uint32_t flags)
 {
-	free_physical_pages(get_physical_page(address), GET_PAGES(size, PAGE_4K));
-	unmap_virtual_pages(address, GET_PAGES(size, PAGE_4K));
+	free_physical_pages(get_physical_page(address), GET_PAGES(size, PAGE_SIZE));
+	unmap_virtual_pages(address, GET_PAGES(size, PAGE_SIZE));
 }
 
 uintptr_t memory_map(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags)
 {
-	map_virtual_pages(virtual_address, physical_address, GET_PAGES(size, PAGE_4K));
+	map_virtual_pages(virtual_address, physical_address, GET_PAGES(size, PAGE_SIZE));
 }
 
 void memory_unmap(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags)
 {
-	unmap_virtual_pages(virtual_address, GET_PAGES(size, PAGE_4K));
+	unmap_virtual_pages(virtual_address, GET_PAGES(size, PAGE_SIZE));
 }
 
 uint32_t virtual_memory_size()
@@ -82,6 +82,6 @@ uint32_t physical_memory_size()
 static uint32_t get_kernel_pages()
 {
 	uint32_t kernel_size = (uint32_t)&KERNEL_END - KERNEL_VIRTUAL_ADDRESS;
-	uint32_t pages = kernel_size / PAGE_4K + ((kernel_size % PAGE_4K == 0) ? 0 : 1);
+	uint32_t pages = kernel_size / PAGE_SIZE + ((kernel_size % PAGE_SIZE == 0) ? 0 : 1);
 	return pages;
 }

@@ -18,6 +18,8 @@
 #define GET_OFFSET(x)                                   (x & 0xFFF)
 #define GET_PAGE_VIRTUAL_ADDRESS(dir_index, page_index) ((dir_index << 22) | (page_index << 12))
 
+#define PAGE_SIZE 0x1000
+
 struct PAGE_TABLE_ENTRY {
 	uint32_t present : 1;  // Page present in memory
 	uint32_t rw : 1;       // Read-only if clear, readwrite if set
