@@ -45,11 +45,11 @@
 #define GDT_DATA_PL3 SEG_DESCTYPE(1) | SEG_PRES(1) | SEG_PRIV(3) | SEG_DATA_RDWR
 
 #pragma pack(1)
-struct GDT {
+struct GDT_DESCRIPTOR {
 	uint16_t limit;
 	uint32_t base;
 };
-struct GDTEntry {
+struct GDT_ENTRY {
 	uint16_t lim0_15;
 	uint16_t base0_15;
 	uint8_t base16_23;
@@ -60,9 +60,15 @@ struct GDTEntry {
 };
 #pragma pack()
 
-void setup_gdt();
+class GDT
+{
+  private:
+	static void fill_gdt(volatile GDT_DESCRIPTOR* gdt, uint32_t base, uint16_t limit);
+	static void load_segments(uint16_t code_segment, uint16_t data_segment);
+	static void load_gdt(volatile GDT_DESCRIPTOR* gdt);
 
-static void load_gdt(volatile GDT* gdt);
-static void fill_gdt_entry(volatile GDTEntry* gdt_entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags);
-static void fill_gdt(volatile GDT* gdt, uint32_t base, uint16_t limit);
-static void load_segments(uint16_t code_segment, uint16_t data_segment);
+  public:
+	static void setup();
+	static void fill_gdt_entry(volatile GDT_ENTRY* gdt_entry, uint32_t base, uint32_t limit, uint8_t access,
+	                           uint8_t flags);
+};
