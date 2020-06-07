@@ -25,3 +25,4 @@ enum I86_PIT_OCW {
 
 void setup_pit();
 void pit_handler(ISR_INFO isr_info);
+void sleep(unsigned Duration);

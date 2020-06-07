@@ -9,12 +9,28 @@ void setup_pit()
 	enable_irq(PIC_PIT);
 	register_isr_handler(pit_handler, PIC_PIT + PIC1_IDT_OFFSET);
 	out8(I86_PIT_REG_COMMAND, I86_PIT_OCW_COUNTER_0 | I86_PIT_OCW_RL_DATA | I86_PIT_OCW_MODE_SQUAREWAVEGEN);
-	out8(I86_PIT_REG_COUNTER0, 0xFF); // Lower Half
-	out8(I86_PIT_REG_COUNTER0, 0xFF); // Higher Half
+	out8(I86_PIT_REG_COUNTER0, 0xA9); // Lower Half
+	out8(I86_PIT_REG_COUNTER0, 0x04); // Higher Half
 }
 
+volatile bool CPU_HLT = false;
+volatile unsigned CPU_HLT_DURATION = 0;
+
+void sleep(unsigned Duration)
+{
+	CPU_HLT = true;
+	CPU_HLT_DURATION = Duration / 2;
+	while (CPU_HLT)
+		HLT();
+}
 void pit_handler(ISR_INFO isr_info)
 {
-	printf("hello\n");
+	if (CPU_HLT == true) {
+		CPU_HLT_DURATION -= 1;
+		if (CPU_HLT_DURATION == 0) {
+			CPU_HLT = false;
+		}
+	}
+	// printf("hello\n");
 	acknowledge_pic(PIC_PIT);
 }
