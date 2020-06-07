@@ -5,15 +5,16 @@
 - [x] Higher half kernel
 - [x] Interrupt dispatchers.
 - [x] Dynamic virtual/physical memory allocation.
-- [ ] APIC.
-- [ ] Keyboard/Mouse drivers.
+- [ ] Heap allocator.
+- [ ] PIC.
+- [ ] Multiprocessing.
 - [ ] Mutex/Semaphores.
 - [ ] User space.
 - [ ] System calls.
-- [ ] Multiprocessing.
+- [ ] Keyboard/Mouse drivers.
 - [ ] Process signalling.
-- [ ] Filesystem.<br>
-Distance Future:
+- [ ] Filesystem.<br><br>
+Distance Future:<br>
 - [ ] GUI.
 - [ ] Network Driver.
 - [ ] USB.
