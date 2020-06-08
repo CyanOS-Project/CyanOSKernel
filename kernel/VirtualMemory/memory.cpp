@@ -38,9 +38,9 @@ uintptr_t memory_alloc(uint32_t size, uint32_t flags)
 	uint32_t vAdd;
 	uint32_t pages_num = GET_PAGES(size, PAGE_SIZE);
 
-	if (flags & MEMORY::KERNEL) {
-		vAdd = virtual_find_pages(GET_FRAME(KERNEL_VIRTUAL_ADDRESS), 1024 * 1024,
-		                          pages_num); // TODO: do 1024 * 1024 dynamicly
+	if (flags & MEMORY_TYPE::KERNEL) {
+		vAdd = virtual_find_pages(GET_FRAME(KERNEL_VIRTUAL_ADDRESS),
+		                          NUMBER_OF_PAGE_DIRECOTRY_ENTRIES * NUMBER_OF_PAGE_TABLE_ENTRIES, pages_num);
 	} else {
 		vAdd = virtual_find_pages(1, GET_FRAME(KERNEL_VIRTUAL_ADDRESS),
 		                          pages_num); // skip first page to detect null pointer
@@ -49,7 +49,7 @@ uintptr_t memory_alloc(uint32_t size, uint32_t flags)
 	for (size_t i = 0; i < pages_num; i++) {
 
 		uint32_t pAdd = alloc_physical_page();
-		map_virtual_pages(vAdd + PAGE_SIZE * i, pAdd, 1);
+		map_virtual_pages(vAdd + PAGE_SIZE * i, pAdd, 1, flags);
 	}
 	return vAdd;
 }
@@ -62,7 +62,7 @@ uintptr_t memory_free(uintptr_t address, uint32_t size, uint32_t flags)
 
 uintptr_t memory_map(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags)
 {
-	map_virtual_pages(virtual_address, physical_address, GET_PAGES(size, PAGE_SIZE));
+	map_virtual_pages(virtual_address, physical_address, GET_PAGES(size, PAGE_SIZE), flags);
 }
 
 void memory_unmap(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags)

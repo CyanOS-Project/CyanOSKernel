@@ -20,6 +20,10 @@
 
 #define PAGE_SIZE 0x1000
 
+#define PAGE_FLAGS_KERNEL      1
+#define PAGE_FLAGS_WRITABLE    2
+#define PAGE_FLAGS_WRITEONCOPY 4
+
 struct PAGE_TABLE_ENTRY {
 	uint32_t present : 1;  // Page present in memory
 	uint32_t rw : 1;       // Read-only if clear, readwrite if set
@@ -46,9 +50,9 @@ struct PAGE_TABLE {
 void setup_paging(uint32_t num_kernel_pages);
 void initialize_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
 void initialize_page_table(volatile PAGE_TABLE* page_direcotry);
-void map_virtual_page(uint32_t virtual_address, uint32_t physical_address);
-void map_virtual_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages);
-void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, int pages);
+void map_virtual_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages, uint32_t flags);
+void map_virtual_page(uint32_t virtual_address, uint32_t physical_address, uint32_t flags);
+void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages);
 void unmap_virtual_page(uint32_t virtual_address);
 void unmap_virtual_pages(uint32_t virtual_address, uint32_t pages);
 bool check_page_present(uint32_t virtual_address);
@@ -59,7 +63,7 @@ void fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t
                            bool writeable);
 void fill_directory_PSE_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, bool user,
                               bool writeable);
-void enable_PSE();    // TODO: make it inline
-void enable_paging(); // TODO: make it inline
+void enable_PSE();
+void enable_paging();
 void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
 void invalidate_page(uint32_t addr);

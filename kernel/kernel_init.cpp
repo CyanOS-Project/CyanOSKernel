@@ -38,8 +38,8 @@ extern "C" void kernel_init()
 	volatile intptr_t p1 = kmalloc(0xF00, 0);
 	volatile intptr_t p2 = kmalloc(0x10, 0);
 	volatile intptr_t p3 = kmalloc(0xA0, 0);
-	// kfree(p2);
-	volatile intptr_t p4 = kmalloc(0x100, 0);
+	kfree(p1);
+	volatile intptr_t p4 = kmalloc(0xF10, 0);
 	volatile intptr_t p5 = kmalloc(10, 0);
 	/*setup_pic();
 	setup_pit();

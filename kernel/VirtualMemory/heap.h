@@ -7,6 +7,7 @@
 #define HEADER_TO_ADDR(x)                  ((unsigned)x + sizeof(BlockHeader))
 #define NEXT_NEIGHBOR_BLOCK(current_block) ((unsigned)current_block + sizeof(BlockHeader) + current_block->size)
 #define MALLOC_PAGE_SIZE                   PAGE_SIZE
+#define MAX_SIZE                           (MALLOC_PAGE_SIZE - sizeof(BlockHeader) * 2 - sizeof(PageFrameBlock))
 
 struct BlockHeader {
 	unsigned size;
