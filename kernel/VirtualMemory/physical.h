@@ -1,3 +1,5 @@
+#pragma once
+
 #include "kernel_map.h"
 #include "types.h"
 

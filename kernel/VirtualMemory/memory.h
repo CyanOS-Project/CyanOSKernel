@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Arch/x86/isr.h"
 #include "types.h"
 
