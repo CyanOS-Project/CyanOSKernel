@@ -2,19 +2,18 @@
 
 ## Todo list
 - [x] Paging and virtual memory.
-- [x] Higher half kernel
+- [x] Higher half kernel.
 - [x] Interrupt dispatchers.
 - [x] Dynamic virtual/physical memory allocation.
-- [ ] Heap allocator.
-- [ ] PIC.
+- [x] Heap allocator.
+- [x] PIC.
 - [ ] Multiprocessing.
 - [ ] Mutex/Semaphores.
 - [ ] User space.
 - [ ] System calls.
 - [ ] Keyboard/Mouse drivers.
 - [ ] Process signalling.
-- [ ] Filesystem.<br><br>
-Distance Future:<br>
+- [ ] Filesystem.
 - [ ] GUI.
 - [ ] Network Driver.
 - [ ] USB.
