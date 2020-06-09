@@ -8,14 +8,14 @@ static isr_function interrupt_dispatcher_vector[NUMBER_OF_IDT_ENTRIES] __attribu
 
 extern "C" uintptr_t isr_vector[];
 
-void initiate_isr_dispatcher_vector()
+void ISR::initiate_isr_dispatcher_vector()
 {
 	for (size_t i = 0; i < NUMBER_OF_IDT_ENTRIES; i++) {
 		interrupt_dispatcher_vector[i] = 0;
 	}
 }
 
-void register_isr_handler(isr_function address, uint8_t irq_number)
+void ISR::register_isr_handler(isr_function address, uint8_t irq_number)
 {
 	interrupt_dispatcher_vector[irq_number] = (isr_function)address;
 }
@@ -26,11 +26,11 @@ extern "C" void __attribute__((cdecl)) interrupt_dispatcher(ISR_INFO info)
 	if (interrupt_dispatcher_vector[info.irq_number]) {
 		interrupt_dispatcher_vector[info.irq_number](info);
 	} else {
-		default_interrupt_handler(info);
+		ISR::default_interrupt_handler(info);
 	}
 }
 
-void default_interrupt_handler(ISR_INFO info)
+void ISR::default_interrupt_handler(ISR_INFO info)
 {
 	if (info.irq_number < NUMBER_OF_IDT_ENTRIES) {
 		printf("Exception: ");
@@ -44,22 +44,22 @@ void default_interrupt_handler(ISR_INFO info)
 	}
 }
 
-const char* exception_messages[19] = {"Division by zero",
-                                      "Debug",
-                                      "Non-maskable interrupt",
-                                      "Breakpoint",
-                                      "Detected overflow",
-                                      "Out-of-bounds",
-                                      "Invalid opcode",
-                                      "No coprocessor",
-                                      "Double fault",
-                                      "Coprocessor segment overrun",
-                                      "Bad TSS",
-                                      "Segment not present",
-                                      "Stack fault",
-                                      "General protection fault",
-                                      "Page fault",
-                                      "Unknown interrupt",
-                                      "Coprocessor fault",
-                                      "Alignment check",
-                                      "Machine check"};
+const char* ISR::exception_messages[19] = {"Division by zero",
+                                           "Debug",
+                                           "Non-maskable interrupt",
+                                           "Breakpoint",
+                                           "Detected overflow",
+                                           "Out-of-bounds",
+                                           "Invalid opcode",
+                                           "No coprocessor",
+                                           "Double fault",
+                                           "Coprocessor segment overrun",
+                                           "Bad TSS",
+                                           "Segment not present",
+                                           "Stack fault",
+                                           "General protection fault",
+                                           "Page fault",
+                                           "Unknown interrupt",
+                                           "Coprocessor fault",
+                                           "Alignment check",
+                                           "Machine check"};

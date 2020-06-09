@@ -31,6 +31,12 @@
 
 #define PIC_EOI 0x20
 
-void setup_pic();
-void enable_irq(uint8_t irq);
-void acknowledge_pic(uint8_t irq);
+class PIC
+{
+  private:
+	/* data */
+  public:
+	static void setup();
+	static void enable_irq(uint8_t irq);
+	static void acknowledge_pic(uint8_t irq);
+};

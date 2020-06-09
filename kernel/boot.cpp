@@ -22,7 +22,7 @@ extern uint32_t KERNEL_STACK_END;
 __attribute__((section(".bootstrap"))) void kernel_boot()
 {
 	SET_STACK(VIR_TO_PHY((uint32_t)&KERNEL_STACK_END));
-	setup_virtual_memory();
+	Memory::setup();
 	SET_STACK((uint32_t)&KERNEL_STACK_END);
 	JMP(kernel_init);
 	HLT();

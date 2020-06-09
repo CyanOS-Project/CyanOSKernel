@@ -4,10 +4,10 @@
 #include "Arch/x86/pic.h"
 #include "console.h"
 
-void setup_pit()
+void PIT::setup()
 {
-	enable_irq(PIC_PIT);
-	register_isr_handler(pit_handler, PIC_PIT + PIC1_IDT_OFFSET);
+	PIC::enable_irq(PIC_PIT);
+	ISR::register_isr_handler(pit_handler, PIC_PIT + PIC1_IDT_OFFSET);
 	out8(I86_PIT_REG_COMMAND, I86_PIT_OCW_COUNTER_0 | I86_PIT_OCW_RL_DATA | I86_PIT_OCW_MODE_SQUAREWAVEGEN);
 	out8(I86_PIT_REG_COUNTER0, 0xA9); // Lower Half
 	out8(I86_PIT_REG_COUNTER0, 0x04); // Higher Half
@@ -16,14 +16,14 @@ void setup_pit()
 volatile bool CPU_HLT = false;
 volatile unsigned CPU_HLT_DURATION = 0;
 
-void sleep(unsigned Duration)
+void PIT::sleep(unsigned Duration)
 {
 	CPU_HLT = true;
 	CPU_HLT_DURATION = Duration / 2;
 	while (CPU_HLT)
 		HLT();
 }
-void pit_handler(ISR_INFO isr_info)
+void PIT::pit_handler(ISR_INFO isr_info)
 {
 	if (CPU_HLT == true) {
 		CPU_HLT_DURATION -= 1;
@@ -32,5 +32,5 @@ void pit_handler(ISR_INFO isr_info)
 		}
 	}
 	// printf("hello\n");
-	acknowledge_pic(PIC_PIT);
+	PIC::acknowledge_pic(PIC_PIT);
 }

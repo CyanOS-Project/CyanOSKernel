@@ -3,14 +3,12 @@
 #include "isr.h"
 #include "paging.h"
 
-volatile IDT idt __attribute__((aligned(4)));
-volatile IDTEntry idt_entries[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
+volatile IDT_DISCRIPTOR IDT::idt __attribute__((aligned(4)));
+volatile IDTEntry IDT::idt_entries[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
 
-void testISR(ISR_INFO);
-
-void setup_idt()
+void IDT::setup()
 {
-	initiate_isr_dispatcher_vector();
+	ISR::initiate_isr_dispatcher_vector();
 	fill_idt(&idt, (uint32_t)idt_entries, sizeof(idt_entries) - 1);
 
 	for (size_t i = 0; i < NUMBER_OF_IDT_ENTRIES; i++)
@@ -19,13 +17,13 @@ void setup_idt()
 	load_idt(&idt);
 }
 
-static void fill_idt(volatile IDT* idt, uint32_t base, uint16_t limit)
+void IDT::fill_idt(volatile IDT_DISCRIPTOR* idt, uint32_t base, uint16_t limit)
 {
 	idt->base = base;
 	idt->limit = limit;
 }
 
-void fill_idt_entry(uint8_t idt_entry, uint32_t address, uint16_t segment, uint8_t type)
+void IDT::fill_idt_entry(uint8_t idt_entry, uint32_t address, uint16_t segment, uint8_t type)
 {
 	idt_entries[idt_entry].offset0_15 = ((uint32_t)address & 0xFFFF);
 	idt_entries[idt_entry].offset16_31 = ((uint32_t)address & 0xFFFF0000) >> 16;
@@ -34,18 +32,7 @@ void fill_idt_entry(uint8_t idt_entry, uint32_t address, uint16_t segment, uint8
 	idt_entries[idt_entry].zero = 0;
 }
 
-bool is_idt_entry_present(uint8_t idt_entry)
-{
-	return idt_entries[idt_entry].type & IDT_ENTRY_FLAGS::PRESENT;
-}
-
-static void load_idt(volatile IDT* idt)
+void IDT::load_idt(volatile IDT_DISCRIPTOR* idt)
 {
 	asm volatile("LIDT (%0)" : : "r"(idt));
-}
-
-void testISR(ISR_INFO info)
-{
-	asm("nop");
-	return;
 }

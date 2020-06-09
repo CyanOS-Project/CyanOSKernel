@@ -49,21 +49,33 @@ struct PAGE_TABLE {
 	PAGE_TABLE_ENTRY entries[NUMBER_OF_PAGE_TABLE_ENTRIES];
 };
 
-void setup_paging(uint32_t num_kernel_pages);
-void initialize_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
-void initialize_page_table(volatile PAGE_TABLE* page_direcotry);
-void map_virtual_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages, uint32_t flags);
-void map_virtual_page(uint32_t virtual_address, uint32_t physical_address, uint32_t flags);
-void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages);
-void unmap_virtual_page(uint32_t virtual_address);
-void unmap_virtual_pages(uint32_t virtual_address, uint32_t pages);
-bool check_page_present(uint32_t virtual_address);
 uint32_t get_physical_page(uint32_t virtual_address);
-void fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, uint32_t flags);
-void fill_directory_PSE_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame,
-                              uint32_t flags);
-void fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame, uint32_t flags);
-void enable_PSE();
-void enable_paging();
-void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
-void invalidate_page(uint32_t addr);
+
+class Paging
+{
+  private:
+	static void initialize_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
+	static void initialize_page_table(volatile PAGE_TABLE* page_direcotry);
+	static void map_page(uint32_t virtual_address, uint32_t physical_address, uint32_t flags);
+	static void unmap_page(uint32_t virtual_address);
+	static void fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame,
+	                                 uint32_t flags);
+	static void fill_directory_PSE_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame,
+	                                     uint32_t flags);
+	static void fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame,
+	                                  uint32_t flags);
+	static void invalidate_page(uint32_t addr);
+	static void enable_PSE();
+	static void enable_paging();
+	static void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
+	static PAGE_DIRECTORY page_direcotry;
+	static PAGE_TABLE startup_page_tables[];
+
+  public:
+	static void setup(uint32_t num_kernel_pages);
+	static void map_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages, uint32_t flags);
+	static void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages);
+	static void unmap_pages(uint32_t virtual_address, uint32_t pages);
+	static bool check_page_present(uint32_t virtual_address);
+	static uint32_t get_physical_page(uint32_t virtual_address);
+};

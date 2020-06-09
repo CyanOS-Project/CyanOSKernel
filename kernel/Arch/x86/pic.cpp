@@ -1,6 +1,6 @@
 #include "pic.h"
 
-void setup_pic()
+void PIC::setup()
 {
 	// ICW1
 	out8(PIC1_COMMAND, ICW1_ICW4 | ICW1_INIT);
@@ -19,7 +19,7 @@ void setup_pic()
 	out8(PIC2_DATA, 0xFF); //	Disable all IRs.
 }
 
-void enable_irq(uint8_t irq)
+void PIC::enable_irq(uint8_t irq)
 {
 	uint8_t pic_mask;
 	if (irq < 8) { // PIC1
@@ -31,7 +31,7 @@ void enable_irq(uint8_t irq)
 	}
 }
 
-void acknowledge_pic(uint8_t irq)
+void PIC::acknowledge_pic(uint8_t irq)
 {
 	if (irq < 8) { // PIC1
 		out8(PIC1_COMMAND, PIC_EOI);

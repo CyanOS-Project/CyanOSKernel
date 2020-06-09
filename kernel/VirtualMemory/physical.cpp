@@ -2,36 +2,37 @@
 #include "Arch/x86/paging.h"
 #include "Arch/x86/panic.h"
 
-volatile uint8_t physical_memory_tracer[MAX_PHYSICAL_4K_PAGES / 8];
-uint32_t physical_memory_size = 0;
+volatile uint8_t PhysicalMemory::physical_memory_tracer[MAX_PHYSICAL_4K_PAGES / 8];
+volatile uint32_t PhysicalMemory::physical_memory_size;
 
-void initialize_physical_memory()
+void PhysicalMemory::initialize()
 {
 	for (size_t i = 0; i < sizeof(physical_memory_tracer); i++) {
 		physical_memory_tracer[i] = 0;
 	}
+	physical_memory_size = 0;
 }
 
-uint32_t alloc_physical_page()
+uint32_t PhysicalMemory::alloc_page()
 {
-	uint32_t physical_page = find_physical_pages(1);
-	set_used_physical_pages(physical_page, 1);
+	uint32_t physical_page = find_pages(1);
+	set_used_pages(physical_page, 1);
 	return physical_page * PAGE_SIZE;
 }
 
-uint32_t alloc_contagious_physical_pages(int count)
+uint32_t PhysicalMemory::alloc_contagious_pages(int count)
 {
-	uint32_t physical_pages = find_physical_pages(count);
-	set_used_physical_pages(physical_pages, count);
+	uint32_t physical_pages = find_pages(count);
+	set_used_pages(physical_pages, count);
 	return physical_pages * PAGE_SIZE;
 }
 
-void free_physical_pages(uint32_t page_number, uint32_t count)
+void PhysicalMemory::free_pages(uint32_t page_number, uint32_t count)
 {
-	set_free_physical_pages(page_number, count);
+	set_free_pages(page_number, count);
 }
 
-void set_free_physical_pages(uint32_t page_number, uint32_t count)
+void PhysicalMemory::set_free_pages(uint32_t page_number, uint32_t count)
 {
 	uint32_t current_page = page_number;
 	for (size_t i = 0; i < count; i++) {
@@ -41,7 +42,7 @@ void set_free_physical_pages(uint32_t page_number, uint32_t count)
 	physical_memory_size -= count * PAGE_SIZE;
 }
 
-void set_used_physical_pages(uint32_t page_number, uint32_t count)
+void PhysicalMemory::set_used_pages(uint32_t page_number, uint32_t count)
 {
 	uint32_t current_page = page_number;
 	for (size_t i = 0; i < count; i++) {
@@ -51,7 +52,7 @@ void set_used_physical_pages(uint32_t page_number, uint32_t count)
 	physical_memory_size += count * PAGE_SIZE;
 }
 
-uint32_t find_physical_pages(uint32_t count)
+uint32_t PhysicalMemory::find_pages(uint32_t count)
 {
 	// TODO: keep a pointer to the last allocated/freed page to improve the performance.
 	uint32_t first_free_page = 0;
@@ -75,7 +76,7 @@ uint32_t find_physical_pages(uint32_t count)
 	PANIC("No physical memory available!");
 }
 
-uint32_t get_physical_memory_size()
+uint32_t PhysicalMemory::get_physical_memory_size()
 {
 	return physical_memory_size;
 }

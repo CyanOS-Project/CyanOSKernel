@@ -23,4 +23,11 @@ struct DATE_TIME {
 	uint8_t year;
 };
 
-void get_time(DATE_TIME* Time);
+class RTC
+{
+  private:
+	static ::uint8_t BCDtoBYTE(uint8_t BCD);
+
+  public:
+	static void get_time(DATE_TIME* Time);
+};

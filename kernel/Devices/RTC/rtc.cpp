@@ -1,11 +1,11 @@
 #include "RTC.h"
-uint8_t BCDtoBYTE(uint8_t BCD)
+uint8_t RTC::BCDtoBYTE(uint8_t BCD)
 {
 	uint8_t H = BCD >> 4;
 	uint8_t L = BCD & 0x0F;
 	return H * 10 + L;
 }
-void get_time(DATE_TIME* Time)
+void RTC::get_time(DATE_TIME* Time)
 {
 	out8(CMOS_ADDRESS_PORT, NMI_DISABLE_FLAG | RTC_REG_SECONDS);
 	Time->seconds = BCDtoBYTE(in8(CMOS_DATA_PORT));

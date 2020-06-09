@@ -1,5 +1,5 @@
-
 #pragma once
+
 #include "types.h"
 
 #define PF_PRESENT(x) (x & 1)  // The fault was caused by a page-level protection violation.
@@ -41,10 +41,15 @@ enum IRQ_NUMBER {
 };
 
 typedef void (*isr_function)(ISR_INFO);
-
-void initiate_isr_dispatcher_vector();
-void register_isr_handler(isr_function address, uint8_t irq_number);
-static void default_interrupt_handler(ISR_INFO info);
-
 extern "C" uintptr_t isr_vector[];
-extern const char* exception_messages[];
+
+class ISR
+{
+  private:
+	static const char* exception_messages[];
+
+  public:
+	static void default_interrupt_handler(ISR_INFO info);
+	static void initiate_isr_dispatcher_vector();
+	static void register_isr_handler(isr_function address, uint8_t irq_number);
+};

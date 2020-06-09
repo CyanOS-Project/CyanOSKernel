@@ -19,12 +19,18 @@ struct PageFrameBlock {
 	PageFrameBlock *next, *previous;
 };
 
-void setup_heap();
-uintptr_t kmalloc(unsigned size, unsigned flags);
-void kfree(uintptr_t addr);
-PageFrameBlock* create_new_page();
-BlockHeader* initiate_first_block(PageFrameBlock* new_page);
-void link_block(BlockHeader* current_block, BlockHeader* new_block);
-void unlink_block(BlockHeader* current_block);
-BlockHeader* find_free_block(unsigned size);
-PageFrameBlock* get_last_page();
+class Heap
+{
+  private:
+	static PageFrameBlock* create_new_page();
+	static PageFrameBlock* get_last_page();
+	static BlockHeader* initiate_first_block(PageFrameBlock* new_page);
+	static BlockHeader* find_free_block(unsigned size);
+	static void link_block(BlockHeader* current_block, BlockHeader* new_block);
+	static void unlink_block(BlockHeader* current_block);
+
+  public:
+	static void setup();
+	static uintptr_t kmalloc(unsigned size, unsigned flags);
+	static void kfree(uintptr_t addr);
+};

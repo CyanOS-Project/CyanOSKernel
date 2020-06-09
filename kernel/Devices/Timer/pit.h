@@ -23,6 +23,12 @@ enum I86_PIT_OCW {
 	I86_PIT_OCW_COUNTER_2 = 0x80          // 10000000
 };
 
-void setup_pit();
-void pit_handler(ISR_INFO isr_info);
-void sleep(unsigned Duration);
+class PIT
+{
+  private:
+	static void pit_handler(ISR_INFO isr_info);
+
+  public:
+	static void setup();
+	static void sleep(unsigned Duration);
+};

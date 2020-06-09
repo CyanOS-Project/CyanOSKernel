@@ -18,7 +18,7 @@ enum IDT_ENTRY_FLAGS {
 };
 
 #pragma pack(1)
-struct IDT {
+struct IDT_DISCRIPTOR {
 	uint16_t limit;
 	uint32_t base;
 };
@@ -31,8 +31,15 @@ struct IDTEntry {
 };
 #pragma pack()
 
-void setup_idt();
-static void fill_idt(volatile IDT* idt, uint32_t base, uint16_t limit);
-static void load_idt(volatile IDT* idt);
-bool is_idt_entry_present(uint8_t idt_entry);
-void fill_idt_entry(uint8_t idt_entry, uint32_t address, uint16_t segment, uint8_t type);
+class IDT
+{
+  private:
+	static void fill_idt(volatile IDT_DISCRIPTOR* idt, uint32_t base, uint16_t limit);
+	static void load_idt(volatile IDT_DISCRIPTOR* idt);
+	static void fill_idt_entry(uint8_t idt_entry, uint32_t address, uint16_t segment, uint8_t type);
+	volatile static IDT_DISCRIPTOR idt;
+	volatile static IDTEntry idt_entries[];
+
+  public:
+	static void setup();
+};

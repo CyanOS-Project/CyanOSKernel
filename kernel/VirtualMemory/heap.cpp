@@ -3,13 +3,13 @@
 
 volatile PageFrameBlock* malloc_mem;
 
-void setup_heap()
+void Heap::setup()
 {
 	malloc_mem = nullptr;
 	malloc_mem = create_new_page();
 }
 
-uintptr_t kmalloc(unsigned size, unsigned flags)
+uintptr_t Heap::kmalloc(unsigned size, unsigned flags)
 {
 	if (!size)
 		return (uintptr_t) nullptr;
@@ -35,16 +35,16 @@ uintptr_t kmalloc(unsigned size, unsigned flags)
 	return (uintptr_t)HEADER_TO_ADDR(free_block);
 }
 
-void kfree(uintptr_t addr)
+void Heap::kfree(uintptr_t addr)
 {
 	BlockHeader* current_block = (BlockHeader*)ADDR_TO_HEADER(addr);
 	unlink_block(current_block);
 }
 
-PageFrameBlock* create_new_page()
+PageFrameBlock* Heap::create_new_page()
 {
 	PageFrameBlock* new_page =
-	    (PageFrameBlock*)memory_alloc(MALLOC_PAGE_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
+	    (PageFrameBlock*)Memory::alloc(MALLOC_PAGE_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	new_page->size = MALLOC_PAGE_SIZE;
 
 	PageFrameBlock* last_page = get_last_page();
@@ -54,7 +54,7 @@ PageFrameBlock* create_new_page()
 	return new_page;
 }
 
-BlockHeader* initiate_first_block(PageFrameBlock* new_page)
+BlockHeader* Heap::initiate_first_block(PageFrameBlock* new_page)
 {
 	BlockHeader* empty_block = (BlockHeader*)(new_page + 1);
 	BlockHeader* free_block = (empty_block + 1);
@@ -65,7 +65,7 @@ BlockHeader* initiate_first_block(PageFrameBlock* new_page)
 	return free_block;
 }
 
-void link_block(BlockHeader* current_block, BlockHeader* new_block)
+void Heap::link_block(BlockHeader* current_block, BlockHeader* new_block)
 {
 	BlockHeader* prev_block = current_block;
 	BlockHeader* next_block = current_block->next;
@@ -74,7 +74,7 @@ void link_block(BlockHeader* current_block, BlockHeader* new_block)
 		next_block->previous = new_block;
 }
 
-void unlink_block(BlockHeader* current_block)
+void Heap::unlink_block(BlockHeader* current_block)
 {
 	BlockHeader* prev_block = current_block->previous;
 	BlockHeader* next_block = current_block->next;
@@ -84,7 +84,7 @@ void unlink_block(BlockHeader* current_block)
 	}
 }
 
-BlockHeader* find_free_block(unsigned size)
+BlockHeader* Heap::find_free_block(unsigned size)
 {
 	volatile PageFrameBlock* current_page = malloc_mem;
 	BlockHeader *current_block, *free_block;
@@ -111,7 +111,7 @@ BlockHeader* find_free_block(unsigned size)
 	return nullptr;
 }
 
-PageFrameBlock* get_last_page()
+PageFrameBlock* Heap::get_last_page()
 {
 	if (!malloc_mem) {
 		return nullptr;
