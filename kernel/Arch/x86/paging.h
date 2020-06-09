@@ -17,12 +17,14 @@
 #define GET_NUMBER_OF_DIRECTORIES(x)                    (x >> 22)
 #define GET_OFFSET(x)                                   (x & 0xFFF)
 #define GET_PAGE_VIRTUAL_ADDRESS(dir_index, page_index) ((dir_index << 22) | (page_index << 12))
+#define BOOL(x)                                         ((bool)(x))
 
 #define PAGE_SIZE 0x1000
 
-#define PAGE_FLAGS_KERNEL      1
-#define PAGE_FLAGS_WRITABLE    2
-#define PAGE_FLAGS_WRITEONCOPY 4
+#define PAGE_FLAGS_PRESENT  1
+#define PAGE_FLAGS_USER     2
+#define PAGE_FLAGS_WRITABLE 4
+#define PAGE_FLAGS_GLOBAL   8
 
 struct PAGE_TABLE_ENTRY {
 	uint32_t present : 1;  // Page present in memory
@@ -57,12 +59,10 @@ void unmap_virtual_page(uint32_t virtual_address);
 void unmap_virtual_pages(uint32_t virtual_address, uint32_t pages);
 bool check_page_present(uint32_t virtual_address);
 uint32_t get_physical_page(uint32_t virtual_address);
-void fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, bool user,
-                          bool writeable);
-void fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame, bool user,
-                           bool writeable);
-void fill_directory_PSE_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, bool user,
-                              bool writeable);
+void fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, uint32_t flags);
+void fill_directory_PSE_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame,
+                              uint32_t flags);
+void fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame, uint32_t flags);
 void enable_PSE();
 void enable_paging();
 void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry);

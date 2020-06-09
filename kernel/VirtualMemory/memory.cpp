@@ -49,7 +49,7 @@ uintptr_t memory_alloc(uint32_t size, uint32_t flags)
 	for (size_t i = 0; i < pages_num; i++) {
 
 		uint32_t pAdd = alloc_physical_page();
-		map_virtual_pages(vAdd + PAGE_SIZE * i, pAdd, 1, flags);
+		map_virtual_pages(vAdd + PAGE_SIZE * i, pAdd, 1, parse_flags(flags));
 	}
 	return vAdd;
 }
@@ -62,7 +62,7 @@ uintptr_t memory_free(uintptr_t address, uint32_t size, uint32_t flags)
 
 uintptr_t memory_map(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags)
 {
-	map_virtual_pages(virtual_address, physical_address, GET_PAGES(size, PAGE_SIZE), flags);
+	map_virtual_pages(virtual_address, physical_address, GET_PAGES(size, PAGE_SIZE), parse_flags(flags));
 }
 
 void memory_unmap(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags)
@@ -84,4 +84,16 @@ static uint32_t get_kernel_pages()
 	uint32_t kernel_size = (uint32_t)&KERNEL_END - KERNEL_VIRTUAL_ADDRESS;
 	uint32_t pages = kernel_size / PAGE_SIZE + ((kernel_size % PAGE_SIZE == 0) ? 0 : 1);
 	return pages;
+}
+
+uint32_t parse_flags(uint32_t mem_flags)
+{
+	uint32_t page_flags = PAGE_FLAGS_PRESENT;
+	if (mem_flags & MEMORY_TYPE::WRITABLE) {
+		page_flags |= PAGE_FLAGS_WRITABLE;
+	}
+	if (!(mem_flags & MEMORY_TYPE::KERNEL)) {
+		page_flags |= PAGE_FLAGS_USER;
+	}
+	return page_flags;
 }

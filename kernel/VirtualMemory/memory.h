@@ -20,5 +20,6 @@ uint32_t virtual_memory_size();
 uint32_t physical_memory_size();
 void setup_page_fault_handler();
 void page_fault_handler(ISR_INFO isr_info);
+uint32_t parse_flags(uint32_t mem_flags);
 
 static uint32_t get_kernel_pages();
