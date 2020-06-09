@@ -2,7 +2,7 @@
 #include "Arch/x86/asm.h"
 #include "Arch/x86/panic.h"
 #include "Arch/x86/pic.h"
-#include "console.h"
+#include "Devices/Console/console.h"
 
 void PIT::setup()
 {

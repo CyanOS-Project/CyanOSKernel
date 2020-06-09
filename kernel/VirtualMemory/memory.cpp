@@ -2,7 +2,7 @@
 #include "Arch/x86/isr.h"
 #include "Arch/x86/paging.h"
 #include "Arch/x86/panic.h"
-#include "console.h"
+#include "Devices/Console/console.h"
 #include "physical.h"
 #include "virtual.h"
 

@@ -66,9 +66,9 @@ class GDT
 	static void fill_gdt(volatile GDT_DESCRIPTOR* gdt, uint32_t base, uint16_t limit);
 	static void load_segments(uint16_t code_segment, uint16_t data_segment);
 	static void load_gdt(volatile GDT_DESCRIPTOR* gdt);
+	static void fill_gdt_entry(volatile GDT_ENTRY* gdt_entry, uint32_t base, uint32_t limit, uint8_t access,
+	                           uint8_t flags);
 
   public:
 	static void setup();
-	static void fill_gdt_entry(volatile GDT_ENTRY* gdt_entry, uint32_t base, uint32_t limit, uint8_t access,
-	                           uint8_t flags);
 };

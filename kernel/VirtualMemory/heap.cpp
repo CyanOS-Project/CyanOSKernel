@@ -1,7 +1,7 @@
 #include "heap.h"
 #include "Arch/x86/paging.h"
 
-volatile PageFrameBlock* malloc_mem;
+volatile PageFrameBlock* Heap::malloc_mem;
 
 void Heap::setup()
 {

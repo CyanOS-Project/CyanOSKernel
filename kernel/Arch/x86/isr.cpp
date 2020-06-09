@@ -1,6 +1,6 @@
 
 #include "isr.h"
-#include "console.h"
+#include "Devices/Console/console.h"
 #include "gdt.h"
 #include "idt.h"
 

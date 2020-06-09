@@ -28,6 +28,7 @@ class Heap
 	static BlockHeader* find_free_block(unsigned size);
 	static void link_block(BlockHeader* current_block, BlockHeader* new_block);
 	static void unlink_block(BlockHeader* current_block);
+	static volatile PageFrameBlock* malloc_mem;
 
   public:
 	static void setup();
