@@ -9,18 +9,18 @@ volatile IDTEntry IDT::idt_entries[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned
 void IDT::setup()
 {
 	ISR::initiate_isr_dispatcher_vector();
-	fill_idt(&idt, (uint32_t)idt_entries, sizeof(idt_entries) - 1);
+	fill_idt((uint32_t)idt_entries, sizeof(IDTEntry) * NUMBER_OF_IDT_ENTRIES);
 
 	for (size_t i = 0; i < NUMBER_OF_IDT_ENTRIES; i++)
 		fill_idt_entry(i, (uint32_t)isr_vector[i], KCS_SELECTOR,
 		               IDT_ENTRY_FLAGS::PRESENT | IDT_ENTRY_FLAGS::GATE_32 | IDT_ENTRY_FLAGS::INT_GATE);
-	load_idt(&idt);
+	load_idt();
 }
 
-void IDT::fill_idt(volatile IDT_DISCRIPTOR* idt, uint32_t base, uint16_t limit)
+void IDT::fill_idt(uint32_t base, uint16_t limit)
 {
-	idt->base = base;
-	idt->limit = limit;
+	idt.base = base;
+	idt.limit = limit;
 }
 
 void IDT::fill_idt_entry(uint8_t idt_entry, uint32_t address, uint16_t segment, uint8_t type)
@@ -32,7 +32,7 @@ void IDT::fill_idt_entry(uint8_t idt_entry, uint32_t address, uint16_t segment, 
 	idt_entries[idt_entry].zero = 0;
 }
 
-void IDT::load_idt(volatile IDT_DISCRIPTOR* idt)
+void IDT::load_idt()
 {
-	asm volatile("LIDT (%0)" : : "r"(idt));
+	asm volatile("LIDT (%0)" : : "r"(&idt));
 }
