@@ -3,8 +3,6 @@
 #include "Arch/x86/isr.h"
 #include "types.h"
 
-#define GET_PAGES(x, boundary) (x / boundary + ((x % boundary) == 0 ? 0 : 1))
-
 enum MEMORY_TYPE {
 	KERNEL = 1,
 	WRITABLE = 2,
@@ -21,7 +19,8 @@ class Memory
   public:
 	static void setup();
 	static uintptr_t alloc(uint32_t size, uint32_t flags);
-	static uintptr_t free(uintptr_t address, uint32_t size, uint32_t flags);
+	static uintptr_t alloc(uintptr_t virtual_address, uint32_t size, uint32_t flags);
+	static uintptr_t free(uintptr_t virtual_address, uint32_t size, uint32_t flags);
 	static uintptr_t map(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags);
 	static void unmap(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags);
 	static uint32_t virtual_memory_size();

@@ -40,6 +40,7 @@ extern "C" void kernel_init()
 	printStatus("Setting up Heap.", true);
 	printf("Welcome to CyanOS.\n");
 
+	// Testing stuff
 	volatile intptr_t p1 = Heap::kmalloc(0xF00, 0);
 	volatile intptr_t p2 = Heap::kmalloc(0x10, 0);
 	volatile intptr_t p3 = Heap::kmalloc(0xA0, 0);
@@ -47,6 +48,16 @@ extern "C" void kernel_init()
 	volatile intptr_t p4 = Heap::kmalloc(0xF10, 0);
 	volatile intptr_t p5 = Heap::kmalloc(10, 0);
 
+	volatile int* p6 = (int*)Memory::alloc(LAST_PAGE_ADDRESS, 0x1000, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
+	for (size_t i = 0; i < 0x400; i++) {
+		p6[i] = i;
+	}
+
+	for (size_t i = 0; i < 0x400; i++) {
+		if (p6[i] != i) {
+			printf("something wrong");
+		}
+	}
 	ENABLE_INTERRUPTS();
 	display_time();
 	while (1) {

@@ -35,39 +35,55 @@ void Memory::page_fault_handler(ISR_INFO isr_info)
 }
 uintptr_t Memory::alloc(uint32_t size, uint32_t flags)
 {
-	uint32_t vAdd;
-	uint32_t pages_num = GET_PAGES(size, PAGE_SIZE);
+	uint32_t vAdd, pAdd;
+	unsigned pages_num = GET_PAGES(size);
 
 	if (flags & MEMORY_TYPE::KERNEL) {
-		vAdd = VirtualMemory::find_pages(GET_FRAME(KERNEL_VIRTUAL_ADDRESS),
-		                                 NUMBER_OF_PAGE_DIRECOTRY_ENTRIES * NUMBER_OF_PAGE_TABLE_ENTRIES, pages_num);
+		vAdd = VirtualMemory::find_pages(KERNEL_VIRTUAL_ADDRESS, LAST_PAGE_ADDRESS, pages_num);
 	} else {
-		vAdd = VirtualMemory::find_pages(1, GET_FRAME(KERNEL_VIRTUAL_ADDRESS),
+		vAdd = VirtualMemory::find_pages(FIRST_PAGE_ADDRESS, KERNEL_VIRTUAL_ADDRESS,
 		                                 pages_num); // skip first page to detect null pointer
 	}
 
 	for (size_t i = 0; i < pages_num; i++) {
 
 		uint32_t pAdd = PhysicalMemory::alloc_page();
-		Paging::map_pages(vAdd + PAGE_SIZE * i, pAdd, 1, parse_flags(flags));
+		Paging::map_pages(vAdd + (PAGE_SIZE * i), pAdd, 1, parse_flags(flags));
 	}
 	return vAdd;
 }
 
-uintptr_t Memory::free(uintptr_t address, uint32_t size, uint32_t flags)
+uintptr_t Memory::alloc(uintptr_t virtual_address, uint32_t size, uint32_t flags)
 {
-	PhysicalMemory::free_pages(Paging::get_physical_page(address), GET_PAGES(size, PAGE_SIZE));
-	Paging::unmap_pages(address, GET_PAGES(size, PAGE_SIZE));
+	uint32_t vAdd, pAdd;
+	unsigned pages_num = GET_PAGES(size);
+
+	if (!VirtualMemory::check_free_pages(virtual_address, pages_num)) {
+		return 0;
+	}
+	vAdd = virtual_address;
+	for (size_t i = 0; i < pages_num; i++) {
+		uint32_t pAdd = PhysicalMemory::alloc_page();
+		Paging::map_pages(vAdd + (PAGE_SIZE * i), pAdd, 1, parse_flags(flags));
+	}
+	return vAdd;
+}
+
+uintptr_t Memory::free(uintptr_t virtual_address, uint32_t size, uint32_t flags)
+{
+	unsigned pages_num = GET_PAGES(size);
+	PhysicalMemory::free_pages(Paging::get_physical_page(virtual_address), pages_num);
+	Paging::unmap_pages(virtual_address, pages_num);
 }
 
 uintptr_t Memory::map(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags)
 {
-	Paging::map_pages(virtual_address, physical_address, GET_PAGES(size, PAGE_SIZE), parse_flags(flags));
+	Paging::map_pages(virtual_address, physical_address, GET_PAGES(size), parse_flags(flags));
 }
 
 void Memory::unmap(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags)
 {
-	Paging::unmap_pages(virtual_address, GET_PAGES(size, PAGE_SIZE));
+	Paging::unmap_pages(virtual_address, GET_PAGES(size));
 }
 
 uint32_t Memory::virtual_memory_size()

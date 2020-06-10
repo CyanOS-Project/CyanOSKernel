@@ -19,7 +19,12 @@
 #define GET_PAGE_VIRTUAL_ADDRESS(dir_index, page_index) ((dir_index << 22) | (page_index << 12))
 #define BOOL(x)                                         ((bool)(x))
 
-#define PAGE_SIZE 0x1000
+#define GET_PAGES(x)  (x / PAGE_SIZE + ((x % PAGE_SIZE) == 0 ? 0 : 1))
+#define PAGE_ALIGN(x) (GET_PAGES(x) * PAGE_SIZE)
+
+#define PAGE_SIZE          0x1000
+#define FIRST_PAGE_ADDRESS 0x1000
+#define LAST_PAGE_ADDRESS  GET_PAGE_VIRTUAL_ADDRESS(RECURSIVE_ENTRY - 1, NUMBER_OF_PAGE_TABLE_ENTRIES - 1)
 
 #define PAGE_FLAGS_PRESENT  1
 #define PAGE_FLAGS_USER     2
