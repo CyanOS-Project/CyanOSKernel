@@ -1,6 +1,7 @@
 
 #include "isr.h"
 #include "Devices/Console/console.h"
+#include "asm.h"
 #include "gdt.h"
 #include "idt.h"
 
@@ -42,6 +43,7 @@ void ISR::default_interrupt_handler(ISR_INFO info)
 	} else {
 		printf("Undefined IRQ Number (IRQ%d)\n", info.irq_number);
 	}
+	HLT();
 }
 
 const char* ISR::exception_messages[19] = {"Division by zero",

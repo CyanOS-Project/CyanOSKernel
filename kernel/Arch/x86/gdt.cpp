@@ -1,12 +1,16 @@
 #include "gdt.h"
+#include "Lib/stdlib.h"
 #include "paging.h"
 
 volatile GDT_DESCRIPTOR GDT::gdt __attribute__((aligned(8)));
 volatile GDT_ENTRY GDT::gdt_entries[GDT_NUMBER_OF_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
-
+volatile TSS_ENTRY GDT::tss_entry __attribute__((aligned(PAGE_SIZE)));
 void GDT::setup()
 {
-	fill_gdt((uint32_t)&gdt_entries, 5 * sizeof(GDT_ENTRY));
+	memset((char*)&tss_entry, 0, sizeof(TSS_ENTRY));
+	memset((char*)&gdt_entries, 0, sizeof(GDT_ENTRY) * GDT_NUMBER_OF_ENTRIES);
+
+	fill_gdt((uint32_t)&gdt_entries, GDT_NUMBER_OF_ENTRIES * sizeof(GDT_ENTRY));
 
 	// Empty Entry
 	fill_gdt_entry(0, 0, 0, 0, 0);
@@ -16,9 +20,24 @@ void GDT::setup()
 	// User Entries
 	fill_gdt_entry(SEGMENT_INDEX(UCS_SELECTOR), 0, 0xFFFFF, GDT_CODE_PL3, 0x0D);
 	fill_gdt_entry(SEGMENT_INDEX(UDS_SELECTOR), 0, 0xFFFFF, GDT_DATA_PL3, 0x0D);
+	// TSS
+	fill_gdt_entry(SEGMENT_INDEX(TSS_SELECTOR), (uint32_t)&tss_entry, sizeof(TSS_ENTRY), GDT_TSS_PL3, 0x0D);
 
 	load_gdt();
+
 	load_segments(KCS_SELECTOR, KDS_SELECTOR);
+}
+
+void GDT::set_tss_stack(uint32_t kernel_stack)
+{
+	tss_entry.esp0 = kernel_stack;
+	tss_entry.ss0 = KDS_SELECTOR;
+}
+
+void GDT::setup_tss(uint32_t kernel_stack)
+{
+	set_tss_stack(kernel_stack);
+	load_tss(TSS_SELECTOR);
 }
 
 void GDT::fill_gdt_entry(uint32_t gdt_entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags)
@@ -41,6 +60,11 @@ void GDT::fill_gdt(uint32_t base, uint16_t limit)
 void GDT::load_gdt()
 {
 	asm volatile("LGDT (%0)" : : "r"(&gdt));
+}
+
+void GDT::load_tss(uint16_t tss)
+{
+	asm volatile("LTR %0" : : "a"(tss));
 }
 
 void GDT::load_segments(uint16_t code_segment, uint16_t data_segment)
