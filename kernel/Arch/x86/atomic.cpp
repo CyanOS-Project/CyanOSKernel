@@ -3,6 +3,10 @@
 
 int atomic_level = 0;
 
+void atomic_intiate()
+{
+	atomic_level = 0;
+}
 void atomic_begin()
 {
 	atomic_level++;
