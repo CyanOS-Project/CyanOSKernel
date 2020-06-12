@@ -28,13 +28,15 @@ extern "C" void kernel_init()
 	initiate_console();
 	IDT::setup();
 	GDT::setup();
-	uintptr_t new_stack = Memory::alloc(0x1000, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
+	uintptr_t new_stack = Memory::alloc(0x1000, MEMORY_TYPE::KERNEL);
 	GDT::setup_tss(new_stack);
 	Memory::setup_page_fault_handler();
+	printStatus("Setting up core components.", true);
+	Heap::setup();
 	PIC::setup();
 	PIT::setup();
-	Heap::setup();
-	printStatus("Setting up core components.", true);
+	printStatus("Setting up devices.", true);
+
 	printf("Welcome to CyanOS.\n");
 	ENABLE_INTERRUPTS();
 	display_time();

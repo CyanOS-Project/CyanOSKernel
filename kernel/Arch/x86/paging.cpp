@@ -22,7 +22,7 @@ void Paging::setup(uint32_t num_kernel_pages)
 	map_boot_pages(KERNEL_PHYSICAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, num_kernel_pages);
 	map_boot_pages(KERNEL_VIRTUAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, num_kernel_pages);
 	// Load page directory and enable paging
-	load_page_directory(ph_page_direcotry);
+	load_page_directory((uint32_t)ph_page_direcotry);
 	enable_PSE();
 	enable_paging();
 }
@@ -145,7 +145,7 @@ void Paging::fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, 
 	page_table_entry->frame = physical_frame;
 }
 
-void Paging::load_page_directory(volatile PAGE_DIRECTORY* page_direcotry)
+void Paging::load_page_directory(uint32_t page_direcotry)
 {
 	asm("MOV %0,%%CR3" : : "r"(page_direcotry) :);
 }

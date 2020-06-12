@@ -10,7 +10,7 @@
 #define PF_PK(x)      (x & 6)  // There was a protection-key violation.
 #define PF_SGK(x)     (x & 16) // The fault resulted from violation of SGX-specific access-control requirements.
 
-struct ISR_INFO {
+struct ContextFrame {
 	uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
 	uint32_t cr2;
 	uint32_t irq_number;
@@ -40,7 +40,7 @@ enum IRQ_NUMBER {
 	VE = 20
 };
 
-typedef void (*isr_function)(ISR_INFO);
+typedef void (*isr_function)(ContextFrame*);
 extern "C" uintptr_t isr_vector[];
 
 class ISR
@@ -49,7 +49,7 @@ class ISR
 	static const char* exception_messages[];
 
   public:
-	static void default_interrupt_handler(ISR_INFO info);
+	static void default_interrupt_handler(ContextFrame* info);
 	static void initiate_isr_dispatcher_vector();
 	static void register_isr_handler(isr_function address, uint8_t irq_number);
 };

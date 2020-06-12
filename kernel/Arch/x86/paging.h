@@ -72,7 +72,6 @@ class Paging
 	static void invalidate_page(uint32_t addr);
 	static void enable_PSE();
 	static void enable_paging();
-	static void load_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
 	static PAGE_DIRECTORY page_direcotry;
 	static PAGE_TABLE startup_page_tables[];
 
@@ -83,4 +82,5 @@ class Paging
 	static void unmap_pages(uint32_t virtual_address, uint32_t pages);
 	static bool check_page_present(uint32_t virtual_address);
 	static uint32_t get_physical_page(uint32_t virtual_address);
+	static void load_page_directory(uint32_t page_direcotry);
 };

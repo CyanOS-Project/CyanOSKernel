@@ -12,7 +12,7 @@ enum MEMORY_TYPE {
 class Memory
 {
   private:
-	static void page_fault_handler(ISR_INFO isr_info);
+	static void page_fault_handler(ContextFrame* isr_info);
 	static uint32_t parse_flags(uint32_t mem_flags);
 	static uint32_t get_kernel_pages();
 

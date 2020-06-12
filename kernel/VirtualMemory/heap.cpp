@@ -1,5 +1,6 @@
 #include "heap.h"
 #include "Arch/x86/paging.h"
+#include "Lib/stdlib.h"
 
 volatile PageFrameBlock* Heap::malloc_mem;
 
@@ -9,6 +10,7 @@ void Heap::setup()
 	malloc_mem = create_new_page();
 }
 
+// Returns address of zeroed block of memory.
 uintptr_t Heap::kmalloc(unsigned size, unsigned flags)
 {
 	if (!size)
@@ -32,9 +34,12 @@ uintptr_t Heap::kmalloc(unsigned size, unsigned flags)
 	PageFrameBlock* new_page = create_new_page();
 	free_block = initiate_first_block(new_page);
 	free_block->size = size;
-	return (uintptr_t)HEADER_TO_ADDR(free_block);
+	uintptr_t alloc_address = HEADER_TO_ADDR(free_block);
+	memset((char*)alloc_address, 0, size);
+	return alloc_address;
 }
 
+// Frees block of memory allocated by kmalloc.
 void Heap::kfree(uintptr_t addr)
 {
 	BlockHeader* current_block = (BlockHeader*)ADDR_TO_HEADER(addr);

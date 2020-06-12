@@ -3,6 +3,7 @@
 #include "Arch/x86/panic.h"
 #include "Arch/x86/pic.h"
 #include "Devices/Console/console.h"
+#include "Tasking/scheduler.h"
 
 void PIT::setup()
 {
@@ -23,8 +24,9 @@ void PIT::sleep(unsigned Duration)
 	while (CPU_HLT)
 		HLT();
 }
-void PIT::pit_handler(ISR_INFO isr_info)
+void PIT::pit_handler(ContextFrame* frame)
 {
+	Scheduler::schedule(frame);
 	if (CPU_HLT == true) {
 		CPU_HLT_DURATION -= 1;
 		if (CPU_HLT_DURATION == 0) {
