@@ -6,6 +6,8 @@
 #include "VirtualMemory/heap.h"
 #include "VirtualMemory/memory.h"
 
+ThreadControlBlock* Scheduler::active_thread;
+ThreadControlBlock* Scheduler::blocked_thread;
 ThreadControlBlock* Scheduler::current_thread;
 unsigned tid;
 
@@ -18,7 +20,7 @@ void hello1()
 	}
 
 	while (1) {
-		/* code */
+		asm("HLT");
 	}
 }
 
@@ -37,7 +39,7 @@ void hello2()
 		asm("STI");
 	}
 	while (1) {
-		/* code */
+		asm("HLT");
 	}
 }
 void hello3()
@@ -48,17 +50,19 @@ void hello3()
 		asm("STI");
 	}
 	while (1) {
-		/* code */
+		asm("HLT");
 	}
 }
 
 void Scheduler::setup()
 {
 	tid = 0;
-	current_thread = 0;
+	active_thread = nullptr;
+	blocked_thread = nullptr;
 	create_new_thread((uintptr_t)hello1);
 	create_new_thread((uintptr_t)hello2);
 	create_new_thread((uintptr_t)hello3);
+	current_thread = active_thread;
 }
 
 // Create thread structure of a new thread
@@ -71,70 +75,104 @@ void Scheduler::create_new_thread(uintptr_t address)
 	new_thread->context.eip = address;
 	new_thread->context.eflags = 0x200;
 	new_thread->state = ThreadState::INTIALE;
-	append_thread_list(new_thread);
+	append_to_thread_list(&active_thread, new_thread);
 }
 
 // Append a thread to thread circular list.
-void Scheduler::append_thread_list(ThreadControlBlock* new_thread)
+void Scheduler::append_to_thread_list(ThreadControlBlock** list, ThreadControlBlock* new_thread)
 {
-	if (current_thread) {
-		new_thread->next = current_thread;
-		new_thread->prev = current_thread->prev;
-		current_thread->prev->next = new_thread;
-		current_thread->prev = new_thread;
+	if (*list) {
+		new_thread->next = *list;
+		new_thread->prev = (*list)->prev;
+		(*list)->prev->next = new_thread;
+		(*list)->prev = new_thread;
 	} else {
 		new_thread->next = new_thread->prev = new_thread;
-		current_thread = new_thread;
+		*list = new_thread;
 	}
+}
+
+void Scheduler::delete_from_thread_list(ThreadControlBlock** list, ThreadControlBlock* thread)
+{
+	if (thread->prev == thread->next) {
+		*list = 0;
+	} else {
+		thread->prev->next = thread->next;
+		thread->next->prev = thread->prev;
+	}
+
+	Heap::kfree((uintptr_t)thread);
 }
 
 // Select next process, save and switch context.
 void Scheduler::schedule(ContextFrame* current_context)
 {
-	volatile ThreadControlBlock* next_thread = select_next_thread();
-	if ((current_thread->state == ThreadState::RUNNING) || (current_thread->state == ThreadState::BLOCKED)) {
+	wake_up_sleepers();
+	if (current_thread->state == ThreadState::RUNNING) {
+		save_context(current_context);
+		current_thread->state = ThreadState::ACTIVE;
+	} else if (current_thread->state == ThreadState::BLOCKED) {
 		save_context(current_context);
 	}
+
+	volatile ThreadControlBlock* next_thread = select_next_thread();
 	next_thread->state = ThreadState::RUNNING;
-	current_thread->state = ThreadState::ACTIVE;
 	switch_context(current_context, (ThreadControlBlock*)next_thread);
-	current_thread = (ThreadControlBlock*)next_thread;
+	active_thread = (ThreadControlBlock*)next_thread;
+	current_thread = active_thread;
 }
 
 // Round Robinson Scheduling Algorithm.
-volatile ThreadControlBlock* Scheduler::select_next_thread()
+ThreadControlBlock* Scheduler::select_next_thread()
 {
-	volatile ThreadControlBlock* thread_pointer = current_thread->next;
-	volatile ThreadControlBlock* next_thread = 0;
+	ThreadControlBlock* thread_pointer = active_thread->next;
+	ThreadControlBlock* next_thread = 0;
 	do {
-		if (thread_pointer->sleep_ticks > 0) {
-			thread_pointer->sleep_ticks--;
-			if (thread_pointer->sleep_ticks) {
-				thread_pointer->state = ThreadState::BLOCKED;
-			} else {
-				thread_pointer->state = ThreadState::ACTIVE;
-			}
-		}
 		if (thread_pointer->next == thread_pointer) {
 			next_thread = thread_pointer;
 			break;
 		}
-		if ((thread_pointer != current_thread) &&
+		if ((thread_pointer != active_thread) &&
 		    ((thread_pointer->state == ThreadState::ACTIVE) || (thread_pointer->state == ThreadState::INTIALE)) &&
 		    (!next_thread)) {
 			next_thread = thread_pointer;
 		}
-
 		thread_pointer = thread_pointer->next;
-	} while (thread_pointer != current_thread->next);
+	} while (thread_pointer != active_thread->next);
 	return next_thread;
+}
+void Scheduler::wake_up_sleepers()
+{
+	ThreadControlBlock* thread_pointer = blocked_thread;
+	ThreadControlBlock* next_thread = 0;
+
+	if (blocked_thread) {
+		do {
+			if (thread_pointer->sleep_ticks > 0) {
+				thread_pointer->sleep_ticks--;
+				if (!thread_pointer->sleep_ticks) {
+					thread_pointer->state = ThreadState::ACTIVE;
+					delete_from_thread_list(&blocked_thread, thread_pointer);
+					append_to_thread_list(&active_thread, thread_pointer);
+					current_thread = thread_pointer;
+					if (!blocked_thread)
+						break;
+				}
+			}
+			thread_pointer = thread_pointer->next;
+		} while (thread_pointer != blocked_thread);
+	}
 }
 
 void Scheduler::thread_sleep(unsigned ms)
 {
 	DISABLE_INTERRUPTS();
-	current_thread->sleep_ticks = ms;
-	current_thread->state = ThreadState::BLOCKED;
+	ThreadControlBlock* thread = active_thread;
+	active_thread = active_thread->next;
+	thread->sleep_ticks = ms;
+	thread->state = ThreadState::BLOCKED;
+	delete_from_thread_list(&active_thread, thread);
+	append_to_thread_list(&blocked_thread, thread);
 	ENABLE_INTERRUPTS();
 }
 

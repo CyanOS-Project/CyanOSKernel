@@ -50,13 +50,17 @@ struct ProcessControlBlock {
 class Scheduler
 {
   private:
+	static ThreadControlBlock* active_thread;
+	static ThreadControlBlock* blocked_thread;
 	static ThreadControlBlock* current_thread;
 	static void create_new_thread(uintptr_t address);
 	static void switch_context(ContextFrame* current_context, ThreadControlBlock* new_thread);
 	static void switch_page_directory(ProcessControlBlock* new_thread);
-	static void append_thread_list(ThreadControlBlock* new_thread);
 	static void save_context(ContextFrame* current_context);
-	static volatile ThreadControlBlock* select_next_thread();
+	static void delete_from_thread_list(ThreadControlBlock** list, ThreadControlBlock* thread);
+	static void append_to_thread_list(ThreadControlBlock** list, ThreadControlBlock* new_thread);
+	static void wake_up_sleepers();
+	static ThreadControlBlock* select_next_thread();
 
   public:
 	static void schedule(ContextFrame* current_context);
