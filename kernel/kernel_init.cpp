@@ -40,10 +40,12 @@ extern "C" void kernel_init()
 	PIC::setup();
 	PIT::setup();
 	printStatus("Setting up devices.", true);
-
 	printf("Welcome to CyanOS.\n");
 	ENABLE_INTERRUPTS();
 	// display_time();
+	for (size_t i = 0; i < 10; i++) {
+		printf("This is main.\n");
+	}
 	while (1) {
 		HLT();
 	}

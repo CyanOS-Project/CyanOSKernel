@@ -11,10 +11,10 @@ unsigned tid;
 
 void hello1()
 {
-	for (size_t i = 0; i < 10; i++) {
-		atomic_begin();
-		printf("hello I'm thread 1, i love you.\n");
-		atomic_end();
+	for (size_t i = 0; i < 5; i++) {
+		asm("CLI");
+		printf("Thread1: (%d).\n", i);
+		asm("STI");
 	}
 
 	while (1) {
@@ -24,10 +24,17 @@ void hello1()
 
 void hello2()
 {
-	for (size_t i = 0; i < 10; i++) {
-		atomic_begin();
-		printf("hello I'm thread 2, i hate you.\n");
-		atomic_end();
+	for (size_t i = 0; i < 5; i++) {
+		asm("CLI");
+		printf("Thread2: (%d).\n", i);
+		asm("STI");
+	}
+	Scheduler::thread_sleep(1000);
+	asm("HLT");
+	for (size_t i = 5; i < 8; i++) {
+		asm("CLI");
+		printf("Thread2: (%d).\n", i);
+		asm("STI");
 	}
 	while (1) {
 		/* code */
@@ -35,10 +42,10 @@ void hello2()
 }
 void hello3()
 {
-	for (size_t i = 0; i < 10; i++) {
-		atomic_begin();
-		printf("hello I'm thread 3, i don't know you.\n");
-		atomic_end();
+	for (size_t i = 0; i < 5; i++) {
+		asm("CLI");
+		printf("Thread3: (%d).\n", i);
+		asm("STI");
 	}
 	while (1) {
 		/* code */
@@ -54,6 +61,7 @@ void Scheduler::setup()
 	create_new_thread((uintptr_t)hello3);
 }
 
+// Create thread structure of a new thread
 void Scheduler::create_new_thread(uintptr_t address)
 {
 	ThreadControlBlock* new_thread = (ThreadControlBlock*)Heap::kmalloc(sizeof(ThreadControlBlock), 0);
@@ -66,6 +74,7 @@ void Scheduler::create_new_thread(uintptr_t address)
 	append_thread_list(new_thread);
 }
 
+// Append a thread to thread circular list.
 void Scheduler::append_thread_list(ThreadControlBlock* new_thread)
 {
 	if (current_thread) {
@@ -79,20 +88,37 @@ void Scheduler::append_thread_list(ThreadControlBlock* new_thread)
 	}
 }
 
+// Select next process, save and switch context.
 void Scheduler::schedule(ContextFrame* current_context)
 {
-	ThreadControlBlock* thread_pointer = current_thread;
-	ThreadControlBlock* next_thread = 0;
+	volatile ThreadControlBlock* next_thread = select_next_thread();
+	if ((current_thread->state == ThreadState::RUNNING) || (current_thread->state == ThreadState::BLOCKED)) {
+		save_context(current_context);
+	}
+	next_thread->state = ThreadState::RUNNING;
+	current_thread->state = ThreadState::ACTIVE;
+	switch_context(current_context, (ThreadControlBlock*)next_thread);
+	current_thread = (ThreadControlBlock*)next_thread;
+}
+
+// Round Robinson Scheduling Algorithm.
+volatile ThreadControlBlock* Scheduler::select_next_thread()
+{
+	volatile ThreadControlBlock* thread_pointer = current_thread->next;
+	volatile ThreadControlBlock* next_thread = 0;
 	do {
 		if (thread_pointer->sleep_ticks > 0) {
 			thread_pointer->sleep_ticks--;
+			if (thread_pointer->sleep_ticks) {
+				thread_pointer->state = ThreadState::BLOCKED;
+			} else {
+				thread_pointer->state = ThreadState::ACTIVE;
+			}
 		}
-
 		if (thread_pointer->next == thread_pointer) {
 			next_thread = thread_pointer;
 			break;
 		}
-
 		if ((thread_pointer != current_thread) &&
 		    ((thread_pointer->state == ThreadState::ACTIVE) || (thread_pointer->state == ThreadState::INTIALE)) &&
 		    (!next_thread)) {
@@ -100,31 +126,17 @@ void Scheduler::schedule(ContextFrame* current_context)
 		}
 
 		thread_pointer = thread_pointer->next;
-	} while (thread_pointer != current_thread);
-
-	if (next_thread->state == ThreadState::ACTIVE) {
-		save_context(current_context);
-		next_thread->state == ThreadState::RUNNING;
-	}
-	if (next_thread->state == ThreadState::INTIALE) {
-		next_thread->state == ThreadState::RUNNING;
-	}
-	current_thread->state = ThreadState::ACTIVE;
-
-	switch_context(current_context, next_thread);
-	current_thread = next_thread;
+	} while (thread_pointer != current_thread->next);
+	return next_thread;
 }
 
-/*void Scheduler::thread_tick()
+void Scheduler::thread_sleep(unsigned ms)
 {
-    ThreadControlBlock* thread_index = current_thread;
-    do {
-        if (thread_index->sleep_ticks > 0) {
-            thread_index->sleep_ticks--;
-        }
-        thread_index = thread_index->next;
-    } while (thread_index != current_thread);
-}*/
+	DISABLE_INTERRUPTS();
+	current_thread->sleep_ticks = ms;
+	current_thread->state = ThreadState::BLOCKED;
+	ENABLE_INTERRUPTS();
+}
 
 void Scheduler::switch_context(ContextFrame* current_context, ThreadControlBlock* new_thread)
 {
@@ -135,8 +147,8 @@ void Scheduler::switch_context(ContextFrame* current_context, ThreadControlBlock
 	current_context->esi = new_thread->context.esi;
 	current_context->edi = new_thread->context.edi;
 	current_context->eip = new_thread->context.eip;
-	current_context->esp = new_thread->context.esp;
 	current_context->ebp = new_thread->context.ebp;
+	current_context->useresp = new_thread->context.esp;
 	current_context->eflags = new_thread->context.eflags;
 }
 
@@ -148,9 +160,9 @@ void Scheduler::save_context(ContextFrame* current_context)
 	current_thread->context.edx = current_context->edx;
 	current_thread->context.esi = current_context->esi;
 	current_thread->context.edi = current_context->edi;
-	current_thread->context.esp = current_context->esp;
 	current_thread->context.ebp = current_context->ebp;
 	current_thread->context.eip = current_context->eip;
+	current_thread->context.esp = current_context->useresp;
 	current_thread->context.eflags = current_context->eflags;
 }
 

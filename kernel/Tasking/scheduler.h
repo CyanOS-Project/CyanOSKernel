@@ -56,8 +56,10 @@ class Scheduler
 	static void switch_page_directory(ProcessControlBlock* new_thread);
 	static void append_thread_list(ThreadControlBlock* new_thread);
 	static void save_context(ContextFrame* current_context);
+	static volatile ThreadControlBlock* select_next_thread();
 
   public:
 	static void schedule(ContextFrame* current_context);
 	static void setup();
+	static void thread_sleep(unsigned ms);
 };
