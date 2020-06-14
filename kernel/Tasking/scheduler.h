@@ -8,7 +8,6 @@ enum class ThreadState {
 	ACTIVE,
 	BLOCKED,
 	SUSPENDED,
-	INTIALE,
 };
 enum class ProcessState {
 	RUNNING = 1,
@@ -17,8 +16,6 @@ enum class ProcessState {
 	SUSPENDED = 4,
 };
 
-struct ThreadControlBlock;
-struct ProcessControlBlock;
 struct RegistersContext {
 	uint32_t eax;
 	uint32_t ebx;
@@ -31,23 +28,23 @@ struct RegistersContext {
 	uint32_t eip;
 	uint32_t eflags;
 };
-struct ThreadControlBlock {
-	unsigned tid;
-	unsigned sleep_ticks;
-	ThreadState state;
-	ProcessControlBlock* parent;
-	RegistersContext context;
-	ThreadControlBlock *next, *prev;
-};
 
-struct ProcessControlBlock {
+typedef volatile struct ProcessControlBlock_t {
 	unsigned pid;
 	unsigned page_directory;
 	ProcessState state;
-	ProcessControlBlock* parent;
-	ThreadControlBlock* threads;
-	ProcessControlBlock *next, *prev;
-};
+	volatile ProcessControlBlock_t* parent;
+	volatile ProcessControlBlock_t *next, *prev;
+} ProcessControlBlock;
+
+typedef volatile struct ThreadControlBlock_t {
+	unsigned tid;
+	unsigned sleep_ticks;
+	ThreadState state;
+	RegistersContext context;
+	volatile ProcessControlBlock_t* parent;
+	volatile ThreadControlBlock_t *next, *prev;
+} ThreadControlBlock;
 
 class Scheduler
 {
@@ -68,4 +65,5 @@ class Scheduler
 	static void schedule(ContextFrame* current_context);
 	static void setup();
 	static void thread_sleep(unsigned ms);
+	static void loop();
 };

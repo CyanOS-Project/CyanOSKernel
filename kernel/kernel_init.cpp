@@ -43,9 +43,7 @@ extern "C" void kernel_init()
 	printf("Welcome to CyanOS.\n");
 	ENABLE_INTERRUPTS();
 	// display_time();
-	for (size_t i = 0; i < 10; i++) {
-		printf("This is main.\n");
-	}
+	printf("Going Idle State.\n");
 	while (1) {
 		HLT();
 	}
