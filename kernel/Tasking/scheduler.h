@@ -10,10 +10,15 @@ enum class ThreadState {
 	SUSPENDED,
 };
 enum class ProcessState {
-	RUNNING = 1,
-	ACTIVE = 2,
-	BLOCKED = 3,
-	SUSPENDED = 4,
+	RUNNING,
+	ACTIVE,
+	BLOCKED,
+	SUSPENDED,
+};
+
+enum class ScheduleType {
+	FORCED,
+	TIMED,
 };
 
 struct RegistersContext {
@@ -59,10 +64,11 @@ class Scheduler
 	static void delete_from_thread_list(ThreadControlBlock** list, ThreadControlBlock* thread);
 	static void append_to_thread_list(ThreadControlBlock** list, ThreadControlBlock* new_thread);
 	static void wake_up_sleepers();
+	static void schedule_handler(ContextFrame* frame);
 	static ThreadControlBlock* select_next_thread();
 
   public:
-	static void schedule(ContextFrame* current_context);
+	static void schedule_new_thread(ContextFrame* current_context, ScheduleType type);
 	static void setup();
 	static void thread_sleep(unsigned ms);
 	static void loop();

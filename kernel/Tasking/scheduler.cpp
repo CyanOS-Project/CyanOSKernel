@@ -1,6 +1,7 @@
 #include "scheduler.h"
 #include "Arch/x86/asm.h"
 #include "Arch/x86/atomic.h"
+#include "Arch/x86/isr.h"
 #include "Arch/x86/panic.h"
 #include "Devices/Console/console.h"
 #include "VirtualMemory/heap.h"
@@ -44,10 +45,10 @@ void hello2()
 		for (size_t i = 0; i < 3; i++) {
 			asm("CLI");
 			printf("Thread2: (%d).\n", index);
-			index++;
-			// Scheduler::thread_sleep(1000);
-			// asm("HLT");
+			Scheduler::thread_sleep(1000);
+			asm("HLT");
 			asm("STI");
+			index++;
 		}
 	}
 
@@ -72,12 +73,15 @@ void hello3()
 		asm("HLT");
 	}
 }
-#include "assert.h"
+volatile unsigned count = 0;
+
 void Scheduler::setup()
 {
+	count = 0;
 	tid = 0;
 	active_thread = nullptr;
 	blocked_thread = nullptr;
+	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
 	create_new_thread((uintptr_t)0); // main thread of kernel-> idle
 	create_new_thread((uintptr_t)hello1);
 	create_new_thread((uintptr_t)hello2);
@@ -85,19 +89,22 @@ void Scheduler::setup()
 	current_thread = active_thread;
 }
 
-// Select next process, save and switch context.
-void Scheduler::schedule(ContextFrame* current_context)
+void Scheduler::schedule_handler(ContextFrame* frame)
 {
-	wake_up_sleepers();
+	schedule_new_thread(frame, ScheduleType::FORCED);
+}
+
+// Select next process, save and switch context.
+void Scheduler::schedule_new_thread(ContextFrame* current_context, ScheduleType type)
+{
+	if (type == ScheduleType::TIMED)
+		wake_up_sleepers();
 	save_context(current_context);
 	if (current_thread->state == ThreadState::RUNNING) {
 		current_thread->state = ThreadState::ACTIVE;
 	}
 	// TODO: switch using pointer switch only
 	ThreadControlBlock* next_thread = select_next_thread();
-	if (!next_thread) {
-		asm volatile("int3");
-	}
 	next_thread->state = ThreadState::RUNNING;
 	switch_context(current_context, (ThreadControlBlock*)next_thread);
 	active_thread = (ThreadControlBlock*)next_thread;
@@ -148,13 +155,15 @@ void Scheduler::wake_up_sleepers()
 // Put the current thread into sleep for ms.
 void Scheduler::thread_sleep(unsigned ms)
 {
+
 	DISABLE_INTERRUPTS();
 	current_thread->sleep_ticks = ms;
 	current_thread->state = ThreadState::BLOCKED;
-	active_thread = active_thread->next;
 	delete_from_thread_list(&active_thread, current_thread);
 	append_to_thread_list(&blocked_thread, current_thread);
+
 	ENABLE_INTERRUPTS();
+	// asm volatile("int $0x81");
 }
 
 // Create thread structure of a new thread
@@ -232,5 +241,9 @@ void Scheduler::delete_from_thread_list(ThreadControlBlock** list, ThreadControl
 	} else {
 		thread->prev->next = thread->next;
 		thread->next->prev = thread->prev;
+		if (*list == thread)
+			*list = (*list)->next;
 	}
+
+	ASSERT(active_thread)
 }

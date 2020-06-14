@@ -10,6 +10,8 @@
 #define PF_PK(x)      (x & 6)  // There was a protection-key violation.
 #define PF_SGK(x)     (x & 16) // The fault resulted from violation of SGX-specific access-control requirements.
 
+#define SCHEDULE_IRQ 0x81
+
 struct ContextFrame {
 	uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
 	uint32_t cr2;
