@@ -26,18 +26,18 @@ void hello1()
 
 void hello2()
 {
-	for (size_t i = 0; i < 5; i++) {
-		asm("CLI");
-		printf("Thread2: (%d).\n", i);
-		asm("STI");
+	int index = 0;
+	for (size_t j = 0; j < 10; j++) {
+		Scheduler::thread_sleep(1000);
+		asm("HLT");
+		for (size_t i = 0; i < 3; i++) {
+			asm("CLI");
+			printf("Thread2: (%d).\n", index);
+			index++;
+			asm("STI");
+		}
 	}
-	Scheduler::thread_sleep(1000);
-	asm("HLT");
-	for (size_t i = 5; i < 8; i++) {
-		asm("CLI");
-		printf("Thread2: (%d).\n", i);
-		asm("STI");
-	}
+
 	while (1) {
 		asm("HLT");
 	}
@@ -125,43 +125,29 @@ void Scheduler::schedule(ContextFrame* current_context)
 // Round Robinson Scheduling Algorithm.
 ThreadControlBlock* Scheduler::select_next_thread()
 {
-	ThreadControlBlock* thread_pointer = active_thread->next;
-	ThreadControlBlock* next_thread = 0;
-	do {
-		if (thread_pointer->next == thread_pointer) {
-			next_thread = thread_pointer;
-			break;
-		}
-		if ((thread_pointer != active_thread) &&
-		    ((thread_pointer->state == ThreadState::ACTIVE) || (thread_pointer->state == ThreadState::INTIALE)) &&
-		    (!next_thread)) {
-			next_thread = thread_pointer;
-		}
-		thread_pointer = thread_pointer->next;
-	} while (thread_pointer != active_thread->next);
-	return next_thread;
+	return active_thread->next;
 }
 void Scheduler::wake_up_sleepers()
 {
 	ThreadControlBlock* thread_pointer = blocked_thread;
 	ThreadControlBlock* next_thread = 0;
 
-	if (blocked_thread) {
-		do {
-			if (thread_pointer->sleep_ticks > 0) {
-				thread_pointer->sleep_ticks--;
-				if (!thread_pointer->sleep_ticks) {
-					thread_pointer->state = ThreadState::ACTIVE;
-					delete_from_thread_list(&blocked_thread, thread_pointer);
-					append_to_thread_list(&active_thread, thread_pointer);
-					current_thread = thread_pointer;
-					if (!blocked_thread)
-						break;
-				}
+	if (!blocked_thread)
+		return;
+	do {
+		if (thread_pointer->sleep_ticks > 0) {
+			thread_pointer->sleep_ticks--;
+			if (!thread_pointer->sleep_ticks) {
+				thread_pointer->state = ThreadState::ACTIVE;
+				delete_from_thread_list(&blocked_thread, thread_pointer);
+				append_to_thread_list(&active_thread, thread_pointer);
+				current_thread = thread_pointer;
+				if (!blocked_thread)
+					break;
 			}
-			thread_pointer = thread_pointer->next;
-		} while (thread_pointer != blocked_thread);
-	}
+		}
+		thread_pointer = thread_pointer->next;
+	} while (thread_pointer != blocked_thread);
 }
 
 void Scheduler::thread_sleep(unsigned ms)
