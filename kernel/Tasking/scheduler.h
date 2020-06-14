@@ -1,6 +1,8 @@
 #include "Arch/x86/isr.h"
+#include "Arch/x86/paging.h"
 #include "types.h"
 
+#define STACK_SIZE PAGE_SIZE
 enum class ThreadState {
 	RUNNING,
 	ACTIVE,
@@ -55,7 +57,7 @@ class Scheduler
 	static ThreadControlBlock* current_thread;
 	static void create_new_thread(uintptr_t address);
 	static void switch_context(ContextFrame* current_context, ThreadControlBlock* new_thread);
-	static void switch_page_directory(ProcessControlBlock* new_thread);
+	static void switch_page_directory(uintptr_t page_directory);
 	static void save_context(ContextFrame* current_context);
 	static void delete_from_thread_list(ThreadControlBlock** list, ThreadControlBlock* thread);
 	static void append_to_thread_list(ThreadControlBlock** list, ThreadControlBlock* new_thread);

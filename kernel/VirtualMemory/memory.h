@@ -25,5 +25,6 @@ class Memory
 	static void unmap(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags);
 	static uint32_t virtual_memory_size();
 	static uint32_t physical_memory_size();
+	static void switch_page_directory(uintptr_t physical_address);
 	static void setup_page_fault_handler();
 };

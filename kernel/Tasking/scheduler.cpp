@@ -1,6 +1,5 @@
 #include "scheduler.h"
 #include "Arch/x86/atomic.h"
-#include "Arch/x86/paging.h"
 #include "Devices/Console/console.h"
 #include "Devices/Null/null.h"
 #include "VirtualMemory/heap.h"
@@ -65,45 +64,6 @@ void Scheduler::setup()
 	current_thread = active_thread;
 }
 
-// Create thread structure of a new thread
-void Scheduler::create_new_thread(uintptr_t address)
-{
-	ThreadControlBlock* new_thread = (ThreadControlBlock*)Heap::kmalloc(sizeof(ThreadControlBlock), 0);
-	void* thread_stack = (void*)Memory::alloc(PAGE_SIZE, MEMORY_TYPE::KERNEL, MEMORY_TYPE::WRITABLE);
-	new_thread->tid = tid++;
-	new_thread->context.esp = (unsigned)thread_stack + PAGE_SIZE;
-	new_thread->context.eip = address;
-	new_thread->context.eflags = 0x200;
-	new_thread->state = ThreadState::INTIALE;
-	append_to_thread_list(&active_thread, new_thread);
-}
-
-// Append a thread to thread circular list.
-void Scheduler::append_to_thread_list(ThreadControlBlock** list, ThreadControlBlock* new_thread)
-{
-	if (*list) {
-		new_thread->next = *list;
-		new_thread->prev = (*list)->prev;
-		(*list)->prev->next = new_thread;
-		(*list)->prev = new_thread;
-	} else {
-		new_thread->next = new_thread->prev = new_thread;
-		*list = new_thread;
-	}
-}
-
-void Scheduler::delete_from_thread_list(ThreadControlBlock** list, ThreadControlBlock* thread)
-{
-	if (thread->prev == thread->next) {
-		*list = 0;
-	} else {
-		thread->prev->next = thread->next;
-		thread->next->prev = thread->prev;
-	}
-
-	Heap::kfree((uintptr_t)thread);
-}
-
 // Select next process, save and switch context.
 void Scheduler::schedule(ContextFrame* current_context)
 {
@@ -127,6 +87,8 @@ ThreadControlBlock* Scheduler::select_next_thread()
 {
 	return active_thread->next;
 }
+
+// Decrease sleep_ticks of each thread and wake up whose value is zero.
 void Scheduler::wake_up_sleepers()
 {
 	ThreadControlBlock* thread_pointer = blocked_thread;
@@ -150,6 +112,7 @@ void Scheduler::wake_up_sleepers()
 	} while (thread_pointer != blocked_thread);
 }
 
+// Put the current thread into sleep for ms.
 void Scheduler::thread_sleep(unsigned ms)
 {
 	DISABLE_INTERRUPTS();
@@ -162,6 +125,20 @@ void Scheduler::thread_sleep(unsigned ms)
 	ENABLE_INTERRUPTS();
 }
 
+// Create thread structure of a new thread
+void Scheduler::create_new_thread(uintptr_t address)
+{
+	ThreadControlBlock* new_thread = (ThreadControlBlock*)Heap::kmalloc(sizeof(ThreadControlBlock), 0);
+	void* thread_stack = (void*)Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL, MEMORY_TYPE::WRITABLE);
+	new_thread->tid = tid++;
+	new_thread->context.esp = (unsigned)thread_stack + STACK_SIZE;
+	new_thread->context.eip = address;
+	new_thread->context.eflags = 0x200;
+	new_thread->state = ThreadState::INTIALE;
+	append_to_thread_list(&active_thread, new_thread);
+}
+
+// Switch the returned context of the current IRQ.
 void Scheduler::switch_context(ContextFrame* current_context, ThreadControlBlock* new_thread)
 {
 	current_context->eax = new_thread->context.eax;
@@ -176,6 +153,7 @@ void Scheduler::switch_context(ContextFrame* current_context, ThreadControlBlock
 	current_context->eflags = new_thread->context.eflags;
 }
 
+// Save current context into its TCB.
 void Scheduler::save_context(ContextFrame* current_context)
 {
 	current_thread->context.eax = current_context->eax;
@@ -190,7 +168,35 @@ void Scheduler::save_context(ContextFrame* current_context)
 	current_thread->context.eflags = current_context->eflags;
 }
 
-void Scheduler::switch_page_directory(ProcessControlBlock* new_thread)
+// Switch to page directory
+void Scheduler::switch_page_directory(uintptr_t page_directory)
 {
-	Paging::load_page_directory(new_thread->page_directory);
+	Memory::switch_page_directory(page_directory);
+}
+
+// Append a thread to thread circular list.
+void Scheduler::append_to_thread_list(ThreadControlBlock** list, ThreadControlBlock* new_thread)
+{
+	if (*list) {
+		new_thread->next = *list;
+		new_thread->prev = (*list)->prev;
+		(*list)->prev->next = new_thread;
+		(*list)->prev = new_thread;
+	} else {
+		new_thread->next = new_thread->prev = new_thread;
+		*list = new_thread;
+	}
+}
+
+// Delete thread from a list.
+void Scheduler::delete_from_thread_list(ThreadControlBlock** list, ThreadControlBlock* thread)
+{
+	if (thread->prev == thread->next) {
+		*list = 0;
+	} else {
+		thread->prev->next = thread->next;
+		thread->next->prev = thread->prev;
+	}
+
+	Heap::kfree((uintptr_t)thread);
 }

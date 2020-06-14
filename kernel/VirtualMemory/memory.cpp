@@ -113,3 +113,7 @@ uint32_t Memory::parse_flags(uint32_t mem_flags)
 	}
 	return page_flags;
 }
+void Memory::switch_page_directory(uintptr_t physical_address)
+{
+	Paging::load_page_directory(physical_address);
+}
