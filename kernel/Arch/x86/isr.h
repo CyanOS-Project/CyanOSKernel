@@ -13,7 +13,7 @@
 #define SCHEDULE_IRQ 0x81
 
 struct ContextFrame {
-	uint32_t edi, esi, ebp, esp, ebx, edx, ecx, eax;
+	uint32_t esp, edi, esi, ebp, __esp, ebx, edx, ecx, eax;
 	uint32_t cr2;
 	uint32_t irq_number;
 	uint32_t error_code;

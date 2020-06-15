@@ -1,6 +1,7 @@
 #include "scheduler.h"
 #include "Arch/x86/asm.h"
 #include "Arch/x86/atomic.h"
+#include "Arch/x86/gdt.h"
 #include "Arch/x86/isr.h"
 #include "Arch/x86/panic.h"
 #include "Devices/Console/console.h"
@@ -19,19 +20,14 @@ unsigned tid;
 
 void hello1()
 {
-	int index = 0;
+	asm volatile("int $0x81");
 	for (size_t j = 0; j < 3; j++) {
-
-		for (size_t i = 0; i < 3; i++) {
-			asm("CLI");
-			printf("Thread1: (%d).\n", index);
-			index++;
-			asm("STI");
-			// Scheduler::thread_sleep(1000);
-			// asm("HLT");
-		}
+		asm("CLI");
+		printf("Thread1: (%d).\n", j);
+		asm("STI");
+		// Scheduler::thread_sleep(1000);
+		// asm("HLT");
 	}
-
 	while (1) {
 		asm("HLT");
 	}
@@ -39,53 +35,41 @@ void hello1()
 
 void hello2()
 {
-	int index = 0;
 	for (size_t j = 0; j < 3; j++) {
-
-		for (size_t i = 0; i < 3; i++) {
-			asm("CLI");
-			printf("Thread2: (%d).\n", index);
-			Scheduler::thread_sleep(1000);
-			asm("HLT");
-			asm("STI");
-			index++;
-		}
+		asm("CLI");
+		printf("Thread2: (%d).\n", j);
+		asm("STI");
+		// Scheduler::thread_sleep(1000);
+		// asm("HLT");
 	}
-
 	while (1) {
 		asm("HLT");
 	}
 }
 void hello3()
 {
-	int index = 0;
 	for (size_t j = 0; j < 3; j++) {
+		asm("CLI");
+		printf("Thread3: (%d).\n", j);
+		asm("STI");
 		// Scheduler::thread_sleep(1000);
 		// asm("HLT");
-		for (size_t i = 0; i < 3; i++) {
-			asm("CLI");
-			printf("Thread3: (%d).\n", index);
-			index++;
-			asm("STI");
-		}
 	}
 	while (1) {
 		asm("HLT");
 	}
 }
-volatile unsigned count = 0;
 
 void Scheduler::setup()
 {
-	count = 0;
 	tid = 0;
 	active_thread = nullptr;
 	blocked_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
-	create_new_thread((uintptr_t)0); // main thread of kernel-> idle
+	// create_new_thread((uintptr_t)0); // main thread of kernel-> idle
 	create_new_thread((uintptr_t)hello1);
 	create_new_thread((uintptr_t)hello2);
-	create_new_thread((uintptr_t)hello3);
+	// create_new_thread((uintptr_t)hello3);
 	current_thread = active_thread;
 }
 
@@ -103,12 +87,12 @@ void Scheduler::schedule_new_thread(ContextFrame* current_context, ScheduleType 
 	if (current_thread->state == ThreadState::RUNNING) {
 		current_thread->state = ThreadState::ACTIVE;
 	}
-	// TODO: switch using pointer switch only
+	// TODO: switch using pointer only
 	ThreadControlBlock* next_thread = select_next_thread();
 	next_thread->state = ThreadState::RUNNING;
-	switch_context(current_context, (ThreadControlBlock*)next_thread);
 	active_thread = (ThreadControlBlock*)next_thread;
 	current_thread = active_thread;
+	switch_context(current_context, (ThreadControlBlock*)next_thread);
 }
 
 // Round Robinson Scheduling Algorithm.
@@ -161,7 +145,6 @@ void Scheduler::thread_sleep(unsigned ms)
 	current_thread->state = ThreadState::BLOCKED;
 	delete_from_thread_list(&active_thread, current_thread);
 	append_to_thread_list(&blocked_thread, current_thread);
-
 	ENABLE_INTERRUPTS();
 	// asm volatile("int $0x81");
 }
@@ -170,11 +153,15 @@ void Scheduler::thread_sleep(unsigned ms)
 void Scheduler::create_new_thread(uintptr_t address)
 {
 	ThreadControlBlock* new_thread = (ThreadControlBlock*)Heap::kmalloc(sizeof(ThreadControlBlock), 0);
-	void* thread_stack = (void*)Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL, MEMORY_TYPE::WRITABLE);
+
+	void* thread_stack = (void*)Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
+	ContextFrame* new_frame = (ContextFrame*)((unsigned)thread_stack + STACK_SIZE - sizeof(ContextFrame));
+	new_frame->cs = KCS_SELECTOR;
+	new_frame->eip = address;
+	new_frame->eflags = 0x200;
+	new_frame->esp = (unsigned)new_frame;
 	new_thread->tid = tid++;
-	new_thread->context.esp = (unsigned)thread_stack + STACK_SIZE;
-	new_thread->context.eip = address;
-	new_thread->context.eflags = 0x200;
+	new_thread->context.esp = (unsigned)new_frame;
 	new_thread->state = ThreadState::ACTIVE;
 	append_to_thread_list(&active_thread, new_thread);
 }
@@ -190,7 +177,7 @@ void Scheduler::switch_context(ContextFrame* current_context, ThreadControlBlock
 	current_context->edi = new_thread->context.edi;
 	current_context->eip = new_thread->context.eip;
 	current_context->ebp = new_thread->context.ebp;
-	current_context->useresp = new_thread->context.esp;
+	current_context->esp = new_thread->context.esp;
 	current_context->eflags = new_thread->context.eflags;
 }
 
@@ -205,7 +192,7 @@ void Scheduler::save_context(ContextFrame* current_context)
 	current_thread->context.edi = current_context->edi;
 	current_thread->context.ebp = current_context->ebp;
 	current_thread->context.eip = current_context->eip;
-	current_thread->context.esp = current_context->useresp;
+	current_thread->context.esp = current_context->esp;
 	current_thread->context.eflags = current_context->eflags;
 }
 

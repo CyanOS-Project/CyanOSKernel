@@ -10,9 +10,12 @@ dd isr%1
 		push dword %1
 		push dword 0
 		pusha
+		push esp
 		call interrupt_dispatcher
+		mov esp, eax
+		add esp, 4 ;discarding esp
 		popa
-	 	add esp, 12
+	 	add esp, 12;discarding irq num, error and cr2
 	 	iret
 %endmacro
 
@@ -21,9 +24,12 @@ dd isr%1
 		push dword %1
 		push dword 0
 		pusha
+		push esp
 		call interrupt_dispatcher
+		mov esp, eax ;discarding esp
+		add esp,4
 		popa
-		add esp, 12
+		add esp, 12	;discarding irq num, error and cr2
 		iret
 %endmacro
 
