@@ -1,7 +1,7 @@
 #pragma once
 
 #include "kernel_map.h"
-#include "types.h"
+#include "utils/types.h"
 
 #define NUMBER_OF_PAGE_DIRECOTRY_ENTRIES 1024
 #define NUMBER_OF_PAGE_TABLE_ENTRIES     1024

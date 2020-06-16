@@ -7,71 +7,17 @@
 #include "Devices/Console/console.h"
 #include "VirtualMemory/heap.h"
 #include "VirtualMemory/memory.h"
+#include "utils/assert.h"
 
 ThreadControlBlock* Scheduler::active_thread;
 ThreadControlBlock* Scheduler::blocked_thread;
 ThreadControlBlock* Scheduler::current_thread;
 unsigned tid;
 
-#define ASSERT(x)                                                                                                      \
-	if (!x) {                                                                                                          \
-		PANIC("Null Value ( " #x " )");                                                                                \
-	}
-
-void hello1()
-{
-	int index = 0;
-	for (size_t j = 0; j < 10; j++) {
-
-		asm("CLI");
-		printf("Thread1: (%d).\n", j);
-		asm("STI");
-		Scheduler::thread_sleep(1000);
-		// asm("HLT");
-	}
-
-	while (1) {
-		asm("HLT");
-	}
-}
-
-void hello2()
-{
-	int index = 0;
-	for (size_t j = 0; j < 10; j++) {
-
-		asm("CLI");
-		printf("Thread2: (%d).\n", j);
-		asm("STI");
-		Scheduler::thread_sleep(1000);
-		// asm("HLT");
-	}
-
-	while (1) {
-		asm("HLT");
-	}
-}
-void hello3()
-{
-	int index = 0;
-	for (size_t j = 0; j < 10; j++) {
-
-		asm("CLI");
-		printf("Thread3: (%d).\n", j);
-		asm("STI");
-		Scheduler::thread_sleep(1000);
-		// asm("HLT");
-	}
-
-	while (1) {
-		asm("HLT");
-	}
-}
-
 void idle()
 {
 	while (1) {
-		asm("HLT");
+		HLT();
 	}
 }
 void Scheduler::setup()
@@ -80,21 +26,17 @@ void Scheduler::setup()
 	active_thread = nullptr;
 	blocked_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
-	// create_new_thread((uintptr_t)0); // main thread of kernel-> idle
 	create_new_thread((uintptr_t)idle);
-	create_new_thread((uintptr_t)hello1);
-	create_new_thread((uintptr_t)hello2);
-	create_new_thread((uintptr_t)hello3);
 	current_thread = active_thread;
 }
 
 void Scheduler::schedule_handler(ContextFrame* frame)
 {
-	schedule_new_thread(frame, ScheduleType::FORCED);
+	schedule(frame, ScheduleType::FORCED);
 }
 
 // Select next process, save and switch context.
-void Scheduler::schedule_new_thread(ContextFrame* current_context, ScheduleType type)
+void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
 {
 	if (type == ScheduleType::TIMED)
 		wake_up_sleepers();
@@ -111,19 +53,8 @@ void Scheduler::schedule_new_thread(ContextFrame* current_context, ScheduleType 
 // Round Robinson Scheduling Algorithm.
 ThreadControlBlock* Scheduler::select_next_thread()
 {
-	ASSERT(active_thread)
+	ASSERT(active_thread);
 	return active_thread->next;
-}
-
-void Scheduler::loop()
-{
-	ThreadControlBlock* thread_pointer = active_thread;
-	ThreadControlBlock* next_thread = 0;
-	do {
-		volatile unsigned ptid = thread_pointer->tid;
-		volatile unsigned peip = thread_pointer->context.eip;
-		thread_pointer = thread_pointer->next;
-	} while (thread_pointer != active_thread);
 }
 
 // Decrease sleep_ticks of each thread and wake up whose value is zero.
@@ -150,7 +81,7 @@ void Scheduler::wake_up_sleepers()
 }
 
 // Put the current thread into sleep for ms.
-void Scheduler::thread_sleep(unsigned ms)
+void Scheduler::sleep(unsigned ms)
 {
 
 	DISABLE_INTERRUPTS();
@@ -159,6 +90,12 @@ void Scheduler::thread_sleep(unsigned ms)
 	delete_from_thread_list(&active_thread, current_thread);
 	append_to_thread_list(&blocked_thread, current_thread);
 	ENABLE_INTERRUPTS();
+	yield();
+}
+
+// schedule another thread.
+void Scheduler::yield()
+{
 	asm volatile("int $0x81");
 }
 
@@ -200,7 +137,7 @@ void Scheduler::switch_page_directory(uintptr_t page_directory)
 void Scheduler::append_to_thread_list(ThreadControlBlock** list, ThreadControlBlock* new_thread)
 {
 	ASSERT(new_thread)
-
+	ASSERT(list)
 	if (*list) {
 		new_thread->next = *list;
 		new_thread->prev = (*list)->prev;
@@ -225,6 +162,5 @@ void Scheduler::delete_from_thread_list(ThreadControlBlock** list, ThreadControl
 		if (*list == thread)
 			*list = (*list)->next;
 	}
-
 	ASSERT(active_thread)
 }

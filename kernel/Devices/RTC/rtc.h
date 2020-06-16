@@ -1,6 +1,6 @@
 #pragma once
 #include "Arch/x86/asm.h"
-#include "types.h"
+#include "utils/types.h"
 
 #define CMOS_ADDRESS_PORT  0x70
 #define CMOS_DATA_PORT     0x71

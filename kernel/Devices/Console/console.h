@@ -1,7 +1,7 @@
 #pragma once
 #include "Lib/stdlib.h"
 #include "kernel_map.h"
-#include "types.h"
+#include "utils/types.h"
 #include <stdarg.h>
 
 #define VGATEXTMODE_BUFFER 0x000B8000

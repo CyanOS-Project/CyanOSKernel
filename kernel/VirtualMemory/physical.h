@@ -1,7 +1,7 @@
 #pragma once
 
 #include "kernel_map.h"
-#include "types.h"
+#include "utils/types.h"
 
 #define MAX_PHYSICAL_4K_PAGES (1024 * 1024)
 #define CHECK_BIT(value, bit) ((value >> bit) & 1)

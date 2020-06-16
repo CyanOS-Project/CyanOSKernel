@@ -1,5 +1,5 @@
 #include "asm.h"
-#include "types.h"
+#include "utils/types.h"
 
 #define PIC1_BASE       (0x20)
 #define PIC2_BASE       (0xA0)

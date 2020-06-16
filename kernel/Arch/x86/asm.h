@@ -1,5 +1,5 @@
 #pragma once
-#include "types.h"
+#include "utils/types.h"
 
 #define JMP(x)               asm("JMP %0" : : "r"(kernel_init) :)
 #define HLT()                asm("HLT")

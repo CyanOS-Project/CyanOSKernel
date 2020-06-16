@@ -1,4 +1,4 @@
-#include "types.h"
+#include "utils/types.h"
 
 #define KERNEL_SPACE_SIZE       0x40000000
 #define KERNEL_BASE             0xC0000000

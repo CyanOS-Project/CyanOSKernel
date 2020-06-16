@@ -1,6 +1,6 @@
 #pragma once
 
-#include "types.h"
+#include "utils/types.h"
 
 #define PF_PRESENT(x) (x & 1)  // The fault was caused by a page-level protection violation.
 #define PF_WR(x)      (x & 2)  // The access causing the fault was a write.

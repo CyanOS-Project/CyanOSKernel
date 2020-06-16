@@ -1,7 +1,7 @@
 #pragma once
 
 #include "kernel_map.h"
-#include "types.h"
+#include "utils/types.h"
 
 #define GDT_NUMBER_OF_ENTRIES              6
 #define SEGMENT_SELECTOR(index, prv_level) (index << 3 | prv_level)

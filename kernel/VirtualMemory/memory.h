@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Arch/x86/isr.h"
-#include "types.h"
+#include "utils/types.h"
 
 enum MEMORY_TYPE {
 	KERNEL = 1,

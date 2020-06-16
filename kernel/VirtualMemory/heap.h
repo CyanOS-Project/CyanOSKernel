@@ -1,7 +1,7 @@
 #pragma once
 
 #include "VirtualMemory/memory.h"
-#include "types.h"
+#include "utils/types.h"
 
 #define ADDR_TO_HEADER(x)                  ((unsigned)x - sizeof(BlockHeader))
 #define HEADER_TO_ADDR(x)                  ((unsigned)x + sizeof(BlockHeader))

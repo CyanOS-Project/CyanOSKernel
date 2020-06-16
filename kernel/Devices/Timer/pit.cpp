@@ -28,7 +28,7 @@ void PIT::sleep(unsigned Duration)
 }
 void PIT::pit_handler(ContextFrame* frame)
 {
-	Scheduler::schedule_new_thread(frame, ScheduleType::TIMED);
+	Scheduler::schedule(frame, ScheduleType::TIMED);
 	if (CPU_HLT == true) {
 		CPU_HLT_DURATION -= 1;
 		if (CPU_HLT_DURATION == 0) {

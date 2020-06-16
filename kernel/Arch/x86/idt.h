@@ -1,7 +1,7 @@
 #pragma once
 
 #include "kernel_map.h"
-#include "types.h"
+#include "utils/types.h"
 
 #define NUMBER_OF_IDT_ENTRIES    256
 #define NUMBER_OF_IDT_EXCEPTIONS 32
