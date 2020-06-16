@@ -21,7 +21,7 @@ enum class ScheduleType {
 	TIMED,
 };
 
-struct RegistersContext {
+typedef volatile struct RegistersContext_t {
 	uint32_t eax;
 	uint32_t ebx;
 	uint32_t ecx;
@@ -32,7 +32,7 @@ struct RegistersContext {
 	uint32_t ebp;
 	uint32_t eip;
 	uint32_t eflags;
-};
+} RegistersContext;
 
 typedef volatile struct ProcessControlBlock_t {
 	unsigned pid;
@@ -57,7 +57,8 @@ class Scheduler
 	static ThreadControlBlock* active_thread;
 	static ThreadControlBlock* blocked_thread;
 	static ThreadControlBlock* current_thread;
-	static void switch_context(ContextFrame* current_context, ThreadControlBlock* new_thread);
+	static void create_new_thread(uintptr_t address);
+	static void load_context(ContextFrame* current_context);
 	static void switch_page_directory(uintptr_t page_directory);
 	static void save_context(ContextFrame* current_context);
 	static void delete_from_thread_list(ThreadControlBlock** list, ThreadControlBlock* thread);
@@ -67,8 +68,8 @@ class Scheduler
 	static ThreadControlBlock* select_next_thread();
 
   public:
-	static void create_new_thread(uintptr_t address);
 	static void schedule_new_thread(ContextFrame* current_context, ScheduleType type);
 	static void setup();
 	static void thread_sleep(unsigned ms);
+	static void loop();
 };

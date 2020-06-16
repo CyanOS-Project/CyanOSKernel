@@ -21,7 +21,7 @@ void ISR::register_isr_handler(isr_function address, uint8_t irq_number)
 	interrupt_dispatcher_vector[irq_number] = (isr_function)address;
 }
 
-extern "C" uint32_t __attribute__((cdecl)) interrupt_dispatcher(ContextFrame info)
+extern "C" void __attribute__((cdecl)) interrupt_dispatcher(ContextFrame info)
 {
 	asm("MOVL %%CR2,%0" : "=r"(info.cr2));
 	if (interrupt_dispatcher_vector[info.irq_number]) {
@@ -29,7 +29,6 @@ extern "C" uint32_t __attribute__((cdecl)) interrupt_dispatcher(ContextFrame inf
 	} else {
 		ISR::default_interrupt_handler(&info);
 	}
-	return info.esp;
 }
 
 void ISR::default_interrupt_handler(ContextFrame* info)

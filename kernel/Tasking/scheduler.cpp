@@ -20,13 +20,16 @@ unsigned tid;
 
 void hello1()
 {
-	for (size_t j = 0; j < 3; j++) {
+	int index = 0;
+	for (size_t j = 0; j < 10; j++) {
+
 		asm("CLI");
 		printf("Thread1: (%d).\n", j);
 		asm("STI");
 		Scheduler::thread_sleep(1000);
 		// asm("HLT");
 	}
+
 	while (1) {
 		asm("HLT");
 	}
@@ -34,36 +37,39 @@ void hello1()
 
 void hello2()
 {
-	for (size_t j = 0; j < 3; j++) {
+	int index = 0;
+	for (size_t j = 0; j < 10; j++) {
+
 		asm("CLI");
 		printf("Thread2: (%d).\n", j);
 		asm("STI");
 		Scheduler::thread_sleep(1000);
 		// asm("HLT");
 	}
+
 	while (1) {
 		asm("HLT");
 	}
 }
 void hello3()
 {
-	for (size_t j = 0; j < 3; j++) {
+	int index = 0;
+	for (size_t j = 0; j < 10; j++) {
+
 		asm("CLI");
 		printf("Thread3: (%d).\n", j);
 		asm("STI");
-		// Scheduler::thread_sleep(1000);
+		Scheduler::thread_sleep(1000);
 		// asm("HLT");
 	}
+
 	while (1) {
 		asm("HLT");
 	}
 }
 
-void startup()
+void idle()
 {
-	Scheduler::create_new_thread((uintptr_t)hello1);
-	Scheduler::create_new_thread((uintptr_t)hello2);
-	Scheduler::create_new_thread((uintptr_t)hello3);
 	while (1) {
 		asm("HLT");
 	}
@@ -74,7 +80,8 @@ void Scheduler::setup()
 	active_thread = nullptr;
 	blocked_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
-	// create_new_thread((uintptr_t)startup); // main thread of kernel-> idle
+	// create_new_thread((uintptr_t)0); // main thread of kernel-> idle
+	create_new_thread((uintptr_t)idle);
 	create_new_thread((uintptr_t)hello1);
 	create_new_thread((uintptr_t)hello2);
 	create_new_thread((uintptr_t)hello3);
@@ -93,16 +100,12 @@ void Scheduler::schedule_new_thread(ContextFrame* current_context, ScheduleType 
 		wake_up_sleepers();
 	if (current_thread->state != ThreadState::ACTIVE) {
 		current_thread->state = ThreadState::ACTIVE;
-		// current_thread->context.esp = current_context->esp;
 		save_context(current_context);
 	}
-	// TODO: switch using pointer only
-	ThreadControlBlock* next_thread = select_next_thread();
-	next_thread->state = ThreadState::RUNNING;
-	active_thread = (ThreadControlBlock*)next_thread;
-	current_thread = active_thread;
-	current_context->esp = current_thread->context.esp;
-	switch_context(current_context, (ThreadControlBlock*)next_thread);
+	// TODO: switch using pointer switch only
+	current_thread = active_thread = select_next_thread();
+	current_thread->state = ThreadState::RUNNING;
+	load_context(current_context);
 }
 
 // Round Robinson Scheduling Algorithm.
@@ -110,6 +113,17 @@ ThreadControlBlock* Scheduler::select_next_thread()
 {
 	ASSERT(active_thread)
 	return active_thread->next;
+}
+
+void Scheduler::loop()
+{
+	ThreadControlBlock* thread_pointer = active_thread;
+	ThreadControlBlock* next_thread = 0;
+	do {
+		volatile unsigned ptid = thread_pointer->tid;
+		volatile unsigned peip = thread_pointer->context.eip;
+		thread_pointer = thread_pointer->next;
+	} while (thread_pointer != active_thread);
 }
 
 // Decrease sleep_ticks of each thread and wake up whose value is zero.
@@ -127,8 +141,8 @@ void Scheduler::wake_up_sleepers()
 				thread_pointer->state = ThreadState::ACTIVE;
 				delete_from_thread_list(&blocked_thread, thread_pointer);
 				append_to_thread_list(&active_thread, thread_pointer);
-				if (!blocked_thread)
-					break;
+				wake_up_sleepers();
+				break;
 			}
 		}
 		thread_pointer = thread_pointer->next;
@@ -151,50 +165,29 @@ void Scheduler::thread_sleep(unsigned ms)
 // Create thread structure of a new thread
 void Scheduler::create_new_thread(uintptr_t address)
 {
-	DISABLE_INTERRUPTS();
 	ThreadControlBlock* new_thread = (ThreadControlBlock*)Heap::kmalloc(sizeof(ThreadControlBlock), 0);
-
 	void* thread_stack = (void*)Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
-	ContextFrame* new_frame = (ContextFrame*)((unsigned)thread_stack + STACK_SIZE - sizeof(ContextFrame));
-	new_frame->cs = KCS_SELECTOR;
-	new_frame->eip = address;
-	new_frame->eflags = 0x202;
-	new_frame->esp = (unsigned)new_frame + 4;
+	ContextFrame* frame = (ContextFrame*)((unsigned)thread_stack + STACK_SIZE - sizeof(ContextFrame));
+	// frame->esp = (unsigned)frame + 4;
+	frame->eip = address;
+	frame->cs = KCS_SELECTOR;
+	frame->eflags = 0x202;
 	new_thread->tid = tid++;
-	new_thread->context.esp = (unsigned)new_frame + 4;
+	new_thread->context.esp = (unsigned)frame + 4;
 	new_thread->state = ThreadState::ACTIVE;
 	append_to_thread_list(&active_thread, new_thread);
-	ENABLE_INTERRUPTS();
 }
 
 // Switch the returned context of the current IRQ.
-void Scheduler::switch_context(ContextFrame* current_context, ThreadControlBlock* new_thread)
+void Scheduler::load_context(ContextFrame* current_context)
 {
-	/*current_context->eax = new_thread->context.eax;
-	current_context->ebx = new_thread->context.ebx;
-	current_context->ecx = new_thread->context.ecx;
-	current_context->edx = new_thread->context.edx;
-	current_context->esi = new_thread->context.esi;
-	current_context->edi = new_thread->context.edi;
-	current_context->eip = new_thread->context.eip;
-	current_context->ebp = new_thread->context.ebp;*/
-	current_context->esp = new_thread->context.esp;
-	// current_context->eflags = new_thread->context.eflags;
+	current_context->esp = current_thread->context.esp;
 }
 
 // Save current context into its TCB.
 void Scheduler::save_context(ContextFrame* current_context)
 {
-	/*current_thread->context.eax = current_context->eax;
-	current_thread->context.ebx = current_context->ebx;
-	current_thread->context.ecx = current_context->ecx;
-	current_thread->context.edx = current_context->edx;
-	current_thread->context.esi = current_context->esi;
-	current_thread->context.edi = current_context->edi;
-	current_thread->context.ebp = current_context->ebp;
-	current_thread->context.eip = current_context->eip;*/
 	current_thread->context.esp = current_context->esp;
-	// current_thread->context.eflags = current_context->eflags;
 }
 
 // Switch to page directory

@@ -12,10 +12,9 @@ dd isr%1
 		pusha
 		push esp
 		call interrupt_dispatcher
-		mov esp, eax
-
+		pop esp
 		popa
-	 	add esp, 12;discarding irq num, error and cr2
+	 	add esp, 12
 	 	iret
 %endmacro
 
@@ -26,10 +25,9 @@ dd isr%1
 		pusha
 		push esp
 		call interrupt_dispatcher
-		mov esp, eax 
-
+		pop esp
 		popa
-		add esp, 12	;discarding irq num, error and cr2
+		add esp, 12
 		iret
 %endmacro
 
