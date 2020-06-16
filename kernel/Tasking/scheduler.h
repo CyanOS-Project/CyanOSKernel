@@ -57,7 +57,6 @@ class Scheduler
 	static ThreadControlBlock* active_thread;
 	static ThreadControlBlock* blocked_thread;
 	static ThreadControlBlock* current_thread;
-	static void create_new_thread(uintptr_t address);
 	static void switch_context(ContextFrame* current_context, ThreadControlBlock* new_thread);
 	static void switch_page_directory(uintptr_t page_directory);
 	static void save_context(ContextFrame* current_context);
@@ -68,8 +67,8 @@ class Scheduler
 	static ThreadControlBlock* select_next_thread();
 
   public:
+	static void create_new_thread(uintptr_t address);
 	static void schedule_new_thread(ContextFrame* current_context, ScheduleType type);
 	static void setup();
 	static void thread_sleep(unsigned ms);
-	static void loop();
 };

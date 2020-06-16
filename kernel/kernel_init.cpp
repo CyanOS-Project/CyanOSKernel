@@ -3,6 +3,7 @@
 #include "Arch/x86/atomic.h"
 #include "Arch/x86/gdt.h"
 #include "Arch/x86/idt.h"
+#include "Arch/x86/isr.h"
 #include "Arch/x86/paging.h"
 #include "Arch/x86/panic.h"
 #include "Arch/x86/pic.h"
@@ -24,6 +25,10 @@ void display_time()
 		PIT::sleep(1000);
 		removeLine();
 	}
+}
+void int3irq(ContextFrame* frame)
+{
+	printf("hello");
 }
 extern "C" void kernel_init()
 {
