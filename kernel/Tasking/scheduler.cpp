@@ -8,8 +8,8 @@
 #include "VirtualMemory/memory.h"
 #include "utils/assert.h"
 
-ThreadControlBlock* Scheduler::active_thread;
-ThreadControlBlock* Scheduler::blocked_thread;
+ThreadControlBlock* Scheduler::active_threads;
+ThreadControlBlock* Scheduler::sleeping_threads;
 ThreadControlBlock* Scheduler::current_thread;
 
 SpinLock Scheduler::scheduler_lock;
@@ -26,8 +26,8 @@ void Scheduler::setup()
 {
 	spinlock_init(&scheduler_lock);
 	tid = 0;
-	active_thread = nullptr;
-	blocked_thread = nullptr;
+	active_threads = nullptr;
+	sleeping_threads = nullptr;
 	current_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
 	create_new_thread((uintptr_t)idle);
@@ -50,7 +50,7 @@ void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
 		current_thread->state = ThreadState::READY;
 	}
 
-	current_thread = active_thread = select_next_thread();
+	current_thread = active_threads = select_next_thread();
 	current_thread->state = ThreadState::RUNNING;
 	load_context(current_context);
 	spinlock_release(&scheduler_lock);
@@ -59,31 +59,31 @@ void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
 // Round Robinson Scheduling Algorithm.
 ThreadControlBlock* Scheduler::select_next_thread()
 {
-	ASSERT(active_thread);
-	return active_thread->next;
+	ASSERT(active_threads);
+	return active_threads->next;
 }
 
 // Decrease sleep_ticks of each thread and wake up whose value is zero.
 void Scheduler::wake_up_sleepers()
 {
-	ThreadControlBlock* thread_pointer = blocked_thread;
+	ThreadControlBlock* thread_pointer = sleeping_threads;
 	ThreadControlBlock* next_thread = 0;
 
-	if (!blocked_thread)
+	if (!sleeping_threads)
 		return;
 	do {
 		if (thread_pointer->sleep_ticks > 0) {
 			thread_pointer->sleep_ticks--;
 			if (!thread_pointer->sleep_ticks) {
 				thread_pointer->state = ThreadState::READY;
-				delete_from_thread_list(&blocked_thread, thread_pointer);
-				append_to_thread_list(&active_thread, thread_pointer);
+				delete_from_thread_list(&sleeping_threads, thread_pointer);
+				append_to_thread_list(&active_threads, thread_pointer);
 				wake_up_sleepers();
 				break;
 			}
 		}
 		thread_pointer = thread_pointer->next;
-	} while (thread_pointer != blocked_thread);
+	} while (thread_pointer != sleeping_threads);
 }
 
 // Put the current thread into sleep for ms.
@@ -92,9 +92,18 @@ void Scheduler::sleep(unsigned ms)
 
 	spinlock_acquire(&scheduler_lock);
 	current_thread->sleep_ticks = ms;
-	current_thread->state = ThreadState::BLOCKED;
-	delete_from_thread_list(&active_thread, current_thread);
-	append_to_thread_list(&blocked_thread, current_thread);
+	current_thread->state = ThreadState::BLOCKED_SLEEP;
+	delete_from_thread_list(&active_threads, current_thread);
+	append_to_thread_list(&sleeping_threads, current_thread);
+	spinlock_release(&scheduler_lock);
+	yield();
+}
+
+void Scheduler::block_current_thread(ThreadState reason)
+{
+	spinlock_acquire(&scheduler_lock);
+	current_thread->state = ThreadState::BLOCKED_LOCK;
+	delete_from_thread_list(&active_threads, current_thread);
 	spinlock_release(&scheduler_lock);
 	yield();
 }
@@ -119,7 +128,7 @@ void Scheduler::create_new_thread(uintptr_t address)
 	new_thread->tid = tid++;
 	new_thread->context.esp = (unsigned)frame + 4;
 	new_thread->state = ThreadState::READY;
-	append_to_thread_list(&active_thread, new_thread);
+	append_to_thread_list(&active_threads, new_thread);
 	spinlock_release(&scheduler_lock);
 }
 
@@ -170,5 +179,5 @@ void Scheduler::delete_from_thread_list(ThreadControlBlock** list, ThreadControl
 		if (*list == thread)
 			*list = (*list)->next;
 	}
-	ASSERT(active_thread)
+	ASSERT(active_threads)
 }

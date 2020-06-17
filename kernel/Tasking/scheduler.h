@@ -4,10 +4,13 @@
 #include "utils/types.h"
 
 #define STACK_SIZE PAGE_SIZE
+
 enum class ThreadState {
 	RUNNING,
 	READY,
-	BLOCKED,
+	BLOCKED_SLEEP,
+	BLOCKED_LOCK,
+	BLOCKED_IO,
 	SUSPENDED,
 };
 enum class ProcessState {
@@ -55,23 +58,25 @@ typedef volatile struct ThreadControlBlock_t {
 class Scheduler
 {
   private:
-	static ThreadControlBlock* active_thread;
-	static ThreadControlBlock* blocked_thread;
-	static ThreadControlBlock* current_thread;
 	static void load_context(ContextFrame* current_context);
 	static void switch_page_directory(uintptr_t page_directory);
 	static void save_context(ContextFrame* current_context);
-	static void delete_from_thread_list(ThreadControlBlock** list, ThreadControlBlock* thread);
-	static void append_to_thread_list(ThreadControlBlock** list, ThreadControlBlock* new_thread);
+
 	static void wake_up_sleepers();
 	static void schedule_handler(ContextFrame* frame);
 	static ThreadControlBlock* select_next_thread();
 
   public:
+	static ThreadControlBlock* active_threads;
+	static ThreadControlBlock* sleeping_threads;
+	static ThreadControlBlock* current_thread;
 	static SpinLock scheduler_lock;
 	static void create_new_thread(uintptr_t address);
 	static void schedule(ContextFrame* current_context, ScheduleType type);
+	static void block_current_thread(ThreadState reason);
 	static void setup();
 	static void sleep(unsigned ms);
 	static void yield();
+	static void delete_from_thread_list(ThreadControlBlock** list, ThreadControlBlock* thread);
+	static void append_to_thread_list(ThreadControlBlock** list, ThreadControlBlock* new_thread);
 };
