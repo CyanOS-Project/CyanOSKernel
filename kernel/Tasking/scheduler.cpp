@@ -1,6 +1,5 @@
 #include "scheduler.h"
 #include "Arch/x86/asm.h"
-#include "Arch/x86/atomic.h"
 #include "Arch/x86/gdt.h"
 #include "Arch/x86/isr.h"
 #include "Arch/x86/panic.h"
@@ -12,6 +11,9 @@
 ThreadControlBlock* Scheduler::active_thread;
 ThreadControlBlock* Scheduler::blocked_thread;
 ThreadControlBlock* Scheduler::current_thread;
+
+SpinLock Scheduler::scheduler_lock;
+
 unsigned tid;
 
 void idle()
@@ -22,12 +24,13 @@ void idle()
 }
 void Scheduler::setup()
 {
+	spinlock_init(&scheduler_lock);
 	tid = 0;
 	active_thread = nullptr;
 	blocked_thread = nullptr;
+	current_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
 	create_new_thread((uintptr_t)idle);
-	current_thread = active_thread;
 }
 
 void Scheduler::schedule_handler(ContextFrame* frame)
@@ -38,16 +41,19 @@ void Scheduler::schedule_handler(ContextFrame* frame)
 // Select next process, save and switch context.
 void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
 {
+	spinlock_acquire(&scheduler_lock);
 	if (type == ScheduleType::TIMED)
 		wake_up_sleepers();
-	if (current_thread->state != ThreadState::ACTIVE) {
-		current_thread->state = ThreadState::ACTIVE;
+
+	if (current_thread) {
 		save_context(current_context);
+		current_thread->state = ThreadState::READY;
 	}
-	// TODO: switch using pointer switch only
+
 	current_thread = active_thread = select_next_thread();
 	current_thread->state = ThreadState::RUNNING;
 	load_context(current_context);
+	spinlock_release(&scheduler_lock);
 }
 
 // Round Robinson Scheduling Algorithm.
@@ -69,7 +75,7 @@ void Scheduler::wake_up_sleepers()
 		if (thread_pointer->sleep_ticks > 0) {
 			thread_pointer->sleep_ticks--;
 			if (!thread_pointer->sleep_ticks) {
-				thread_pointer->state = ThreadState::ACTIVE;
+				thread_pointer->state = ThreadState::READY;
 				delete_from_thread_list(&blocked_thread, thread_pointer);
 				append_to_thread_list(&active_thread, thread_pointer);
 				wake_up_sleepers();
@@ -84,12 +90,12 @@ void Scheduler::wake_up_sleepers()
 void Scheduler::sleep(unsigned ms)
 {
 
-	DISABLE_INTERRUPTS();
+	spinlock_acquire(&scheduler_lock);
 	current_thread->sleep_ticks = ms;
 	current_thread->state = ThreadState::BLOCKED;
 	delete_from_thread_list(&active_thread, current_thread);
 	append_to_thread_list(&blocked_thread, current_thread);
-	ENABLE_INTERRUPTS();
+	spinlock_release(&scheduler_lock);
 	yield();
 }
 
@@ -102,6 +108,7 @@ void Scheduler::yield()
 // Create thread structure of a new thread
 void Scheduler::create_new_thread(uintptr_t address)
 {
+	spinlock_acquire(&scheduler_lock);
 	ThreadControlBlock* new_thread = (ThreadControlBlock*)Heap::kmalloc(sizeof(ThreadControlBlock), 0);
 	void* thread_stack = (void*)Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	ContextFrame* frame = (ContextFrame*)((unsigned)thread_stack + STACK_SIZE - sizeof(ContextFrame));
@@ -111,8 +118,9 @@ void Scheduler::create_new_thread(uintptr_t address)
 	frame->eflags = 0x202;
 	new_thread->tid = tid++;
 	new_thread->context.esp = (unsigned)frame + 4;
-	new_thread->state = ThreadState::ACTIVE;
+	new_thread->state = ThreadState::READY;
 	append_to_thread_list(&active_thread, new_thread);
+	spinlock_release(&scheduler_lock);
 }
 
 // Switch the returned context of the current IRQ.

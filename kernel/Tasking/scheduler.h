@@ -1,11 +1,12 @@
 #include "Arch/x86/isr.h"
 #include "Arch/x86/paging.h"
+#include "Arch/x86/spinlock.h"
 #include "utils/types.h"
 
 #define STACK_SIZE PAGE_SIZE
 enum class ThreadState {
 	RUNNING,
-	ACTIVE,
+	READY,
 	BLOCKED,
 	SUSPENDED,
 };
@@ -67,6 +68,7 @@ class Scheduler
 	static ThreadControlBlock* select_next_thread();
 
   public:
+	static SpinLock scheduler_lock;
 	static void create_new_thread(uintptr_t address);
 	static void schedule(ContextFrame* current_context, ScheduleType type);
 	static void setup();

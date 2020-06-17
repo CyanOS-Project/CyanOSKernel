@@ -42,3 +42,26 @@ static inline void out32(uint16_t port, uint32_t data)
 {
 	asm volatile("outl %0, %1" : : "a"(data), "d"(port));
 }
+
+static inline uint32_t test_and_set(volatile uint32_t* address)
+{
+	uint32_t result;
+	asm volatile(" LOCK XCHGL %0, %1\n" : "+m"(*address), "=a"(result) : "1"(1) : "cc", "memory");
+	return result;
+}
+
+static inline uint32_t eflags_read()
+{
+	uint32_t eflags;
+	asm volatile("PUSHFL\n"
+	             "POPL %0\n" ::"r"(eflags));
+
+	return eflags;
+}
+
+static inline void eflags_write(uint32_t eflags)
+{
+	asm volatile("PUSHL %0\n"
+	             "POPFL \n"
+	             : "=r"(eflags));
+}

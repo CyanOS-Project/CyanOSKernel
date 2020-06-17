@@ -1,6 +1,5 @@
 #include "kernel_init.h"
 #include "Arch/x86/asm.h"
-#include "Arch/x86/atomic.h"
 #include "Arch/x86/gdt.h"
 #include "Arch/x86/idt.h"
 #include "Arch/x86/paging.h"
@@ -30,9 +29,8 @@ void display_time()
 extern "C" void kernel_init()
 {
 	initiate_console();
-	atomic_intiate();
-	IDT::setup();
 	GDT::setup();
+	IDT::setup();
 	Memory::setup_page_fault_handler();
 	printStatus("Setting up core components.", true);
 	Heap::setup();
@@ -43,7 +41,6 @@ extern "C" void kernel_init()
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
 	ENABLE_INTERRUPTS();
-	// display_time();
 	printf("Going Idle State.\n");
 	while (1) {
 		HLT();
