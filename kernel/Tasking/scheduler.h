@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Arch/x86/isr.h"
 #include "Arch/x86/paging.h"
 #include "Arch/x86/spinlock.h"
@@ -67,7 +69,7 @@ class Scheduler
 	static ThreadControlBlock* select_next_thread();
 
   public:
-	static ThreadControlBlock* active_threads;
+	static ThreadControlBlock* ready_threads;
 	static ThreadControlBlock* sleeping_threads;
 	static ThreadControlBlock* current_thread;
 	static SpinLock scheduler_lock;

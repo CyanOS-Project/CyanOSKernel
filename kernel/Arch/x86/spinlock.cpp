@@ -12,10 +12,10 @@ void spinlock_acquire(SpinLock* lock)
 	DISABLE_INTERRUPTS();
 	while (test_and_set(&lock->value) != 0)
 		;
-	eflags_write(lock->eflags);
 }
 
 void spinlock_release(SpinLock* lock)
 {
 	lock->value = 0;
+	eflags_write(lock->eflags);
 }

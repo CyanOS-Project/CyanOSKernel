@@ -7,12 +7,13 @@
 - [x] Dynamic virtual/physical memory allocation.
 - [x] Heap allocator.
 - [x] PIC.
-- [ ] Multiprocessing.
-- [ ] Mutex/Semaphores.
+- [x] Multi-threading.
+- [x] Mutex/Semaphores.
+- [ ] Multi-processing.
 - [ ] User space.
 - [ ] System calls.
 - [ ] Keyboard/Mouse drivers.
-- [ ] Process signalling.
+- [ ] Inter-process communication.
 - [ ] Filesystem.
 - [ ] GUI.
 - [ ] Network Driver.
