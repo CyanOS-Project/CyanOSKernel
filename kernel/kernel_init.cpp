@@ -43,6 +43,7 @@ void thread2()
 void thread1()
 {
 	printf("Thread1:\n");
+	semaphore_init(&lock);
 	semaphore_acquire(&lock);
 	Scheduler::create_new_thread((uint32_t)thread2);
 	printf("Semaphore acquired by thread1\n");
@@ -68,7 +69,6 @@ extern "C" void kernel_init()
 	PIT::setup();
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
-	semaphore_init(&lock);
 	ENABLE_INTERRUPTS();
 	printf("Going Idle State.\n");
 	while (1) {

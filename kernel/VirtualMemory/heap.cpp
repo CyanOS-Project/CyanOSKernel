@@ -11,13 +11,13 @@ void Heap::setup()
 }
 
 // Returns address of zeroed block of memory.
-uintptr_t Heap::kmalloc(unsigned size, unsigned flags)
+void* Heap::kmalloc(unsigned size, unsigned flags)
 {
 	if (!size)
-		return (uintptr_t) nullptr;
+		return nullptr;
 
 	if (size > MAX_SIZE) {
-		return (uintptr_t) nullptr;
+		return nullptr;
 	}
 
 	BlockHeader* free_block;
@@ -28,7 +28,7 @@ uintptr_t Heap::kmalloc(unsigned size, unsigned flags)
 	if (free_block) {
 		link_block(free_block->previous, free_block);
 		free_block->size = size;
-		return (uintptr_t)HEADER_TO_ADDR(free_block);
+		return (void*)HEADER_TO_ADDR(free_block);
 	}
 	// Create new memory page
 	PageFrameBlock* new_page = create_new_page();
@@ -36,11 +36,11 @@ uintptr_t Heap::kmalloc(unsigned size, unsigned flags)
 	free_block->size = size;
 	uintptr_t alloc_address = HEADER_TO_ADDR(free_block);
 	memset((char*)alloc_address, 0, size);
-	return alloc_address;
+	return (void*)alloc_address;
 }
 
 // Frees block of memory allocated by kmalloc.
-void Heap::kfree(uintptr_t addr)
+void Heap::kfree(void* addr)
 {
 	BlockHeader* current_block = (BlockHeader*)ADDR_TO_HEADER(addr);
 	unlink_block(current_block);

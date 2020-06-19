@@ -32,6 +32,6 @@ class Heap
 
   public:
 	static void setup();
-	static uintptr_t kmalloc(unsigned size, unsigned flags);
-	static void kfree(uintptr_t addr);
+	static void* kmalloc(unsigned size, unsigned flags);
+	static void kfree(void* addr);
 };
