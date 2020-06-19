@@ -14,6 +14,7 @@
 #include "VirtualMemory/memory.h"
 #include "VirtualMemory/virtual.h"
 #include "utils/assert.h"
+#include "utils/list.h"
 
 void display_time()
 {
@@ -55,6 +56,34 @@ void thread1()
 	}
 }
 
+struct Stuff {
+	int value1;
+	int value2;
+};
+
+void test()
+{
+	CircularList<Stuff> list = *new CircularList<Stuff>;
+	list.push_back({.value1 = 1, .value2 = 2});
+	list.push_back({.value1 = 3, .value2 = 4});
+	for (size_t i = 0; i < list.count; i++) {
+		printf("%d %d\n", list[i].value1, list[i].value2);
+	}
+
+	/*CircularList<Stuff>* list = new CircularList<Stuff>({.value1 = 1, .value2 = 2});
+	/*for (size_t i = 0; i < 5; i++) {
+	    CircularList<Stuff>* new_node = new CircularList<Stuff>({.value1 = 1, .value2 = 2});
+	    list->add_node(new_node);
+	}
+	CircularList<Stuff>* node_iterator = list->begin();
+	do {
+	    node_iterator->operator++();
+	} while (node_iterator != list->begin());
+
+
+	*/
+}
+
 extern "C" void kernel_init()
 {
 	initiate_console();
@@ -69,7 +98,8 @@ extern "C" void kernel_init()
 	PIT::setup();
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
-	ENABLE_INTERRUPTS();
+	// ENABLE_INTERRUPTS();
+	test();
 	printf("Going Idle State.\n");
 	while (1) {
 		HLT();
