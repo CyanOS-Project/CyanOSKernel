@@ -1,4 +1,5 @@
-#include "Devices/Console/console.h"
+#pragma once
+#include "assert.h"
 
 template <class T> class CircularList
 {
@@ -31,12 +32,13 @@ template <class T> class CircularList
 	void push_front(const T& new_data);
 	void pop_back();
 	void pop_front();
-	void remove(const Iterator&);
+	void remove(Iterator&);
 	void remove(int index);
 	void increment_head();
-	void set_head(const Iterator&);
+	void set_head(Iterator&);
 	void set_head(int index);
-	void move_to_list(const CircularList<T>* list);
+	void move_to_list(CircularList<T>* list);
+	bool is_empty();
 	T& head_data();
 	T& data(Iterator&);
 	T& operator[](int index);
@@ -105,6 +107,9 @@ template <class T> CircularList<T>::CircularList()
 
 template <class T> CircularList<T>::~CircularList()
 {
+	if (!m_first)
+		return;
+
 	Node* node_iterator = m_first;
 	do {
 		Node* next = node_iterator->next;
@@ -116,6 +121,7 @@ template <class T> CircularList<T>::~CircularList()
 // unlink node from the list.
 template <class T> void CircularList<T>::unlink_node(Node* node)
 {
+	ASSERT(m_first);
 	if (node == node->next) { // remove the last node
 		m_first = nullptr;
 	} else {
@@ -153,18 +159,21 @@ template <class T> void CircularList<T>::push_front(const T& new_data)
 // The second node will be the head.
 template <class T> void CircularList<T>::increment_head()
 {
+	ASSERT(m_first);
 	m_first = m_first->next;
 }
 
 // Select the head node using Iterator.
-template <class T> void CircularList<T>::set_head(const Iterator& itr)
+template <class T> void CircularList<T>::set_head(Iterator& itr)
 {
+	ASSERT(m_first);
 	m_first = itr.node();
 }
 
 // Select the head node using an index.
 template <class T> void CircularList<T>::set_head(int index)
 {
+	ASSERT(m_first);
 	Iterator itr = Iterator(this);
 	itr.set_cursor(index);
 	m_first = itr.node();
@@ -173,24 +182,28 @@ template <class T> void CircularList<T>::set_head(int index)
 // Remove the last node.
 template <class T> void CircularList<T>::pop_back()
 {
+	ASSERT(m_first);
 	unlink_node(m_first->prev);
 }
 
 // Remove the first node.
 template <class T> void CircularList<T>::pop_front()
 {
+	ASSERT(m_first);
 	unlink_node(m_first);
 }
 
 // Remove a node whose selected by Iterator.
-template <class T> void CircularList<T>::remove(const Iterator& itr)
+template <class T> void CircularList<T>::remove(Iterator& itr)
 {
+	ASSERT(m_first);
 	unlink_node(itr.node());
 }
 
 // Remove a node whose selected by its index.
 template <class T> void CircularList<T>::remove(int index)
 {
+	ASSERT(m_first);
 	Iterator itr = Iterator(this);
 	itr.set_cursor(index);
 	unlink_node(itr.node());
@@ -199,18 +212,29 @@ template <class T> void CircularList<T>::remove(int index)
 // Get data of the node selected by iterator.
 template <class T> T& CircularList<T>::data(Iterator& itr)
 {
+	ASSERT(m_first);
 	return itr.node()->data;
 }
 
 // Get data of the head node.
 template <class T> T& CircularList<T>::head_data()
 {
+	ASSERT(m_first);
 	return m_first->data;
 }
 
 template <class T> T& CircularList<T>::operator[](int index)
 {
+	ASSERT(m_first);
 	Iterator itr = Iterator(this);
 	itr.set_cursor(index);
 	return itr.node().data;
+}
+
+template <class T> bool CircularList<T>::is_empty()
+{
+	if (m_first)
+		return false;
+	else
+		return true;
 }

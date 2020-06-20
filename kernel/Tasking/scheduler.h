@@ -3,6 +3,7 @@
 #include "Arch/x86/isr.h"
 #include "Arch/x86/paging.h"
 #include "Arch/x86/spinlock.h"
+#include "utils/list.h"
 #include "utils/types.h"
 
 #define STACK_SIZE PAGE_SIZE
@@ -27,7 +28,7 @@ enum class ScheduleType {
 	TIMED,
 };
 
-typedef volatile struct RegistersContext_t {
+typedef struct RegistersContext_t {
 	uint32_t eax;
 	uint32_t ebx;
 	uint32_t ecx;
@@ -40,21 +41,19 @@ typedef volatile struct RegistersContext_t {
 	uint32_t eflags;
 } RegistersContext;
 
-typedef volatile struct ProcessControlBlock_t {
+typedef struct ProcessControlBlock_t {
 	unsigned pid;
 	unsigned page_directory;
 	ProcessState state;
-	volatile ProcessControlBlock_t* parent;
-	volatile ProcessControlBlock_t *next, *prev;
+	ProcessControlBlock_t* parent;
 } ProcessControlBlock;
 
-typedef volatile struct ThreadControlBlock_t {
+typedef struct ThreadControlBlock_t {
 	unsigned tid;
 	unsigned sleep_ticks;
 	ThreadState state;
 	RegistersContext context;
-	volatile ProcessControlBlock_t* parent;
-	volatile ThreadControlBlock_t *next, *prev;
+	ProcessControlBlock_t* parent;
 } ThreadControlBlock;
 
 class Scheduler
@@ -63,15 +62,13 @@ class Scheduler
 	static void load_context(ContextFrame* current_context);
 	static void switch_page_directory(uintptr_t page_directory);
 	static void save_context(ContextFrame* current_context);
-
 	static void wake_up_sleepers();
 	static void schedule_handler(ContextFrame* frame);
-	static ThreadControlBlock* select_next_thread();
+	static void select_next_thread(CircularList<ThreadControlBlock>::Iterator& iterator);
 
   public:
-	static ThreadControlBlock* ready_threads;
-	static ThreadControlBlock* sleeping_threads;
-	static ThreadControlBlock* current_thread;
+	static CircularList<ThreadControlBlock>* ready_threads;
+	static CircularList<ThreadControlBlock>* sleeping_threads;
 	static SpinLock scheduler_lock;
 	static void create_new_thread(uintptr_t address);
 	static void schedule(ContextFrame* current_context, ScheduleType type);
@@ -79,6 +76,4 @@ class Scheduler
 	static void setup();
 	static void sleep(unsigned ms);
 	static void yield();
-	static void delete_from_thread_list(ThreadControlBlock** list, ThreadControlBlock* thread);
-	static void append_to_thread_list(ThreadControlBlock** list, ThreadControlBlock* new_thread);
 };

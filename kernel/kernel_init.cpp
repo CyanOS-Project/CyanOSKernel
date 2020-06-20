@@ -27,15 +27,15 @@ void display_time()
 		removeLine();
 	}
 }
-Semaphore lock;
+// Semaphore lock;
 void thread2()
 {
 	printf("Thread2:\n");
-	semaphore_acquire(&lock);
+	/*semaphore_acquire(&lock);
 	printf("Semaphore acquired by thread2\n");
 	Scheduler::sleep(1000);
 	semaphore_release(&lock);
-	printf("Semaphore released by thread2\n");
+	printf("Semaphore released by thread2\n");*/
 	while (1) {
 		HLT();
 	}
@@ -44,39 +44,48 @@ void thread2()
 void thread1()
 {
 	printf("Thread1:\n");
-	semaphore_init(&lock);
+	/*semaphore_init(&lock);
 	semaphore_acquire(&lock);
 	Scheduler::create_new_thread((uint32_t)thread2);
 	printf("Semaphore acquired by thread1\n");
 	Scheduler::sleep(500);
 	semaphore_release(&lock);
-	printf("Semaphore released by thread1\n");
+	printf("Semaphore released by thread1\n");*/
 	while (1) {
 		HLT();
 	}
 }
 
-struct Stuff {
+typedef struct Stuff_t {
 	int value1;
 	int value2;
-};
+} Stuff;
 
 void test()
 {
-	CircularList<Stuff> list = *new CircularList<Stuff>;
-	list.push_back({.value1 = 1, .value2 = 1});
-	list.push_back({.value1 = 2, .value2 = 2});
-	list.push_back({.value1 = 3, .value2 = 3});
-	list.push_back({.value1 = 4, .value2 = 4});
+	CircularList<Stuff>* list = new CircularList<Stuff>;
 
-	CircularList<Stuff>::Iterator itr = CircularList<Stuff>::Iterator(&list);
-	list.remove(0);
-	itr.set_cursor(0);
-	do {
-		Stuff& cur = list.data(itr);
-		printf("%d %d\n", cur.value1, cur.value2);
-		itr++;
-	} while (!itr.is_head());
+	Stuff s1;
+	s1.value1 = 1;
+	s1.value2 = 1;
+	Stuff s2 = {2, 2};
+	Stuff s3 = {3, 3};
+	Stuff s4 = {4, 4};
+	list->push_back(s1);
+	list->push_back(s2);
+	list->push_back(s3);
+	list->push_back(s4);
+	if (!list->is_empty()) {
+		CircularList<Stuff>::Iterator itr = CircularList<Stuff>::Iterator(list);
+		// list->remove(0);
+		itr.set_cursor(0);
+		s1.value1 = 5;
+		do {
+			Stuff& cur = list->data(itr);
+			printf("%d %d\n", cur.value1, cur.value2);
+			itr++;
+		} while (!itr.is_head());
+	}
 }
 
 extern "C" void kernel_init()
@@ -89,12 +98,13 @@ extern "C" void kernel_init()
 	Heap::setup();
 	Scheduler::setup();
 	Scheduler::create_new_thread((uintptr_t)thread1);
+	Scheduler::create_new_thread((uintptr_t)thread2);
 	PIC::setup();
 	PIT::setup();
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
-	// ENABLE_INTERRUPTS();
-	test();
+	ENABLE_INTERRUPTS();
+	// test();
 	printf("Going Idle State.\n");
 	while (1) {
 		HLT();
