@@ -68,19 +68,15 @@ void test()
 	list.push_back({.value1 = 2, .value2 = 2});
 	list.push_back({.value1 = 3, .value2 = 3});
 	list.push_back({.value1 = 4, .value2 = 4});
-	list.remove(2);
+
 	CircularList<Stuff>::Iterator itr = CircularList<Stuff>::Iterator(&list);
-	// itr.remove_current();
-	/*for (size_t i = 0; i < 3; i++) {
-	    Stuff& cur = list[i];
-	    printf("%d %d\n", cur.value1, cur.value2);
-	}*/
-	// itr.set_cursor(0);
+	list.remove(0);
+	itr.set_cursor(0);
 	do {
-		Stuff& cur = itr.get_current();
+		Stuff& cur = list.data(itr);
 		printf("%d %d\n", cur.value1, cur.value2);
 		itr++;
-	} while (!itr.is_first());
+	} while (!itr.is_head());
 }
 
 extern "C" void kernel_init()
