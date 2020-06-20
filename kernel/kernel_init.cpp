@@ -64,24 +64,23 @@ struct Stuff {
 void test()
 {
 	CircularList<Stuff> list = *new CircularList<Stuff>;
-	list.push_back({.value1 = 1, .value2 = 2});
-	list.push_back({.value1 = 3, .value2 = 4});
-	for (size_t i = 0; i < list.count; i++) {
-		printf("%d %d\n", list[i].value1, list[i].value2);
-	}
-
-	/*CircularList<Stuff>* list = new CircularList<Stuff>({.value1 = 1, .value2 = 2});
-	/*for (size_t i = 0; i < 5; i++) {
-	    CircularList<Stuff>* new_node = new CircularList<Stuff>({.value1 = 1, .value2 = 2});
-	    list->add_node(new_node);
-	}
-	CircularList<Stuff>* node_iterator = list->begin();
+	list.push_back({.value1 = 1, .value2 = 1});
+	list.push_back({.value1 = 2, .value2 = 2});
+	list.push_back({.value1 = 3, .value2 = 3});
+	list.push_back({.value1 = 4, .value2 = 4});
+	list.remove(2);
+	CircularList<Stuff>::Iterator itr = CircularList<Stuff>::Iterator(&list);
+	// itr.remove_current();
+	/*for (size_t i = 0; i < 3; i++) {
+	    Stuff& cur = list[i];
+	    printf("%d %d\n", cur.value1, cur.value2);
+	}*/
+	// itr.set_cursor(0);
 	do {
-	    node_iterator->operator++();
-	} while (node_iterator != list->begin());
-
-
-	*/
+		Stuff& cur = itr.get_current();
+		printf("%d %d\n", cur.value1, cur.value2);
+		itr++;
+	} while (!itr.is_first());
 }
 
 extern "C" void kernel_init()
