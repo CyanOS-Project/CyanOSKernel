@@ -97,11 +97,19 @@ void Scheduler::sleep(unsigned ms)
 	yield();
 }
 
-void Scheduler::block_current_thread(ThreadState reason)
+void Scheduler::block_current_thread(ThreadState reason, CircularList<ThreadControlBlock>* waiting_list)
 {
 	spinlock_acquire(&scheduler_lock);
 	ThreadControlBlock& current = ready_threads->head_data();
 	current.state = ThreadState::BLOCKED_LOCK;
+	ready_threads->move_head_to_other_list(waiting_list);
+	spinlock_release(&scheduler_lock);
+}
+
+void Scheduler::unblock_thread(CircularList<ThreadControlBlock>* waiting_list)
+{
+	spinlock_acquire(&scheduler_lock);
+	waiting_list->move_head_to_other_list(ready_threads);
 	spinlock_release(&scheduler_lock);
 }
 

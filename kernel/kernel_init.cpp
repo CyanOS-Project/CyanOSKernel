@@ -27,15 +27,15 @@ void display_time()
 		removeLine();
 	}
 }
-// Semaphore lock;
+Semaphore lock;
 void thread2()
 {
 	printf("Thread2:\n");
-	/*semaphore_acquire(&lock);
+	semaphore_acquire(&lock);
 	printf("Semaphore acquired by thread2\n");
 	Scheduler::sleep(1000);
 	semaphore_release(&lock);
-	printf("Semaphore released by thread2\n");*/
+	printf("Semaphore released by thread2\n");
 	while (1) {
 		HLT();
 	}
@@ -45,14 +45,13 @@ void thread1()
 {
 	printf("Thread1:\n");
 	Scheduler::sleep(500);
-	printf("Thread1:end\n");
-	/*semaphore_init(&lock);
+	semaphore_init(&lock);
 	semaphore_acquire(&lock);
 	Scheduler::create_new_thread((uint32_t)thread2);
 	printf("Semaphore acquired by thread1\n");
 	Scheduler::sleep(500);
 	semaphore_release(&lock);
-	printf("Semaphore released by thread1\n");*/
+	printf("Semaphore released by thread1\n");
 	while (1) {
 		HLT();
 	}
@@ -111,7 +110,6 @@ extern "C" void kernel_init()
 	Heap::setup();
 	Scheduler::setup();
 	Scheduler::create_new_thread((uintptr_t)thread1);
-	Scheduler::create_new_thread((uintptr_t)thread2);
 	PIC::setup();
 	PIT::setup();
 	printStatus("Setting up devices.", true);

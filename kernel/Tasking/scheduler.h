@@ -59,6 +59,9 @@ typedef struct ThreadControlBlock_t {
 class Scheduler
 {
   private:
+	static CircularList<ThreadControlBlock>* ready_threads;
+	static CircularList<ThreadControlBlock>* sleeping_threads;
+	static SpinLock scheduler_lock;
 	static void load_context(ContextFrame* current_context, ThreadControlBlock* thread);
 	static void switch_page_directory(uintptr_t page_directory);
 	static void save_context(ContextFrame* current_context, ThreadControlBlock* thread);
@@ -67,12 +70,10 @@ class Scheduler
 	static void select_next_thread(CircularList<ThreadControlBlock>::Iterator& iterator);
 
   public:
-	static CircularList<ThreadControlBlock>* ready_threads;
-	static CircularList<ThreadControlBlock>* sleeping_threads;
-	static SpinLock scheduler_lock;
 	static void create_new_thread(uintptr_t address);
 	static void schedule(ContextFrame* current_context, ScheduleType type);
-	static void block_current_thread(ThreadState reason);
+	static void block_current_thread(ThreadState reason, CircularList<ThreadControlBlock>* waiting_list);
+	static void unblock_thread(CircularList<ThreadControlBlock>* waiting_list);
 	static void setup();
 	static void sleep(unsigned ms);
 	static void yield();
