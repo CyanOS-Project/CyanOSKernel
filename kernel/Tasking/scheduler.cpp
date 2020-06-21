@@ -10,6 +10,7 @@
 
 CircularList<ThreadControlBlock>* Scheduler::ready_threads;
 CircularList<ThreadControlBlock>* Scheduler::sleeping_threads;
+ThreadControlBlock* current_thread;
 
 SpinLock Scheduler::scheduler_lock;
 
@@ -27,6 +28,7 @@ void Scheduler::setup()
 	tid = 0;
 	ready_threads = new CircularList<ThreadControlBlock>;
 	sleeping_threads = new CircularList<ThreadControlBlock>;
+	current_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
 	create_new_thread((uintptr_t)idle);
 }
@@ -40,20 +42,19 @@ void Scheduler::schedule_handler(ContextFrame* frame)
 void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
 {
 	spinlock_acquire(&scheduler_lock);
-	ThreadControlBlock& current_TCB = ready_threads->head_data();
 	if (type == ScheduleType::TIMED)
 		wake_up_sleepers();
-	// TODO: remove blocked threads
-	if (current_TCB.state != ThreadState::READY) {
-		save_context(current_context);
-		current_TCB.state = ThreadState::READY;
+	if (current_thread) {
+		save_context(current_context, current_thread);
+		current_thread->state = ThreadState::READY;
 	}
 	// FIXME: schedule idle if there is no ready thread
 	CircularList<ThreadControlBlock>::Iterator iterator = CircularList<ThreadControlBlock>::Iterator(ready_threads);
 	select_next_thread(iterator);
 	ready_threads->set_head(iterator);
 	ready_threads->head_data().state = ThreadState::RUNNING;
-	load_context(current_context);
+	load_context(current_context, &ready_threads->head_data());
+	current_thread = &ready_threads->head_data();
 	spinlock_release(&scheduler_lock);
 }
 
@@ -74,9 +75,7 @@ void Scheduler::wake_up_sleepers()
 		if (current.sleep_ticks > 0) {
 			current.sleep_ticks--;
 			if (!current.sleep_ticks) {
-				current.state = ThreadState::READY;
-				sleeping_threads->remove(iterator);
-				ready_threads->push_back(current);
+				sleeping_threads->move_to_other_list(ready_threads, iterator);
 				wake_up_sleepers();
 				break;
 			}
@@ -90,10 +89,10 @@ void Scheduler::sleep(unsigned ms)
 {
 
 	spinlock_acquire(&scheduler_lock);
-	ThreadControlBlock& current = sleeping_threads->head_data();
+	ThreadControlBlock& current = ready_threads->head_data();
 	current.sleep_ticks = ms;
 	current.state = ThreadState::BLOCKED_SLEEP;
-	sleeping_threads->push_back(current);
+	ready_threads->move_head_to_other_list(sleeping_threads);
 	spinlock_release(&scheduler_lock);
 	yield();
 }
@@ -132,15 +131,15 @@ void Scheduler::create_new_thread(uintptr_t address)
 }
 
 // Switch the returned context of the current IRQ.
-void Scheduler::load_context(ContextFrame* current_context)
+void Scheduler::load_context(ContextFrame* current_context, ThreadControlBlock* thread)
 {
-	current_context->esp = ready_threads->head_data().context.esp;
+	current_context->esp = thread->context.esp;
 }
 
 // Save current context into its TCB.
-void Scheduler::save_context(ContextFrame* current_context)
+void Scheduler::save_context(ContextFrame* current_context, ThreadControlBlock* thread)
 {
-	ready_threads->head_data().context.esp = current_context->esp;
+	thread->context.esp = current_context->esp;
 }
 
 // Switch to page directory

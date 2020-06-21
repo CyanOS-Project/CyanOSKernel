@@ -59,9 +59,9 @@ typedef struct ThreadControlBlock_t {
 class Scheduler
 {
   private:
-	static void load_context(ContextFrame* current_context);
+	static void load_context(ContextFrame* current_context, ThreadControlBlock* thread);
 	static void switch_page_directory(uintptr_t page_directory);
-	static void save_context(ContextFrame* current_context);
+	static void save_context(ContextFrame* current_context, ThreadControlBlock* thread);
 	static void wake_up_sleepers();
 	static void schedule_handler(ContextFrame* frame);
 	static void select_next_thread(CircularList<ThreadControlBlock>::Iterator& iterator);

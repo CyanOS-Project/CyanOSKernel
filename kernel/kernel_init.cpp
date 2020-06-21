@@ -44,6 +44,8 @@ void thread2()
 void thread1()
 {
 	printf("Thread1:\n");
+	Scheduler::sleep(500);
+	printf("Thread1:end\n");
 	/*semaphore_init(&lock);
 	semaphore_acquire(&lock);
 	Scheduler::create_new_thread((uint32_t)thread2);
@@ -64,10 +66,9 @@ typedef struct Stuff_t {
 void test()
 {
 	CircularList<Stuff>* list = new CircularList<Stuff>;
+	CircularList<Stuff>* list2 = new CircularList<Stuff>;
 
-	Stuff s1;
-	s1.value1 = 1;
-	s1.value2 = 1;
+	Stuff s1 = {1, 1};
 	Stuff s2 = {2, 2};
 	Stuff s3 = {3, 3};
 	Stuff s4 = {4, 4};
@@ -75,17 +76,29 @@ void test()
 	list->push_back(s2);
 	list->push_back(s3);
 	list->push_back(s4);
-	if (!list->is_empty()) {
-		CircularList<Stuff>::Iterator itr = CircularList<Stuff>::Iterator(list);
-		// list->remove(0);
-		itr.set_cursor(0);
-		s1.value1 = 5;
-		do {
-			Stuff& cur = list->data(itr);
-			printf("%d %d\n", cur.value1, cur.value2);
-			itr++;
-		} while (!itr.is_head());
-	}
+	printf("List 1:\n");
+	CircularList<Stuff>::Iterator itr = CircularList<Stuff>::Iterator(list);
+	list->move_head_to_other_list(list2);
+	list->move_head_to_other_list(list2);
+	list->move_head_to_other_list(list2);
+	itr.set_cursor(0);
+	// list->remove(1);
+	do {
+		Stuff& cur = list->data(itr);
+		printf("%d %d\n", cur.value1, cur.value2);
+		itr++;
+	} while (!itr.is_head());
+
+	printf("List 2:\n");
+	CircularList<Stuff>::Iterator itr2 = CircularList<Stuff>::Iterator(list2);
+	// list->remove(0);
+	itr2.set_cursor(0);
+	s1.value1 = 5;
+	do {
+		Stuff& cur = list2->data(itr2);
+		printf("%d %d\n", cur.value1, cur.value2);
+		itr2++;
+	} while (!itr2.is_head());
 }
 
 extern "C" void kernel_init()
