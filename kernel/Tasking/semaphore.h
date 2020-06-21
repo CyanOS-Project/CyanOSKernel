@@ -2,13 +2,17 @@
 #include "utils/list.h"
 #include "utils/types.h"
 
-struct Semaphore {
+class Semaphore
+{
+  private:
 	unsigned max_count;
 	unsigned count;
 	SpinLock spinlock;
 	CircularList<ThreadControlBlock>* waiting_queue;
-};
 
-void semaphore_init(Semaphore* lock);
-void semaphore_acquire(Semaphore* lock);
-void semaphore_release(Semaphore* lock);
+  public:
+	Semaphore(int _max_count);
+	~Semaphore();
+	void acquire();
+	void release();
+};

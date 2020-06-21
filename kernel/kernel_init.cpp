@@ -27,14 +27,14 @@ void display_time()
 		removeLine();
 	}
 }
-Semaphore lock;
+Semaphore* lock;
 void thread2()
 {
 	printf("Thread2:\n");
-	semaphore_acquire(&lock);
+	lock->acquire();
 	printf("Semaphore acquired by thread2\n");
 	Scheduler::sleep(1000);
-	semaphore_release(&lock);
+	lock->release();
 	printf("Semaphore released by thread2\n");
 	while (1) {
 		HLT();
@@ -45,12 +45,12 @@ void thread1()
 {
 	printf("Thread1:\n");
 	Scheduler::sleep(500);
-	semaphore_init(&lock);
-	semaphore_acquire(&lock);
+	lock = new Semaphore(1);
+	lock->acquire();
 	Scheduler::create_new_thread((uint32_t)thread2);
 	printf("Semaphore acquired by thread1\n");
 	Scheduler::sleep(500);
-	semaphore_release(&lock);
+	lock->release();
 	printf("Semaphore released by thread1\n");
 	while (1) {
 		HLT();
