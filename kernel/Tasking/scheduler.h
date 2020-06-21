@@ -62,15 +62,15 @@ class Scheduler
 	static CircularList<ThreadControlBlock>* ready_threads;
 	static CircularList<ThreadControlBlock>* sleeping_threads;
 	static SpinLock scheduler_lock;
-	static void load_context(ContextFrame* current_context, ThreadControlBlock* thread);
-	static void switch_page_directory(uintptr_t page_directory);
-	static void save_context(ContextFrame* current_context, ThreadControlBlock* thread);
+	static void load_context(ContextFrame* current_context, const ThreadControlBlock* thread);
+	static void switch_page_directory(const uintptr_t page_directory);
+	static void save_context(const ContextFrame* current_context, ThreadControlBlock* thread);
 	static void wake_up_sleepers();
 	static void schedule_handler(ContextFrame* frame);
 	static void select_next_thread(CircularList<ThreadControlBlock>::Iterator& iterator);
 
   public:
-	static void create_new_thread(uintptr_t address);
+	static void create_new_thread(void* address);
 	static void schedule(ContextFrame* current_context, ScheduleType type);
 	static void block_current_thread(ThreadState reason, CircularList<ThreadControlBlock>* waiting_list);
 	static void unblock_thread(CircularList<ThreadControlBlock>* waiting_list);

@@ -47,7 +47,7 @@ void thread1()
 	Scheduler::sleep(500);
 	lock = new Semaphore(1);
 	lock->acquire();
-	Scheduler::create_new_thread((uint32_t)thread2);
+	Scheduler::create_new_thread((void*)thread2);
 	printf("Semaphore acquired by thread1\n");
 	Scheduler::sleep(500);
 	lock->release();
@@ -109,7 +109,7 @@ extern "C" void kernel_init()
 	printStatus("Setting up core components.", true);
 	Heap::setup();
 	Scheduler::setup();
-	Scheduler::create_new_thread((uintptr_t)thread1);
+	Scheduler::create_new_thread((void*)thread1);
 	PIC::setup();
 	PIT::setup();
 	printStatus("Setting up devices.", true);

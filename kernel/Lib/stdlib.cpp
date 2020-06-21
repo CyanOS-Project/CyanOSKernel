@@ -1,26 +1,35 @@
 #include "stdlib.h"
 
-void memcpy(char* dest, char* source, unsigned int len)
+void memcpy(void* dest, void* source, unsigned int len)
 {
+	char* _dest = (char*)dest;
+	char* _source = (char*)source;
 	for (size_t i = 0; i < len; i++)
-		dest[i] = source[i];
+		_dest[i] = _source[i];
 }
-void memset(char* dest, char value, unsigned int len)
+
+void memset(void* dest, char value, unsigned int len)
 {
+	char* _dest = (char*)dest;
 	for (size_t i = 0; i < len; i++)
-		dest[i] = value;
+		_dest[i] = value;
 }
-bool memcmp(char* source, char* dest, unsigned int len)
+
+bool memcmp(void* source, void* dest, unsigned int len)
 {
+	char* _dest = (char*)dest;
+	char* _source = (char*)source;
 	for (size_t i = 0; i < len; i++)
-		if (source[i] != dest[i])
+		if (_source[i] != _dest[i])
 			return 1;
 	return 0;
 }
+
 bool strncmp(char* source, char* dest, unsigned int len)
 {
 	return memcmp(source, dest, len);
 }
+
 bool strcmp(char* source, char* dest, unsigned int len)
 {
 	int i = 0;
@@ -31,6 +40,7 @@ bool strcmp(char* source, char* dest, unsigned int len)
 	}
 	return 0;
 }
+
 int strcp(char* dst, const char* src)
 {
 	int i = 0;
@@ -38,6 +48,7 @@ int strcp(char* dst, const char* src)
 		;
 	return i;
 }
+
 int strlen(char* str)
 {
 	int len = 0;
@@ -45,6 +56,7 @@ int strlen(char* str)
 		len++;
 	return len;
 }
+
 int toupper(char* str)
 {
 	int i = 0;
@@ -55,6 +67,7 @@ int toupper(char* str)
 	}
 	return i;
 }
+
 int tolower(char* str)
 {
 	int i = 0;
@@ -65,6 +78,7 @@ int tolower(char* str)
 	}
 	return i;
 }
+
 void itoa(char* buf, unsigned long int n, int base)
 {
 	unsigned long int tmp;

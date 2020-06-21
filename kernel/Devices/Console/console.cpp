@@ -23,7 +23,7 @@ inline uint16_t vga_entry(unsigned char uc, uint8_t color)
 void pageUp()
 {
 	for (size_t i = 0; i < VGA_HEIGHT - 1; i++) {
-		memcpy((char*)(video_ram + VGA_WIDTH * i), (char*)(video_ram + VGA_WIDTH * (i + 1)), VGA_WIDTH * sizeof(short));
+		memcpy((void*)(video_ram + VGA_WIDTH * i), (void*)(video_ram + VGA_WIDTH * (i + 1)), VGA_WIDTH * sizeof(short));
 	}
 	memset((char*)(video_ram + VGA_WIDTH * (VGA_HEIGHT - 1)), 0, VGA_WIDTH * sizeof(short));
 }

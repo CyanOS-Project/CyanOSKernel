@@ -30,7 +30,7 @@ void Scheduler::setup()
 	sleeping_threads = new CircularList<ThreadControlBlock>;
 	current_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
-	create_new_thread((uintptr_t)idle);
+	create_new_thread((void*)idle);
 }
 
 void Scheduler::schedule_handler(ContextFrame* frame)
@@ -120,7 +120,7 @@ void Scheduler::yield()
 }
 
 // Create thread structure of a new thread
-void Scheduler::create_new_thread(uintptr_t address)
+void Scheduler::create_new_thread(void* address)
 {
 	spinlock_acquire(&scheduler_lock);
 	ThreadControlBlock new_thread;
@@ -128,7 +128,7 @@ void Scheduler::create_new_thread(uintptr_t address)
 	void* thread_stack = (void*)Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	ContextFrame* frame = (ContextFrame*)((unsigned)thread_stack + STACK_SIZE - sizeof(ContextFrame));
 	// frame->esp = (unsigned)frame + 4;
-	frame->eip = address;
+	frame->eip = (uint32_t)address;
 	frame->cs = KCS_SELECTOR;
 	frame->eflags = 0x202;
 	new_thread.tid = tid++;
@@ -139,13 +139,13 @@ void Scheduler::create_new_thread(uintptr_t address)
 }
 
 // Switch the returned context of the current IRQ.
-void Scheduler::load_context(ContextFrame* current_context, ThreadControlBlock* thread)
+void Scheduler::load_context(ContextFrame* current_context, const ThreadControlBlock* thread)
 {
 	current_context->esp = thread->context.esp;
 }
 
 // Save current context into its TCB.
-void Scheduler::save_context(ContextFrame* current_context, ThreadControlBlock* thread)
+void Scheduler::save_context(const ContextFrame* current_context, ThreadControlBlock* thread)
 {
 	thread->context.esp = current_context->esp;
 }

@@ -1,9 +1,9 @@
 #pragma once
 #include "utils/types.h"
 
-void memcpy(char* dest, char* source, unsigned int len);
-void memset(char* dest, char value, unsigned int len);
-bool memcmp(char* source, char* dest, unsigned int len);
+void memcpy(void* dest, void* source, unsigned int len);
+void memset(void* dest, char value, unsigned int len);
+bool memcmp(void* source, void* dest, unsigned int len);
 bool strncmp(char* source, char* dest, unsigned int len);
 bool strcmp(char* source, char* dest, unsigned int len);
 int strcp(char* dst, const char* src);
