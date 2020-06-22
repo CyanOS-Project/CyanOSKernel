@@ -4,6 +4,7 @@
 #include "Arch/x86/isr.h"
 #include "Arch/x86/panic.h"
 #include "Devices/Console/console.h"
+#include "Devices/Timer/pit.h"
 #include "VirtualMemory/heap.h"
 #include "VirtualMemory/memory.h"
 #include "utils/assert.h"
@@ -11,7 +12,6 @@
 CircularQueue<ThreadControlBlock>* Scheduler::ready_threads;
 CircularQueue<ThreadControlBlock>* Scheduler::sleeping_threads;
 ThreadControlBlock* current_thread;
-
 SpinLock Scheduler::scheduler_lock;
 
 unsigned tid;
@@ -44,15 +44,16 @@ void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
 	spinlock_acquire(&scheduler_lock);
 	if (type == ScheduleType::TIMED)
 		wake_up_sleepers();
+
 	if (current_thread) {
 		save_context(current_context, current_thread);
 		current_thread->state = ThreadState::READY;
 	}
 	// FIXME: schedule idle if there is no ready thread
 	select_next_thread();
-	ready_threads->head_data().state = ThreadState::RUNNING;
-	load_context(current_context, &ready_threads->head_data());
-	current_thread = &ready_threads->head_data();
+	ready_threads->head().state = ThreadState::RUNNING;
+	load_context(current_context, &ready_threads->head());
+	current_thread = &ready_threads->head();
 	spinlock_release(&scheduler_lock);
 }
 
@@ -67,13 +68,11 @@ void Scheduler::wake_up_sleepers()
 {
 	for (CircularQueue<ThreadControlBlock>::Iterator thread = sleeping_threads->begin();
 	     thread != sleeping_threads->end(); thread++) {
-		if (thread->sleep_ticks > 0) {
-			thread->sleep_ticks--;
-			if (!thread->sleep_ticks) {
-				sleeping_threads->move_to_other_list(ready_threads, thread);
-				wake_up_sleepers();
-				break;
-			}
+		if (thread->sleep_ticks <= PIT::ticks) {
+			thread->sleep_ticks = 0;
+			sleeping_threads->move_to_other_list(ready_threads, thread);
+			wake_up_sleepers();
+			break;
 		}
 	}
 }
@@ -83,8 +82,8 @@ void Scheduler::sleep(unsigned ms)
 {
 
 	spinlock_acquire(&scheduler_lock);
-	ThreadControlBlock& current = ready_threads->head_data();
-	current.sleep_ticks = ms;
+	ThreadControlBlock& current = ready_threads->head();
+	current.sleep_ticks = PIT::ticks + ms;
 	current.state = ThreadState::BLOCKED_SLEEP;
 	ready_threads->move_head_to_other_list(sleeping_threads);
 	spinlock_release(&scheduler_lock);
@@ -94,7 +93,7 @@ void Scheduler::sleep(unsigned ms)
 void Scheduler::block_current_thread(ThreadState reason, CircularQueue<ThreadControlBlock>* waiting_list)
 {
 	spinlock_acquire(&scheduler_lock);
-	ThreadControlBlock& current = ready_threads->head_data();
+	ThreadControlBlock& current = ready_threads->head();
 	current.state = ThreadState::BLOCKED_LOCK;
 	ready_threads->move_head_to_other_list(waiting_list);
 	spinlock_release(&scheduler_lock);

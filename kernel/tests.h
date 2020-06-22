@@ -1,4 +1,5 @@
 #include "Devices/Console/console.h"
+#include "Devices/Timer/pit.h"
 #include "Tasking/scheduler.h"
 #include "Tasking/semaphore.h"
 
@@ -17,9 +18,9 @@ void thread2()
 }
 
 void thread1()
+
 {
 	printf("Thread1:\n");
-	Scheduler::sleep(500);
 	lock = new Semaphore(1);
 	lock->acquire();
 	Scheduler::create_new_thread((void*)thread2);

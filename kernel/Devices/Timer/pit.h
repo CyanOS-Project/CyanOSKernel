@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Arch/x86/isr.h"
 
 #define I86_PIT_REG_COUNTER0 0x40
@@ -30,5 +32,5 @@ class PIT
 
   public:
 	static void setup();
-	static void sleep(unsigned Duration);
+	static unsigned ticks;
 };

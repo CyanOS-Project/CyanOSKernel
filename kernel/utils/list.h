@@ -48,7 +48,7 @@ template <class T> class CircularQueue
 	void move_head_to_other_list(CircularQueue<T>* list);
 	bool is_empty();
 	size_t size();
-	T& head_data();
+	T& head();
 	T& operator[](int index);
 };
 
@@ -271,7 +271,7 @@ template <class T> void CircularQueue<T>::remove(int index)
 }
 
 // Get data of the head node.
-template <class T> T& CircularQueue<T>::head_data()
+template <class T> T& CircularQueue<T>::head()
 {
 	ASSERT(m_head);
 	return m_head->data;
