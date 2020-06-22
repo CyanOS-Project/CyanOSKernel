@@ -1,3 +1,5 @@
+#pragma once
+
 #include "asm.h"
 #include "utils/types.h"
 

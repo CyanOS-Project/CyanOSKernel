@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Devices/Console/console.h"
 #include "Devices/Timer/pit.h"
 #include "Tasking/scheduler.h"

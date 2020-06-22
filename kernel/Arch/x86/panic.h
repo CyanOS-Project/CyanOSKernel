@@ -1,3 +1,5 @@
+#pragma once
+
 #include "Devices/Console/console.h"
 #include "asm.h"
 

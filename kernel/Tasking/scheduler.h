@@ -3,6 +3,7 @@
 #include "Arch/x86/isr.h"
 #include "Arch/x86/paging.h"
 #include "Arch/x86/spinlock.h"
+#include "utils/bitmap.h"
 #include "utils/list.h"
 #include "utils/types.h"
 
@@ -59,6 +60,7 @@ typedef struct ThreadControlBlock_t {
 class Scheduler
 {
   private:
+	static Bitmap* m_id_bitmap;
 	static CircularQueue<ThreadControlBlock>* ready_threads;
 	static CircularQueue<ThreadControlBlock>* sleeping_threads;
 	static SpinLock scheduler_lock;

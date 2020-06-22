@@ -13,8 +13,7 @@ CircularQueue<ThreadControlBlock>* Scheduler::ready_threads;
 CircularQueue<ThreadControlBlock>* Scheduler::sleeping_threads;
 ThreadControlBlock* current_thread;
 SpinLock Scheduler::scheduler_lock;
-
-unsigned tid;
+Bitmap* Scheduler::m_id_bitmap;
 
 void idle()
 {
@@ -25,10 +24,10 @@ void idle()
 void Scheduler::setup()
 {
 	spinlock_init(&scheduler_lock);
-	tid = 0;
 	ready_threads = new CircularQueue<ThreadControlBlock>;
 	sleeping_threads = new CircularQueue<ThreadControlBlock>;
 	current_thread = nullptr;
+	m_id_bitmap = new Bitmap(MAX_BITMAP_SIZE);
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
 	create_new_thread((void*)idle);
 }
@@ -124,7 +123,10 @@ void Scheduler::create_new_thread(void* address)
 	frame->eip = (uint32_t)address;
 	frame->cs = KCS_SELECTOR;
 	frame->eflags = 0x202;
-	new_thread.tid = tid++;
+
+	unsigned id = m_id_bitmap->find_first_unused();
+	m_id_bitmap->set_used(id);
+	new_thread.tid = id;
 	new_thread.context.esp = (unsigned)frame + 4;
 	new_thread.state = ThreadState::READY;
 	ready_threads->push_back(new_thread);

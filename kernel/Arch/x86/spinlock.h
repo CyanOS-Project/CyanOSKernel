@@ -1,3 +1,5 @@
+#pragma once
+
 #include "utils/types.h"
 typedef volatile struct spinlock_t {
 	uint32_t value;

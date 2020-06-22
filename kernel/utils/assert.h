@@ -1,3 +1,4 @@
+#pragma once
 #include "Arch/x86/panic.h"
 #ifdef NDEBUG
     /*
