@@ -1,3 +1,5 @@
+#pragma once
+
 #include "scheduler.h"
 #include "utils/list.h"
 #include "utils/types.h"

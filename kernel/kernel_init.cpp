@@ -13,6 +13,7 @@
 #include "VirtualMemory/heap.h"
 #include "VirtualMemory/memory.h"
 #include "VirtualMemory/virtual.h"
+#include "tests.h"
 #include "utils/assert.h"
 #include "utils/list.h"
 
@@ -25,67 +26,6 @@ void display_time()
 		       date.year);
 		Scheduler::sleep(500);
 		removeLine();
-	}
-}
-Semaphore* lock;
-void thread2()
-{
-	printf("Thread2:\n");
-	lock->acquire();
-	printf("Semaphore acquired by thread2\n");
-	Scheduler::sleep(1000);
-	lock->release();
-	printf("Semaphore released by thread2\n");
-	while (1) {
-		HLT();
-	}
-}
-
-void thread1()
-{
-	printf("Thread1:\n");
-	Scheduler::sleep(500);
-	lock = new Semaphore(1);
-	lock->acquire();
-	Scheduler::create_new_thread((void*)thread2);
-	printf("Semaphore acquired by thread1\n");
-	Scheduler::sleep(500);
-	lock->release();
-	printf("Semaphore released by thread1\n");
-	while (1) {
-		HLT();
-	}
-}
-
-typedef struct Stuff_t {
-	int value1;
-	int value2;
-} Stuff;
-
-void test()
-{
-	CircularQueue<Stuff>* list = new CircularQueue<Stuff>;
-	CircularQueue<Stuff>* list2 = new CircularQueue<Stuff>;
-
-	Stuff s1 = {1, 1};
-	Stuff s2 = {2, 2};
-	Stuff s3 = {3, 3};
-	Stuff s4 = {4, 4};
-	list->push_back(s1);
-	list->push_back(s2);
-	list->push_back(s3);
-	list->push_back(s4);
-	printf("List 1:\n");
-	CircularQueue<Stuff>::Iterator itr = list->begin();
-	list->move_head_to_other_list(list2);
-	list->move_head_to_other_list(list2);
-	// list->move_head_to_other_list(list2);
-	// list->move_head_to_other_list(list2);
-	list->remove(0);
-
-	for (CircularQueue<Stuff>::Iterator i = list->begin(); i != list->end(); i++) {
-		Stuff& cur = list->data(i);
-		printf("%d %d\n", cur.value1, cur.value2);
 	}
 }
 
@@ -103,8 +43,10 @@ extern "C" void kernel_init()
 	PIT::setup();
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
+
 	ENABLE_INTERRUPTS();
-	// test();
+	// test_lists();
+
 	printf("Going Idle State.\n");
 	while (1) {
 		HLT();

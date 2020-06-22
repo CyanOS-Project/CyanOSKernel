@@ -49,7 +49,6 @@ void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
 		current_thread->state = ThreadState::READY;
 	}
 	// FIXME: schedule idle if there is no ready thread
-	CircularQueue<ThreadControlBlock>::Iterator iterator = ready_threads->begin();
 	select_next_thread();
 	ready_threads->head_data().state = ThreadState::RUNNING;
 	load_context(current_context, &ready_threads->head_data());
@@ -66,12 +65,12 @@ void Scheduler::select_next_thread()
 // Decrease sleep_ticks of each thread and wake up whose value is zero.
 void Scheduler::wake_up_sleepers()
 {
-	for (CircularQueue<ThreadControlBlock>::Iterator i = sleeping_threads->begin(); i != sleeping_threads->end(); i++) {
-		ThreadControlBlock& current = sleeping_threads->data(i);
-		if (current.sleep_ticks > 0) {
-			current.sleep_ticks--;
-			if (!current.sleep_ticks) {
-				sleeping_threads->move_to_other_list(ready_threads, i);
+	for (CircularQueue<ThreadControlBlock>::Iterator thread = sleeping_threads->begin();
+	     thread != sleeping_threads->end(); thread++) {
+		if (thread->sleep_ticks > 0) {
+			thread->sleep_ticks--;
+			if (!thread->sleep_ticks) {
+				sleeping_threads->move_to_other_list(ready_threads, thread);
 				wake_up_sleepers();
 				break;
 			}

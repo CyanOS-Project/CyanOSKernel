@@ -9,7 +9,7 @@ template <class T> class CircularQueue
 		Node *next, *prev;
 	};
 	Node* m_head;
-	unsigned m_count;
+	size_t m_count;
 	void unlink_node(Node* node);
 	void link_node(Node* new_node, Node* pnode);
 
@@ -28,6 +28,8 @@ template <class T> class CircularQueue
 		bool operator!=(const CircularQueue<T>::Iterator& other);
 		bool operator==(const CircularQueue<T>::Iterator& other);
 		void operator=(const CircularQueue<T>::Iterator& other);
+		T* operator->();
+		T& operator*();
 	};
 	CircularQueue();
 	~CircularQueue();
@@ -45,8 +47,8 @@ template <class T> class CircularQueue
 	void move_to_other_list(CircularQueue<T>* list, Iterator& itr);
 	void move_head_to_other_list(CircularQueue<T>* list);
 	bool is_empty();
+	size_t size();
 	T& head_data();
-	T& data(Iterator&);
 	T& operator[](int index);
 };
 
@@ -96,6 +98,16 @@ template <class T> void CircularQueue<T>::Iterator::operator=(const CircularQueu
 {
 	m_current = other->m_current;
 	m_head = other->m_head;
+}
+
+template <class T> T& CircularQueue<T>::Iterator::operator*()
+{
+	return m_current->data;
+}
+
+template <class T> T* CircularQueue<T>::Iterator::operator->()
+{
+	return &m_current->data;
 }
 
 // Get node pointer.
@@ -258,13 +270,6 @@ template <class T> void CircularQueue<T>::remove(int index)
 	remove(itr);
 }
 
-// Get data of the node selected by iterator.
-template <class T> T& CircularQueue<T>::data(Iterator& itr)
-{
-	ASSERT(m_head);
-	return itr.node()->data;
-}
-
 // Get data of the head node.
 template <class T> T& CircularQueue<T>::head_data()
 {
@@ -277,13 +282,18 @@ template <class T> T& CircularQueue<T>::operator[](int index)
 	ASSERT(m_head);
 	Iterator itr(m_head);
 	itr.move_cursor(index);
-	return itr.node().data;
+	return *itr;
 }
 
 template <class T> bool CircularQueue<T>::is_empty()
 {
-	if (m_head)
+	if (m_count)
 		return false;
 	else
 		return true;
+}
+
+template <class T> size_t CircularQueue<T>::size()
+{
+	return m_count;
 }
