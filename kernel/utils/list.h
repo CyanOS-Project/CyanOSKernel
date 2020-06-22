@@ -56,7 +56,7 @@ template <class T> CircularQueue<T>::Iterator::Iterator(Node* t_node) : m_curren
 {
 }
 
-// Set current node pointer to an input index relative to the head.
+// move the current node pointer number of nodes forward or backward relative to the current head.
 template <class T> void CircularQueue<T>::Iterator::move_cursor(int index)
 {
 	Node* p = m_head;
@@ -185,11 +185,13 @@ template <class T> void CircularQueue<T>::link_node(Node* new_node, Node* pnode)
 	m_count++;
 }
 
+// Get iterator object for the head node.
 template <class T> typename CircularQueue<T>::Iterator CircularQueue<T>::begin()
 {
 	return Iterator(m_head);
 }
 
+// Get iterator object for the last node.
 template <class T> typename CircularQueue<T>::Iterator CircularQueue<T>::end()
 {
 	return Iterator(nullptr);

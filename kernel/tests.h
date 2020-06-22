@@ -2,6 +2,8 @@
 #include "Devices/Timer/pit.h"
 #include "Tasking/scheduler.h"
 #include "Tasking/semaphore.h"
+#include "utils/bitmap.h"
+#include "utils/list.h"
 
 Semaphore* lock;
 void thread2()
@@ -18,7 +20,6 @@ void thread2()
 }
 
 void thread1()
-
 {
 	printf("Thread1:\n");
 	lock = new Semaphore(1);
@@ -61,4 +62,16 @@ void test_lists()
 	for (CircularQueue<Stuff>::Iterator i = list->begin(); i != list->end(); i++) {
 		printf("%d %d\n", *i, *i);
 	}
+}
+
+void test_bitmap()
+{
+	Bitmap my_bitmap(10);
+	my_bitmap.set_used(2);
+	printf("find_first_used %d\n", my_bitmap.find_first_unused(5));
+	my_bitmap.set_unused(2);
+	printf("find_first_used %d\n", my_bitmap.find_first_unused(5));
+	my_bitmap.set_used(8);
+	printf("find_first_used %d\n", my_bitmap.find_first_used(5));
+	printf("find_first_used %d\n", my_bitmap.find_first_used(1));
 }
