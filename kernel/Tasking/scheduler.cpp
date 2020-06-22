@@ -66,7 +66,7 @@ void Scheduler::select_next_thread()
 void Scheduler::wake_up_sleepers()
 {
 	for (CircularQueue<ThreadControlBlock>::Iterator thread = sleeping_threads->begin();
-	     thread != sleeping_threads->end(); thread++) {
+	     thread != sleeping_threads->end(); ++thread) {
 		if (thread->sleep_ticks <= PIT::ticks) {
 			thread->sleep_ticks = 0;
 			sleeping_threads->move_to_other_list(ready_threads, thread);

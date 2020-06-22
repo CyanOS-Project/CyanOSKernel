@@ -61,7 +61,7 @@ void test_lists()
 	// list->move_head_to_other_list(list2);
 	list->remove(0);
 
-	for (CircularQueue<Stuff>::Iterator i = list->begin(); i != list->end(); i++) {
+	for (CircularQueue<Stuff>::Iterator i = list->begin(); i != list->end(); ++i) {
 		printf("%d %d\n", *i, *i);
 	}
 }

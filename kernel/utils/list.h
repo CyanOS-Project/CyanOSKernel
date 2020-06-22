@@ -25,6 +25,7 @@ template <class T> class CircularQueue
 		Node* node();
 		void move_cursor(int index);
 		Iterator& operator++(int);
+		Iterator& operator++();
 		bool operator!=(const CircularQueue<T>::Iterator& other);
 		bool operator==(const CircularQueue<T>::Iterator& other);
 		void operator=(const CircularQueue<T>::Iterator& other);
@@ -74,6 +75,18 @@ template <class T> void CircularQueue<T>::Iterator::move_cursor(int index)
 
 // Increment the current node pointer.
 template <class T> typename CircularQueue<T>::Iterator& CircularQueue<T>::Iterator::operator++(int)
+{
+	const auto next = m_current->next;
+	if (next == m_head) {
+		m_current = nullptr; // iterated through the whole list.
+	} else {
+		m_current = next;
+	}
+	return *this;
+}
+
+// Increment the current node pointer.
+template <class T> typename CircularQueue<T>::Iterator& CircularQueue<T>::Iterator::operator++()
 {
 	const auto next = m_current->next;
 	if (next == m_head) {
