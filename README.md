@@ -51,3 +51,13 @@ cd ./CyanOS
 make clean && make run
 ```
 You may need to change the name of Qemu's executable in /kernel/Makefile under the variable `QEMU` to your Qemu's name.
+
+## Useful resources:
+* Operating Systems: Internals And Design Principles By William Stallings.
+* Operating Systems: Design and Implementation By Albert S. Woodhull and Andrew S. Tanenbaum.
+* http://www.brokenthorn.com/Resources
+* https://littleosbook.github.io
+* http://www.jamesmolloy.co.uk/tutorial_html
+* https://samypesse.gitbook.io/how-to-create-an-operating-system/
+* https://wiki.osdev.org/Main_Page
+* https://www.intel.com/content/dam/www/public/us/en/documents/manuals/64-ia-32-architectures-software-developer-vol-3a-part-1-manual.pdf
