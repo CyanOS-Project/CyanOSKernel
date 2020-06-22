@@ -3,7 +3,7 @@
 class Mutex
 {
   private:
-	Semaphore* lock;
+	Semaphore* m_lock;
 
   public:
 	Mutex();

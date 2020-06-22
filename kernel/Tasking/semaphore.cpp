@@ -1,28 +1,28 @@
 #include "semaphore.h"
 #include "Lib/stdlib.h"
 
-Semaphore::Semaphore(int _max_count)
+Semaphore::Semaphore(int t_max_count) :
+    m_max_count(t_max_count),
+    m_count(0),
+    m_waiting_queue(new CircularQueue<ThreadControlBlock>)
 {
-	max_count = _max_count;
-	count = 0;
-	waiting_queue = new CircularList<ThreadControlBlock>;
-	spinlock_init(&spinlock);
+	spinlock_init(&m_spinlock);
 }
 
 Semaphore::~Semaphore()
 {
-	delete waiting_queue;
+	delete m_waiting_queue;
 }
 
 void Semaphore::acquire()
 {
-	spinlock_acquire(&spinlock);
-	if (count < max_count) {
-		count++;
-		spinlock_release(&spinlock);
+	spinlock_acquire(&m_spinlock);
+	if (m_count < m_max_count) {
+		m_count++;
+		spinlock_release(&m_spinlock);
 	} else {
-		Scheduler::block_current_thread(ThreadState::BLOCKED_LOCK, waiting_queue);
-		spinlock_release(&spinlock);
+		Scheduler::block_current_thread(ThreadState::BLOCKED_LOCK, m_waiting_queue);
+		spinlock_release(&m_spinlock);
 		Scheduler::yield();
 		acquire();
 	}
@@ -30,14 +30,14 @@ void Semaphore::acquire()
 
 void Semaphore::release()
 {
-	if (!count)
+	if (!m_count)
 		return;
-	spinlock_acquire(&spinlock);
-	if (!waiting_queue->is_empty()) {
-		Scheduler::unblock_thread(waiting_queue);
-		if (!waiting_queue->is_empty())
-			waiting_queue->increment_head();
+	spinlock_acquire(&m_spinlock);
+	if (!m_waiting_queue->is_empty()) {
+		Scheduler::unblock_thread(m_waiting_queue);
+		if (!m_waiting_queue->is_empty())
+			m_waiting_queue->increment_head();
 	}
-	count--;
-	spinlock_release(&spinlock);
+	m_count--;
+	spinlock_release(&m_spinlock);
 }

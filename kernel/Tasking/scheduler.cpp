@@ -8,8 +8,8 @@
 #include "VirtualMemory/memory.h"
 #include "utils/assert.h"
 
-CircularList<ThreadControlBlock>* Scheduler::ready_threads;
-CircularList<ThreadControlBlock>* Scheduler::sleeping_threads;
+CircularQueue<ThreadControlBlock>* Scheduler::ready_threads;
+CircularQueue<ThreadControlBlock>* Scheduler::sleeping_threads;
 ThreadControlBlock* current_thread;
 
 SpinLock Scheduler::scheduler_lock;
@@ -26,8 +26,8 @@ void Scheduler::setup()
 {
 	spinlock_init(&scheduler_lock);
 	tid = 0;
-	ready_threads = new CircularList<ThreadControlBlock>;
-	sleeping_threads = new CircularList<ThreadControlBlock>;
+	ready_threads = new CircularQueue<ThreadControlBlock>;
+	sleeping_threads = new CircularQueue<ThreadControlBlock>;
 	current_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
 	create_new_thread((void*)idle);
@@ -49,9 +49,8 @@ void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
 		current_thread->state = ThreadState::READY;
 	}
 	// FIXME: schedule idle if there is no ready thread
-	CircularList<ThreadControlBlock>::Iterator iterator = CircularList<ThreadControlBlock>::Iterator(ready_threads);
-	select_next_thread(iterator);
-	ready_threads->set_head(iterator);
+	CircularQueue<ThreadControlBlock>::Iterator iterator = ready_threads->begin();
+	select_next_thread();
 	ready_threads->head_data().state = ThreadState::RUNNING;
 	load_context(current_context, &ready_threads->head_data());
 	current_thread = &ready_threads->head_data();
@@ -59,29 +58,25 @@ void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
 }
 
 // Round Robinson Scheduling Algorithm.
-void Scheduler::select_next_thread(CircularList<ThreadControlBlock>::Iterator& iterator)
+void Scheduler::select_next_thread()
 {
-	iterator++;
+	ready_threads->increment_head();
 }
 
 // Decrease sleep_ticks of each thread and wake up whose value is zero.
 void Scheduler::wake_up_sleepers()
 {
-	if (sleeping_threads->is_empty())
-		return;
-	CircularList<ThreadControlBlock>::Iterator iterator = CircularList<ThreadControlBlock>::Iterator(sleeping_threads);
-	do {
-		ThreadControlBlock& current = sleeping_threads->data(iterator);
+	for (CircularQueue<ThreadControlBlock>::Iterator i = sleeping_threads->begin(); i != sleeping_threads->end(); i++) {
+		ThreadControlBlock& current = sleeping_threads->data(i);
 		if (current.sleep_ticks > 0) {
 			current.sleep_ticks--;
 			if (!current.sleep_ticks) {
-				sleeping_threads->move_to_other_list(ready_threads, iterator);
+				sleeping_threads->move_to_other_list(ready_threads, i);
 				wake_up_sleepers();
 				break;
 			}
 		}
-		iterator++;
-	} while (!iterator.is_head());
+	}
 }
 
 // Put the current thread into sleep for ms.
@@ -97,7 +92,7 @@ void Scheduler::sleep(unsigned ms)
 	yield();
 }
 
-void Scheduler::block_current_thread(ThreadState reason, CircularList<ThreadControlBlock>* waiting_list)
+void Scheduler::block_current_thread(ThreadState reason, CircularQueue<ThreadControlBlock>* waiting_list)
 {
 	spinlock_acquire(&scheduler_lock);
 	ThreadControlBlock& current = ready_threads->head_data();
@@ -106,7 +101,7 @@ void Scheduler::block_current_thread(ThreadState reason, CircularList<ThreadCont
 	spinlock_release(&scheduler_lock);
 }
 
-void Scheduler::unblock_thread(CircularList<ThreadControlBlock>* waiting_list)
+void Scheduler::unblock_thread(CircularQueue<ThreadControlBlock>* waiting_list)
 {
 	spinlock_acquire(&scheduler_lock);
 	waiting_list->move_head_to_other_list(ready_threads);

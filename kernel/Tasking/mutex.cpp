@@ -1,21 +1,20 @@
 #include "mutex.h"
 
-Mutex::Mutex()
+Mutex::Mutex() : m_lock(new Semaphore(1))
 {
-	lock = new Semaphore(1);
 }
 
 Mutex::~Mutex()
 {
-	delete lock;
+	delete m_lock;
 }
 
 void Mutex::acquire()
 {
-	lock->acquire();
+	m_lock->acquire();
 }
 
 void Mutex::release()
 {
-	lock->release();
+	m_lock->release();
 }

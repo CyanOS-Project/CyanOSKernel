@@ -5,13 +5,13 @@
 class Semaphore
 {
   private:
-	unsigned max_count;
-	unsigned count;
-	SpinLock spinlock;
-	CircularList<ThreadControlBlock>* waiting_queue;
+	unsigned m_max_count;
+	unsigned m_count;
+	SpinLock m_spinlock;
+	CircularQueue<ThreadControlBlock>* m_waiting_queue;
 
   public:
-	Semaphore(int _max_count);
+	Semaphore(int t_max_count);
 	~Semaphore();
 	void acquire();
 	void release();

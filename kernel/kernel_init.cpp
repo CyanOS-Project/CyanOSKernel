@@ -64,8 +64,8 @@ typedef struct Stuff_t {
 
 void test()
 {
-	CircularList<Stuff>* list = new CircularList<Stuff>;
-	CircularList<Stuff>* list2 = new CircularList<Stuff>;
+	CircularQueue<Stuff>* list = new CircularQueue<Stuff>;
+	CircularQueue<Stuff>* list2 = new CircularQueue<Stuff>;
 
 	Stuff s1 = {1, 1};
 	Stuff s2 = {2, 2};
@@ -76,28 +76,17 @@ void test()
 	list->push_back(s3);
 	list->push_back(s4);
 	printf("List 1:\n");
-	CircularList<Stuff>::Iterator itr = CircularList<Stuff>::Iterator(list);
+	CircularQueue<Stuff>::Iterator itr = list->begin();
 	list->move_head_to_other_list(list2);
 	list->move_head_to_other_list(list2);
-	list->move_head_to_other_list(list2);
-	itr.set_cursor(0);
-	// list->remove(1);
-	do {
-		Stuff& cur = list->data(itr);
-		printf("%d %d\n", cur.value1, cur.value2);
-		itr++;
-	} while (!itr.is_head());
+	// list->move_head_to_other_list(list2);
+	// list->move_head_to_other_list(list2);
+	list->remove(0);
 
-	printf("List 2:\n");
-	CircularList<Stuff>::Iterator itr2 = CircularList<Stuff>::Iterator(list2);
-	// list->remove(0);
-	itr2.set_cursor(0);
-	s1.value1 = 5;
-	do {
-		Stuff& cur = list2->data(itr2);
+	for (CircularQueue<Stuff>::Iterator i = list->begin(); i != list->end(); i++) {
+		Stuff& cur = list->data(i);
 		printf("%d %d\n", cur.value1, cur.value2);
-		itr2++;
-	} while (!itr2.is_head());
+	}
 }
 
 extern "C" void kernel_init()

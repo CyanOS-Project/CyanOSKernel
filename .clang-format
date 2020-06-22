@@ -21,6 +21,9 @@ IndentCaseLabels: true
 IndentPPDirectives: BeforeHash
 SpaceBeforeAssignmentOperators: true
 SpacesInCStyleCastParentheses: false
+BreakConstructorInitializers: AfterColon 
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+AllowAllConstructorInitializersOnNextLine: false
 BreakBeforeBraces: Linux
 IndentWidth: 4
 ColumnLimit: 120
