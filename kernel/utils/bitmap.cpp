@@ -78,7 +78,7 @@ unsigned Bitmap::find_first_used(unsigned count)
 	uint32_t first_found = 0;
 	uint32_t remaining_count = count;
 	for (size_t i = 0; i < sizeof(m_bitmap_data); i++) {
-		if ((m_bitmap_data[i] == 0xFF) && (remaining_count != count)) {
+		if ((m_bitmap_data[i] == 0x00) && (remaining_count != count)) {
 			remaining_count = count;
 		} else {
 			for (size_t bit = 0; bit < 8; bit++) {

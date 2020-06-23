@@ -14,6 +14,7 @@
 #include "VirtualMemory/memory.h"
 #include "VirtualMemory/virtual.h"
 #include "tests.h"
+#include "utils/UnitTests.h"
 #include "utils/assert.h"
 #include "utils/list.h"
 
@@ -42,12 +43,14 @@ extern "C" void kernel_init()
 	PIC::setup();
 	PIT::setup();
 	printStatus("Setting up devices.", true);
-	printf("Welcome to CyanOS.\n");
 
-	ENABLE_INTERRUPTS();
+	// ENABLE_INTERRUPTS();
 	// test_lists();
 	// test_bitmap();
+	// UnitTest_Bitmap();
+	UnitTest_CircularQueue();
 
+	printf("Welcome to CyanOS.\n");
 	printf("Going Idle State.\n");
 	while (1) {
 		HLT();

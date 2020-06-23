@@ -233,7 +233,7 @@ void printStatus(const char* msg, bool Success)
 	printf("[");
 	if (Success) {
 		setColor(VGAColor::VGA_COLOR_GREEN, VGAColor::VGA_COLOR_BLACK);
-		printf(" OK ");
+		printf("  OK  ");
 	} else {
 		setColor(VGAColor::VGA_COLOR_RED, VGAColor::VGA_COLOR_BLACK);
 		printf(" FAIL ");
