@@ -1,6 +1,4 @@
 #include "console.h"
-#include "Arch/x86/spinlock.h"
-#include "VirtualMemory/memory.h"
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -8,6 +6,92 @@ volatile uint16_t* video_ram = 0;
 volatile int vPosition = 0, hPosition = 0;
 uint8_t charColor = 0x0F;
 SpinLock printf_lock;
+
+void clearScreen()
+{
+	for (size_t i = 0; i < VGA_WIDTH; i++) {
+		for (size_t i2 = 0; i2 < VGA_HEIGHT; i2++) {
+			video_ram[i + i2 * VGA_WIDTH] = 0;
+		}
+	}
+	hPosition = 0;
+	vPosition = 0;
+}
+
+void initiate_console()
+{
+	spinlock_init(&printf_lock);
+	hPosition = 0;
+	vPosition = 0;
+	Memory::map((void*)(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER), (void*)VGATEXTMODE_BUFFER, 0x1000,
+	            MEMORY_TYPE::WRITABLE);
+	video_ram = (uint16_t*)(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER);
+	clearScreen();
+}
+
+void printf(const char* s, ...)
+{
+	spinlock_acquire(&printf_lock);
+	unsigned char c;
+	va_list ap;
+	va_start(ap, s);
+	while ((c = *s++)) {
+		if (c == 0)
+			break;
+		else if (c == '%') {
+			formatEscapeCharacters(c, s, va_arg(ap, int));
+			s++;
+		} else
+			putChar(c);
+	}
+	spinlock_release(&printf_lock);
+}
+
+void displayMemory(const char* Address, int Size)
+{
+	spinlock_acquire(&printf_lock);
+	for (size_t i = 0; i < Size; i++) {
+		if ((i % 8 == 0))
+			__printf("\n");
+		else if (i % 4 == 0)
+			__printf("          ");
+		__printf("%X ", Address[i]);
+	}
+	__printf("\n");
+	spinlock_release(&printf_lock);
+}
+
+void printStatus(const char* msg, bool Success)
+{
+	spinlock_acquire(&printf_lock);
+	__printf("[");
+	if (Success) {
+		setColor(VGAColor::VGA_COLOR_GREEN, VGAColor::VGA_COLOR_BLACK);
+		__printf("  OK  ");
+	} else {
+		setColor(VGAColor::VGA_COLOR_RED, VGAColor::VGA_COLOR_BLACK);
+		__printf(" FAIL ");
+	}
+	setColor(VGAColor::VGA_COLOR_WHITE, VGAColor::VGA_COLOR_BLACK);
+	__printf("] %s.\n", msg);
+	spinlock_release(&printf_lock);
+}
+
+void __printf(const char* s, ...)
+{
+	unsigned char c;
+	va_list ap;
+	va_start(ap, s);
+	while ((c = *s++)) {
+		if (c == 0)
+			break;
+		else if (c == '%') {
+			formatEscapeCharacters(c, s, va_arg(ap, int));
+			s++;
+		} else
+			putChar(c);
+	}
+}
 
 void setMode(TerminalMode Mode)
 {
@@ -18,10 +102,12 @@ inline uint8_t vga_entry_color(VGAColor fg, VGAColor bg)
 {
 	return fg | bg << 4;
 }
+
 inline uint16_t vga_entry(unsigned char uc, uint8_t color)
 {
 	return (uint16_t)uc | (uint16_t)color << 8;
 }
+
 void pageUp()
 {
 	for (size_t i = 0; i < VGA_HEIGHT - 1; i++) {
@@ -29,10 +115,12 @@ void pageUp()
 	}
 	memset((char*)(video_ram + VGA_WIDTH * (VGA_HEIGHT - 1)), 0, VGA_WIDTH * sizeof(short));
 }
+
 void setColor(VGAColor color, VGAColor backcolor)
 {
 	charColor = vga_entry_color(color, backcolor);
 }
+
 void removeLine()
 {
 	do {
@@ -49,9 +137,9 @@ void removeLine()
 	} while (video_ram[hPosition + vPosition * VGA_WIDTH] == 0 || hPosition != 0);
 	video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
 }
+
 void putChar(char str)
 {
-	spinlock_acquire(&printf_lock);
 	if (vPosition == VGA_HEIGHT) {
 		pageUp();
 		vPosition--;
@@ -67,12 +155,13 @@ void putChar(char str)
 		insertCharacter(str);
 	}
 	updateCursor();
-	spinlock_release(&printf_lock);
 }
+
 void updateCursor()
 {
 	video_ram[hPosition + vPosition * VGA_WIDTH] = vga_entry(0, vga_entry_color(VGA_COLOR_BLACK, VGA_COLOR_WHITE));
 }
+
 void insertNewLine()
 {
 	if (hPosition != VGA_WIDTH) // Update Cursor
@@ -80,12 +169,14 @@ void insertNewLine()
 	hPosition = 0;
 	vPosition++;
 }
+
 void insertCharacter(char str)
 {
 	video_ram[hPosition + vPosition * VGA_WIDTH] = vga_entry(str, charColor);
 	hPosition = (hPosition + 1) % VGA_WIDTH;
 	vPosition = (vPosition + (hPosition == 0));
 }
+
 void insertBackSpace()
 {
 	if (hPosition != VGA_WIDTH) // Update Cursor
@@ -102,43 +193,7 @@ void insertBackSpace()
 	} while (video_ram[hPosition + vPosition * VGA_WIDTH] == 0);
 	video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
 }
-void clearScreen()
-{
-	for (size_t i = 0; i < VGA_WIDTH; i++) {
-		for (size_t i2 = 0; i2 < VGA_HEIGHT; i2++) {
-			video_ram[i + i2 * VGA_WIDTH] = 0;
-		}
-	}
-	hPosition = 0;
-	vPosition = 0;
-}
-void initiate_console()
-{
-	spinlock_init(&printf_lock);
-	hPosition = 0;
-	vPosition = 0;
-	Memory::map((void*)(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER), (void*)VGATEXTMODE_BUFFER, 0x1000,
-	            MEMORY_TYPE::WRITABLE);
-	video_ram = (uint16_t*)(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER);
-	clearScreen();
-}
 
-void printf(const char* s, ...)
-{
-	va_list ap;
-	unsigned char c;
-	va_start(ap, s);
-	while ((c = *s++)) {
-		if (c == 0)
-			break;
-		else if (c == '%') {
-			formatEscapeCharacters(c, s, va_arg(ap, int));
-			s++;
-		} else
-			putChar(c);
-	}
-	return;
-}
 void formatEscapeCharacters(unsigned char c, const char* s, int cur_arg)
 {
 	int size = 0;
@@ -162,8 +217,9 @@ void formatEscapeCharacters(unsigned char c, const char* s, int cur_arg)
 
 void formatString(char* arg)
 {
-	printf(arg);
+	__printf(arg);
 }
+
 void formatPointer(int arg, int size)
 {
 	char buf[16];
@@ -175,8 +231,9 @@ void formatPointer(int arg, int size)
 	if (buflen < size)
 		for (i = size, j = buflen; i >= 0; i--, j--)
 			buf[i] = (j >= 0) ? buf[j] : '0';
-	printf("0x%s", buf);
+	__printf("0x%s", buf);
 }
+
 void formatHex(int arg, int size, unsigned char c)
 {
 	char buf[16];
@@ -189,7 +246,7 @@ void formatHex(int arg, int size, unsigned char c)
 			buf[i] = (j >= 0) ? buf[j] : '0';
 	if (c == 'X')
 		toupper(buf);
-	printf("0x%s", buf);
+	__printf("0x%s", buf);
 }
 
 void formatUnsigned(int arg, int size)
@@ -202,8 +259,9 @@ void formatUnsigned(int arg, int size)
 	if (buflen < size)
 		for (i = size, j = buflen; i >= 0; i--, j--)
 			buf[i] = (j >= 0) ? buf[j] : '0';
-	printf(buf);
+	__printf(buf);
 }
+
 void formatDecimal(int arg, int size)
 {
 	char buf[16];
@@ -220,31 +278,7 @@ void formatDecimal(int arg, int size)
 		for (i = size, j = buflen; i >= 0; i--, j--)
 			buf[i] = (j >= 0) ? buf[j] : '0';
 	if (neg)
-		printf("-%s", buf);
+		__printf("-%s", buf);
 	else
-		printf(buf);
-}
-void displayMemory(const char* Address, int Size)
-{
-	for (size_t i = 0; i < Size; i++) {
-		if ((i % 8 == 0))
-			printf("\n");
-		else if (i % 4 == 0)
-			printf("          ");
-		printf("%X ", Address[i]);
-	}
-	printf("\n");
-}
-void printStatus(const char* msg, bool Success)
-{
-	printf("[");
-	if (Success) {
-		setColor(VGAColor::VGA_COLOR_GREEN, VGAColor::VGA_COLOR_BLACK);
-		printf("  OK  ");
-	} else {
-		setColor(VGAColor::VGA_COLOR_RED, VGAColor::VGA_COLOR_BLACK);
-		printf(" FAIL ");
-	}
-	setColor(VGAColor::VGA_COLOR_WHITE, VGAColor::VGA_COLOR_BLACK);
-	printf("] %s.\n", msg);
+		__printf(buf);
 }

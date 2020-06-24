@@ -1,5 +1,7 @@
 #pragma once
+#include "Arch/x86/spinlock.h"
 #include "Lib/stdlib.h"
+#include "VirtualMemory/memory.h"
 #include "kernel_map.h"
 #include "utils/types.h"
 #include <stdarg.h>
@@ -30,6 +32,7 @@ typedef enum {
 void setMode(TerminalMode Mode);
 void setColor(VGAColor color, VGAColor backcolor);
 void printf(const char* s, ...);
+void __printf(const char* s, ...);
 void putChar(char str);
 void clearScreen();
 void initiate_console();
