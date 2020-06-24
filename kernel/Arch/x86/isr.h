@@ -17,7 +17,8 @@ struct ContextFrame {
 	uint32_t cr2;
 	uint32_t irq_number;
 	uint32_t error_code;
-	uint32_t eip, cs, eflags, useresp, ss;
+	uint32_t eip, cs, eflags;
+	// uint32_t useresp, ss;
 };
 
 enum IRQ_NUMBER {
