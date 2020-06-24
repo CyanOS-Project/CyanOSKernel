@@ -14,17 +14,17 @@ class Memory
   private:
 	static void page_fault_handler(ContextFrame* isr_info);
 	static uint32_t parse_flags(uint32_t mem_flags);
-	static uint32_t get_kernel_pages();
+	static unsigned get_kernel_pages();
 
   public:
 	static void setup();
-	static uintptr_t alloc(uint32_t size, uint32_t flags);
-	static uintptr_t alloc(uintptr_t virtual_address, uint32_t size, uint32_t flags);
-	static uintptr_t free(uintptr_t virtual_address, uint32_t size, uint32_t flags);
-	static uintptr_t map(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags);
-	static void unmap(uint32_t virtual_address, uint32_t physical_address, uint32_t size, uint32_t flags);
-	static uint32_t virtual_memory_size();
-	static uint32_t physical_memory_size();
+	static void* alloc(uint32_t size, uint32_t flags);
+	static void* alloc(void* virtual_address, uint32_t size, uint32_t flags);
+	static void free(void* virtual_address, uint32_t size, uint32_t flags);
+	static void map(void* virtual_address, void* physical_address, uint32_t size, uint32_t flags);
+	static void unmap(void* virtual_address, void* physical_address, uint32_t size, uint32_t flags);
+	static unsigned virtual_memory_size();
+	static unsigned physical_memory_size();
 	static void switch_page_directory(uintptr_t physical_address);
 	static void setup_page_fault_handler();
 };

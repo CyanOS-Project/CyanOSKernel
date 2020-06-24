@@ -39,18 +39,17 @@ extern "C" void kernel_init()
 	printStatus("Setting up core components.", true);
 	Heap::setup();
 	Scheduler::setup();
-	Scheduler::create_new_thread((void*)thread1);
+	Scheduler::create_new_thread((void*)test_threading);
 	PIC::setup();
 	PIT::setup();
 	printStatus("Setting up devices.", true);
-
-	// ENABLE_INTERRUPTS();
+	printf("Welcome to CyanOS.\n");
+	ENABLE_INTERRUPTS();
 	// test_lists();
 	// test_bitmap();
 	// UnitTest_Bitmap();
-	UnitTest_CircularQueue();
+	// UnitTest_CircularQueue();
 
-	printf("Welcome to CyanOS.\n");
 	printf("Going Idle State.\n");
 	while (1) {
 		HLT();

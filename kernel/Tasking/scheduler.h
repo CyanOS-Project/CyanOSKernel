@@ -44,7 +44,7 @@ typedef struct RegistersContext_t {
 
 typedef struct ProcessControlBlock_t {
 	unsigned pid;
-	unsigned page_directory;
+
 	ProcessState state;
 	ProcessControlBlock_t* parent;
 } ProcessControlBlock;
@@ -52,6 +52,8 @@ typedef struct ProcessControlBlock_t {
 typedef struct ThreadControlBlock_t {
 	unsigned tid;
 	unsigned sleep_ticks;
+	intptr_t page_directory; // temp, should be in ProcessControlBlock_t
+	intptr_t task_stack;     // temp, should be in ProcessControlBlock_t
 	ThreadState state;
 	RegistersContext context;
 	ProcessControlBlock_t* parent;
@@ -70,6 +72,7 @@ class Scheduler
 	static void wake_up_sleepers();
 	static void schedule_handler(ContextFrame* frame);
 	static void select_next_thread();
+	static unsigned reserve_thread_id();
 
   public:
 	static void create_new_thread(void* address);

@@ -26,8 +26,8 @@ void Scheduler::setup()
 	spinlock_init(&scheduler_lock);
 	ready_threads = new CircularQueue<ThreadControlBlock>;
 	sleeping_threads = new CircularQueue<ThreadControlBlock>;
-	current_thread = nullptr;
 	m_id_bitmap = new Bitmap(MAX_BITMAP_SIZE);
+	current_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
 	create_new_thread((void*)idle);
 }
@@ -117,26 +117,30 @@ void Scheduler::create_new_thread(void* address)
 	spinlock_acquire(&scheduler_lock);
 	ThreadControlBlock new_thread;
 	memset((char*)&new_thread, 0, sizeof(ThreadControlBlock));
-	void* thread_stack = (void*)Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
+	void* thread_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	ContextFrame* frame = (ContextFrame*)((unsigned)thread_stack + STACK_SIZE - sizeof(ContextFrame));
-	// frame->esp = (unsigned)frame + 4;
 	frame->eip = (uint32_t)address;
 	frame->cs = KCS_SELECTOR;
 	frame->eflags = 0x202;
-
-	unsigned id = m_id_bitmap->find_first_unused();
-	m_id_bitmap->set_used(id);
-	new_thread.tid = id;
+	new_thread.tid = Scheduler::reserve_thread_id();
+	new_thread.task_stack = (intptr_t)thread_stack;
 	new_thread.context.esp = (unsigned)frame + 4;
 	new_thread.state = ThreadState::READY;
 	ready_threads->push_back(new_thread);
 	spinlock_release(&scheduler_lock);
 }
 
+unsigned Scheduler::reserve_thread_id()
+{
+	unsigned id = m_id_bitmap->find_first_unused();
+	m_id_bitmap->set_used(id);
+	return id;
+}
 // Switch the returned context of the current IRQ.
 void Scheduler::load_context(ContextFrame* current_context, const ThreadControlBlock* thread)
 {
 	current_context->esp = thread->context.esp;
+	GDT::set_tss_stack(thread->task_stack);
 }
 
 // Save current context into its TCB.

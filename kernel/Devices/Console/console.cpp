@@ -1,4 +1,5 @@
 #include "console.h"
+#include "Arch/x86/spinlock.h"
 #include "VirtualMemory/memory.h"
 
 static const size_t VGA_WIDTH = 80;
@@ -6,6 +7,7 @@ static const size_t VGA_HEIGHT = 25;
 volatile uint16_t* video_ram = 0;
 volatile int vPosition = 0, hPosition = 0;
 uint8_t charColor = 0x0F;
+SpinLock printf_lock;
 
 void setMode(TerminalMode Mode)
 {
@@ -49,6 +51,7 @@ void removeLine()
 }
 void putChar(char str)
 {
+	spinlock_acquire(&printf_lock);
 	if (vPosition == VGA_HEIGHT) {
 		pageUp();
 		vPosition--;
@@ -64,6 +67,7 @@ void putChar(char str)
 		insertCharacter(str);
 	}
 	updateCursor();
+	spinlock_release(&printf_lock);
 }
 void updateCursor()
 {
@@ -110,12 +114,15 @@ void clearScreen()
 }
 void initiate_console()
 {
+	spinlock_init(&printf_lock);
 	hPosition = 0;
 	vPosition = 0;
-	Memory::map(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER, VGATEXTMODE_BUFFER, 0x1000, MEMORY_TYPE::WRITABLE);
+	Memory::map((void*)(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER), (void*)VGATEXTMODE_BUFFER, 0x1000,
+	            MEMORY_TYPE::WRITABLE);
 	video_ram = (uint16_t*)(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER);
 	clearScreen();
 }
+
 void printf(const char* s, ...)
 {
 	va_list ap;
