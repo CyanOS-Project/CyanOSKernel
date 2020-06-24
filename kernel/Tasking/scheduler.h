@@ -59,6 +59,14 @@ typedef struct ThreadControlBlock_t {
 	ProcessControlBlock_t* parent;
 } ThreadControlBlock;
 
+typedef void (*thread_function)(uintptr_t argument);
+
+struct InitialThreadStack {
+	ContextFrame frame;
+	thread_function return_address;
+	intptr_t argument;
+};
+
 class Scheduler
 {
   private:
@@ -75,7 +83,7 @@ class Scheduler
 	static unsigned reserve_thread_id();
 
   public:
-	static void create_new_thread(void* address);
+	static void create_new_thread(thread_function address, uintptr_t argument);
 	static void schedule(ContextFrame* current_context, ScheduleType type);
 	static void block_current_thread(ThreadState reason, CircularQueue<ThreadControlBlock>* waiting_list);
 	static void unblock_thread(CircularQueue<ThreadControlBlock>* waiting_list);

@@ -23,8 +23,7 @@ void Memory::setup_page_fault_handler()
 
 void Memory::page_fault_handler(ContextFrame* isr_info)
 {
-	printf("Page= %X EIP=%X\t CS=%X\t ESP=%X  SS=%X\t\n", isr_info->cr2, isr_info->eip, isr_info->cs, isr_info->esp,
-	       isr_info->ss);
+	printf("Page= %X EIP=%X\t CS=%X\t ESP=%X \t\n", isr_info->cr2, isr_info->eip, isr_info->cs, isr_info->esp);
 	if (!PF_PRESENT(isr_info->error_code)) {
 		PANIC("Page fault due accessing non-present page.");
 	} else if (PF_US(isr_info->error_code)) {

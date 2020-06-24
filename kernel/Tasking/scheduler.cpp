@@ -15,7 +15,7 @@ ThreadControlBlock* current_thread;
 SpinLock Scheduler::scheduler_lock;
 Bitmap* Scheduler::m_id_bitmap;
 
-void idle()
+void idle(__UNUSED_PARAM(uintptr_t))
 {
 	while (1) {
 		HLT();
@@ -29,7 +29,7 @@ void Scheduler::setup()
 	m_id_bitmap = new Bitmap(MAX_BITMAP_SIZE);
 	current_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
-	create_new_thread((void*)idle);
+	create_new_thread(idle, 0);
 }
 
 void Scheduler::schedule_handler(ContextFrame* frame)
@@ -112,19 +112,22 @@ void Scheduler::yield()
 }
 
 // Create thread structure of a new thread
-void Scheduler::create_new_thread(void* address)
+void Scheduler::create_new_thread(thread_function address, uintptr_t argument)
 {
 	spinlock_acquire(&scheduler_lock);
 	ThreadControlBlock new_thread;
 	memset((char*)&new_thread, 0, sizeof(ThreadControlBlock));
 	void* thread_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
-	ContextFrame* frame = (ContextFrame*)((unsigned)thread_stack + STACK_SIZE - sizeof(ContextFrame));
-	frame->eip = (uint32_t)address;
-	frame->cs = KCS_SELECTOR;
-	frame->eflags = 0x202;
+	InitialThreadStack* init_thread_stack =
+	    (InitialThreadStack*)((unsigned)thread_stack + STACK_SIZE - sizeof(InitialThreadStack));
+	init_thread_stack->return_address = idle;
+	init_thread_stack->argument = argument;
+	init_thread_stack->frame.eip = (uintptr_t)address;
+	init_thread_stack->frame.cs = KCS_SELECTOR;
+	init_thread_stack->frame.eflags = 0x202;
 	new_thread.tid = Scheduler::reserve_thread_id();
 	new_thread.task_stack = (intptr_t)thread_stack;
-	new_thread.context.esp = (unsigned)frame + 4;
+	new_thread.context.esp = (unsigned)&init_thread_stack->frame + 4;
 	new_thread.state = ThreadState::READY;
 	ready_threads->push_back(new_thread);
 	spinlock_release(&scheduler_lock);

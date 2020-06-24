@@ -8,7 +8,7 @@
 #include "utils/list.h"
 
 Semaphore* lock;
-void test_semaphore_thread2()
+void test_semaphore_thread2(uintptr_t arg)
 {
 	printf("Thread2:\n");
 	lock->acquire();
@@ -21,12 +21,12 @@ void test_semaphore_thread2()
 	}
 }
 
-void test_semaphore()
+void test_semaphore(uintptr_t arg)
 {
 	printf("Thread1:\n");
 	lock = new Semaphore(1);
 	lock->acquire();
-	Scheduler::create_new_thread((void*)test_semaphore_thread2);
+	Scheduler::create_new_thread(test_semaphore_thread2, 0);
 	printf("Semaphore acquired by thread1\n");
 	Scheduler::sleep(500);
 	lock->release();
@@ -36,18 +36,18 @@ void test_semaphore()
 	}
 }
 
-void thread_test()
+void thread_test(uintptr_t arg)
 {
 	for (size_t i = 0; i < 3; i++) {
-		printf("Hello %d", i);
+		printf("Thread %d:Hello %d\n", arg, i);
 	}
 }
-void test_threading()
+void test_threading(uintptr_t arg)
 {
 	printf("Main thread: creating other threads\n");
 	for (size_t i = 0; i < 5; i++) {
 		printf("Main thread: Creating thread%d\n", i);
-		Scheduler::create_new_thread((void*)thread_test);
+		Scheduler::create_new_thread(thread_test, i);
 	}
 }
 

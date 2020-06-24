@@ -39,7 +39,7 @@ extern "C" void kernel_init()
 	printStatus("Setting up core components.", true);
 	Heap::setup();
 	Scheduler::setup();
-	Scheduler::create_new_thread((void*)test_threading);
+	Scheduler::create_new_thread(test_threading, 0);
 	PIC::setup();
 	PIT::setup();
 	printStatus("Setting up devices.", true);
