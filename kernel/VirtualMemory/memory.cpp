@@ -74,14 +74,39 @@ void Memory::free(void* virtual_address, uint32_t size, uint32_t flags)
 	Paging::unmap_pages((intptr_t)virtual_address, pages_num);
 }
 
-void Memory::map(void* virtual_address, void* physical_address, uint32_t size, uint32_t flags)
+void* Memory::map(intptr_t physical_address, uint32_t size, uint32_t flags)
 {
-	Paging::map_pages((intptr_t)virtual_address, (intptr_t)physical_address, GET_PAGES(size), parse_flags(flags));
+	intptr_t vAdd;
+	intptr_t pAdd = GET_PDE_INDEX((intptr_t)physical_address);
+	unsigned pages_num = GET_PAGES(size);
+
+	if (flags & MEMORY_TYPE::KERNEL) {
+		vAdd = VirtualMemory::find_pages(KERNEL_VIRTUAL_ADDRESS, LAST_PAGE_ADDRESS, pages_num);
+	} else {
+		vAdd = VirtualMemory::find_pages(FIRST_PAGE_ADDRESS, KERNEL_VIRTUAL_ADDRESS,
+		                                 pages_num); // skip first page to detect null pointer
+	}
+
+	PhysicalMemory::set_used_pages(pAdd, pages_num);
+	Paging::map_pages(vAdd, physical_address, GET_PAGES(size), parse_flags(flags));
+	return (void*)vAdd;
 }
 
-void Memory::unmap(void* virtual_address, void* physical_address, uint32_t size, uint32_t flags)
+void Memory::unmap(void* virtual_address, uint32_t size, uint32_t flags)
 {
+	unsigned pages_num = GET_PAGES(size);
+	intptr_t pAdd = Paging::get_physical_page((intptr_t)virtual_address);
 	Paging::unmap_pages((intptr_t)virtual_address, GET_PAGES(size));
+	PhysicalMemory::set_used_pages(pAdd, pages_num);
+}
+
+uintptr_t Memory::create_new_virtual_space()
+{
+	uintptr_t page_directory = (uintptr_t)alloc(sizeof(PAGE_DIRECTORY), MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
+	Paging::map_kernel_pd_entries(page_directory);
+	Paging::unmap_pages(page_directory,
+	                    GET_PAGES(sizeof(PAGE_DIRECTORY))); // unmap pd from virtual memory but keep it in physical
+	return Paging::get_physical_page(page_directory) * PAGE_SIZE;
 }
 
 unsigned Memory::virtual_memory_size()

@@ -21,8 +21,9 @@ class Memory
 	static void* alloc(uint32_t size, uint32_t flags);
 	static void* alloc(void* virtual_address, uint32_t size, uint32_t flags);
 	static void free(void* virtual_address, uint32_t size, uint32_t flags);
-	static void map(void* virtual_address, void* physical_address, uint32_t size, uint32_t flags);
-	static void unmap(void* virtual_address, void* physical_address, uint32_t size, uint32_t flags);
+	static void* map(intptr_t physical_address, uint32_t size, uint32_t flags);
+	static void unmap(void* virtual_address, uint32_t size, uint32_t flags);
+	static uintptr_t create_new_virtual_space();
 	static unsigned virtual_memory_size();
 	static unsigned physical_memory_size();
 	static void switch_page_directory(uintptr_t physical_address);

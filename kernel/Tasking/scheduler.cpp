@@ -129,6 +129,10 @@ void Scheduler::create_new_thread(thread_function address, uintptr_t argument)
 	new_thread.task_stack = (intptr_t)thread_stack;
 	new_thread.context.esp = (unsigned)&init_thread_stack->frame + 4;
 	new_thread.state = ThreadState::READY;
+
+	// FIXME: should be in process, but testing in threads
+	new_thread.page_directory = Memory::create_new_virtual_space();
+	//-----------------------------------------
 	ready_threads->push_back(new_thread);
 	spinlock_release(&scheduler_lock);
 }
@@ -143,7 +147,9 @@ unsigned Scheduler::reserve_thread_id()
 void Scheduler::load_context(ContextFrame* current_context, const ThreadControlBlock* thread)
 {
 	current_context->esp = thread->context.esp;
+	// FIXME: should be in process, but testing in threads
 	GDT::set_tss_stack(thread->task_stack);
+	Memory::switch_page_directory(thread->page_directory);
 }
 
 // Save current context into its TCB.

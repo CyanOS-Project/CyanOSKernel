@@ -52,8 +52,8 @@ typedef struct ProcessControlBlock_t {
 typedef struct ThreadControlBlock_t {
 	unsigned tid;
 	unsigned sleep_ticks;
-	intptr_t page_directory; // temp, should be in ProcessControlBlock_t
-	intptr_t task_stack;     // temp, should be in ProcessControlBlock_t
+	intptr_t page_directory; // FIXME: temp, should be in ProcessControlBlock_t
+	intptr_t task_stack;     // FIXME: temp, should be in ProcessControlBlock_t
 	ThreadState state;
 	RegistersContext context;
 	ProcessControlBlock_t* parent;

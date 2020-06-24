@@ -89,7 +89,7 @@ uint32_t Paging::get_physical_page(uint32_t virtual_address)
 }
 
 // Zeroing page directory entries.
-void Paging::initialize_page_directory(volatile PAGE_DIRECTORY* page_direcotry)
+void Paging::initialize_page_directory(PAGE_DIRECTORY* page_direcotry)
 {
 	for (size_t i = 0; i < NUMBER_OF_PAGE_DIRECOTRY_ENTRIES; i++) {
 		*((uint32_t*)&page_direcotry->entries[i]) = 0;
@@ -97,15 +97,24 @@ void Paging::initialize_page_directory(volatile PAGE_DIRECTORY* page_direcotry)
 }
 
 // Zeroing page table entries.
-void Paging::initialize_page_table(volatile PAGE_TABLE* page_direcotry)
+void Paging::initialize_page_table(PAGE_TABLE* page_direcotry)
 {
 	for (size_t i = 0; i < NUMBER_OF_PAGE_TABLE_ENTRIES; i++) {
 		*((uint32_t*)&page_direcotry->entries[i]) = 0;
 	}
 }
 
-void Paging::fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame,
-                                  uint32_t flags)
+void Paging::map_kernel_pd_entries(uint32_t pd)
+{
+	PAGE_DIRECTORY* new_page_dir = (PAGE_DIRECTORY*)pd;
+	initialize_page_directory(new_page_dir);
+	const size_t start = GET_PDE_INDEX(KERNEL_VIRTUAL_ADDRESS);
+	for (size_t i = start; i < (GET_NUMBER_OF_DIRECTORIES(KERNEL_SPACE_SIZE) + start); i++) {
+		memcpy((void*)&new_page_dir->entries[i], (void*)&page_direcotry.entries[i], sizeof(PAGE_DIRECTORY_ENTRY));
+	}
+}
+
+void Paging::fill_directory_entry(PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, uint32_t flags)
 {
 	page_direcotry_entry->unused = 0;
 	page_direcotry_entry->global = BOOL(flags & PAGE_FLAGS_GLOBAL);
@@ -118,7 +127,7 @@ void Paging::fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_
 	page_direcotry_entry->frame = physical_frame;
 }
 
-void Paging::fill_directory_PSE_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame,
+void Paging::fill_directory_PSE_entry(PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame,
                                       uint32_t flags)
 {
 	page_direcotry_entry->unused = 0;
@@ -132,7 +141,7 @@ void Paging::fill_directory_PSE_entry(volatile PAGE_DIRECTORY_ENTRY* page_direco
 	page_direcotry_entry->frame = physical_frame;
 }
 
-void Paging::fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame, uint32_t flags)
+void Paging::fill_page_table_entry(PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame, uint32_t flags)
 {
 	page_table_entry->unused = 0;
 	page_table_entry->global = BOOL(flags & PAGE_FLAGS_GLOBAL);

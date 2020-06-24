@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Lib/stdlib.h"
 #include "kernel_map.h"
 #include "utils/types.h"
 
@@ -31,7 +32,7 @@
 #define PAGE_FLAGS_WRITABLE 4
 #define PAGE_FLAGS_GLOBAL   8
 
-struct PAGE_TABLE_ENTRY {
+typedef volatile struct PAGE_TABLE_ENTRY_t {
 	uint32_t present : 1;  // Page present in memory
 	uint32_t rw : 1;       // Read-only if clear, readwrite if set
 	uint32_t user : 1;     // Supervisor level only if clear
@@ -43,16 +44,17 @@ struct PAGE_TABLE_ENTRY {
 	uint32_t global : 1;   // page is global
 	uint32_t unused : 3;   // Amalgamation of unused and reserved bits
 	uint32_t frame : 20;   // Frame address (shifted right 12 bits)
-};
+} PAGE_TABLE_ENTRY;
+
 typedef PAGE_TABLE_ENTRY PAGE_DIRECTORY_ENTRY;
 
-struct PAGE_DIRECTORY {
+typedef volatile struct PAGE_DIRECTORY_t {
 	PAGE_DIRECTORY_ENTRY entries[NUMBER_OF_PAGE_DIRECOTRY_ENTRIES];
-};
+} PAGE_DIRECTORY;
 
-struct PAGE_TABLE {
+typedef volatile struct PAGE_TABLE_t {
 	PAGE_TABLE_ENTRY entries[NUMBER_OF_PAGE_TABLE_ENTRIES];
-};
+} PAGE_TABLE;
 
 uint32_t get_physical_page(uint32_t virtual_address);
 
@@ -83,4 +85,5 @@ class Paging
 	static bool check_page_present(uint32_t virtual_address);
 	static uint32_t get_physical_page(uint32_t virtual_address);
 	static void load_page_directory(uint32_t page_direcotry);
+	static void map_kernel_pd_entries(uint32_t pd);
 };

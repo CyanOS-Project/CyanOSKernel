@@ -23,9 +23,8 @@ void initiate_console()
 	spinlock_init(&printf_lock);
 	hPosition = 0;
 	vPosition = 0;
-	Memory::map((void*)(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER), (void*)VGATEXTMODE_BUFFER, 0x1000,
-	            MEMORY_TYPE::WRITABLE);
-	video_ram = (uint16_t*)(KERNEL_VIRTUAL_ADDRESS + VGATEXTMODE_BUFFER);
+	video_ram =
+	    (volatile uint16_t*)Memory::map(VGATEXTMODE_BUFFER, 0x1000, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
 	clearScreen();
 }
 
