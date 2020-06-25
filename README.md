@@ -9,7 +9,7 @@
 - [x] PIC.
 - [x] Multi-threading.
 - [x] Mutex/Semaphores.
-- [ ] Multi-processing.
+- [x] Multi-programming.
 - [ ] User space.
 - [ ] System calls.
 - [ ] Keyboard/Mouse drivers.
