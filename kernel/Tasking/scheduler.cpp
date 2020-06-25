@@ -46,6 +46,8 @@ void Scheduler::schedule_handler(ContextFrame* frame)
 // Select next process, save and switch context.
 void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
 {
+	// FIXME: schedule idle if there is no ready thread
+	// TODO: move all unnecessary stuff to a separate thread to be performed later.
 	spinlock_acquire(&scheduler_lock);
 	if (type == ScheduleType::TIMED)
 		wake_up_sleepers();
@@ -54,7 +56,6 @@ void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
 		save_context(current_context, current_thread);
 		current_thread->state = ThreadState::READY;
 	}
-	// FIXME: schedule idle if there is no ready thread
 	select_next_thread();
 	ThreadControlBlock& next_thread = ready_threads->head();
 	next_thread.state = ThreadState::RUNNING;

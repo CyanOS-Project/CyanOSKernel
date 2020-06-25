@@ -1,0 +1,3 @@
+install: make g++-multilib nasm
+language: c++
+compiler: gcc
