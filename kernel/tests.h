@@ -26,7 +26,7 @@ void test_semaphore(uintptr_t arg)
 	printf("Thread1:\n");
 	lock = new Semaphore(1);
 	lock->acquire();
-	Scheduler::create_new_thread(test_semaphore_thread2, 0);
+	Scheduler::create_new_thread(0, test_semaphore_thread2, 0);
 	printf("Semaphore acquired by thread1\n");
 	Scheduler::sleep(500);
 	lock->release();
@@ -57,7 +57,7 @@ void test_threading(uintptr_t arg)
 	printf("Main thread: creating other threads\n");
 	for (size_t i = 0; i < 5; i++) {
 		printf("Main thread: Creating thread%d\n", i);
-		Scheduler::create_new_thread(thread_test, i);
+		Scheduler::create_new_thread(0, thread_test, i);
 	}
 }
 

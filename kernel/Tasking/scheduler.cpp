@@ -11,25 +11,31 @@
 
 CircularQueue<ThreadControlBlock>* Scheduler::ready_threads;
 CircularQueue<ThreadControlBlock>* Scheduler::sleeping_threads;
+CircularQueue<ProcessControlBlock>* Scheduler::processes;
 ThreadControlBlock* current_thread;
 SpinLock Scheduler::scheduler_lock;
-Bitmap* Scheduler::m_id_bitmap;
+Bitmap* Scheduler::m_tid_bitmap;
+Bitmap* Scheduler::m_pid_bitmap;
 
-void idle(__UNUSED_PARAM(uintptr_t))
+void idle(_UNUSED_PARAM(uintptr_t))
 {
 	while (1) {
 		HLT();
 	}
 }
+
 void Scheduler::setup()
 {
 	spinlock_init(&scheduler_lock);
 	ready_threads = new CircularQueue<ThreadControlBlock>;
 	sleeping_threads = new CircularQueue<ThreadControlBlock>;
-	m_id_bitmap = new Bitmap(MAX_BITMAP_SIZE);
+	processes = new CircularQueue<ProcessControlBlock>;
+	m_tid_bitmap = new Bitmap(MAX_BITMAP_SIZE);
+	m_pid_bitmap = new Bitmap(MAX_BITMAP_SIZE);
 	current_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
-	create_new_thread(idle, 0);
+	auto& new_proc = create_new_process();
+	create_new_thread(&new_proc, idle, 0);
 }
 
 void Scheduler::schedule_handler(ContextFrame* frame)
@@ -50,9 +56,15 @@ void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
 	}
 	// FIXME: schedule idle if there is no ready thread
 	select_next_thread();
-	ready_threads->head().state = ThreadState::RUNNING;
-	load_context(current_context, &ready_threads->head());
-	current_thread = &ready_threads->head();
+	ThreadControlBlock& next_thread = ready_threads->head();
+	next_thread.state = ThreadState::RUNNING;
+	if (current_thread) {
+		if (next_thread.parent->pid != current_thread->parent->pid) {
+			switch_page_directory(next_thread.parent->page_directory);
+		}
+	}
+	current_thread = &next_thread;
+	load_context(current_context, &next_thread);
 	spinlock_release(&scheduler_lock);
 }
 
@@ -112,7 +124,7 @@ void Scheduler::yield()
 }
 
 // Create thread structure of a new thread
-void Scheduler::create_new_thread(thread_function address, uintptr_t argument)
+void Scheduler::create_new_thread(ProcessControlBlock* process, thread_function address, uintptr_t argument)
 {
 	spinlock_acquire(&scheduler_lock);
 	ThreadControlBlock new_thread;
@@ -125,31 +137,52 @@ void Scheduler::create_new_thread(thread_function address, uintptr_t argument)
 	init_thread_stack->frame.eip = (uintptr_t)address;
 	init_thread_stack->frame.cs = KCS_SELECTOR;
 	init_thread_stack->frame.eflags = 0x202;
-	new_thread.tid = Scheduler::reserve_thread_id();
+	new_thread.tid = Scheduler::reserve_tid();
 	new_thread.task_stack = (intptr_t)thread_stack;
 	new_thread.context.esp = (unsigned)&init_thread_stack->frame + 4;
 	new_thread.state = ThreadState::READY;
-
-	// FIXME: should be in process, but testing in threads
-	new_thread.page_directory = Memory::create_new_virtual_space();
-	//-----------------------------------------
+	if (process) {
+		new_thread.parent = process;
+	} else {
+		new_thread.parent = current_thread->parent;
+	}
 	ready_threads->push_back(new_thread);
 	spinlock_release(&scheduler_lock);
 }
 
-unsigned Scheduler::reserve_thread_id()
+ProcessControlBlock& Scheduler::create_new_process()
 {
-	unsigned id = m_id_bitmap->find_first_unused();
-	m_id_bitmap->set_used(id);
+	spinlock_acquire(&scheduler_lock);
+	ProcessControlBlock new_process;
+	memset(&new_process, 0, sizeof(ProcessControlBlock));
+	new_process.parent = 0;
+	new_process.pid = reserve_pid();
+	new_process.page_directory = Memory::create_new_virtual_space();
+	processes->push_front(new_process);
+	auto& pcb = processes->head();
+	spinlock_release(&scheduler_lock);
+	return pcb;
+}
+
+unsigned Scheduler::reserve_tid()
+{
+	unsigned id = m_tid_bitmap->find_first_unused();
+	m_tid_bitmap->set_used(id);
 	return id;
 }
+
+unsigned Scheduler::reserve_pid()
+{
+	unsigned id = m_pid_bitmap->find_first_unused();
+	m_pid_bitmap->set_used(id);
+	return id;
+}
+
 // Switch the returned context of the current IRQ.
 void Scheduler::load_context(ContextFrame* current_context, const ThreadControlBlock* thread)
 {
 	current_context->esp = thread->context.esp;
-	// FIXME: should be in process, but testing in threads
 	GDT::set_tss_stack(thread->task_stack);
-	Memory::switch_page_directory(thread->page_directory);
 }
 
 // Save current context into its TCB.

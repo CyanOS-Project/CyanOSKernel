@@ -3,4 +3,4 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#define __UNUSED_PARAM(x) x __attribute__((__unused__))
+#define _UNUSED_PARAM(x) x tmp __attribute__((__unused__))

@@ -7,8 +7,8 @@ volatile GDT_ENTRY GDT::gdt_entries[GDT_NUMBER_OF_ENTRIES] __attribute__((aligne
 volatile TSS_ENTRY GDT::tss_entry __attribute__((aligned(PAGE_SIZE)));
 void GDT::setup()
 {
-	memset((char*)&tss_entry, 0, sizeof(TSS_ENTRY));
-	memset((char*)&gdt_entries, 0, sizeof(GDT_ENTRY) * GDT_NUMBER_OF_ENTRIES);
+	memset((void*)&tss_entry, 0, sizeof(TSS_ENTRY));
+	memset((void*)&gdt_entries, 0, sizeof(GDT_ENTRY) * GDT_NUMBER_OF_ENTRIES);
 
 	fill_gdt((uint32_t)&gdt_entries, GDT_NUMBER_OF_ENTRIES * sizeof(GDT_ENTRY));
 

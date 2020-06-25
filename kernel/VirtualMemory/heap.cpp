@@ -35,7 +35,7 @@ void* Heap::kmalloc(unsigned size, unsigned flags)
 	free_block = initiate_first_block(new_page);
 	free_block->size = size;
 	uintptr_t alloc_address = HEADER_TO_ADDR(free_block);
-	memset((char*)alloc_address, 0, size);
+	memset((void*)alloc_address, 0, size);
 	return (void*)alloc_address;
 }
 

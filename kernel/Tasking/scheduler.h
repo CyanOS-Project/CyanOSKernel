@@ -44,7 +44,7 @@ typedef struct RegistersContext_t {
 
 typedef struct ProcessControlBlock_t {
 	unsigned pid;
-
+	intptr_t page_directory;
 	ProcessState state;
 	ProcessControlBlock_t* parent;
 } ProcessControlBlock;
@@ -52,8 +52,7 @@ typedef struct ProcessControlBlock_t {
 typedef struct ThreadControlBlock_t {
 	unsigned tid;
 	unsigned sleep_ticks;
-	intptr_t page_directory; // FIXME: temp, should be in ProcessControlBlock_t
-	intptr_t task_stack;     // FIXME: temp, should be in ProcessControlBlock_t
+	intptr_t task_stack;
 	ThreadState state;
 	RegistersContext context;
 	ProcessControlBlock_t* parent;
@@ -70,9 +69,11 @@ struct InitialThreadStack {
 class Scheduler
 {
   private:
-	static Bitmap* m_id_bitmap;
+	static Bitmap* m_tid_bitmap;
+	static Bitmap* m_pid_bitmap;
 	static CircularQueue<ThreadControlBlock>* ready_threads;
 	static CircularQueue<ThreadControlBlock>* sleeping_threads;
+	static CircularQueue<ProcessControlBlock>* processes;
 	static SpinLock scheduler_lock;
 	static void load_context(ContextFrame* current_context, const ThreadControlBlock* thread);
 	static void switch_page_directory(const uintptr_t page_directory);
@@ -80,10 +81,12 @@ class Scheduler
 	static void wake_up_sleepers();
 	static void schedule_handler(ContextFrame* frame);
 	static void select_next_thread();
-	static unsigned reserve_thread_id();
+	static unsigned reserve_tid();
+	static unsigned reserve_pid();
 
   public:
-	static void create_new_thread(thread_function address, uintptr_t argument);
+	static void create_new_thread(ProcessControlBlock* process, thread_function address, uintptr_t argument);
+	static ProcessControlBlock& create_new_process();
 	static void schedule(ContextFrame* current_context, ScheduleType type);
 	static void block_current_thread(ThreadState reason, CircularQueue<ThreadControlBlock>* waiting_list);
 	static void unblock_thread(CircularQueue<ThreadControlBlock>* waiting_list);
