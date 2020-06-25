@@ -61,16 +61,14 @@ uint32_t get_physical_page(uint32_t virtual_address);
 class Paging
 {
   private:
-	static void initialize_page_directory(volatile PAGE_DIRECTORY* page_direcotry);
-	static void initialize_page_table(volatile PAGE_TABLE* page_direcotry);
-	static void map_page(uint32_t virtual_address, uint32_t physical_address, uint32_t flags);
-	static void unmap_page(uint32_t virtual_address);
-	static void fill_directory_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame,
+	static void initialize_page_directory(PAGE_DIRECTORY* page_direcotry);
+	static void initialize_page_table(PAGE_TABLE* page_direcotry);
+	static void fill_directory_entry(PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame,
 	                                 uint32_t flags);
-	static void fill_directory_PSE_entry(volatile PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame,
+	static void fill_directory_PSE_entry(PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame,
 	                                     uint32_t flags);
-	static void fill_page_table_entry(volatile PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame,
-	                                  uint32_t flags);
+	static void fill_page_table_entry(PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame, uint32_t flags);
+	static bool check_page_exits_in_table(uint32_t virtual_address);
 	static void invalidate_page(uint32_t addr);
 	static void enable_PSE();
 	static void enable_paging();
@@ -83,7 +81,11 @@ class Paging
 	static void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages);
 	static void unmap_pages(uint32_t virtual_address, uint32_t pages);
 	static bool check_page_present(uint32_t virtual_address);
+	static bool check_page_table_exists(uint32_t virtual_address);
 	static uint32_t get_physical_page(uint32_t virtual_address);
 	static void load_page_directory(uint32_t page_direcotry);
 	static void map_kernel_pd_entries(uint32_t pd);
+	static void map_page_table(uint32_t virtual_address, uint32_t pt);
+	static void map_page(uint32_t virtual_address, uint32_t physical_address, uint32_t flags);
+	static void unmap_page(uint32_t virtual_address);
 };

@@ -46,7 +46,6 @@ void Paging::map_boot_pages(uint32_t virtual_address, uint32_t physical_address,
 // Map a virtual page to a physical page.
 void Paging::map_page(uint32_t virtual_address, uint32_t physical_address, uint32_t flags)
 {
-
 	PAGE_TABLE* page_table = (PAGE_TABLE*)GET_PAGE_VIRTUAL_ADDRESS(RECURSIVE_ENTRY, GET_PDE_INDEX(virtual_address));
 	fill_page_table_entry(&page_table->entries[GET_PTE_INDEX(virtual_address)], GET_FRAME(physical_address), flags);
 	invalidate_page(virtual_address);
@@ -76,10 +75,31 @@ void Paging::unmap_pages(uint32_t virtual_address, uint32_t pages)
 	}
 }
 
-bool Paging::check_page_present(uint32_t virtual_address)
+void Paging::map_page_table(uint32_t virtual_address, uint32_t pt_virtual_address)
+{
+	uint32_t page_flags = PAGE_FLAGS_PRESENT | PAGE_FLAGS_WRITABLE;
+	PAGE_DIRECTORY* page_dir = (PAGE_DIRECTORY*)GET_PAGE_VIRTUAL_ADDRESS(RECURSIVE_ENTRY, RECURSIVE_ENTRY);
+	uint32_t pt_frame = get_physical_page(pt_virtual_address);
+	fill_directory_entry(&page_dir->entries[GET_PDE_INDEX(virtual_address)], pt_frame, page_flags);
+}
+
+bool Paging::check_page_table_exists(uint32_t virtual_address)
+{
+	PAGE_DIRECTORY* page_dir = (PAGE_DIRECTORY*)GET_PAGE_VIRTUAL_ADDRESS(RECURSIVE_ENTRY, RECURSIVE_ENTRY);
+	return page_dir->entries[GET_PDE_INDEX(virtual_address)].present;
+}
+
+bool Paging::check_page_exits_in_table(uint32_t virtual_address)
 {
 	PAGE_TABLE* page_table = (PAGE_TABLE*)GET_PAGE_VIRTUAL_ADDRESS(RECURSIVE_ENTRY, GET_PDE_INDEX(virtual_address));
 	return page_table->entries[GET_PTE_INDEX(virtual_address)].present;
+}
+
+bool Paging::check_page_present(uint32_t virtual_address)
+{
+	if (check_page_table_exists(virtual_address) == false)
+		return false;
+	return check_page_exits_in_table(virtual_address);
 }
 
 uint32_t Paging::get_physical_page(uint32_t virtual_address)
@@ -106,12 +126,14 @@ void Paging::initialize_page_table(PAGE_TABLE* page_direcotry)
 
 void Paging::map_kernel_pd_entries(uint32_t pd)
 {
+	uint32_t page_flags = PAGE_FLAGS_PRESENT | PAGE_FLAGS_WRITABLE;
 	PAGE_DIRECTORY* new_page_dir = (PAGE_DIRECTORY*)pd;
 	initialize_page_directory(new_page_dir);
 	const size_t start = GET_PDE_INDEX(KERNEL_VIRTUAL_ADDRESS);
-	for (size_t i = start; i < (GET_NUMBER_OF_DIRECTORIES(KERNEL_SPACE_SIZE) + start); i++) {
+	for (size_t i = start; i < RECURSIVE_ENTRY; i++) {
 		memcpy((void*)&new_page_dir->entries[i], (void*)&page_direcotry.entries[i], sizeof(PAGE_DIRECTORY_ENTRY));
 	}
+	fill_directory_entry(&new_page_dir->entries[RECURSIVE_ENTRY], get_physical_page(pd), page_flags);
 }
 
 void Paging::fill_directory_entry(PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame, uint32_t flags)

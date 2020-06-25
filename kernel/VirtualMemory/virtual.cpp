@@ -1,6 +1,4 @@
 #include "virtual.h"
-#include "Arch/x86/paging.h"
-#include "Arch/x86/panic.h"
 
 uintptr_t VirtualMemory::find_pages(uint32_t start_address, uint32_t end_address, uint32_t pages_num)
 {
@@ -33,4 +31,21 @@ bool VirtualMemory::check_free_pages(uint32_t start_address, uint32_t pages_num)
 		}
 	}
 	return true;
+}
+
+uintptr_t VirtualMemory::create_page_table()
+{
+	uintptr_t pt_addr =
+	    (uintptr_t)Memory::_alloc_no_lock(sizeof(PAGE_TABLE), MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
+	Paging::unmap_pages(pt_addr, GET_PAGES(sizeof(PAGE_TABLE))); // we don't need table to be in virtual memory.
+	return pt_addr;
+}
+void VirtualMemory::map_pages(uintptr_t virtual_address, uintptr_t physical_address, uint32_t pages, uint32_t flags)
+{
+	for (size_t i = 0; i < pages; i++) {
+		if (Paging::check_page_table_exists(virtual_address) == false) {
+			Paging::map_page_table(virtual_address, create_page_table());
+		}
+		Paging::map_page(virtual_address + PAGE_SIZE * i, physical_address + PAGE_SIZE * i, flags);
+	}
 }

@@ -15,6 +15,11 @@ class Memory
 	static void page_fault_handler(ContextFrame* isr_info);
 	static uint32_t parse_flags(uint32_t mem_flags);
 	static unsigned get_kernel_pages();
+	static void* _alloc_no_lock(uint32_t size, uint32_t flags);
+	static void* _alloc_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
+	static void _free_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
+	static void* _map_no_lock(intptr_t physical_address, uint32_t size, uint32_t flags);
+	static void _unmap_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
 
   public:
 	static void setup();
@@ -28,4 +33,6 @@ class Memory
 	static unsigned physical_memory_size();
 	static void switch_page_directory(uintptr_t physical_address);
 	static void setup_page_fault_handler();
+
+	friend class VirtualMemory;
 };
