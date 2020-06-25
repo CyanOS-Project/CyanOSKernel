@@ -1,4 +1,4 @@
-# CyanOS: A Hobbyist Operating System
+# CyanOS: A Hobbyist Operating System [![Build Status](https://travis-ci.com/AymenSekhri/CyanOS.svg?branch=master)](https://travis-ci.com/AymenSekhri/CyanOS)
 
 ## Todo list
 - [x] Paging and virtual memory.
