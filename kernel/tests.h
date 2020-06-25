@@ -38,18 +38,9 @@ void test_semaphore(uintptr_t arg)
 
 void thread_test(uintptr_t arg)
 {
-	volatile int* data = (int*)Memory::alloc(0x200, MEMORY_TYPE::WRITABLE);
 	printf("Thread %d\n", arg);
-	*data = arg;
-	while (1) {
-		printf("ending thread %d ; ", arg);
-		printStatus("", *data == arg);
-
-		if (*data != arg) {
-			printf("");
-		}
-
-		Scheduler::sleep(3000);
+	for (size_t i = 0; i < 3; i++) {
+		printf("Thread %d:Hello %d\n", arg, i);
 	}
 }
 void test_threading(uintptr_t arg)
