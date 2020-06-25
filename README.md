@@ -50,7 +50,6 @@ git clone https://github.com/AymenSekhri/CyanOS.git
 cd ./CyanOS
 make clean && make run
 ```
-You may need to change the name of Qemu's executable in /kernel/Makefile under the variable `QEMU` to your Qemu's name.
 
 ## Useful resources:
 * Operating Systems: Internals And Design Principles By William Stallings.
