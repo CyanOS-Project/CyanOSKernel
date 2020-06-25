@@ -9,13 +9,18 @@
 SpinLock mem_lock;
 void Memory::setup()
 {
-	spinlock_init(&mem_lock);
 	Paging::setup(get_kernel_pages());
 	PhysicalMemory::initialize();
 	// Reserve Low 1MB Pages.
 	PhysicalMemory::set_used_pages(0, GET_FRAME(KERNEL_PHYSICAL_ADDRESS));
 	// Set kernel memory as used.
 	PhysicalMemory::set_used_pages(GET_FRAME(KERNEL_PHYSICAL_ADDRESS), get_kernel_pages());
+}
+
+void Memory::setup_stage2()
+{
+	spinlock_init(&mem_lock);
+	setup_page_fault_handler();
 }
 
 void Memory::setup_page_fault_handler()

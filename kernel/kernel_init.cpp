@@ -32,10 +32,10 @@ void display_time()
 
 extern "C" void kernel_init()
 {
+	Memory::setup_stage2();
 	initiate_console();
 	GDT::setup();
 	IDT::setup();
-	Memory::setup_page_fault_handler();
 	printStatus("Setting up core components.", true);
 	Heap::setup();
 	Scheduler::setup();

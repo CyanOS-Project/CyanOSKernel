@@ -46,7 +46,7 @@ void thread_test(uintptr_t arg)
 void test_threading(uintptr_t arg)
 {
 	printf("Main thread: creating other threads\n");
-	for (size_t i = 0; i < 5; i++) {
+	for (size_t i = 0; i < 3; i++) {
 		printf("Main thread: Creating thread%d\n", i);
 		Scheduler::create_new_thread(0, thread_test, i);
 	}
