@@ -1,7 +1,7 @@
 #pragma once
 #include "utils/types.h"
 
-#define JMP(x)               asm("JMP %0" : : "r"(kernel_init) :)
+#define JMP(x)               asm("JMP *%0" : : "r"(kernel_init) :)
 #define HLT()                asm("HLT")
 #define DISABLE_INTERRUPTS() asm("CLI")
 #define ENABLE_INTERRUPTS()  asm("STI")
@@ -61,7 +61,8 @@ static inline uint32_t eflags_read()
 {
 	uint32_t eflags;
 	asm volatile("PUSHFL\n"
-	             "POPL %0\n" ::"r"(eflags));
+	             "POPL %0\n"
+	             : "=r"(eflags));
 
 	return eflags;
 }
@@ -69,6 +70,5 @@ static inline uint32_t eflags_read()
 static inline void eflags_write(uint32_t eflags)
 {
 	asm volatile("PUSHL %0\n"
-	             "POPFL \n"
-	             : "=r"(eflags));
+	             "POPFL \n" ::"r"(eflags));
 }
