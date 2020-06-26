@@ -33,7 +33,7 @@ void Paging::map_boot_pages(uint32_t virtual_address, uint32_t physical_address,
 	PAGE_TABLE* ph_page_tables = (PAGE_TABLE*)VIR_TO_PHY((uint32_t)startup_page_tables);
 	uint32_t current_v_page = virtual_address;
 	uint32_t current_p_page = physical_address;
-	uint32_t page_flags = PAGE_FLAGS_PRESENT | PAGE_FLAGS_WRITABLE;
+	uint32_t page_flags = PAGE_FLAGS_PRESENT | PAGE_FLAGS_WRITABLE | PAGE_FLAGS_GLOBAL;
 	for (size_t i = 0; i < pages; i++) {
 		uint32_t pde = GET_PDE_INDEX(current_v_page);
 		uint32_t pte = GET_PTE_INDEX(current_v_page);
