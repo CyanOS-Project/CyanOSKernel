@@ -1,6 +1,6 @@
 #include "stdlib.h"
 
-void memcpy(void* dest, void* source, unsigned int len)
+void memcpy(void* dest, const void* source, unsigned int len)
 {
 	char* _dest = (char*)dest;
 	char* _source = (char*)source;
@@ -15,7 +15,7 @@ void memset(void* dest, char value, unsigned int len)
 		_dest[i] = value;
 }
 
-bool memcmp(void* source, void* dest, unsigned int len)
+bool memcmp(const void* source, const void* dest, unsigned int len)
 {
 	char* _dest = (char*)dest;
 	char* _source = (char*)source;
@@ -25,23 +25,24 @@ bool memcmp(void* source, void* dest, unsigned int len)
 	return 0;
 }
 
-bool strncmp(char* source, char* dest, unsigned int len)
+bool strncmp(const char* source, const char* dest, unsigned int len)
 {
 	return memcmp(source, dest, len);
 }
 
-bool strcmp(char* source, char* dest, unsigned int len)
+bool strcmp(const char* source, const char* dest)
 {
-	unsigned i = 0;
-	while ((source[i] != 0 || dest[i] != 0) && (i < len)) {
+	unsigned src_len = strlen(source);
+	if (src_len != strlen(dest))
+		return 1;
+	for (size_t i = 0; i < src_len; i++) {
 		if (source[i] != dest[i])
 			return 1;
-		i++;
 	}
 	return 0;
 }
 
-int strcp(char* dst, const char* src)
+int strcpy(char* dst, const char* src)
 {
 	unsigned i = 0;
 	while ((dst[i] = src[i]))
@@ -49,7 +50,7 @@ int strcp(char* dst, const char* src)
 	return i;
 }
 
-int strlen(char* str)
+unsigned strlen(const char* str)
 {
 	unsigned len = 0;
 	while ((str[len]))

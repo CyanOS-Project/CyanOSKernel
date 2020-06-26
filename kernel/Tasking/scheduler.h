@@ -32,6 +32,7 @@ enum class ScheduleType {
 
 typedef struct ProcessControlBlock_t {
 	unsigned pid;
+	const char* name;
 	uintptr_t page_directory;
 	ProcessState state;
 	ProcessControlBlock_t* parent;
@@ -69,7 +70,7 @@ class Scheduler
 
   public:
 	static void create_new_thread(ProcessControlBlock* process, thread_function address, uintptr_t argument);
-	static ProcessControlBlock& create_new_process();
+	static ProcessControlBlock& create_new_process(const char* name);
 	static void schedule(ISRContextFrame* current_context, ScheduleType type);
 	static void block_current_thread(ThreadState reason, CircularQueue<ThreadControlBlock>* waiting_list);
 	static void unblock_thread(CircularQueue<ThreadControlBlock>* waiting_list);

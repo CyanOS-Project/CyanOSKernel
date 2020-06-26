@@ -34,7 +34,7 @@ void Scheduler::setup()
 	m_pid_bitmap = new Bitmap(MAX_BITMAP_SIZE);
 	current_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
-	auto& new_proc = create_new_process();
+	auto& new_proc = create_new_process("idle_process");
 	create_new_thread(&new_proc, idle, 0);
 }
 
@@ -98,11 +98,16 @@ void Scheduler::yield()
 	asm volatile("int $0x81");
 }
 
-ProcessControlBlock& Scheduler::create_new_process()
+ProcessControlBlock& Scheduler::create_new_process(const char* name)
 {
 	spinlock_acquire(&scheduler_lock);
+	unsigned str_len = strlen(name) + 1;
+	char* proc_name = new char[str_len];
 	ProcessControlBlock new_process;
 	memset(&new_process, 0, sizeof(ProcessControlBlock));
+	memset(proc_name, 0, sizeof(str_len));
+	memcpy(proc_name, name, str_len);
+	new_process.name = proc_name;
 	new_process.parent = 0;
 	new_process.pid = reserve_pid();
 	new_process.page_directory = Memory::create_new_virtual_space();
