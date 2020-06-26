@@ -16,7 +16,7 @@ ASM_OBJS := $(patsubst %.s,$(OBJ)/%.o2,$(ASM_SRCS))
 DIRS    := $(sort  $(abspath $(dir $(ASM_OBJS) $(CPP_OBJS)))) 
 EXE     := $(BIN)/kernel.out
 IMG		:= 	$(BIN)/kernel.img
-CFLAGS  := -T linker.ld -I $(INCLUDE) -m32 -g --std=c++17 -fno-builtin -Og -MMD -fno-pie -ffreestanding -nostdlib -fno-rtti -fno-exceptions -fno-leading-underscore
+CFLAGS  := -T linker.ld -I $(INCLUDE) -m32 -g -Wall --std=c++17 -fno-builtin -Og -MMD -fno-pie -ffreestanding -nostdlib -fno-rtti -fno-exceptions -fno-leading-underscore
 QMFLAGS := -S -gdb tcp::1234
 NFLAGS	:= 
 

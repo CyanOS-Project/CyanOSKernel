@@ -4,6 +4,7 @@
 #include "Arch/x86/panic.h"
 #include "Devices/Console/console.h"
 #include "physical.h"
+#include "utils/assert.h"
 #include "virtual.h"
 
 SpinLock mem_lock;
@@ -93,6 +94,8 @@ uintptr_t Memory::create_new_virtual_space()
 
 unsigned Memory::virtual_memory_size()
 {
+	ASSERT_NOT_REACHABLE();
+	return 0;
 }
 
 unsigned Memory::physical_memory_size()
@@ -156,7 +159,7 @@ void Memory::_free_no_lock(void* virtual_address, uint32_t size, uint32_t flags)
 
 void* Memory::_alloc_no_lock(void* virtual_address, uint32_t size, uint32_t flags)
 {
-	intptr_t vAdd, pAdd;
+	intptr_t vAdd;
 	unsigned pages_num = GET_PAGES(size);
 	vAdd = (intptr_t)virtual_address;
 	if (!VirtualMemory::check_free_pages(vAdd, pages_num)) {
@@ -171,7 +174,7 @@ void* Memory::_alloc_no_lock(void* virtual_address, uint32_t size, uint32_t flag
 
 void* Memory::_alloc_no_lock(uint32_t size, uint32_t flags)
 {
-	intptr_t vAdd, pAdd;
+	intptr_t vAdd;
 	unsigned pages_num = GET_PAGES(size);
 
 	if (flags & MEMORY_TYPE::KERNEL) {

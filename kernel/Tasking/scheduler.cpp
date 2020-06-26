@@ -67,7 +67,6 @@ void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
 // Put the current thread into sleep for ms.
 void Scheduler::sleep(unsigned ms)
 {
-
 	spinlock_acquire(&scheduler_lock);
 	ThreadControlBlock& current = ready_threads->head();
 	current.sleep_ticks = PIT::ticks + ms;

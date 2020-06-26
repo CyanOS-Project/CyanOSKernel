@@ -45,7 +45,7 @@ void printf(const char* s, ...)
 	spinlock_release(&printf_lock);
 }
 
-void displayMemory(const char* Address, int Size)
+void displayMemory(const char* Address, unsigned Size)
 {
 	spinlock_acquire(&printf_lock);
 	for (size_t i = 0; i < Size; i++) {

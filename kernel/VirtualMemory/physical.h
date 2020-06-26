@@ -9,16 +9,16 @@
 class PhysicalMemory
 {
   private:
-	static uint32_t find_pages(uint32_t count);
+	static uintptr_t find_pages(uint32_t count);
 	static volatile uint8_t physical_memory_tracer[];
-	static volatile uint32_t physical_memory_size;
+	static volatile unsigned physical_memory_size;
 
   public:
 	static void initialize();
-	static uint32_t alloc_page();
-	static uint32_t alloc_contagious_pages(int count);
-	static void free_pages(uint32_t page_number, uint32_t count);
-	static void set_free_pages(uint32_t page_number, uint32_t count);
-	static void set_used_pages(uint32_t page_number, uint32_t count);
-	static uint32_t get_physical_memory_size();
+	static uintptr_t alloc_page();
+	static uintptr_t alloc_contagious_pages(unsigned count);
+	static void free_pages(uintptr_t page_number, unsigned count);
+	static void set_free_pages(uintptr_t page_number, unsigned count);
+	static void set_used_pages(uintptr_t page_number, unsigned count);
+	static unsigned get_physical_memory_size();
 };

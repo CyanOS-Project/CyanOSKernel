@@ -1,4 +1,5 @@
 #include "virtual.h"
+#include "utils/assert.h"
 
 uintptr_t VirtualMemory::find_pages(uint32_t start_address, uint32_t end_address, uint32_t pages_num)
 {
@@ -20,6 +21,8 @@ uintptr_t VirtualMemory::find_pages(uint32_t start_address, uint32_t end_address
 	}
 
 	PANIC("No virtual memory available!");
+	ASSERT_NOT_REACHABLE();
+	return uintptr_t(nullptr);
 }
 
 bool VirtualMemory::check_free_pages(uint32_t start_address, uint32_t pages_num)

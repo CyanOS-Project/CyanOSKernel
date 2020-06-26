@@ -32,7 +32,7 @@ bool strncmp(char* source, char* dest, unsigned int len)
 
 bool strcmp(char* source, char* dest, unsigned int len)
 {
-	int i = 0;
+	unsigned i = 0;
 	while ((source[i] != 0 || dest[i] != 0) && (i < len)) {
 		if (source[i] != dest[i])
 			return 1;
@@ -43,15 +43,15 @@ bool strcmp(char* source, char* dest, unsigned int len)
 
 int strcp(char* dst, const char* src)
 {
-	int i = 0;
-	while ((dst[i] = src[i++]))
-		;
+	unsigned i = 0;
+	while ((dst[i] = src[i]))
+		i++;
 	return i;
 }
 
 int strlen(char* str)
 {
-	int len = 0;
+	unsigned len = 0;
 	while ((str[len]))
 		len++;
 	return len;
@@ -59,7 +59,7 @@ int strlen(char* str)
 
 int toupper(char* str)
 {
-	int i = 0;
+	unsigned i = 0;
 	while (str[i]) {
 		if (str[i] >= 'a' && str[i] <= 'z')
 			str[i] += 'A' - 'a';
@@ -70,7 +70,7 @@ int toupper(char* str)
 
 int tolower(char* str)
 {
-	int i = 0;
+	unsigned i = 0;
 	while (str[i]) {
 		if (str[i] >= 'A' && str[i] <= 'Z')
 			str[i] -= 'A' - 'a';
@@ -82,7 +82,7 @@ int tolower(char* str)
 void itoa(char* buf, unsigned long int n, int base)
 {
 	unsigned long int tmp;
-	int i, j;
+	unsigned i, j;
 
 	tmp = n;
 	i = 0;

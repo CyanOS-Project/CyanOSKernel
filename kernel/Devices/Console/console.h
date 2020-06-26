@@ -36,7 +36,7 @@ void __printf(const char* s, ...);
 void putChar(char str);
 void clearScreen();
 void initiate_console();
-void displayMemory(const char* Address, int Size);
+void displayMemory(const char* Address, unsigned Size);
 void printStatus(const char* msg, bool Success);
 void removeLine();
 void pageUp();

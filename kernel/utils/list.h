@@ -129,7 +129,7 @@ template <class T> typename CircularQueue<T>::Node* CircularQueue<T>::Iterator::
 	return m_current;
 }
 
-template <class T> CircularQueue<T>::CircularQueue() : m_count(0), m_head(nullptr)
+template <class T> CircularQueue<T>::CircularQueue() : m_head(nullptr), m_count(0)
 {
 }
 

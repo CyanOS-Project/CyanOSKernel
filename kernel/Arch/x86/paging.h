@@ -17,7 +17,7 @@
 #define GET_PDE_INDEX(x)                                (x >> 22)
 #define GET_NUMBER_OF_DIRECTORIES(x)                    (x >> 22)
 #define GET_OFFSET(x)                                   (x & 0xFFF)
-#define GET_PAGE_VIRTUAL_ADDRESS(dir_index, page_index) ((dir_index << 22) | (page_index << 12))
+#define GET_PAGE_VIRTUAL_ADDRESS(dir_index, page_index) (((dir_index) << 22) | ((page_index) << 12))
 #define BOOL(x)                                         ((bool)(x))
 
 #define GET_PAGES(x)  (x / PAGE_SIZE + ((x % PAGE_SIZE) == 0 ? 0 : 1))

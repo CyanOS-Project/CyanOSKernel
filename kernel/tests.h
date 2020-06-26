@@ -71,7 +71,6 @@ void test_lists()
 	list->push_back(s3);
 	list->push_back(s4);
 	printf("List 1:\n");
-	CircularQueue<Stuff>::Iterator itr = list->begin();
 	list->move_head_to_other_list(list2);
 	list->move_head_to_other_list(list2);
 	// list->move_head_to_other_list(list2);
