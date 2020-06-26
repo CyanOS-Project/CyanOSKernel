@@ -12,9 +12,19 @@
 
 #define SCHEDULE_IRQ 0x81
 
-struct ContextFrame {
-	uint32_t esp, edi, esi, ebp, ___esp, ebx, edx, ecx, eax;
-	uint32_t cr2;
+struct RegistersContext {
+	uint32_t eax;
+	uint32_t ebx;
+	uint32_t ecx;
+	uint32_t edx;
+	uint32_t esi;
+	uint32_t edi;
+	uint32_t esp;
+	uint32_t ebp;
+};
+struct ISRContextFrame {
+	uint32_t context_stack;
+	RegistersContext registers;
 	uint32_t irq_number;
 	uint32_t error_code;
 	uint32_t eip, cs, eflags;
@@ -43,7 +53,7 @@ enum IRQ_NUMBER {
 	VE = 20
 };
 
-typedef void (*isr_function)(ContextFrame*);
+typedef void (*isr_function)(ISRContextFrame*);
 extern "C" uintptr_t isr_vector[];
 
 class ISR
@@ -52,7 +62,7 @@ class ISR
 	static const char* exception_messages[];
 
   public:
-	static void default_interrupt_handler(ContextFrame* info);
+	static void default_interrupt_handler(ISRContextFrame* info);
 	static void initiate_isr_dispatcher_vector();
 	static void register_isr_handler(isr_function address, uint8_t irq_number);
 };

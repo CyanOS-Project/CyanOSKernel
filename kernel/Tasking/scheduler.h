@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Arch/x86/context.h"
 #include "Arch/x86/isr.h"
 #include "Arch/x86/paging.h"
 #include "Arch/x86/spinlock.h"
@@ -29,22 +30,9 @@ enum class ScheduleType {
 	TIMED,
 };
 
-typedef struct RegistersContext_t {
-	uint32_t eax;
-	uint32_t ebx;
-	uint32_t ecx;
-	uint32_t edx;
-	uint32_t esi;
-	uint32_t edi;
-	uint32_t esp;
-	uint32_t ebp;
-	uint32_t eip;
-	uint32_t eflags;
-} RegistersContext;
-
 typedef struct ProcessControlBlock_t {
 	unsigned pid;
-	intptr_t page_directory;
+	uintptr_t page_directory;
 	ProcessState state;
 	ProcessControlBlock_t* parent;
 } ProcessControlBlock;
@@ -52,19 +40,13 @@ typedef struct ProcessControlBlock_t {
 typedef struct ThreadControlBlock_t {
 	unsigned tid;
 	unsigned sleep_ticks;
-	intptr_t task_stack;
+	uintptr_t task_stack_start;
+	uintptr_t task_stack_pointer;
 	ThreadState state;
-	RegistersContext context;
-	ProcessControlBlock_t* parent;
+	ProcessControlBlock* parent;
 } ThreadControlBlock;
 
 typedef void (*thread_function)(uintptr_t argument);
-
-struct InitialThreadStack {
-	ContextFrame frame;
-	thread_function return_address;
-	intptr_t argument;
-};
 
 class Scheduler
 {
@@ -75,19 +57,20 @@ class Scheduler
 	static CircularQueue<ThreadControlBlock>* sleeping_threads;
 	static CircularQueue<ProcessControlBlock>* processes;
 	static SpinLock scheduler_lock;
-	static void load_context(ContextFrame* current_context, const ThreadControlBlock* thread);
+	static void load_context(ISRContextFrame* current_context, const ThreadControlBlock* thread);
 	static void switch_page_directory(const uintptr_t page_directory);
-	static void save_context(const ContextFrame* current_context, ThreadControlBlock* thread);
+	static void save_context(const ISRContextFrame* current_context, ThreadControlBlock* thread);
 	static void wake_up_sleepers();
-	static void schedule_handler(ContextFrame* frame);
+	static void schedule_handler(ISRContextFrame* frame);
 	static void select_next_thread();
 	static unsigned reserve_tid();
 	static unsigned reserve_pid();
+	static void create_tcb(uintptr_t task_stack, uintptr_t task_current_stack, ProcessControlBlock* parent);
 
   public:
 	static void create_new_thread(ProcessControlBlock* process, thread_function address, uintptr_t argument);
 	static ProcessControlBlock& create_new_process();
-	static void schedule(ContextFrame* current_context, ScheduleType type);
+	static void schedule(ISRContextFrame* current_context, ScheduleType type);
 	static void block_current_thread(ThreadState reason, CircularQueue<ThreadControlBlock>* waiting_list);
 	static void unblock_thread(CircularQueue<ThreadControlBlock>* waiting_list);
 	static void setup();

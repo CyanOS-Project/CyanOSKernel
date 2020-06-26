@@ -8,26 +8,24 @@ dd isr%1
 	isr%1:
 		push dword 0
 		push dword %1
-		push dword 0
 		pusha
 		push esp
 		call interrupt_dispatcher
 		pop esp
 		popa
-	 	add esp, 12
+	 	add esp, 8
 	 	iret
 %endmacro
 
 %macro ISR_ERRCODE 1
 	isr%1:
 		push dword %1
-		push dword 0
 		pusha
 		push esp
 		call interrupt_dispatcher
 		pop esp
 		popa
-		add esp, 12
+		add esp, 8
 		iret
 %endmacro
 

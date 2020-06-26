@@ -38,13 +38,8 @@ void Scheduler::setup()
 	create_new_thread(&new_proc, idle, 0);
 }
 
-void Scheduler::schedule_handler(ContextFrame* frame)
-{
-	schedule(frame, ScheduleType::FORCED);
-}
-
 // Select next process, save and switch context.
-void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
+void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
 {
 	// FIXME: schedule idle if there is no ready thread
 	// TODO: move all unnecessary stuff to a separate thread to be performed later.
@@ -67,26 +62,6 @@ void Scheduler::schedule(ContextFrame* current_context, ScheduleType type)
 	current_thread = &next_thread;
 	load_context(current_context, &next_thread);
 	spinlock_release(&scheduler_lock);
-}
-
-// Round Robinson Scheduling Algorithm.
-void Scheduler::select_next_thread()
-{
-	ready_threads->increment_head();
-}
-
-// Decrease sleep_ticks of each thread and wake up whose value is zero.
-void Scheduler::wake_up_sleepers()
-{
-	for (CircularQueue<ThreadControlBlock>::Iterator thread = sleeping_threads->begin();
-	     thread != sleeping_threads->end(); ++thread) {
-		if (thread->sleep_ticks <= PIT::ticks) {
-			thread->sleep_ticks = 0;
-			sleeping_threads->move_to_other_list(ready_threads, thread);
-			wake_up_sleepers();
-			break;
-		}
-	}
 }
 
 // Put the current thread into sleep for ms.
@@ -124,33 +99,6 @@ void Scheduler::yield()
 	asm volatile("int $0x81");
 }
 
-// Create thread structure of a new thread
-void Scheduler::create_new_thread(ProcessControlBlock* process, thread_function address, uintptr_t argument)
-{
-	spinlock_acquire(&scheduler_lock);
-	ThreadControlBlock new_thread;
-	memset((char*)&new_thread, 0, sizeof(ThreadControlBlock));
-	void* thread_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
-	InitialThreadStack* init_thread_stack =
-	    (InitialThreadStack*)((unsigned)thread_stack + STACK_SIZE - sizeof(InitialThreadStack));
-	init_thread_stack->return_address = idle;
-	init_thread_stack->argument = argument;
-	init_thread_stack->frame.eip = (uintptr_t)address;
-	init_thread_stack->frame.cs = KCS_SELECTOR;
-	init_thread_stack->frame.eflags = 0x202;
-	new_thread.tid = Scheduler::reserve_tid();
-	new_thread.task_stack = (intptr_t)thread_stack;
-	new_thread.context.esp = (unsigned)&init_thread_stack->frame + 4;
-	new_thread.state = ThreadState::READY;
-	if (process) {
-		new_thread.parent = process;
-	} else {
-		new_thread.parent = current_thread->parent;
-	}
-	ready_threads->push_back(new_thread);
-	spinlock_release(&scheduler_lock);
-}
-
 ProcessControlBlock& Scheduler::create_new_process()
 {
 	spinlock_acquire(&scheduler_lock);
@@ -163,6 +111,54 @@ ProcessControlBlock& Scheduler::create_new_process()
 	auto& pcb = processes->head();
 	spinlock_release(&scheduler_lock);
 	return pcb;
+}
+
+void Scheduler::create_new_thread(ProcessControlBlock* parent_process, thread_function address, uintptr_t argument)
+{
+	spinlock_acquire(&scheduler_lock);
+
+	void* thread_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
+	uintptr_t stack_pointer =
+	    setup_task_stack_context(thread_stack, STACK_SIZE, uintptr_t(address), uintptr_t(idle), argument);
+	create_tcb(uintptr_t(thread_stack), stack_pointer, parent_process);
+
+	spinlock_release(&scheduler_lock);
+}
+
+// Round Robinson Scheduling Algorithm.
+void Scheduler::select_next_thread()
+{
+	ready_threads->increment_head();
+}
+
+// Decrease sleep_ticks of each thread and wake up whose value is zero.
+void Scheduler::wake_up_sleepers()
+{
+	for (CircularQueue<ThreadControlBlock>::Iterator thread = sleeping_threads->begin();
+	     thread != sleeping_threads->end(); ++thread) {
+		if (thread->sleep_ticks <= PIT::ticks) {
+			thread->sleep_ticks = 0;
+			sleeping_threads->move_to_other_list(ready_threads, thread);
+			wake_up_sleepers();
+			break;
+		}
+	}
+}
+
+void Scheduler::create_tcb(uintptr_t task_stack_start, uintptr_t task_stack_pointer,
+                           ProcessControlBlock* parent_process)
+{
+	ThreadControlBlock new_thread;
+	memset((char*)&new_thread, 0, sizeof(ThreadControlBlock));
+	new_thread.tid = reserve_tid();
+	new_thread.task_stack_start = task_stack_start;
+	new_thread.task_stack_pointer = task_stack_pointer;
+	new_thread.state = ThreadState::READY;
+	if (parent_process)
+		new_thread.parent = parent_process;
+	else
+		new_thread.parent = current_thread->parent;
+	ready_threads->push_back(new_thread);
 }
 
 unsigned Scheduler::reserve_tid()
@@ -180,20 +176,25 @@ unsigned Scheduler::reserve_pid()
 }
 
 // Switch the returned context of the current IRQ.
-void Scheduler::load_context(ContextFrame* current_context, const ThreadControlBlock* thread)
+void Scheduler::load_context(ISRContextFrame* current_context, const ThreadControlBlock* thread)
 {
-	current_context->esp = thread->context.esp;
-	GDT::set_tss_stack(thread->task_stack);
+	current_context->context_stack = thread->task_stack_pointer;
+	switch_task_stack(thread->task_stack_start);
 }
 
 // Save current context into its TCB.
-void Scheduler::save_context(const ContextFrame* current_context, ThreadControlBlock* thread)
+void Scheduler::save_context(const ISRContextFrame* current_context, ThreadControlBlock* thread)
 {
-	thread->context.esp = current_context->esp;
+	thread->task_stack_pointer = current_context->context_stack;
 }
 
 // Switch to page directory
 void Scheduler::switch_page_directory(uintptr_t page_directory)
 {
 	Memory::switch_page_directory(page_directory);
+}
+
+void Scheduler::schedule_handler(ISRContextFrame* frame)
+{
+	schedule(frame, ScheduleType::FORCED);
 }

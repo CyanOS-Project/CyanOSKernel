@@ -7,6 +7,13 @@
 #define ENABLE_INTERRUPTS()  asm("STI")
 #define SET_STACK(x)         asm("MOV %0,%%ESP; SUB $0x10,%%esp" : : "r"(x) :) // PUSH for the debuggers to work properly.
 
+static inline uint32_t get_faulted_page()
+{
+	uint32_t page;
+	asm("MOVL %%CR2,%0" : "=r"(page));
+	return page;
+}
+
 static inline uint8_t in8(uint16_t port)
 {
 	uint8_t data;

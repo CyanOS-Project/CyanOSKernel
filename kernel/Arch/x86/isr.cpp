@@ -21,9 +21,8 @@ void ISR::register_isr_handler(isr_function address, uint8_t irq_number)
 	interrupt_dispatcher_vector[irq_number] = (isr_function)address;
 }
 
-extern "C" void __attribute__((cdecl)) interrupt_dispatcher(ContextFrame info)
+extern "C" void __attribute__((cdecl)) interrupt_dispatcher(ISRContextFrame info)
 {
-	asm("MOVL %%CR2,%0" : "=r"(info.cr2));
 	if (interrupt_dispatcher_vector[info.irq_number]) {
 		interrupt_dispatcher_vector[info.irq_number](&info);
 	} else {
@@ -31,13 +30,13 @@ extern "C" void __attribute__((cdecl)) interrupt_dispatcher(ContextFrame info)
 	}
 }
 
-void ISR::default_interrupt_handler(ContextFrame* info)
+void ISR::default_interrupt_handler(ISRContextFrame* info)
 {
 	if (info->irq_number < NUMBER_OF_IDT_ENTRIES) {
 		printf("Exception: ");
 		printf(exception_messages[info->irq_number]);
 		printf("\nContext Dump:\n");
-		printf("EIP=%X\t CS=%X\t ESP=%X\t\n", info->eip, info->cs, info->esp);
+		printf("EIP=%X\t CS=%X\t ESP=%X\t\n", info->eip, info->cs, info->context_stack);
 	} else if (info->irq_number < NUMBER_OF_IDT_EXCEPTIONS) {
 		printf("Reserved Exception Number\n");
 	} else {

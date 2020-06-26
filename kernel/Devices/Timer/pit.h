@@ -28,7 +28,7 @@ enum I86_PIT_OCW {
 class PIT
 {
   private:
-	static void pit_handler(ContextFrame* isr_info);
+	static void pit_handler(ISRContextFrame* isr_info);
 
   public:
 	static void setup();
