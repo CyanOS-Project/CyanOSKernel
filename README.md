@@ -12,9 +12,10 @@
 - [x] Multi-programming.
 - [ ] User space.
 - [ ] System calls.
-- [ ] Keyboard/Mouse drivers.
 - [ ] Inter-process communication.
 - [ ] Filesystem.
+- [ ] Keyboard driver.
+- [ ] PCI bus.
 - [ ] GUI.
 - [ ] Network Driver.
 - [ ] USB.
