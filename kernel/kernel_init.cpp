@@ -46,6 +46,7 @@ extern "C" void kernel_init()
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
 	ENABLE_INTERRUPTS();
+	Scheduler::yield();
 	// test_lists();
 	// test_bitmap();
 	// UnitTest_Bitmap();

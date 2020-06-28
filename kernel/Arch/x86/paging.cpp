@@ -1,30 +1,41 @@
 #include "paging.h"
 
 PAGE_DIRECTORY Paging::page_direcotry __attribute__((aligned(PAGE_SIZE)));
-PAGE_TABLE Paging::startup_page_tables[NUMBER_OF_PAGE_TABLE_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
+PAGE_TABLE Paging::kernel_page_tables[FULL_KERNEL_PAGES] __attribute__((aligned(PAGE_SIZE)));
+PAGE_TABLE Paging::boostrap_page_table[1] __attribute__((aligned(PAGE_SIZE)));
 
 // Initialize page direcotry and page tables.
 void Paging::setup(uint32_t num_kernel_pages)
 {
-	PAGE_DIRECTORY* ph_page_direcotry = (PAGE_DIRECTORY*)VIR_TO_PHY((uint32_t)&page_direcotry);
-	PAGE_TABLE* ph_page_tables = (PAGE_TABLE*)VIR_TO_PHY((uint32_t)startup_page_tables);
-	initialize_page_directory(ph_page_direcotry);
-	// Link to page tables
-	uint32_t page_flags = PAGE_FLAGS_PRESENT | PAGE_FLAGS_WRITABLE;
-	for (size_t i = 0; i < NUMBER_OF_PAGE_DIRECOTRY_ENTRIES; i++) {
-		initialize_page_table(&ph_page_tables[i]);
-		fill_directory_entry(&ph_page_direcotry->entries[i], GET_FRAME((uint32_t)&ph_page_tables[i]), page_flags);
-	}
-	// Set recursive entry
-	fill_directory_entry(&ph_page_direcotry->entries[RECURSIVE_ENTRY], GET_FRAME((uint32_t)ph_page_direcotry),
-	                     page_flags);
+	setup_page_tables();
 	// Map identity and higher half
-	map_boot_pages(KERNEL_PHYSICAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, num_kernel_pages);
+	map_boot_pages(KERNEL_PHYSICAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, 1);
 	map_boot_pages(KERNEL_VIRTUAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, num_kernel_pages);
 	// Load page directory and enable paging
+	PAGE_DIRECTORY* ph_page_direcotry = (PAGE_DIRECTORY*)VIR_TO_PHY((uint32_t)&page_direcotry);
 	load_page_directory((uint32_t)ph_page_direcotry);
 	enable_PSE();
 	enable_paging();
+}
+
+void Paging::setup_page_tables()
+{
+	PAGE_DIRECTORY* ph_page_direcotry = (PAGE_DIRECTORY*)VIR_TO_PHY((uint32_t)&page_direcotry);
+	PAGE_TABLE* ph_kpage_tables = (PAGE_TABLE*)VIR_TO_PHY((uint32_t)kernel_page_tables);
+	PAGE_TABLE* ph_bootpage_tables = (PAGE_TABLE*)VIR_TO_PHY((uint32_t)boostrap_page_table);
+	initialize_page_directory(ph_page_direcotry);
+	// Link to page tables
+	uint32_t page_flags = PAGE_FLAGS_PRESENT | PAGE_FLAGS_WRITABLE;
+	// Kernel Pages
+	for (size_t i = 0; i < FULL_KERNEL_PAGES; i++) {
+		initialize_page_table(&ph_kpage_tables[i]);
+		fill_directory_entry(&ph_page_direcotry->entries[i], GET_FRAME((uint32_t)&ph_kpage_tables[i]), page_flags);
+	}
+	// Identity for boostrap
+	fill_directory_entry(&ph_page_direcotry->entries[0], GET_FRAME((uint32_t)&ph_bootpage_tables[0]), page_flags);
+	// Set recursive entry
+	fill_directory_entry(&ph_page_direcotry->entries[RECURSIVE_ENTRY], GET_FRAME((uint32_t)ph_page_direcotry),
+	                     page_flags);
 }
 
 // Map virtual address range to physical address, can be used only at boot time.

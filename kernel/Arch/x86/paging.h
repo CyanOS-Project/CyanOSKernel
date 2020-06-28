@@ -6,6 +6,7 @@
 
 #define NUMBER_OF_PAGE_DIRECOTRY_ENTRIES 1024
 #define NUMBER_OF_PAGE_TABLE_ENTRIES     1024
+#define FULL_KERNEL_PAGES                (NUMBER_OF_PAGE_DIRECOTRY_ENTRIES - GET_NUMBER_OF_DIRECTORIES(KERNEL_BASE))
 #define RECURSIVE_ENTRY                  (NUMBER_OF_PAGE_DIRECOTRY_ENTRIES - 1)
 
 #define CR4_PSE    (1 << 4)
@@ -61,6 +62,7 @@ uint32_t get_physical_page(uint32_t virtual_address);
 class Paging
 {
   private:
+	static void setup_page_tables();
 	static void initialize_page_directory(PAGE_DIRECTORY* page_direcotry);
 	static void initialize_page_table(PAGE_TABLE* page_direcotry);
 	static void fill_directory_entry(PAGE_DIRECTORY_ENTRY* page_direcotry_entry, uint16_t physical_frame,
@@ -73,7 +75,8 @@ class Paging
 	static void enable_PSE();
 	static void enable_paging();
 	static PAGE_DIRECTORY page_direcotry;
-	static PAGE_TABLE startup_page_tables[];
+	static PAGE_TABLE kernel_page_tables[];
+	static PAGE_TABLE boostrap_page_table[];
 
   public:
 	static void setup(uint32_t num_kernel_pages);

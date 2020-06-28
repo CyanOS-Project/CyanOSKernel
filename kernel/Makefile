@@ -33,7 +33,7 @@ run: $(EXE)
 
 $(EXE): $(ASM_OBJS) $(CPP_OBJS) | $(BIN)
 	$(CC) $(CFLAGS) $^ -o $@
-	$(OBCP) -O binary $@ $(IMG)
+	$(OBCP) --set-section-flags .bss=alloc,load,contents -O binary $@ $(IMG)
 
 
 $(OBJ)/%.o: %.cpp | $(DIRS)
