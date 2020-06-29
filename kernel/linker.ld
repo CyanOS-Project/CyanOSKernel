@@ -8,11 +8,6 @@ SECTIONS
 	{ 
 		*(.boot)
 	}
-	.bootstrap	: 
-	{ 
-		*(.bootstrap)
-	}
-
 	.text	ALIGN(4K) :
 	{	
 		*(.text)
@@ -26,12 +21,15 @@ SECTIONS
 	{
 		*(.bss)
 	}
-	PROVIDE(KERNEL_STACK_START = .);
+	.bootstrap	: 
+	{ 
+		*(.bootstrap)
+	}
+	PROVIDE(BOOTSTARP_STACK_START = .);
 	.stack 	ALIGN(4K) :
 	{
 		. = . + 4K;
 	}
-	PROVIDE(KERNEL_STACK_END = .);
+	PROVIDE(BOOTSTARP_STACK_END = .);
 	PROVIDE(KERNEL_END = .);
-
 }

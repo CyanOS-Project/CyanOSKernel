@@ -2,17 +2,20 @@
 
 PAGE_DIRECTORY Paging::page_direcotry __attribute__((aligned(PAGE_SIZE)));
 PAGE_TABLE Paging::kernel_page_tables[FULL_KERNEL_PAGES] __attribute__((aligned(PAGE_SIZE)));
-PAGE_TABLE Paging::boostrap_page_table[1] __attribute__((aligned(PAGE_SIZE)));
+PAGE_TABLE Paging::boostrap_page_table[2] __attribute__((aligned(PAGE_SIZE)));
 
 // Initialize page direcotry and page tables.
 void Paging::setup(uint32_t num_kernel_pages)
 {
+	PAGE_DIRECTORY* ph_page_direcotry = (PAGE_DIRECTORY*)VIR_TO_PHY((uint32_t)&page_direcotry);
+	PAGE_TABLE* ph_page_tables = (PAGE_TABLE*)VIR_TO_PHY((uint32_t)kernel_page_tables);
+	initialize_page_directory(ph_page_direcotry);
+	// Link to page tables
 	setup_page_tables();
 	// Map identity and higher half
-	map_boot_pages(KERNEL_PHYSICAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, 1);
+	map_boot_pages(KERNEL_PHYSICAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, num_kernel_pages);
 	map_boot_pages(KERNEL_VIRTUAL_ADDRESS, KERNEL_PHYSICAL_ADDRESS, num_kernel_pages);
 	// Load page directory and enable paging
-	PAGE_DIRECTORY* ph_page_direcotry = (PAGE_DIRECTORY*)VIR_TO_PHY((uint32_t)&page_direcotry);
 	load_page_directory((uint32_t)ph_page_direcotry);
 	enable_PSE();
 	enable_paging();
@@ -23,32 +26,35 @@ void Paging::setup_page_tables()
 	PAGE_DIRECTORY* ph_page_direcotry = (PAGE_DIRECTORY*)VIR_TO_PHY((uint32_t)&page_direcotry);
 	PAGE_TABLE* ph_kpage_tables = (PAGE_TABLE*)VIR_TO_PHY((uint32_t)kernel_page_tables);
 	PAGE_TABLE* ph_bootpage_tables = (PAGE_TABLE*)VIR_TO_PHY((uint32_t)boostrap_page_table);
-	initialize_page_directory(ph_page_direcotry);
-	// Link to page tables
 	uint32_t page_flags = PAGE_FLAGS_PRESENT | PAGE_FLAGS_WRITABLE;
-	// Kernel Pages
+	initialize_page_directory(ph_page_direcotry);
+	// Kernel pages tables
 	for (size_t i = 0; i < FULL_KERNEL_PAGES; i++) {
 		initialize_page_table(&ph_kpage_tables[i]);
-		fill_directory_entry(&ph_page_direcotry->entries[i], GET_FRAME((uint32_t)&ph_kpage_tables[i]), page_flags);
+		fill_directory_entry(&ph_page_direcotry->entries[i + GET_PDE_INDEX(KERNEL_BASE)],
+		                     GET_FRAME((uint32_t)&ph_kpage_tables[i]), page_flags);
 	}
-	// Identity for boostrap
-	fill_directory_entry(&ph_page_direcotry->entries[0], GET_FRAME((uint32_t)&ph_bootpage_tables[0]), page_flags);
+	// Identity page tables for 8mb of the kernel bootstrap
+	for (size_t i = 0; i < 2; i++) {
+		initialize_page_table(&ph_bootpage_tables[i]);
+		fill_directory_entry(&ph_page_direcotry->entries[i], GET_FRAME((uint32_t)&ph_bootpage_tables[i]), page_flags);
+	}
 	// Set recursive entry
 	fill_directory_entry(&ph_page_direcotry->entries[RECURSIVE_ENTRY], GET_FRAME((uint32_t)ph_page_direcotry),
 	                     page_flags);
 }
-
 // Map virtual address range to physical address, can be used only at boot time.
 void Paging::map_boot_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages)
 {
-	PAGE_TABLE* ph_page_tables = (PAGE_TABLE*)VIR_TO_PHY((uint32_t)startup_page_tables);
+	PAGE_DIRECTORY* ph_page_directory = (PAGE_DIRECTORY*)VIR_TO_PHY((uint32_t)&page_direcotry);
 	uint32_t current_v_page = virtual_address;
 	uint32_t current_p_page = physical_address;
 	uint32_t page_flags = PAGE_FLAGS_PRESENT | PAGE_FLAGS_WRITABLE | PAGE_FLAGS_GLOBAL;
 	for (size_t i = 0; i < pages; i++) {
 		uint32_t pde = GET_PDE_INDEX(current_v_page);
 		uint32_t pte = GET_PTE_INDEX(current_v_page);
-		fill_page_table_entry(&ph_page_tables[pde].entries[pte], GET_FRAME(current_p_page), page_flags);
+		PAGE_TABLE* ph_page_table = (PAGE_TABLE*)(ph_page_directory->entries[pde].frame * PAGE_SIZE);
+		fill_page_table_entry(&ph_page_table->entries[pte], GET_FRAME(current_p_page), page_flags);
 		current_v_page += PAGE_SIZE;
 		current_p_page += PAGE_SIZE;
 	}
