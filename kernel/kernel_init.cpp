@@ -32,10 +32,10 @@ void display_time()
 
 extern "C" void kernel_init()
 {
-	Memory::setup_stage2();
-	initiate_console();
 	GDT::setup();
 	IDT::setup();
+	Memory::setup_stage2();
+	initiate_console();
 	printStatus("Setting up core components.", true);
 	Heap::setup();
 	Scheduler::setup();
@@ -45,6 +45,7 @@ extern "C" void kernel_init()
 	PIT::setup();
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
+
 	ENABLE_INTERRUPTS();
 	Scheduler::yield();
 	// test_lists();
