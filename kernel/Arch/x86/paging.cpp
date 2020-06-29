@@ -8,7 +8,6 @@ PAGE_TABLE Paging::boostrap_page_table[2] __attribute__((aligned(PAGE_SIZE)));
 void Paging::setup(uint32_t num_kernel_pages)
 {
 	PAGE_DIRECTORY* ph_page_direcotry = (PAGE_DIRECTORY*)VIR_TO_PHY((uint32_t)&page_direcotry);
-	PAGE_TABLE* ph_page_tables = (PAGE_TABLE*)VIR_TO_PHY((uint32_t)kernel_page_tables);
 	initialize_page_directory(ph_page_direcotry);
 	// Link to page tables
 	setup_page_tables();
