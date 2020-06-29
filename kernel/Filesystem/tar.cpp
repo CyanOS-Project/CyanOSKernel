@@ -6,12 +6,18 @@ TarFS::TarFS(void* tar_address) : m_tar_address((TarHeader*)tar_address)
 
 char* TarFS::read_file(const char* path)
 {
-	return (char*)(file_search(path) + 1);
+	TarHeader* file_header = file_search(path);
+	if (!file_header)
+		return nullptr;
+	return (char*)(file_header + 1);
 }
 
 size_t TarFS::get_file_size(const char* path)
 {
-	return octal_to_decimal(file_search(path)->size);
+	TarHeader* file_header = file_search(path);
+	if (!file_header)
+		return 0;
+	return octal_to_decimal(file_header->size);
 }
 
 TarHeader* TarFS::file_search(const char* path)

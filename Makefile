@@ -7,8 +7,8 @@ BUILD	:= $(CURDIR)/build
 BIN     := $(BUILD)/bin
 OUT		:= $(BIN)/kernel.out
 IMG		:= $(BIN)/kernel.img
-.PHONY: all run debug clean kernel compile
 
+.PHONY: all run debug clean kernel compile
 
 all: compile
 
@@ -30,6 +30,3 @@ kernel: | $(BIN)
 
 $(BIN):
 	$(MKDIR) $@
-
-
-

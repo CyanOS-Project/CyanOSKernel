@@ -45,8 +45,11 @@ extern "C" void kernel_init()
 	PIT::setup();
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
+	printf("Start %X End %X Size %X Ram %X\n", &KERNEL_START, &KERNEL_END,
+	       uintptr_t(&KERNEL_END) - uintptr_t(&KERNEL_START), &RAMDISK_START);
 
-	ENABLE_INTERRUPTS();
+	// test_tar_filesystem();
+	// ENABLE_INTERRUPTS();
 	Scheduler::yield();
 	// test_lists();
 	// test_bitmap();

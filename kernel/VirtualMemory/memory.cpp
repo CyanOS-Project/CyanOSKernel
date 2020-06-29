@@ -16,11 +16,12 @@ void Memory::setup()
 	PhysicalMemory::set_used_pages(0, GET_FRAME(KERNEL_PHYSICAL_ADDRESS));
 	// Set kernel memory as used.
 	PhysicalMemory::set_used_pages(GET_FRAME(KERNEL_PHYSICAL_ADDRESS), get_kernel_pages());
+	spinlock_init(&mem_lock);
 }
 
 void Memory::setup_stage2()
 {
-	spinlock_init(&mem_lock);
+
 	setup_page_fault_handler();
 }
 
@@ -105,7 +106,7 @@ unsigned Memory::physical_memory_size()
 
 unsigned Memory::get_kernel_pages()
 {
-	intptr_t kernel_size = (intptr_t)&KERNEL_END - KERNEL_VIRTUAL_ADDRESS;
+	uintptr_t kernel_size = (uintptr_t)&KERNEL_END - KERNEL_VIRTUAL_ADDRESS;
 	unsigned pages = kernel_size / PAGE_SIZE + ((kernel_size % PAGE_SIZE == 0) ? 0 : 1);
 	return pages;
 }
