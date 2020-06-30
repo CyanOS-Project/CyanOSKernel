@@ -1,6 +1,7 @@
 
 #include "boot.h"
 #include "Arch/x86/asm.h"
+#include "Devices/Console/console.h"
 #include "VirtualMemory/memory.h"
 #include "kernel_init.h"
 #include "kernel_map.h"
@@ -17,14 +18,22 @@ __attribute__((section(".boot"))) const volatile multiboot_header my_multiboot_h
 
 };
 
-extern uint32_t BOOTSTARP_STACK_END;
 __attribute__((section(".bootstrap_stack"))) volatile char boostrap_stack[0x1000];
 __attribute__((section(".bootstrap"))) void kernel_boot()
 {
+
 	SET_STACK(VIR_TO_PHY((uint32_t)boostrap_stack) + sizeof(boostrap_stack));
 	Memory::setup();
+	MultibootInfo* boot_info;
+	asm volatile("mov %%ebx,%0" : "=r"(boot_info));
+	MultibootInfo* boot = (MultibootInfo*)Memory::map(uintptr_t(boot_info), sizeof(MultibootInfo),
+	                                                  MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
+	initiate_console();
+	initiate_console();
+	printf("%x", boot->addr);
 	void* new_stack = Memory::alloc(0x4000, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	SET_STACK((uint32_t)new_stack + 0x4000);
+
 	JMP(kernel_init);
 	HLT();
 	return;

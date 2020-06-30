@@ -47,10 +47,9 @@ extern "C" void kernel_init()
 	printf("Welcome to CyanOS.\n");
 	printf("Start %X End %X Size %X Ram %X\n", &KERNEL_START, &KERNEL_END,
 	       uintptr_t(&KERNEL_END) - uintptr_t(&KERNEL_START), &RAMDISK_START);
+	test_tar_filesystem();
+	// Scheduler::yield();
 
-	// test_tar_filesystem();
-	// ENABLE_INTERRUPTS();
-	Scheduler::yield();
 	// test_lists();
 	// test_bitmap();
 	// UnitTest_Bitmap();

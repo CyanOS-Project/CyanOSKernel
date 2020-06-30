@@ -2,7 +2,7 @@
 
 #include "Devices/Console/console.h"
 #include "Devices/Timer/pit.h"
-#include "Filesystem/tar.h"
+#include "Filesystem/ustar.h"
 #include "Tasking/scheduler.h"
 #include "Tasking/semaphore.h"
 #include "utils/bitmap.h"
@@ -99,10 +99,20 @@ void test_tar_filesystem()
 {
 	printf("tar at %X\n", &RAMDISK_START);
 	TarFS* tar_fs = new TarFS(&RAMDISK_START);
-	printf("file1 size : %d\n", tar_fs->get_file_size("file1"));
-	printf("Output : %s\n", tar_fs->read_file("file1"));
-	printf("file2 size : %d\n", tar_fs->get_file_size("file2"));
-	printf("Output : %s\n", tar_fs->read_file("file2"));
-	printf("file3 size : %d\n", tar_fs->get_file_size("myFolder/file3"));
-	printf("Output : %s\n", tar_fs->read_file("myFolder/file3"));
+	char* file;
+
+	printf("file1 size : %d\n", tar_fs->get_file_size("file1.txt"));
+	file = tar_fs->read_file("file1.txt");
+	if (file)
+		printf("Output : %s\n", file);
+
+	printf("file2 size : %d\n", tar_fs->get_file_size("file2.txt"));
+	file = tar_fs->read_file("file2.txt");
+	if (file)
+		printf("Output : %s\n", file);
+
+	printf("file3 size : %d\n", tar_fs->get_file_size("myFolder/file3.txt"));
+	file = tar_fs->read_file("myFolder/file3.txt");
+	if (file)
+		printf("Output : %s\n", file);
 }
