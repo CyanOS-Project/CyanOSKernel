@@ -7,27 +7,30 @@ BUILD	:= $(CURDIR)/build
 BIN     := $(BUILD)/bin
 OUT		:= $(BIN)/kernel.out
 IMG		:= $(BIN)/kernel.img
+ISO		:= $(BUILD)/CyanOS.iso
+ROOT	:= $(BUILD)/CyanOS_root
 
 .PHONY: all run debug clean kernel compile
 
-all: compile
+all: $(ISO)
 
 
-debug: compile
-	$(QEMU) -cdrom $(BUILD)/CyanOS.iso $(QMFLAGS)
+debug: $(ISO)
+	$(QEMU) -cdrom $(ISO) $(QMFLAGS)
 
 
-run: compile
+run: $(ISO)
 	$(QEMU) -kernel $(IMG)
 
 clean:
 	$(RMDIR) "$(BUILD)"
 
-compile: kernel
+$(ISO): $(OUT)
+	python utils/make_bootable_iso.py $(BIN) $(ROOT) $(ISO)
 
-kernel: | $(BIN)
+$(OUT): | $(BIN)
 	$(MAKE) OBJ=$(BUILD)/obj/kernel OUT=$(OUT) IMG=$(IMG) -C "./kernel"
-	python utils/make_bootable_iso.py $(BIN) $(BUILD)
+	
 	
 $(BIN):
 	$(MKDIR) $@

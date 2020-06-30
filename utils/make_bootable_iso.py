@@ -7,12 +7,12 @@ import shutil
 
 
 def main():
-    if(len(sys.argv) != 3):
+    if(len(sys.argv) != 4):
         print("invalid argument list")
         sys.exit(2)
     bin_dir = os.path.relpath(sys.argv[1])
-    root_dir = os.path.join(os.path.relpath(sys.argv[2]), "CyanOS_root")
-    iso_dir = os.path.join(os.path.relpath(sys.argv[2]), "CyanOS.iso")
+    root_dir = os.path.relpath(sys.argv[2])
+    iso_dir = os.path.relpath(sys.argv[3])
 
     if os.path.exists(root_dir) == True:
         shutil.rmtree(root_dir)
