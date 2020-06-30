@@ -4,7 +4,7 @@ compiler:
 
 before_install:
 - sudo apt-get update
-- sudo apt-get install g++-multilib nasm
+- sudo apt-get install g++-multilib nasm python3.7
 
 script:
 - make
