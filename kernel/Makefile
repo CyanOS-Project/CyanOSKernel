@@ -10,7 +10,7 @@ CPP_SRCS := $(wildcard *.cpp */*.cpp */*/*.cpp)
 ASM_SRCS := $(wildcard  */*/*.s)
 CPP_OBJS := $(patsubst %.cpp,$(OBJ)/%.o,$(CPP_SRCS))
 ASM_OBJS := $(patsubst %.s,$(OBJ)/%.o2,$(ASM_SRCS))
-DIRS    := $(sort  $(abspath $(dir $(ASM_OBJS) $(CPP_OBJS)))) 
+DIRS     := $(sort  $(abspath $(dir $(ASM_OBJS) $(CPP_OBJS)))) 
 
 CFLAGS  := -T linker.ld -I $(INCLUDE) -m32 -g -Wall --std=c++17 -fno-builtin -Og -MMD -fno-pie -ffreestanding -nostdlib -fno-rtti -fno-exceptions -fno-leading-underscore
 

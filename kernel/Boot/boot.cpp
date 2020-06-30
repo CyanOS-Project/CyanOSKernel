@@ -33,7 +33,6 @@ __attribute__((section(".bootstrap"))) void kernel_boot()
 	printf("%x", boot->addr);
 	void* new_stack = Memory::alloc(0x4000, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	SET_STACK((uint32_t)new_stack + 0x4000);
-
 	JMP(kernel_init);
 	HLT();
 	return;

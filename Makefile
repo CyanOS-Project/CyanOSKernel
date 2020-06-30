@@ -14,7 +14,7 @@ all: compile
 
 
 debug: compile
-	$(QEMU) -kernel $(IMG) $(QMFLAGS)
+	$(QEMU) -cdrom $(BUILD)/CyanOS.iso $(QMFLAGS)
 
 
 run: compile
@@ -24,11 +24,10 @@ clean:
 	$(RMDIR) "$(BUILD)"
 
 compile: kernel
-	#python utils/create_ramdisk.py $(BUILD)
 
 kernel: | $(BIN)
 	$(MAKE) OBJ=$(BUILD)/obj/kernel OUT=$(OUT) IMG=$(IMG) -C "./kernel"
-	python utils/create_ramdisk.py ./build
-
+	python utils/make_bootable_iso.py $(BIN) $(BUILD)
+	
 $(BIN):
 	$(MKDIR) $@
