@@ -23,7 +23,7 @@ struct TarHeader {                 /* byte offset */
 	char gname[32];                /* 297 */
 	char devmajor[8];              /* 329 */
 	char devminor[8];              /* 337 */
-	char prefix[155];              /* 345 */
+	char prefix[167];              /* 345 */
 	                               /* 500 */
 };
 

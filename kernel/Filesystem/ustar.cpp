@@ -1,4 +1,4 @@
-#include "tar.h"
+#include "ustar.h"
 
 TarFS::TarFS(void* tar_address) : m_tar_address((TarHeader*)tar_address)
 {
@@ -26,13 +26,16 @@ TarHeader* TarFS::file_search(const char* path)
 	if (path_len > MAX_FILE_NAME)
 		return nullptr;
 
+	if (strncmp(m_tar_address->magic, "ustar", 5))
+		return nullptr;
+
 	TarHeader* tar_parser = m_tar_address;
 	while (tar_parser->name[0]) {
-		if (strncmp(path, tar_parser->name, path_len)) {
+		if (strcmp(path, tar_parser->name) == 0) {
 			return tar_parser;
 		}
-		uintptr_t file_end = uintptr_t(tar_parser + 1) + octal_to_decimal(tar_parser->size);
-		tar_parser = (TarHeader*)(align_to(file_end, TAR_ALIGNMENT));
+		uintptr_t aligned_size = align_to(octal_to_decimal(tar_parser->size), TAR_ALIGNMENT);
+		tar_parser = (TarHeader*)(uintptr_t(tar_parser + 1) + aligned_size);
 	}
 	return nullptr;
 }
@@ -41,14 +44,14 @@ size_t TarFS::octal_to_decimal(const char* octal)
 {
 	size_t size = 0;
 	unsigned current_multiplier = 1;
-	for (size_t i = 12; i > 0; i--) {
+	for (size_t i = TAR_OCTAL_SIZE_LEN - 1; i > 0; i--) {
 		size += (octal[i - 1] - '0') * current_multiplier;
 		current_multiplier *= 8;
 	}
 	return size;
 }
 
-inline uintptr_t TarFS::align_to(uintptr_t address, unsigned alignment)
+inline uintptr_t TarFS::align_to(uintptr_t size, unsigned alignment)
 {
-	return address + alignment - (address % alignment);
+	return size + alignment - (size % alignment);
 }

@@ -21,7 +21,6 @@ void Memory::setup()
 
 void Memory::setup_stage2()
 {
-
 	setup_page_fault_handler();
 }
 
