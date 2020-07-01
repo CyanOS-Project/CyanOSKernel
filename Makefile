@@ -1,7 +1,10 @@
+COLON	:= ::
 MKDIR   := mkdir -p
 RMDIR   := rm -rf
 QEMU	:= qemu-system-i386
-QMFLAGS := -S -gdb tcp::1234
+QMFLAGS := -m 128 -d cpu_reset -boot d -cdrom
+QMDEBUG := -S -gdb tcp$(COLON)1234
+
 
 BUILD	:= $(CURDIR)/build
 BIN     := $(BUILD)/bin
@@ -9,28 +12,30 @@ OUT		:= $(BIN)/kernel.out
 IMG		:= $(BIN)/kernel.img
 ISO		:= $(BUILD)/CyanOS.iso
 ROOT	:= $(BUILD)/CyanOS_root
+KRL_SRC := ./kernel
 
 .PHONY: all run debug clean kernel compile
 
-all: $(ISO)
+all: compile
 
 
-debug: $(ISO)
-	$(QEMU) -cdrom $(ISO) $(QMFLAGS)
+debug: compile
+	$(QEMU) $(QMFLAGS) $(ISO) $(QMDEBUG)
 
 
-run: $(ISO)
-	$(QEMU) -kernel $(IMG)
+run: compile
+	$(QEMU) $(QMFLAGS) $(ISO)
 
 clean:
 	$(RMDIR) "$(BUILD)"
 
-$(ISO): $(OUT)
+compile: $(ISO)
+
+$(ISO): $(IMG)
 	python utils/make_bootable_iso.py $(BIN) $(ROOT) $(ISO)
 
-$(OUT): | $(BIN)
-	$(MAKE) OBJ=$(BUILD)/obj/kernel OUT=$(OUT) IMG=$(IMG) -C "./kernel"
-	
+$(IMG): $(KRL_SRC) | $(BIN)
+	$(MAKE) OBJ=$(BUILD)/obj/kernel OUT=$(OUT) IMG=$(IMG) -C $(KRL_SRC)	
 	
 $(BIN):
 	$(MKDIR) $@
