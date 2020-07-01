@@ -1,0 +1,49 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"array": "cpp",
+			"chrono": "cpp",
+			"string_view": "cpp",
+			"functional": "cpp",
+			"ratio": "cpp",
+			"tuple": "cpp",
+			"type_traits": "cpp",
+			"utility": "cpp",
+			"istream": "cpp",
+			"ostream": "cpp",
+			"complex": "cpp",
+			"sstream": "cpp",
+			"*.tcc": "cpp",
+			"optional": "cpp",
+			"system_error": "cpp",
+			"algorithm": "cpp",
+			"string": "cpp",
+			"atomic": "cpp",
+			"memory": "cpp",
+			"cstdint": "cpp",
+			"initializer_list": "cpp",
+			"typeinfo": "cpp",
+			"list": "cpp",
+			"deque": "cpp",
+			"unordered_map": "cpp",
+			"vector": "cpp",
+			"cwchar": "cpp",
+			"limits": "cpp",
+			"streambuf": "cpp",
+			"cstdarg": "cpp",
+			"cstdio": "cpp",
+			"cstdlib": "cpp",
+			"cwctype": "cpp"
+		},
+		"C_Cpp.clang_format_fallbackStyle": "{UseTab: Always}",
+		"cSpell.words": [
+			"APIC",
+			"CPUID"
+		]
+	}
+}

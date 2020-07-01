@@ -1,5 +1,6 @@
 #pragma once
 
+#include "kernel_init.h"
 #include "multiboot2.h"
 #include "utils/types.h"
 
@@ -49,13 +50,5 @@ typedef struct __attribute__((__packed__)) {
 } Mutiboot2_Header;
 #define MULTIBOOT2_HEADER_CHECKSUM ((uint32_t)(-sizeof(Mutiboot2_Header) - MULTIBOOT2_HEADER_MAGIC))
 
-struct Module {
-	uintptr_t start;
-	uintptr_t size;
-};
-struct Bootloader_info {
-	Module modules[1];
-};
-
 void kernel_boot();
-void parse_mbi(uintptr_t multiboot_info, Bootloader_info& info);
+void parse_mbi(uintptr_t multiboot_info, BootloaderInfo& info);

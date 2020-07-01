@@ -30,7 +30,7 @@ void display_time()
 	}
 }
 
-extern "C" void kernel_init()
+extern "C" void kernel_init(BootloaderInfo* info)
 {
 	GDT::setup();
 	IDT::setup();
@@ -47,7 +47,8 @@ extern "C" void kernel_init()
 	printf("Welcome to CyanOS.\n");
 	printf("Start %X End %X Size %X Ram %X\n", &KERNEL_START, &KERNEL_END,
 	       uintptr_t(&KERNEL_END) - uintptr_t(&KERNEL_START), &RAMDISK_START);
-	test_tar_filesystem();
+	test_tar_filesystem((uintptr_t)Memory::map(info->modules[0].start, info->modules[0].size,
+	                                           MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
 	// Scheduler::yield();
 
 	// test_lists();

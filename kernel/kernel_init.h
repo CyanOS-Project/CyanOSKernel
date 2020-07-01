@@ -1,4 +1,12 @@
 #pragma once
-#include "Boot/boot.h"
+#include "utils/types.h"
 
-extern "C" void kernel_init();
+struct Module {
+	uintptr_t start;
+	uintptr_t size;
+};
+struct BootloaderInfo {
+	Module modules[1];
+};
+
+extern "C" void kernel_init(BootloaderInfo* info);

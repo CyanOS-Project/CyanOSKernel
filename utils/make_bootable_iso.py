@@ -16,6 +16,7 @@ def main():
 
     if os.path.exists(root_dir) == True:
         shutil.rmtree(root_dir)
+        pass
     make_root(bin_dir, root_dir)
     make_iso(root_dir, iso_dir)
 
@@ -52,7 +53,7 @@ def make_grub_cfg(cfg_path, kernel_path):
     f.write('set default=0\n')
     f.write('menuentry "CyanOS" {\n')
     f.write('        multiboot2 ' + kernel_path + '\n')
-    #f.write('        module ' + kernel_path + ' ' + kernel_path + '\n')
+    f.write('        module2 /ramdisk.tar ramdisk\n')
     f.write('}')
 
 

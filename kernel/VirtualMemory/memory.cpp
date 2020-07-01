@@ -128,6 +128,10 @@ void Memory::switch_page_directory(uintptr_t physical_address)
 
 void* Memory::_map_no_lock(intptr_t physical_address, uint32_t size, uint32_t flags)
 {
+	// FIXME: check if physical is used first.
+	if (!size)
+		return nullptr;
+
 	intptr_t vAdd;
 	intptr_t pAdd = GET_PDE_INDEX((intptr_t)physical_address);
 	unsigned pages_num = GET_PAGES(size);

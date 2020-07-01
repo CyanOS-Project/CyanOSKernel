@@ -4,9 +4,10 @@
 #include "Arch/x86/paging.h"
 #include "Devices/Console/console.h"
 #include "VirtualMemory/memory.h"
-#include "kernel_init.h"
 #include "kernel_map.h"
+#include "utils/assert.h"
 
+BootloaderInfo bootloader_info;
 __attribute__((section(".multiboot2"))) const volatile Mutiboot2_Header my_multiboot2_header = {
     .header = {.magic = MULTIBOOT2_HEADER_MAGIC,
                .architecture = MULTIBOOT_ARCHITECTURE_I386,
@@ -27,8 +28,8 @@ __attribute__((section(".multiboot2"))) const volatile Mutiboot2_Header my_multi
             .flags = 0,
             .size = sizeof(multiboot_header_tag)},
 };
-
 __attribute__((section(".bootstrap_stack"))) volatile char boostrap_stack[0x1000];
+
 __attribute__((section(".bootstrap"))) void kernel_boot()
 {
 	SET_STACK(VIR_TO_PHY((uint32_t)boostrap_stack) + sizeof(boostrap_stack));
@@ -41,17 +42,15 @@ __attribute__((section(".bootstrap"))) void kernel_boot()
 	                                              MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	// FIXME: temp hack because map maps only aligned pages.
 	vboot_info = (uintptr_t(boot_info) % PAGE_SIZE) + vboot_info;
-
-	printf("maping %X/%X into %X\n", boot_info, size, vboot_info);
-	printf("physical_add: %X\n", Paging::get_physical_page(vboot_info) * PAGE_SIZE);
-	Bootloader_info bootloader_info;
-	memset(&bootloader_info, 0, sizeof(Bootloader_info));
+	memset(&bootloader_info, 0, sizeof(BootloaderInfo));
 	parse_mbi((uintptr_t)vboot_info, bootloader_info);
 	void* new_stack = Memory::alloc(0x4000, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	SET_STACK((uint32_t)new_stack + 0x4000);
-	kernel_init();
-	// JMP(kernel_init);
-	HLT();
+	asm volatile("PUSHL %0;"
+	             "CALL *%1;"
+	             :
+	             : "r"(&bootloader_info), "r"(kernel_init));
+	ASSERT_NOT_REACHABLE();
 	return;
 }
 
@@ -70,7 +69,7 @@ const char* mmap_entry_type_text[] = {"Unknown"           //
                                       "NVS",              //
                                       "BAD_RAM"};
 
-void parse_mbi(uintptr_t multiboot_info, Bootloader_info& info)
+void parse_mbi(uintptr_t multiboot_info, BootloaderInfo& info)
 {
 	multiboot_tag* current_tag = (multiboot_tag*)(multiboot_info + sizeof(multiboot_tag_start));
 	while (current_tag->type != MULTIBOOT_TAG_TYPE_END) {
@@ -84,7 +83,7 @@ void parse_mbi(uintptr_t multiboot_info, Bootloader_info& info)
 				printf("cmdline :%s\n", tag->cmdline);
 				printf("mem_upper :%d\n", tag->size);
 				info.modules[0].start = tag->mod_start;
-				info.modules[0].size = tag->mod_start - tag->mod_start;
+				info.modules[0].size = tag->mod_end - tag->mod_start;
 				break;
 			}
 			case MULTIBOOT_TAG_TYPE_MMAP: {
