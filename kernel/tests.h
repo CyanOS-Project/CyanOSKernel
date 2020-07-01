@@ -95,10 +95,10 @@ void test_bitmap()
 	printf("find_first_used %d\n", my_bitmap.find_first_used(1));
 }
 
-void test_tar_filesystem()
+void test_tar_filesystem(uintptr_t fs)
 {
-	printf("tar at %X\n", &RAMDISK_START);
-	TarFS* tar_fs = new TarFS(&RAMDISK_START);
+	printf("tar at %X\n", fs);
+	TarFS* tar_fs = new TarFS((void*)fs);
 	char* file;
 
 	printf("file1 size : %d\n", tar_fs->get_file_size("file1.txt"));

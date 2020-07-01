@@ -53,5 +53,8 @@ size_t TarFS::octal_to_decimal(const char* octal)
 
 inline uintptr_t TarFS::align_to(uintptr_t size, unsigned alignment)
 {
-	return size + alignment - (size % alignment);
+	if (!size)
+		return 0;
+	else
+		return size + alignment - (size % alignment);
 }
