@@ -51,7 +51,7 @@ def make_grub_cfg(cfg_path, kernel_path):
     f.write('set timeout=0\n')
     f.write('set default=0\n')
     f.write('menuentry "CyanOS" {\n')
-    f.write('        multiboot ' + kernel_path + '\n')
+    f.write('        multiboot2 ' + kernel_path + '\n')
     f.write('}')
 
 

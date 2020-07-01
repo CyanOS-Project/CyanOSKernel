@@ -4,9 +4,9 @@ SECTIONS
 {
 	. = 0xC0100000;
 	PROVIDE(KERNEL_START = .);
-	.boot	ALIGN(4K) :
+	.multiboot2	ALIGN(4K) :
 	{ 
-		*(.boot)
+		*(.multiboot2)
 	}
 	.bootstrap	ALIGN(4K): 
 	{ 
