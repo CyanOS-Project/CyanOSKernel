@@ -366,6 +366,10 @@ struct multiboot_tag_efi64_ih {
 	uint64_t pointer;
 };
 
+struct multiboot_tag_start {
+	uint32_t total_size;
+	uint32_t reserved;
+};
 struct multiboot_tag_load_base_addr {
 	uint32_t type;
 	uint32_t size;

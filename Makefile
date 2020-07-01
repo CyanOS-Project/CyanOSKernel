@@ -2,7 +2,7 @@ COLON	:= ::
 MKDIR   := mkdir -p
 RMDIR   := rm -rf
 QEMU	:= qemu-system-i386
-QMFLAGS := -m 128 -d cpu_reset -boot d -cdrom
+QMFLAGS := -no-reboot -no-shutdown -m 128 -d cpu_reset -boot d -cdrom
 QMDEBUG := -S -gdb tcp$(COLON)1234
 
 

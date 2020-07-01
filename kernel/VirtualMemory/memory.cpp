@@ -141,6 +141,7 @@ void* Memory::_map_no_lock(intptr_t physical_address, uint32_t size, uint32_t fl
 
 	PhysicalMemory::set_used_pages(pAdd, pages_num);
 	VirtualMemory::map_pages(vAdd, physical_address, GET_PAGES(size), parse_flags(flags));
+	// FIXME: deal with address and size when the input address is unaligned.
 	return (void*)vAdd;
 }
 
