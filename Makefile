@@ -17,34 +17,30 @@ IMG		:= $(BIN_KRNL)/kernel.img
 ISO		:= $(BUILD)/CyanOS.iso
 ROOT	:= $(BUILD)/CyanOS_root
 KRL_DIR := kernel/
-KRL_SRC := $(shell find $(KRL_DIR) -name "*.cpp" -o -name "*.h")
 
 
-.PHONY: all run debug clean compile
+.PHONY: all run debug clean force
 
-all: compile
+all: $(ISO)
 
 
-debug: compile
+debug: $(ISO)
 	$(QEMU) $(QMFLAGS) $(ISO) $(QMDEBUG)
 
 
-run: compile
+run: $(ISO)
 	$(QEMU) $(QMFLAGS) $(ISO)
 
 clean:
 	$(RMDIR) "$(BUILD)"
 
 
-compile: $(ISO)
 
-$(ISO): $(KRL_SRC) $(BIN_APPS)
+$(ISO): $(IMG) $(BIN_APPS)
 	python utils/make_bootable_iso.py $(BIN_KRNL) $(BIN_APPS) $(ROOT) $(ISO)
 
-$(KRL_SRC): | $(BIN_KRNL)
+$(IMG): force | $(BIN_KRNL)
 	$(MAKE) OBJ=$(BUILD)/obj/kernel OUT=$(OUT) IMG=$(IMG) -C $(KRL_DIR)	
-
-
 
 $(BIN_APPS): | $(DRV_BIN) $(USR_BIN)
 	echo "hello file 1" > $(DRV_BIN)/"file1.txt"
@@ -53,3 +49,5 @@ $(BIN_APPS): | $(DRV_BIN) $(USR_BIN)
 
 $(BIN_KRNL) $(DRV_BIN) $(USR_BIN):
 	$(MKDIR) $@
+
+force:
