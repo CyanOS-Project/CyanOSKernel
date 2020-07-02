@@ -101,18 +101,18 @@ void test_tar_filesystem(uintptr_t fs)
 	TarFS* tar_fs = new TarFS((void*)fs);
 	char* file;
 
-	printf("file1 size : %d\n", tar_fs->get_file_size("file1.txt"));
-	file = tar_fs->read_file("file1.txt");
+	printf("file1 size : %d\n", tar_fs->get_file_size("Drivers/file1.txt"));
+	file = tar_fs->read_file("Drivers/file1.txt");
 	if (file)
 		printf("Output : %s\n", file);
 
-	printf("file2 size : %d\n", tar_fs->get_file_size("file2.txt"));
-	file = tar_fs->read_file("file2.txt");
+	printf("file2 size : %d\n", tar_fs->get_file_size("Drivers/file2.txt"));
+	file = tar_fs->read_file("Drivers/file2.txt");
 	if (file)
 		printf("Output : %s\n", file);
 
-	printf("file3 size : %d\n", tar_fs->get_file_size("myFolder/file3.txt"));
-	file = tar_fs->read_file("myFolder/file3.txt");
+	printf("file3 size : %d\n", tar_fs->get_file_size("UserBinary/file3.txt"));
+	file = tar_fs->read_file("UserBinary/file3.txt");
 	if (file)
 		printf("Output : %s\n", file);
 }

@@ -35,7 +35,6 @@ __attribute__((section(".bootstrap"))) void kernel_boot()
 	SET_STACK(VIR_TO_PHY((uint32_t)boostrap_stack) + sizeof(boostrap_stack));
 	multiboot_tag_start* boot_info;
 	asm volatile("mov %%ebx,%0" : "=r"(boot_info));
-	uintptr_t size = boot_info->total_size;
 	Memory::setup();
 	initiate_console();
 	uintptr_t vboot_info = (uintptr_t)Memory::map(uintptr_t(boot_info), boot_info->total_size,
@@ -82,8 +81,8 @@ void parse_mbi(uintptr_t multiboot_info, BootloaderInfo& info)
 				printf("mod_end :%x\n", tag->mod_end);
 				printf("cmdline :%s\n", tag->cmdline);
 				printf("mem_upper :%d\n", tag->size);
-				info.modules[0].start = tag->mod_start;
-				info.modules[0].size = tag->mod_end - tag->mod_start;
+				info.ramdisk.start = tag->mod_start;
+				info.ramdisk.size = tag->mod_end - tag->mod_start;
 				break;
 			}
 			case MULTIBOOT_TAG_TYPE_MMAP: {

@@ -2,23 +2,28 @@ import sys
 import os
 import platform
 import shutil
+import tarfile
 
-# make_bootable_iso.py boot_folder output_folder
+# make_bootable_iso.py krnl_bin_dir apps_bin_dir root_dir iso_out
+# krnl_bin_dir: path of the compiled kernel directory.
+# apps_bin_dir: path of the apps folder to create ramdisk for.
+# root_dir: path of the folder where to create the ramdisk hierarchy.
+# iso_out: path of output iso
 
 
 def main():
-    if(len(sys.argv) != 4):
+    if(len(sys.argv) != 5):
         print("invalid argument list")
         sys.exit(2)
-    bin_dir = os.path.relpath(sys.argv[1])
-    root_dir = os.path.relpath(sys.argv[2])
-    iso_dir = os.path.relpath(sys.argv[3])
-
+    krnl_bin_dir = os.path.relpath(sys.argv[1])
+    apps_bin_dir = os.path.relpath(sys.argv[2])
+    root_dir = os.path.relpath(sys.argv[3])
+    iso_out = os.path.relpath(sys.argv[4])
     if os.path.exists(root_dir) == True:
         shutil.rmtree(root_dir)
-        pass
-    make_root(bin_dir, root_dir)
-    make_iso(root_dir, iso_dir)
+    make_root(krnl_bin_dir, root_dir)
+    create_ramdisk(apps_bin_dir, os.path.join(root_dir, "ramdisk.tar"))
+    make_iso(root_dir, iso_out)
 
 
 def make_iso(folder_name, out_path):
@@ -42,8 +47,11 @@ def make_root(bin_path, out_dir):
                     os.path.join(out_dir, "boot/kernel.img"))
 
 
-def create_ramdisk():
-    pass
+def create_ramdisk(input_path, output_path):
+    tar = tarfile.open(output_path, "x")
+    for filename in os.listdir(input_path):
+        tar.add(os.path.join(input_path, filename), filename)
+    tar.close()
 
 
 def make_grub_cfg(cfg_path, kernel_path):

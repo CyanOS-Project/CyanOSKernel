@@ -6,7 +6,7 @@ struct Module {
 	uintptr_t size;
 };
 struct BootloaderInfo {
-	Module modules[1];
+	Module ramdisk;
 };
 
 extern "C" void kernel_init(BootloaderInfo* info);

@@ -7,14 +7,19 @@ QMDEBUG := -S -gdb tcp$(COLON)1234
 
 
 BUILD	:= $(CURDIR)/build
-BIN     := $(BUILD)/bin
-OUT		:= $(BIN)/kernel.out
-IMG		:= $(BIN)/kernel.img
+BIN		:= $(BUILD)/bin
+BIN_KRNL:= $(BIN)/kernel
+BIN_APPS:= $(BIN)/apps
+DRV_BIN := $(BIN_APPS)/Drivers
+USR_BIN := $(BIN_APPS)/UserBinary
+OUT		:= $(BIN_KRNL)/kernel.out
+IMG		:= $(BIN_KRNL)/kernel.img
 ISO		:= $(BUILD)/CyanOS.iso
 ROOT	:= $(BUILD)/CyanOS_root
 KRL_SRC := ./kernel
 
-.PHONY: all run debug clean kernel compile
+
+.PHONY: all run debug clean compile apps
 
 all: compile
 
@@ -31,11 +36,16 @@ clean:
 
 compile: $(ISO)
 
-$(ISO): $(IMG)
-	python utils/make_bootable_iso.py $(BIN) $(ROOT) $(ISO)
+$(ISO): $(IMG) apps
+	python utils/make_bootable_iso.py $(BIN_KRNL) $(BIN_APPS) $(ROOT) $(ISO)
 
-$(IMG): $(KRL_SRC) | $(BIN)
+$(IMG): $(KRL_SRC) | $(BIN_KRNL)
 	$(MAKE) OBJ=$(BUILD)/obj/kernel OUT=$(OUT) IMG=$(IMG) -C $(KRL_SRC)	
 	
-$(BIN):
+apps: | $(DRV_BIN) $(USR_BIN)
+	echo "hello file 1" > $(DRV_BIN)/"file1.txt"
+	echo "hello file 2" > $(DRV_BIN)/"file2.txt"
+	echo "hello file 3" > $(USR_BIN)/"file3.txt"
+
+$(BIN_KRNL) $(DRV_BIN) $(USR_BIN):
 	$(MKDIR) $@
