@@ -16,10 +16,11 @@ OUT		:= $(BIN_KRNL)/kernel.out
 IMG		:= $(BIN_KRNL)/kernel.img
 ISO		:= $(BUILD)/CyanOS.iso
 ROOT	:= $(BUILD)/CyanOS_root
-KRL_SRC := ./kernel
+KRL_DIR := kernel/
+KRL_SRC := $(shell find $(KRL_DIR) -name "*.cpp" -o -name "*.h")
 
 
-.PHONY: all run debug clean compile apps
+.PHONY: all run debug clean compile
 
 all: compile
 
@@ -34,15 +35,18 @@ run: compile
 clean:
 	$(RMDIR) "$(BUILD)"
 
+
 compile: $(ISO)
 
-$(ISO): $(IMG) apps
+$(ISO): $(KRL_SRC) $(BIN_APPS)
 	python utils/make_bootable_iso.py $(BIN_KRNL) $(BIN_APPS) $(ROOT) $(ISO)
 
-$(IMG): $(KRL_SRC) | $(BIN_KRNL)
-	$(MAKE) OBJ=$(BUILD)/obj/kernel OUT=$(OUT) IMG=$(IMG) -C $(KRL_SRC)	
-	
-apps: | $(DRV_BIN) $(USR_BIN)
+$(KRL_SRC): | $(BIN_KRNL)
+	$(MAKE) OBJ=$(BUILD)/obj/kernel OUT=$(OUT) IMG=$(IMG) -C $(KRL_DIR)	
+
+
+
+$(BIN_APPS): | $(DRV_BIN) $(USR_BIN)
 	echo "hello file 1" > $(DRV_BIN)/"file1.txt"
 	echo "hello file 2" > $(DRV_BIN)/"file2.txt"
 	echo "hello file 3" > $(USR_BIN)/"file3.txt"

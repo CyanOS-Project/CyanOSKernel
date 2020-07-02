@@ -65,8 +65,5 @@ def make_grub_cfg(cfg_path, kernel_path):
     f.write('}')
 
 
-pass
-
-
 if __name__ == "__main__":
     main()

@@ -14,6 +14,8 @@ static inline uint32_t get_faulted_page()
 	return page;
 }
 
+
+
 static inline uint8_t in8(uint16_t port)
 {
 	uint8_t data;

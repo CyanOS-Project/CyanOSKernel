@@ -34,6 +34,8 @@ extern "C" void kernel_init(BootloaderInfo* info)
 {
 	GDT::setup();
 	IDT::setup();
+	;
+	;
 	Memory::setup_stage2();
 	initiate_console();
 	printStatus("Setting up core components.", true);

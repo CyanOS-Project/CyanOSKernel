@@ -8,7 +8,7 @@
             "type": "gdb",
             "request": "attach",
             "name": "Attach to gdbserver",
-            "executable": "${cwd}/build/bin/kernel.out",
+            "executable": "${cwd}/build/bin/kernel/kernel.out",
             "target": "localhost:1234",
             "remote": true,
             "cwd": "${workspaceRoot}",

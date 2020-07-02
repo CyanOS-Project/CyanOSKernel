@@ -37,6 +37,7 @@ __attribute__((section(".bootstrap"))) void kernel_boot()
 	asm volatile("mov %%ebx,%0" : "=r"(boot_info));
 	Memory::setup();
 	initiate_console();
+	;
 	uintptr_t vboot_info = (uintptr_t)Memory::map(uintptr_t(boot_info), boot_info->total_size,
 	                                              MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	// FIXME: temp hack because map maps only aligned pages.
