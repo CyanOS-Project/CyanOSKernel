@@ -8,4 +8,3 @@
 
 extern uintptr_t KERNEL_START;
 extern uintptr_t KERNEL_END;
-extern uintptr_t RAMDISK_START;

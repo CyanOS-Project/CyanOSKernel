@@ -10,8 +10,7 @@ SECTIONS
 	}
 	.bootstrap	ALIGN(4K): 
 	{ 
-		*(.bootstrap)
-		*(.bootstrap_stack)		
+		*(.bootstrap)	
 	}
 	.text	ALIGN(4K) :
 	{	
@@ -28,5 +27,4 @@ SECTIONS
 	}
 
 	PROVIDE(KERNEL_END = .);
-	PROVIDE(RAMDISK_START = .);
 }

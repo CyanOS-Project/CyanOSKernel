@@ -12,15 +12,16 @@ CPP_OBJS := $(patsubst %.cpp,$(OBJ)/%.o,$(CPP_SRCS))
 ASM_OBJS := $(patsubst %.s,$(OBJ)/%.o2,$(ASM_SRCS))
 DIRS     := $(sort  $(abspath $(dir $(ASM_OBJS) $(CPP_OBJS)))) 
 
-CFLAGS  := -T linker.ld -I $(INCLUDE) -m32 -g -Wall --std=c++17 -fno-builtin -Og -MMD -fno-pie -ffreestanding -nostdlib -fno-rtti -fno-exceptions -fno-leading-underscore
+CFLAGS  := -T linker.ld  -I $(INCLUDE) -m32 -g -Wall --std=c++17 -Og -MMD -fno-rtti -fno-exceptions -fno-leading-underscore
+LDFLAGS := -T linker.ld -fno-pie -ffreestanding -nostdlib
 
 .PHONY: all
 
 all: $(OUT)
 
 $(OUT): $(ASM_OBJS) $(CPP_OBJS)
-	$(CC) $(CFLAGS) $^ -o $@
-	$(OBCP) --set-section-flags .bss=alloc,load,contents -O binary $@ $(IMG)
+	$(CC) $(LDFLAGS) $^ -o $@
+	$(OBCP) -O binary $@ $(IMG)
 
 
 $(OBJ)/%.o: %.cpp | $(DIRS)
