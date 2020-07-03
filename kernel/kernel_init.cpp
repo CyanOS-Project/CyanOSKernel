@@ -34,8 +34,6 @@ extern "C" void kernel_init(BootloaderInfo* info)
 {
 	GDT::setup();
 	IDT::setup();
-	;
-	;
 	Memory::setup_stage2();
 	initiate_console();
 	printStatus("Setting up core components.", true);
@@ -47,8 +45,8 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	PIT::setup();
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
-	printf("Start %X End %X Size %X Ram %X\n", &KERNEL_START, &KERNEL_END,
-	       uintptr_t(&KERNEL_END) - uintptr_t(&KERNEL_START), &RAMDISK_START);
+	// Scheduler::yield();
+	// test_virtual_functions();
 	test_tar_filesystem(
 	    (uintptr_t)Memory::map(info->ramdisk.start, info->ramdisk.size, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
 	// Scheduler::yield();

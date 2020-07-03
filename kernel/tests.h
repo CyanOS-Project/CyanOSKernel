@@ -116,3 +116,60 @@ void test_tar_filesystem(uintptr_t fs)
 	if (file)
 		printf("Output : %s\n", file);
 }
+
+class ParentClass
+{
+  private:
+	int d;
+
+  public:
+	ParentClass(int n)
+	{
+		d = n;
+		printf("creating the parent %d class.\n", d);
+	}
+	~ParentClass()
+	{
+		printf("destroying the parent %d class.\n", d);
+	}
+	virtual void hello() = 0;
+
+	void hello2()
+	{
+		printf("this is the parent %d class.\n", d);
+	}
+};
+
+class ChildClass : public ParentClass
+{
+  private:
+	int d;
+
+  public:
+	ChildClass(int n) : ParentClass(n)
+	{
+		d = n;
+		printf("creating the child %d class.\n", d);
+	}
+	~ChildClass()
+	{
+		printf("destroying the child %d class.\n", d);
+	}
+	virtual void hello()
+	{
+		printf("this is the child %d class.\n", d);
+	}
+	void hello2()
+	{
+		printf("this is the child %d class.\n", d);
+	}
+};
+
+void test_virtual_functions()
+{
+	ParentClass* parent;
+	ChildClass child(4);
+	parent = &child;
+	parent->hello();
+	parent->hello2();
+}
