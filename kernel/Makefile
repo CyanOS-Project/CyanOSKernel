@@ -12,8 +12,8 @@ CPP_OBJS := $(patsubst %.cpp,$(OBJ)/%.o,$(CPP_SRCS))
 ASM_OBJS := $(patsubst %.s,$(OBJ)/%.o2,$(ASM_SRCS))
 DIRS     := $(sort  $(abspath $(dir $(ASM_OBJS) $(CPP_OBJS)))) 
 
-CFLAGS  := -T linker.ld  -I $(INCLUDE) -m32 -g -Wall --std=c++17 -Og -MMD -fno-rtti -fno-exceptions -fno-leading-underscore
-LDFLAGS := -T linker.ld -fno-pie -ffreestanding -nostdlib
+CFLAGS  := -T linker.ld  -I $(INCLUDE) -m32 -g -Wall --std=c++17 -Og -MMD -fno-pie -ffreestanding -fno-rtti -fno-exceptions -fno-leading-underscore
+LDFLAGS := -T linker.ld -m32 -nostdlib
 
 .PHONY: all
 

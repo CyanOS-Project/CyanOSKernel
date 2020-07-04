@@ -48,7 +48,7 @@ def make_root(bin_path, out_dir):
 
 
 def create_ramdisk(input_path, output_path):
-    tar = tarfile.open(output_path, "x")
+    tar = tarfile.open(output_path, "w")
     for filename in os.listdir(input_path):
         tar.add(os.path.join(input_path, filename), filename)
     tar.close()

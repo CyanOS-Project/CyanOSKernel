@@ -1,4 +1,3 @@
-#include "malloc.h"
 #include "Arch/x86/panic.h"
 #include "VirtualMemory/heap.h"
 #include <stddef.h>
