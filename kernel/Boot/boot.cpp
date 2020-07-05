@@ -40,13 +40,9 @@ extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_inf
 	printf("%X\n", boot_info->total_size);
 	memset(&bootloader_info, 0, sizeof(BootloaderInfo));
 	parse_mbi((uintptr_t)vboot_info, bootloader_info);
-
-	void* new_stack = Memory::alloc(0x4000, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
-	SET_STACK((uint32_t)new_stack + 0x4000);
-	asm volatile("PUSHL %0;"
-	             "CALL *%1;"
-	             :
-	             : "r"(&bootloader_info), "r"(kernel_init));
+	uintptr_t new_stack = uintptr_t(Memory::alloc(0x4000, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
+	SET_STACK(new_stack + 0x4000);
+	CALL(kernel_init, &bootloader_info)
 	ASSERT_NOT_REACHABLE();
 	return;
 }
@@ -68,11 +64,8 @@ const char* mmap_entry_type_text[] = {"Unknown"           //
 
 void parse_mbi(uintptr_t multiboot_info, BootloaderInfo& info)
 {
-	printf("Fuck you, i'm here\n");
 	multiboot_tag* current_tag = (multiboot_tag*)(multiboot_info + sizeof(multiboot_tag_start));
-	printf("Fuck you, i'm here\n");
 	while (current_tag->type != MULTIBOOT_TAG_TYPE_END) {
-		printf("Fuck you, i'm here\n");
 		printf("checking: %x, Type: %d\n", current_tag, current_tag->type);
 		switch (current_tag->type) {
 			case MULTIBOOT_TAG_TYPE_MODULE: {

@@ -2,6 +2,7 @@
 #include "utils/types.h"
 
 #define JMP(x)               asm("JMP *%0" : : "r"(kernel_init) :)
+#define CALL(x, arg)         asm volatile("PUSHL %0;CALL *%1;" : : "r"(arg), "r"(x));
 #define HLT()                asm("HLT")
 #define DISABLE_INTERRUPTS() asm("CLI")
 #define ENABLE_INTERRUPTS()  asm("STI")
@@ -13,8 +14,6 @@ static inline uint32_t get_faulted_page()
 	asm("MOVL %%CR2,%0" : "=r"(page));
 	return page;
 }
-
-
 
 static inline uint8_t in8(uint16_t port)
 {
