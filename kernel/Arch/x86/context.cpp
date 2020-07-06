@@ -4,7 +4,8 @@
 uint32_t setup_task_stack_context(void* stack, uint32_t stack_size, uint32_t start_function, uint32_t return_function,
                                   uint32_t argument)
 {
-	InitialTaskContext* context = (InitialTaskContext*)(uintptr_t(stack) + stack_size - sizeof(InitialTaskContext));
+	InitialTaskContext* context =
+	    reinterpret_cast<InitialTaskContext*>(uintptr_t(stack) + stack_size - sizeof(InitialTaskContext));
 	context->return_address = return_function;
 	context->argument = argument;
 	context->isr_frame.eip = start_function;

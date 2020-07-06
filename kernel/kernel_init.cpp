@@ -47,8 +47,8 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	printf("Welcome to CyanOS.\n");
 	// Scheduler::yield();
 	// test_virtual_functions();
-	test_tar_filesystem(
-	    (uintptr_t)Memory::map(info->ramdisk.start, info->ramdisk.size, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
+	test_tar_filesystem(reinterpret_cast<uintptr_t>(
+	    Memory::map(info->ramdisk.start, info->ramdisk.size, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE)));
 	// Scheduler::yield();
 	// test_lists();
 	// test_bitmap();
