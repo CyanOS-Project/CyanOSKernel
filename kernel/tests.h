@@ -5,6 +5,7 @@
 #include "Filesystem/ustar/ustar.h"
 #include "Tasking/scheduler.h"
 #include "Tasking/semaphore.h"
+#include "utils/PathParser.h"
 #include "utils/bitmap.h"
 #include "utils/list.h"
 
@@ -172,4 +173,19 @@ void test_virtual_functions()
 	parent = &child;
 	parent->hello();
 	parent->hello2();
+}
+
+void test_path()
+{
+	char current[20];
+	PathParser dd("/mnt/dev/tty");
+	printf("count: %d\n", dd.path_element_count());
+	dd.get_element(0, current, 20);
+	printf("element 0: %s\n", current);
+
+	dd.get_element(1, current, 20);
+	printf("element 1: %s\n", current);
+
+	dd.get_element(2, current, 20);
+	printf("element 2: %s\n", current);
 }

@@ -51,11 +51,11 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	    Memory::map(info->ramdisk.start, info->ramdisk.size, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
 	test_tar_filesystem(ustar_fs);*/
 	// Scheduler::yield();
-	test_lists();
+	// test_lists();
 	// test_bitmap();
 	// UnitTest_Bitmap();
 	// UnitTest_CircularQueue();
-
+	test_path();
 	printf("Going Idle State.\n");
 	while (1) {
 		HLT();

@@ -16,7 +16,11 @@ class FSNode
 	virtual int write();
 	virtual int can_read();
 	virtual int can_write();
-	virtual int dir_lookup();
+	virtual FSNode* dir_lookup();
 	virtual int rmdir();
 	virtual int mkdir();
 };
+
+FSNode::FSNode()
+{
+}
