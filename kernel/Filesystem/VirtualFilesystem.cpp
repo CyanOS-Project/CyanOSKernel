@@ -22,44 +22,54 @@ Result<FileDescriptor&> VFS::open(const char* path, int mode, int flags)
 
 Result<void> VFS::mount()
 {
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> VFS::mount_root()
 {
 	if (m_root)
 		return ResultError(ERROR_MOUNTPOINT_EXISTS);
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> VFS::unmount()
 {
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> VFS::remove()
 {
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> VFS::make_directory()
 {
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> VFS::remove_directory()
 {
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> VFS::rename()
 {
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> VFS::chown()
 {
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> VFS::make_link()
 {
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> VFS::remove_link()
 {
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<FSNode&> VFS::traverse_parent_node(const char* path)

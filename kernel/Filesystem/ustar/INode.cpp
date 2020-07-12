@@ -2,60 +2,58 @@
 
 INode::INode()
 {
-	// TODO
 }
 
 INode::~INode()
 {
-	// TODO
 }
 
 Result<void> INode::read(void* buff, size_t offset, size_t size)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> INode::write(void* buff, size_t offset, size_t size)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<bool> INode::can_read()
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<bool> INode::can_write()
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> INode::remove()
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> INode::create(char* name, void* info)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> INode::mkdir(char* name, void* info)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> INode::link(FSNode& node)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> INode::unlink(FSNode& node)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<FSNode&> INode::dir_lookup(char* file_name)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }

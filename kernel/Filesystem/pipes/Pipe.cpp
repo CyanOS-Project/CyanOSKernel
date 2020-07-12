@@ -2,60 +2,58 @@
 
 Pipe::Pipe()
 {
-	// TODO
 }
 
 Pipe::~Pipe()
 {
-	// TODO
 }
 
 Result<void> Pipe::read(void* buff, size_t offset, size_t size)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> Pipe::write(void* buff, size_t offset, size_t size)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<bool> Pipe::can_read()
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<bool> Pipe::can_write()
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> Pipe::remove()
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> Pipe::create(char* name, void* info)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> Pipe::mkdir(char* name, void* info)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> Pipe::link(FSNode& node)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> Pipe::unlink(FSNode& node)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<FSNode&> Pipe::dir_lookup(char* file_name)
 {
-	// TODO
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }

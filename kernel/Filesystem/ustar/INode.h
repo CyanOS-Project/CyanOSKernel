@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Filesystem/FSNode.h"
+#include "utils/ErrorCodes.h"
+#include "utils/Result.h"
 #include "utils/types.h"
 
 class INode : public FSNode

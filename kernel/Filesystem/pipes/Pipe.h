@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Filesystem/FSNode.h"
+#include "utils/ErrorCodes.h"
 #include "utils/types.h"
 
 class Pipe : public FSNode
