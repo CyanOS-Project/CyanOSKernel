@@ -1,6 +1,6 @@
 #include "FileDescriptor.h"
 
-FileDescriptor::FileDescriptor()
+/*FileDescriptor::FileDescriptor()
 {
 }
 
@@ -38,4 +38,4 @@ int FileDescriptor::ioctl()
 
 int FileDescriptor::mmap()
 {
-}
+}*/

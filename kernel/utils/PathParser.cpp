@@ -11,6 +11,9 @@ PathParser::~PathParser()
 unsigned PathParser::path_element_count()
 {
 	unsigned count = 0;
+	if (m_len == 1 && m_path[0] == m_spliter)
+		return 0;
+
 	for (size_t i = 0; i < m_len; i++) {
 		if (m_path[i] == m_spliter)
 			count++;

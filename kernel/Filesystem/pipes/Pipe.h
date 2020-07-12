@@ -9,13 +9,14 @@ class Pipe : public FSNode
   public:
 	Pipe();
 	~Pipe();
-	virtual int read();
-	virtual int write();
-	virtual int can_read();
-	virtual int can_write();
-	virtual int lookup_directory();
-	virtual int remove_directory();
-	virtual int make_direcotry();
-	virtual int make_file();
-	virtual int remove_file();
+	Result<void> read(void* buff, size_t offset, size_t size);
+	Result<void> write(void* buff, size_t offset, size_t size);
+	Result<bool> can_read();
+	Result<bool> can_write();
+	Result<void> remove();
+	Result<void> create(char* name, void* info);
+	Result<void> mkdir(char* name, void* info);
+	Result<void> link(FSNode& node);
+	Result<void> unlink(FSNode& node);
+	Result<FSNode&> dir_lookup(char* file_name);
 };
