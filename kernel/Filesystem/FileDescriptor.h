@@ -2,28 +2,30 @@
 
 #include "Filesystem/pipes/Pipe.h"
 #include "Filesystem/ustar/INode.h"
+#include "utils/ErrorCodes.h"
+#include "utils/Result.h"
 #include "utils/types.h"
+
+#define MAX_OFFSET (SIZE_MAX / 4)
+enum class SeekOrigin { SET, CURRENT, END };
 
 class FileDescriptor
 {
   private:
-	union Node {
-		INode* inode;
-		Pipe* pipe;
-	};
-	size_t current_position;
-	int type;
-	bool has_changed;
+	FSNode& m_node;
+	size_t m_current_position = 0;
+	int m_type = 0;
+	bool m_has_changed = false;
 
   public:
-	FileDescriptor();
+	FileDescriptor(FSNode& node);
 	~FileDescriptor();
-	virtual int open();
-	virtual int close();
-	virtual int read();
-	virtual int write();
-	virtual int seek();
-	virtual int fstat();
-	virtual int ioctl();
-	virtual int mmap();
+	Result<void> open();
+	Result<void> close();
+	Result<void> read(void* buff, size_t size);
+	Result<void> write(void* buff, size_t size);
+	Result<void> seek(int offset, SeekOrigin origin);
+	Result<void> fstat();
+	Result<void> ioctl();
+	Result<void> mmap();
 };

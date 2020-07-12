@@ -6,11 +6,11 @@
 class FSNode
 {
   private:
+  public:
 	int permission;
 	int owner;
 	size_t size;
 
-  public:
 	virtual Result<void> read(void* buff, size_t offset, size_t size) = 0;
 	virtual Result<void> write(void* buff, size_t offset, size_t size) = 0;
 	virtual Result<bool> can_read() = 0;

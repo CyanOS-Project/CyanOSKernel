@@ -1,41 +1,96 @@
 #include "FileDescriptor.h"
 
-/*FileDescriptor::FileDescriptor()
+FileDescriptor::FileDescriptor(FSNode& node) : m_node(node)
 {
 }
 
 FileDescriptor::~FileDescriptor()
 {
+	close();
 }
 
-int FileDescriptor::open()
+Result<void> FileDescriptor::open()
 {
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-int FileDescriptor::close()
+Result<void> FileDescriptor::close()
 {
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-int FileDescriptor::read()
+Result<void> FileDescriptor::read(void* buff, size_t size)
 {
+	size_t offset = m_current_position + size;
+	if (offset > m_node.size) {
+		return ResultError(ERROR_EOF);
+	}
+	m_node.read(buff, offset, size);
+	return ResultError(ERROR_SUCCESS);
 }
 
-int FileDescriptor::write()
+Result<void> FileDescriptor::write(void* buff, size_t size)
 {
+	size_t offset = m_current_position + size;
+	if (offset > m_node.size) {
+		return ResultError(ERROR_EOF);
+	}
+	m_node.read(buff, offset, size);
+	return ResultError(ERROR_SUCCESS);
 }
 
-int FileDescriptor::seek()
+Result<void> FileDescriptor::seek(int offset, SeekOrigin origin)
 {
+	switch (origin) {
+		case SeekOrigin::SET: {
+			if (offset < 0)
+				return ResultError(ERROR_EOF);
+			if (size_t(offset) > m_node.size)
+				return ResultError(ERROR_EOF);
+
+			m_current_position = offset;
+			break;
+		}
+		case SeekOrigin::CURRENT: {
+			// FIXME: check overflow
+			int new_offset = offset + m_current_position;
+			if (new_offset < 0)
+				return ResultError(ERROR_EOF);
+			if (size_t(new_offset) > m_node.size)
+				return ResultError(ERROR_EOF);
+
+			m_current_position = new_offset;
+			break;
+		}
+		case SeekOrigin::END: {
+			// FIXME: check overflow
+			size_t new_offset = m_node.size + offset;
+			if (new_offset < 0)
+				return ResultError(ERROR_EOF);
+			if (size_t(new_offset) > m_node.size) {
+				return ResultError(ERROR_EOF);
+			}
+
+			m_current_position = new_offset;
+			break;
+		}
+		default:
+			break;
+	}
+	return ResultError(ERROR_SUCCESS);
 }
 
-int FileDescriptor::fstat()
+Result<void> FileDescriptor::fstat()
 {
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-int FileDescriptor::ioctl()
+Result<void> FileDescriptor::ioctl()
 {
+	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-int FileDescriptor::mmap()
+Result<void> FileDescriptor::mmap()
 {
-}*/
+	return ResultError(ERROR_INVALID_PARAMETERS);
+}

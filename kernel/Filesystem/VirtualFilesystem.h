@@ -23,15 +23,15 @@ class VFS
   public:
 	VFS();
 	~VFS();
-	static Result<FileDescriptor*> open(const char* path, int mode, int flags);
-	static int mount();
-	static int mount_root();
-	static int unmount();
-	static int remove();
-	static int make_directory();
-	static int remove_directory();
-	static int rename();
-	static int chown();
-	static int make_link();
-	static int remove_link();
+	static Result<FileDescriptor&> open(const char* path, int mode, int flags);
+	static Result<void> mount();
+	static Result<void> mount_root();
+	static Result<void> unmount();
+	static Result<void> remove();
+	static Result<void> make_directory();
+	static Result<void> remove_directory();
+	static Result<void> rename();
+	static Result<void> chown();
+	static Result<void> make_link();
+	static Result<void> remove_link();
 };
