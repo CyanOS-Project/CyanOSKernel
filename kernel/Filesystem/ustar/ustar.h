@@ -1,14 +1,27 @@
 #pragma once
 
+#include "INode.h"
 #include "Lib/stdlib.h"
+#include "utils/ErrorCodes.h"
+#include "utils/Result.h"
+#include "utils/assert.h"
 #include "utils/types.h"
 
-#define MAX_FILE_NAME      100
+#define MAX_TAR_FILE_NAME  100
 #define TAR_ALIGNMENT      512
 #define TAR_OCTAL_SIZE_LEN 12
+enum USTARFileType {
+	NORMAL = '0',
+	HARD_LINK = '1',
+	SYMBOLIC_LINK = '2',
+	CHARACTER_DEVICE = '3',
+	BLOCK_DEVICE = '4',
+	DIRECTORY = '5',
+	NAMED_PIPE = '6'
+};
 
 struct TarHeader {                 /* byte offset */
-	char name[MAX_FILE_NAME];      /*   0 */
+	char name[MAX_TAR_FILE_NAME];  /*   0 */
 	char mode[8];                  /* 100 */
 	char uid[8];                   /* 108 */
 	char gid[8];                   /* 116 */
@@ -31,13 +44,17 @@ class TarFS
 {
   private:
 	TarHeader* m_tar_address;
+	INode m_root;
 	TarHeader* file_search(const char* path);
 	size_t octal_to_decimal(const char* octal);
+	Result<void> parse_ustar();
+	Result<INode&> add_child_node(INode& parent, const INode& child);
 	inline uintptr_t align_to(uintptr_t address, unsigned alignment);
 
   public:
 	TarFS(void* tar_address);
 	~TarFS();
+	Result<FSNode&> get_root_node();
 	char* read_file(const char* path);
 	size_t get_file_size(const char* path);
 };

@@ -1,7 +1,39 @@
 #include "ustar.h"
 
-TarFS::TarFS(void* tar_address) : m_tar_address((TarHeader*)tar_address)
+TarFS::TarFS(void* tar_address) : m_tar_address(static_cast<TarHeader*>(tar_address)), m_root("root")
 {
+	ASSERT(tar_address);
+}
+
+Result<FSNode&> TarFS::get_root_node()
+{
+	return m_root;
+}
+
+Result<INode&> TarFS::add_child_node(INode& parent, const INode& child)
+{
+	return parent.m_children->push_back(child);
+}
+Result<void> TarFS::parse_ustar()
+{
+
+	if (strncmp(m_tar_address->magic, "ustar", 5))
+		return ResultError(ERROR_INVALID_PARAMETERS);
+
+	TarHeader* tar_parser = m_tar_address;
+	INode* last_parent = &m_root;
+	while (tar_parser->name[0]) {
+		auto new_node = add_child_node(*last_parent, INode(tar_parser->name));
+		if (new_node.error())
+			return ResultError(new_node.error());
+
+		if (tar_parser->typeflag == USTARFileType::DIRECTORY) {
+			last_parent = &new_node.value();
+		}
+		uintptr_t aligned_size = align_to(octal_to_decimal(tar_parser->size), TAR_ALIGNMENT);
+		tar_parser = (TarHeader*)(uintptr_t(tar_parser + 1) + aligned_size);
+	}
+	return ResultError(ERROR_UNDEFINED);
 }
 
 char* TarFS::read_file(const char* path)

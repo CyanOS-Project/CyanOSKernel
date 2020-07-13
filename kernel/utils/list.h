@@ -36,8 +36,8 @@ template <class T> class CircularQueue
 	~CircularQueue();
 	Iterator begin();
 	Iterator end();
-	void push_back(const T& new_data);
-	void push_front(const T& new_data);
+	T& push_back(const T& new_data);
+	T& push_front(const T& new_data);
 	void pop_back();
 	void pop_front();
 	void remove(Iterator&);
@@ -211,18 +211,20 @@ template <class T> typename CircularQueue<T>::Iterator CircularQueue<T>::end()
 }
 
 // Push data to the back of the list.
-template <class T> void CircularQueue<T>::push_back(const T& new_data)
+template <class T> T& CircularQueue<T>::push_back(const T& new_data)
 {
-	Node* new_node = new Node;
+	Node* new_node = new Node();
 	new_node->data = new_data;
 	link_node(new_node, m_head);
+	return new_node->data;
 }
 
 // Push data to the front of the list.
-template <class T> void CircularQueue<T>::push_front(const T& new_data)
+template <class T> T& CircularQueue<T>::push_front(const T& new_data)
 {
-	push_back(new_data);
+	T& new_node_data = push_back(new_data);
 	m_head = m_head->prev;
+	return new_node_data;
 }
 
 // The second node will be the head.

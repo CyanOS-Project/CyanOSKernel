@@ -11,7 +11,6 @@
 #include "utils/assert.h"
 #include "utils/types.h"
 
-#define MAX_FILE_NAME 64
 class VFS
 {
   private:

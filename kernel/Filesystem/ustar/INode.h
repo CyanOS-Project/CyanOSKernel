@@ -1,14 +1,21 @@
 #pragma once
 
 #include "Filesystem/FSNode.h"
+#include "Lib/stdlib.h"
 #include "utils/ErrorCodes.h"
 #include "utils/Result.h"
+#include "utils/list.h"
 #include "utils/types.h"
 
 class INode : public FSNode
 {
   private:
+	CircularQueue<INode>* m_children;
+	size_t size;
+	char filename[MAX_FILE_NAME];
+
   public:
+	INode(const char* name);
 	INode();
 	~INode();
 	Result<void> read(void* buff, size_t offset, size_t size);
@@ -21,4 +28,6 @@ class INode : public FSNode
 	Result<void> link(FSNode& node);
 	Result<void> unlink(FSNode& node);
 	Result<FSNode&> dir_lookup(char* file_name);
+
+	friend class TarFS;
 };

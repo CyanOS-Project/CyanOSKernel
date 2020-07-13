@@ -22,3 +22,5 @@ class FSNode
 	virtual Result<void> unlink(FSNode& node) = 0;
 	virtual Result<FSNode&> dir_lookup(char* file_name) = 0;
 };
+
+#define MAX_FILE_NAME 64
