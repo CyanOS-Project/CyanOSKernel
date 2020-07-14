@@ -64,14 +64,10 @@ void test_lists()
 	CircularQueue<Stuff>* list = new CircularQueue<Stuff>;
 	CircularQueue<Stuff>* list2 = new CircularQueue<Stuff>;
 
-	Stuff s1 = {1, 1};
-	Stuff s2 = {2, 2};
-	Stuff s3 = {3, 3};
-	Stuff s4 = {4, 4};
-	list->push_back(s1);
-	list->push_back(s2);
-	list->push_back(s3);
-	list->push_back(s4);
+	list->push_back({1, 2});
+	list->push_back({2, 4});
+	list->push_back({1, 2});
+	list->push_back({1, 2});
 	printf("List 1:\n");
 	list->move_head_to_other_list(list2);
 	list->move_head_to_other_list(list2);
