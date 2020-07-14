@@ -24,8 +24,8 @@ Result<void> TarFS::parse_ustar()
 	TarHeader* tar_parser = m_tar_address;
 	INode* last_parent = &m_root;
 	while (tar_parser->name[0]) {
-		auto& new_node = last_parent->m_children->emplace_back(
-		    INode(tar_parser->name, octal_to_decimal(tar_parser->size), static_cast<void*>(tar_parser + 1)));
+		auto& new_node = last_parent->m_children->emplace_back(tar_parser->name, octal_to_decimal(tar_parser->size),
+		                                                       static_cast<void*>(tar_parser + 1));
 		if (tar_parser->typeflag == USTARFileType::DIRECTORY) {
 			last_parent = &new_node;
 		}
