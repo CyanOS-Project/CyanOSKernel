@@ -1,8 +1,9 @@
 #include "ustar.h"
 
-TarFS::TarFS(void* tar_address) : m_tar_address(static_cast<TarHeader*>(tar_address)), m_root("root")
+TarFS::TarFS(void* tar_address) : m_tar_address(static_cast<TarHeader*>(tar_address)), m_root("root", 0, nullptr)
 {
 	ASSERT(tar_address);
+	parse_ustar();
 }
 
 Result<FSNode&> TarFS::get_root_node()
@@ -10,10 +11,10 @@ Result<FSNode&> TarFS::get_root_node()
 	return m_root;
 }
 
-Result<INode&> TarFS::add_child_node(INode& parent, const INode& child)
+/*Result<INode&> TarFS::add_child_node(INode& parent, const INode& child)
 {
-	return parent.m_children->push_back(child);
-}
+    return parent.m_children->push_back(child);
+}*/
 Result<void> TarFS::parse_ustar()
 {
 
@@ -23,12 +24,10 @@ Result<void> TarFS::parse_ustar()
 	TarHeader* tar_parser = m_tar_address;
 	INode* last_parent = &m_root;
 	while (tar_parser->name[0]) {
-		auto new_node = add_child_node(*last_parent, INode(tar_parser->name));
-		if (new_node.error())
-			return ResultError(new_node.error());
-
+		auto& new_node = last_parent->m_children->emplace_back(
+		    INode(tar_parser->name, octal_to_decimal(tar_parser->size), static_cast<void*>(tar_parser + 1)));
 		if (tar_parser->typeflag == USTARFileType::DIRECTORY) {
-			last_parent = &new_node.value();
+			last_parent = &new_node;
 		}
 		uintptr_t aligned_size = align_to(octal_to_decimal(tar_parser->size), TAR_ALIGNMENT);
 		tar_parser = (TarHeader*)(uintptr_t(tar_parser + 1) + aligned_size);

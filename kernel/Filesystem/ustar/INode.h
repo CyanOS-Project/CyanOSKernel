@@ -10,14 +10,18 @@
 class INode : public FSNode
 {
   private:
+	char m_filename[MAX_FILE_NAME];
+	size_t m_size;
+	void* m_data;
 	CircularQueue<INode>* m_children;
-	size_t size;
-	char filename[MAX_FILE_NAME];
 
   public:
-	INode(const char* name);
-	INode();
+	INode(const char* name, size_t size, void* data);
+	INode(INode&& other);
+	INode& operator=(const INode&& other);
+	INode& operator=(INode& other);
 	~INode();
+
 	Result<void> read(void* buff, size_t offset, size_t size);
 	Result<void> write(void* buff, size_t offset, size_t size);
 	Result<bool> can_read();

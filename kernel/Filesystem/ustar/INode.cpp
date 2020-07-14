@@ -1,17 +1,23 @@
 #include "INode.h"
 
-INode::INode(const char* name) : m_children(new CircularQueue<INode>)
+INode::INode(const char* name, size_t size, void* data) :
+    m_size(size),
+    m_data(data),
+    m_children(new CircularQueue<INode>)
 {
-	memcpy(filename, name, strlen(name));
+	memcpy(m_filename, name, strlen(name) + 1);
 }
 
-INode::INode() : m_children(new CircularQueue<INode>)
+INode::INode(INode&& other) : m_size(other.m_size), m_data(other.m_data), m_children(other.m_children)
 {
+	memcpy(m_filename, other.m_filename, strlen(other.m_filename) + 1);
+	other.m_children = nullptr;
 }
 
 INode::~INode()
 {
-	delete m_children;
+	if (m_children)
+		delete m_children;
 }
 
 Result<void> INode::read(void* buff, size_t offset, size_t size)

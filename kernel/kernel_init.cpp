@@ -46,16 +46,18 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
 	// Scheduler::yield();
+	// test_semaphore(0);
 	// test_virtual_functions();
-	/*uintptr_t ustar_fs = reinterpret_cast<uintptr_t>(
-	    Memory::map(info->ramdisk.start, info->ramdisk.size, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
-	test_tar_filesystem(ustar_fs);*/
-	// Scheduler::yield();
+	/*
+	 */
+	// Scheduler::yield();;
 	// test_lists();
 	// test_bitmap();
 	// UnitTest_Bitmap();
 	// UnitTest_CircularQueue();
-	test_path();
+	uintptr_t ustar_fs = reinterpret_cast<uintptr_t>(
+	    Memory::map(info->ramdisk.start, info->ramdisk.size, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
+	test_tar_filesystem(ustar_fs);
 	printf("Going Idle State.\n");
 	while (1) {
 		HLT();
