@@ -39,8 +39,6 @@ template <class T> class CircularQueue
 	Iterator end();
 	template <typename... U> T& emplace_back(U&&... u);
 	template <typename... U> T& emplace_front(U&&... u);
-	T& push_back(const T& new_data);
-	T& push_front(const T& new_data);
 	T& push_back(T&& new_data);
 	T& push_front(T&& new_data);
 	void pop_back();
@@ -217,45 +215,30 @@ template <class T> typename CircularQueue<T>::Iterator CircularQueue<T>::end()
 
 template <class T> template <typename... U> T& CircularQueue<T>::emplace_back(U&&... u)
 {
-	Node* new_node = new Node{{T(static_cast<U&&>(u)...)}};
+	Node* new_node = new Node{T(forward<U>(u)...)};
 	link_node(new_node, m_head);
 	return new_node->data;
 }
 
 template <class T> template <typename... U> T& CircularQueue<T>::emplace_front(U&&... u)
 {
-	Node* new_node = new Node{u...};
+	Node* new_node = new Node{forward<U>(u)...};
 	link_node(new_node, m_head);
 	m_head = m_head->prev;
-	return new_node->data;
-}
-// Push data to the back of the list.
-template <class T> T& CircularQueue<T>::push_back(const T& new_data)
-{
-	Node* new_node = new Node{new_data};
-	link_node(new_node, m_head);
 	return new_node->data;
 }
 
 // Push data to the back of the list.
 template <class T> T& CircularQueue<T>::push_back(T&& new_data)
 {
-	Node* new_node = new Node{new_data};
+	Node* new_node = new Node{forward<T>(new_data)};
 	link_node(new_node, m_head);
 	return new_node->data;
 }
 
-// Push data to the front of the list.
-template <class T> T& CircularQueue<T>::push_front(const T& new_data)
-{
-	T& new_node_data = push_back(new_data);
-	m_head = m_head->prev;
-	return new_node_data;
-}
-
 template <class T> T& CircularQueue<T>::push_front(T&& new_data)
 {
-	T& new_node_data = push_back(new_data);
+	T& new_node_data = push_back(forward<T>(new_data));
 	m_head = m_head->prev;
 	return new_node_data;
 }
