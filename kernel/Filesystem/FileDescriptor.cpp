@@ -21,18 +21,18 @@ Result<void> FileDescriptor::close()
 
 Result<void> FileDescriptor::read(void* buff, size_t size)
 {
-	size_t offset = m_current_position + size;
-	if (offset > m_node.size) {
+	size_t reading_size = m_current_position + size;
+	if (reading_size > m_node.m_size) {
 		return ResultError(ERROR_EOF);
 	}
-	m_node.read(buff, offset, size);
+	m_node.read(buff, m_current_position, size);
 	return ResultError(ERROR_SUCCESS);
 }
 
 Result<void> FileDescriptor::write(void* buff, size_t size)
 {
 	size_t offset = m_current_position + size;
-	if (offset > m_node.size) {
+	if (offset > m_node.m_size) {
 		return ResultError(ERROR_EOF);
 	}
 	m_node.read(buff, offset, size);
@@ -45,7 +45,7 @@ Result<void> FileDescriptor::seek(int offset, SeekOrigin origin)
 		case SeekOrigin::SET: {
 			if (offset < 0)
 				return ResultError(ERROR_EOF);
-			if (size_t(offset) > m_node.size)
+			if (size_t(offset) > m_node.m_size)
 				return ResultError(ERROR_EOF);
 
 			m_current_position = offset;
@@ -56,7 +56,7 @@ Result<void> FileDescriptor::seek(int offset, SeekOrigin origin)
 			int new_offset = offset + m_current_position;
 			if (new_offset < 0)
 				return ResultError(ERROR_EOF);
-			if (size_t(new_offset) > m_node.size)
+			if (size_t(new_offset) > m_node.m_size)
 				return ResultError(ERROR_EOF);
 
 			m_current_position = new_offset;
@@ -64,10 +64,10 @@ Result<void> FileDescriptor::seek(int offset, SeekOrigin origin)
 		}
 		case SeekOrigin::END: {
 			// FIXME: check overflow
-			size_t new_offset = m_node.size + offset;
+			size_t new_offset = m_node.m_size + offset;
 			if (new_offset < 0)
 				return ResultError(ERROR_EOF);
-			if (size_t(new_offset) > m_node.size) {
+			if (size_t(new_offset) > m_node.m_size) {
 				return ResultError(ERROR_EOF);
 			}
 

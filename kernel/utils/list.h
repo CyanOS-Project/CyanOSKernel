@@ -217,14 +217,14 @@ template <class T> typename CircularQueue<T>::Iterator CircularQueue<T>::end()
 
 template <class T> template <typename... U> T& CircularQueue<T>::emplace_back(U&&... u)
 {
-	Node* new_node = new Node{T(forward<U>(u)...)};
+	Node* new_node = new Node{T{forward<U>(u)...}};
 	link_node(new_node, m_head);
 	return new_node->data;
 }
 
 template <class T> template <typename... U> T& CircularQueue<T>::emplace_front(U&&... u)
 {
-	Node* new_node = new Node{forward<U>(u)...};
+	Node* new_node = new Node{T{forward<U>(u)...}};
 	link_node(new_node, m_head);
 	m_head = m_head->prev;
 	return new_node->data;

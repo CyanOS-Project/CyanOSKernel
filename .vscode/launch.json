@@ -9,7 +9,7 @@
             "request": "attach",
             "name": "Attach to gdbserver",
             "executable": "${cwd}/build/bin/kernel/kernel.out",
-            "target": "localhost:5555",
+            "target": "localhost:1234",
             "remote": true,
             "cwd": "${workspaceRoot}",
             "valuesFormatting": "parseText",

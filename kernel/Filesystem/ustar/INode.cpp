@@ -1,15 +1,14 @@
 #include "INode.h"
 
-INode::INode(const char* name, size_t size, void* data) :
-    m_size(size),
-    m_data(data),
-    m_children(new CircularQueue<INode>)
+INode::INode(const char* name, size_t size, char* data) : m_data(data), m_children(new CircularQueue<INode>)
 {
+	FSNode::m_size = size;
 	memcpy(m_filename, name, strlen(name) + 1);
 }
 
-INode::INode(INode&& other) : m_size(other.m_size), m_data(other.m_data), m_children(other.m_children)
+INode::INode(INode&& other) : m_data(other.m_data), m_children(other.m_children)
 {
+	FSNode::m_size = other.m_size;
 	memcpy(m_filename, other.m_filename, strlen(other.m_filename) + 1);
 	other.m_children = nullptr;
 }
@@ -22,7 +21,9 @@ INode::~INode()
 
 Result<void> INode::read(void* buff, size_t offset, size_t size)
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	ASSERT((offset + size) <= m_size);
+	memcpy(buff, m_data + offset, size);
+	return ResultError(ERROR_SUCCESS);
 }
 
 Result<void> INode::write(void* buff, size_t offset, size_t size)
@@ -32,7 +33,7 @@ Result<void> INode::write(void* buff, size_t offset, size_t size)
 
 Result<bool> INode::can_read()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return true;
 }
 
 Result<bool> INode::can_write()
@@ -67,5 +68,10 @@ Result<void> INode::unlink(FSNode& node)
 
 Result<FSNode&> INode::dir_lookup(char* file_name)
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	for (auto& i : *m_children) {
+		if (strcmp(file_name, i.m_filename) == 0) {
+			return i;
+		}
+	}
+	return ResultError(ERROR_NODE_DOES_NOT_EXIST);
 }

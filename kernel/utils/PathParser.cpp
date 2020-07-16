@@ -11,19 +11,27 @@ PathParser::~PathParser()
 unsigned PathParser::path_element_count()
 {
 	unsigned count = 0;
-	if (m_len == 1 && m_path[0] == m_spliter)
+	const char* current = m_path;
+	if (m_path[0] == SPLITER) // discard the first '/' if any.
+		++current;
+	size_t len = strlen(current);
+	if (len == 0)
 		return 0;
 
-	for (size_t i = 0; i < m_len; i++) {
-		if (m_path[i] == m_spliter)
-			count++;
+	while (current < m_path + len) {
+		if (current[0] == SPLITER)
+			++count;
+		++current;
 	}
-	return count;
+	return count + 1;
 }
 
 int PathParser::get_element(unsigned element_index, char* element, unsigned len)
 {
-	const char* current = m_path + 1;
+	const char* current = m_path;
+	if (*current == SPLITER)
+		current++;
+
 	while (element_index) {
 		current = get_next_element(current);
 		if (!current)
@@ -31,8 +39,8 @@ int PathParser::get_element(unsigned element_index, char* element, unsigned len)
 		element_index--;
 	}
 	size_t current_len = size_t(get_next_element(current)) - size_t(current) - 1;
-	element[current_len] = 0;
 	memcpy(element, current, current_len);
+	element[current_len] = 0;
 	return 0;
 }
 
@@ -41,7 +49,7 @@ bool PathParser::is_valid()
 	if (strlen(m_path) == 0)
 		return false;
 
-	if (m_path[0] != m_spliter)
+	if (m_path[0] != SPLITER)
 		return false;
 
 	return true;
@@ -50,7 +58,7 @@ bool PathParser::is_valid()
 const char* PathParser::get_next_element(const char* path)
 {
 	while (path < m_path + m_len) {
-		if (path[0] == m_spliter)
+		if (path[0] == SPLITER)
 			return ++path;
 		path++;
 	}

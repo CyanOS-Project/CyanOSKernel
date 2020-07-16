@@ -2,6 +2,8 @@
 
 #include "Devices/Console/console.h"
 #include "Devices/Timer/pit.h"
+#include "Filesystem/FileDescriptor.h"
+#include "Filesystem/VirtualFilesystem.h"
 #include "Filesystem/ustar/ustar.h"
 #include "Tasking/scheduler.h"
 #include "Tasking/semaphore.h"
@@ -96,22 +98,20 @@ void test_tar_filesystem(uintptr_t fs)
 {
 	printf("tar at %X\n", fs);
 	TarFS* tar_fs = new TarFS((void*)fs);
-	char* file;
+	VFS::mount_root(tar_fs->get_root_node().value());
+	auto fd = VFS::open("/Drivers/file2.txt", 0, 0);
+	if (fd.is_error()) {
+		printf("error opening the file %d\n", fd.error());
+		return;
+	}
 
-	printf("file1 size : %d\n", tar_fs->get_file_size("Drivers/file1.txt"));
-	file = tar_fs->read_file("Drivers/file1.txt");
-	if (file)
-		printf("Output : %s\n", file);
-
-	printf("file2 size : %d\n", tar_fs->get_file_size("Drivers/file2.txt"));
-	file = tar_fs->read_file("Drivers/file2.txt");
-	if (file)
-		printf("Output : %s\n", file);
-
-	printf("file3 size : %d\n", tar_fs->get_file_size("UserBinary/file3.txt"));
-	file = tar_fs->read_file("UserBinary/file3.txt");
-	if (file)
-		printf("Output : %s\n", file);
+	char buff[0x100];
+	memset(buff, 0, 0x100);
+	auto result = fd.value().read(buff, 14);
+	if (result.is_error())
+		printf("error reading the file %d\n", result.error());
+	printf(buff);
+	delete tar_fs;
 }
 
 class ParentClass

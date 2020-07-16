@@ -3,7 +3,7 @@ MKDIR   := mkdir -p
 RMDIR   := rm -rf
 QEMU	:= qemu-system-i386
 QMFLAGS := -no-reboot -no-shutdown -m 128 -d cpu_reset -boot d -cdrom
-QMDEBUG := -S -gdb tcp$(COLON)5555
+QMDEBUG := -S -gdb tcp$(COLON)1234
 
 
 BUILD	:= $(CURDIR)/build

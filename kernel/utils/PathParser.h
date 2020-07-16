@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Lib/stdlib.h"
+#define SPLITER '/'
 class PathParser
 {
   private:
-	const char m_spliter = '/';
 	const char* m_path;
 	const unsigned m_len;
 	const char* get_next_element(const char* path);

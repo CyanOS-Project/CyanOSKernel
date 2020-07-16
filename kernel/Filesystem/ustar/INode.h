@@ -11,12 +11,11 @@ class INode : public FSNode
 {
   private:
 	char m_filename[MAX_FILE_NAME];
-	size_t m_size;
-	void* m_data;
+	char* m_data;
 	CircularQueue<INode>* m_children;
 
   public:
-	INode(const char* name, size_t size, void* data);
+	INode(const char* name, size_t size, char* data);
 	INode(INode&& other);
 	INode& operator=(const INode&& other);
 	INode& operator=(INode& other);

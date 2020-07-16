@@ -25,11 +25,12 @@ Result<void> VFS::mount()
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<void> VFS::mount_root()
+Result<void> VFS::mount_root(FSNode& node)
 {
 	if (m_root)
 		return ResultError(ERROR_MOUNTPOINT_EXISTS);
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	m_root = &node;
+	return ResultError(ERROR_SUCCESS);
 }
 
 Result<void> VFS::unmount()

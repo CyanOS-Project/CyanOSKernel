@@ -6,6 +6,10 @@ TarFS::TarFS(void* tar_address) : m_tar_address(static_cast<TarHeader*>(tar_addr
 	parse_ustar();
 }
 
+TarFS::~TarFS()
+{
+}
+
 Result<FSNode&> TarFS::get_root_node()
 {
 	return m_root;
@@ -23,9 +27,13 @@ Result<void> TarFS::parse_ustar()
 
 	TarHeader* tar_parser = m_tar_address;
 	INode* last_parent = &m_root;
+	char last_element[MAX_FILE_NAME];
 	while (tar_parser->name[0]) {
-		auto& new_node = last_parent->m_children->emplace_back(tar_parser->name, octal_to_decimal(tar_parser->size),
-		                                                       static_cast<void*>(tar_parser + 1));
+		remove_tailing_slash(tar_parser->name);
+		PathParser parser(tar_parser->name);
+		parser.get_element(parser.path_element_count() - 1, last_element, MAX_FILE_NAME);
+		auto& new_node = last_parent->m_children->emplace_back(last_element, octal_to_decimal(tar_parser->size),
+		                                                       reinterpret_cast<char*>(tar_parser + 1));
 		if (tar_parser->typeflag == USTARFileType::DIRECTORY) {
 			last_parent = &new_node;
 		}
@@ -88,4 +96,11 @@ inline uintptr_t TarFS::align_to(uintptr_t size, unsigned alignment)
 		return 0;
 	else
 		return size + alignment - (size % alignment);
+}
+
+void TarFS::remove_tailing_slash(char* path)
+{
+	size_t last_index = strlen(path) - 1;
+	if (path[last_index] == SPLITER)
+		path[last_index] = 0;
 }

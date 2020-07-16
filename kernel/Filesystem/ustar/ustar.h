@@ -3,6 +3,7 @@
 #include "INode.h"
 #include "Lib/stdlib.h"
 #include "utils/ErrorCodes.h"
+#include "utils/PathParser.h"
 #include "utils/Result.h"
 #include "utils/assert.h"
 #include "utils/types.h"
@@ -45,11 +46,12 @@ class TarFS
   private:
 	TarHeader* m_tar_address;
 	INode m_root;
-	TarHeader* file_search(const char* path);
-	size_t octal_to_decimal(const char* octal);
 	Result<void> parse_ustar();
 	Result<INode&> add_child_node(INode& parent, const INode& child);
+	TarHeader* file_search(const char* path);
+	void remove_tailing_slash(char* path);
 	inline uintptr_t align_to(uintptr_t address, unsigned alignment);
+	size_t octal_to_decimal(const char* octal);
 
   public:
 	TarFS(void* tar_address);
