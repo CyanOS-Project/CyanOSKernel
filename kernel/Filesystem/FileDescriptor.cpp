@@ -25,8 +25,7 @@ Result<void> FileDescriptor::read(void* buff, size_t size)
 	if (reading_size > m_node.m_size) {
 		return ResultError(ERROR_EOF);
 	}
-	m_node.read(buff, m_current_position, size);
-	return ResultError(ERROR_SUCCESS);
+	return m_node.read(buff, m_current_position, size);
 }
 
 Result<void> FileDescriptor::write(void* buff, size_t size)
@@ -35,8 +34,7 @@ Result<void> FileDescriptor::write(void* buff, size_t size)
 	if (offset > m_node.m_size) {
 		return ResultError(ERROR_EOF);
 	}
-	m_node.read(buff, offset, size);
-	return ResultError(ERROR_SUCCESS);
+	return m_node.read(buff, offset, size);
 }
 
 Result<void> FileDescriptor::seek(int offset, SeekOrigin origin)

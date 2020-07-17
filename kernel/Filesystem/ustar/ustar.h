@@ -46,8 +46,8 @@ class TarFS
   private:
 	TarHeader* m_tar_address;
 	INode m_root;
-	Result<void> parse_ustar();
-	Result<INode&> add_child_node(INode& parent, const INode& child);
+	void parse_ustar();
+	INode& add_child_node(INode& parent, const char* name, const size_t size, char* data);
 	void remove_tailing_slash(char* path);
 	inline uintptr_t align_to(uintptr_t address, unsigned alignment);
 	size_t octal_to_decimal(const char* octal);
@@ -55,6 +55,6 @@ class TarFS
   public:
 	TarFS(void* tar_address);
 	~TarFS();
-	Result<FSNode&> get_root_node();
+	FSNode& get_root_node();
 	char* read_file(const char* path);
 };

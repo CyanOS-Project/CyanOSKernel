@@ -3,6 +3,7 @@
 TarFS::TarFS(void* tar_address) : m_tar_address(static_cast<TarHeader*>(tar_address)), m_root("root", 0, nullptr)
 {
 	ASSERT(tar_address);
+	ASSERT(strncmp(m_tar_address->magic, "ustar", 5) == 0)
 	parse_ustar();
 }
 
@@ -10,37 +11,33 @@ TarFS::~TarFS()
 {
 }
 
-Result<FSNode&> TarFS::get_root_node()
+FSNode& TarFS::get_root_node()
 {
 	return m_root;
 }
 
-/*Result<INode&> TarFS::add_child_node(INode& parent, const INode& child)
+INode& TarFS::add_child_node(INode& parent, const char* name, const size_t size, char* data)
 {
-    return parent.m_children->push_back(child);
-}*/
-Result<void> TarFS::parse_ustar()
+	return parent.m_children->emplace_back(name, size, data);
+}
+
+void TarFS::parse_ustar()
 {
-
-	if (strncmp(m_tar_address->magic, "ustar", 5))
-		return ResultError(ERROR_INVALID_PARAMETERS);
-
 	TarHeader* tar_parser = m_tar_address;
 	INode* last_parent = &m_root;
-	char last_element[MAX_FILE_NAME];
+	char last_path_element[MAX_FILE_NAME];
 	while (tar_parser->name[0]) {
 		remove_tailing_slash(tar_parser->name);
 		PathParser parser(tar_parser->name);
-		parser.get_element(parser.path_element_count() - 1, last_element, MAX_FILE_NAME);
-		auto& new_node = last_parent->m_children->emplace_back(last_element, octal_to_decimal(tar_parser->size),
-		                                                       reinterpret_cast<char*>(tar_parser + 1));
+		parser.get_element(parser.path_element_count() - 1, last_path_element, MAX_FILE_NAME);
+		auto& new_node = add_child_node(*last_parent, last_path_element, octal_to_decimal(tar_parser->size),
+		                                reinterpret_cast<char*>(tar_parser + 1));
 		if (tar_parser->typeflag == USTARFileType::DIRECTORY) {
 			last_parent = &new_node;
 		}
 		uintptr_t aligned_size = align_to(octal_to_decimal(tar_parser->size), TAR_ALIGNMENT);
 		tar_parser = (TarHeader*)(uintptr_t(tar_parser + 1) + aligned_size);
 	}
-	return ResultError(ERROR_UNDEFINED);
 }
 
 size_t TarFS::octal_to_decimal(const char* octal)

@@ -98,7 +98,7 @@ void test_tar_filesystem(uintptr_t fs)
 {
 	printf("tar at %X\n", fs);
 	TarFS* tar_fs = new TarFS((void*)fs);
-	VFS::mount_root(tar_fs->get_root_node().value());
+	VFS::mount_root(tar_fs->get_root_node());
 	auto fd = VFS::open("/Drivers/file2.txt", 0, 0);
 	if (fd.is_error()) {
 		printf("error opening the file %d\n", fd.error());
