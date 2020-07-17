@@ -128,19 +128,20 @@ void Memory::switch_page_directory(uintptr_t physical_address)
 
 void* Memory::_map_no_lock(uintptr_t physical_address, uint32_t size, uint32_t flags)
 {
-	// FIXME: check if physical is used first.
-
-	if (!size)
-		return nullptr;
-
 	uintptr_t vAdd;
 	uintptr_t padding = physical_address % PAGE_SIZE;
 	uintptr_t aligned_physical_address = physical_address - padding;
-	uintptr_t pAdd = GET_PDE_INDEX((uintptr_t)aligned_physical_address);
+	uintptr_t pAdd = GET_PTE_INDEX((uintptr_t)aligned_physical_address);
 	size_t pages_num = GET_PAGES(size);
 
 	if (padding)
 		pages_num++;
+
+	if (!size)
+		return nullptr;
+	if (!PhysicalMemory::check_free_pages(pAdd, pages_num)) {
+		// return nullptr;
+	}
 
 	if (flags & MEMORY_TYPE::KERNEL) {
 		vAdd = VirtualMemory::find_pages(KERNEL_VIRTUAL_ADDRESS, LAST_PAGE_ADDRESS, pages_num);

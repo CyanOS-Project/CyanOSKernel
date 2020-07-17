@@ -4,7 +4,7 @@
 #include "utils/types.h"
 
 #define MAX_PHYSICAL_4K_PAGES (1024 * 1024)
-#define CHECK_BIT(value, bit) ((value >> bit) & 1)
+#define CHECK_BIT(value, bit) (((value) >> (bit)) & 1)
 
 class PhysicalMemory
 {
@@ -15,6 +15,7 @@ class PhysicalMemory
 
   public:
 	static void initialize();
+	static bool check_free_pages(uintptr_t page_number, unsigned count);
 	static uintptr_t alloc_page();
 	static uintptr_t alloc_contagious_pages(unsigned count);
 	static void free_pages(uintptr_t page_number, unsigned count);

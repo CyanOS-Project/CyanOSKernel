@@ -14,6 +14,18 @@ void PhysicalMemory::initialize()
 	physical_memory_size = 0;
 }
 
+bool PhysicalMemory::check_free_pages(uintptr_t page_number, unsigned count)
+{
+	size_t index = page_number;
+	while (index < page_number + count) {
+		if (CHECK_BIT(physical_memory_tracer[index / 8], index % 8)) {
+			return false;
+		}
+		index++;
+	}
+	return true;
+}
+
 uintptr_t PhysicalMemory::alloc_page()
 {
 	uintptr_t physical_page = find_pages(1);
