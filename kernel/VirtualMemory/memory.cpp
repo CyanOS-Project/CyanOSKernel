@@ -65,7 +65,7 @@ void Memory::free(void* virtual_address, uint32_t size, uint32_t flags)
 	spinlock_release(&mem_lock);
 }
 
-void* Memory::map(intptr_t physical_address, uint32_t size, uint32_t flags)
+void* Memory::map(uintptr_t physical_address, uint32_t size, uint32_t flags)
 {
 	spinlock_acquire(&mem_lock);
 	void* vAdd = _map_no_lock(physical_address, size, flags);
@@ -126,15 +126,21 @@ void Memory::switch_page_directory(uintptr_t physical_address)
 	Paging::load_page_directory(physical_address);
 }
 
-void* Memory::_map_no_lock(intptr_t physical_address, uint32_t size, uint32_t flags)
+void* Memory::_map_no_lock(uintptr_t physical_address, uint32_t size, uint32_t flags)
 {
 	// FIXME: check if physical is used first.
+
 	if (!size)
 		return nullptr;
 
-	intptr_t vAdd;
-	intptr_t pAdd = GET_PDE_INDEX((intptr_t)physical_address);
-	unsigned pages_num = GET_PAGES(size);
+	uintptr_t vAdd;
+	uintptr_t padding = physical_address % PAGE_SIZE;
+	uintptr_t aligned_physical_address = physical_address - padding;
+	uintptr_t pAdd = GET_PDE_INDEX((uintptr_t)aligned_physical_address);
+	size_t pages_num = GET_PAGES(size);
+
+	if (padding)
+		pages_num++;
 
 	if (flags & MEMORY_TYPE::KERNEL) {
 		vAdd = VirtualMemory::find_pages(KERNEL_VIRTUAL_ADDRESS, LAST_PAGE_ADDRESS, pages_num);
@@ -144,9 +150,8 @@ void* Memory::_map_no_lock(intptr_t physical_address, uint32_t size, uint32_t fl
 	}
 
 	PhysicalMemory::set_used_pages(pAdd, pages_num);
-	VirtualMemory::map_pages(vAdd, physical_address, GET_PAGES(size), parse_flags(flags));
-	// FIXME: deal with address and size when the input address is unaligned.
-	return (void*)vAdd;
+	VirtualMemory::map_pages(vAdd, aligned_physical_address, GET_PAGES(size), parse_flags(flags));
+	return (void*)(vAdd + padding);
 }
 
 void Memory::_unmap_no_lock(void* virtual_address, uint32_t size, uint32_t flags)
@@ -157,21 +162,21 @@ void Memory::_unmap_no_lock(void* virtual_address, uint32_t size, uint32_t flags
 void Memory::_free_no_lock(void* virtual_address, uint32_t size, uint32_t flags)
 {
 	unsigned pages_num = GET_PAGES(size);
-	intptr_t pAdd = Paging::get_physical_page((intptr_t)virtual_address);
+	uintptr_t pAdd = Paging::get_physical_page((uintptr_t)virtual_address);
 	PhysicalMemory::free_pages(pAdd, pages_num);
-	Paging::unmap_pages((intptr_t)virtual_address, pages_num);
+	Paging::unmap_pages((uintptr_t)virtual_address, pages_num);
 }
 
 void* Memory::_alloc_no_lock(void* virtual_address, uint32_t size, uint32_t flags)
 {
-	intptr_t vAdd;
+	uintptr_t vAdd;
 	unsigned pages_num = GET_PAGES(size);
-	vAdd = (intptr_t)virtual_address;
+	vAdd = (uintptr_t)virtual_address;
 	if (!VirtualMemory::check_free_pages(vAdd, pages_num)) {
 		return 0;
 	}
 	for (size_t i = 0; i < pages_num; i++) {
-		intptr_t pAdd = PhysicalMemory::alloc_page();
+		uintptr_t pAdd = PhysicalMemory::alloc_page();
 		VirtualMemory::map_pages(vAdd + (PAGE_SIZE * i), pAdd, 1, parse_flags(flags));
 	}
 	return (void*)vAdd;
@@ -179,7 +184,7 @@ void* Memory::_alloc_no_lock(void* virtual_address, uint32_t size, uint32_t flag
 
 void* Memory::_alloc_no_lock(uint32_t size, uint32_t flags)
 {
-	intptr_t vAdd;
+	uintptr_t vAdd;
 	unsigned pages_num = GET_PAGES(size);
 
 	if (flags & MEMORY_TYPE::KERNEL) {
@@ -191,7 +196,7 @@ void* Memory::_alloc_no_lock(uint32_t size, uint32_t flags)
 
 	for (size_t i = 0; i < pages_num; i++) {
 
-		intptr_t pAdd = PhysicalMemory::alloc_page();
+		uintptr_t pAdd = PhysicalMemory::alloc_page();
 		VirtualMemory::map_pages(vAdd + (PAGE_SIZE * i), pAdd, 1, parse_flags(flags));
 	}
 	return (void*)vAdd;

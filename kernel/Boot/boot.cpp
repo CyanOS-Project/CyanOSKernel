@@ -35,8 +35,6 @@ extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_inf
 	initiate_console();
 	uintptr_t vboot_info = (uintptr_t)Memory::map(uintptr_t(boot_info), boot_info->total_size,
 	                                              MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
-	// FIXME: temp hack because map maps only aligned pages.
-	vboot_info = (uintptr_t(boot_info) % PAGE_SIZE) + vboot_info;
 	printf("%X\n", boot_info->total_size);
 	memset(&bootloader_info, 0, sizeof(BootloaderInfo));
 	parse_mbi((uintptr_t)vboot_info, bootloader_info);

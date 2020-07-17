@@ -34,8 +34,6 @@ int PathParser::get_element(unsigned element_index, char* element, unsigned len)
 
 	while (element_index) {
 		current = get_next_element(current);
-		if (!current)
-			return 1; // FIXME:select an non-zero error to return.
 		element_index--;
 	}
 	size_t current_len = size_t(get_next_element(current)) - size_t(current) - 1;
