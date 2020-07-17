@@ -1,5 +1,6 @@
 #pragma once
-
+#include "Lib/stl.h"
+#include "utils/assert.h"
 class ResultError
 {
   public:
@@ -7,6 +8,11 @@ class ResultError
 	ResultError(unsigned error) : m_error(error)
 	{
 	}
+
+	ResultError(const ResultError& other) : m_error(other.m_error)
+	{
+	}
+
 	~ResultError()
 	{
 	}
@@ -16,18 +22,29 @@ template <typename T> class Result
 {
   private:
 	const ResultError m_error;
-	T ret_value;
+	union {
+		T m_storage;
+		const char m_storage_empty[sizeof(T)];
+	};
 
   public:
-	Result(const Result& other) : m_error(other.m_error), ret_value(other.ret_value)
-	{
-	}
-
 	Result(const ResultError& error) : m_error(error)
 	{
 	}
 
-	Result(const T& result) : m_error(ResultError(0)), ret_value(result)
+	Result(const Result& other) : m_error(other.m_error), m_storage(other.m_storage)
+	{
+	}
+
+	Result(Result&& other) : m_error(other.m_error), m_storage(move(other.m_storage))
+	{
+	}
+
+	Result(const T& result) : m_error(ResultError(0)), m_storage(result)
+	{
+	}
+
+	Result(T&& result) : m_error(ResultError(0)), m_storage(move(result))
 	{
 	}
 
@@ -43,7 +60,8 @@ template <typename T> class Result
 
 	T& value()
 	{
-		return ret_value;
+		ASSERT(!is_error())
+		return m_storage;
 	}
 
 	~Result()
@@ -55,20 +73,22 @@ template <typename T> class Result<T&>
 {
   private:
 	const ResultError m_error;
-	T* ret_value;
+	T* const m_storage;
 
   public:
-	Result(const Result& other) : m_error(other.m_error), ret_value(other.ret_value)
+	Result(const ResultError& error) : m_error(error), m_storage(nullptr)
 	{
 	}
 
-	Result(const ResultError& error) : m_error(error)
+	Result(const Result& other) : m_error(other.m_error), m_storage(other.m_storage)
 	{
 	}
 
-	Result(T& result) : m_error(ResultError(0)), ret_value(&result)
+	Result(T& result) : m_error(ResultError(0)), m_storage(&result)
 	{
 	}
+
+	Result(T&& result) = delete;
 
 	inline const bool is_error() const
 	{
@@ -82,7 +102,8 @@ template <typename T> class Result<T&>
 
 	T& value()
 	{
-		return *ret_value;
+		ASSERT(!is_error())
+		return *m_storage;
 	}
 
 	~Result()
@@ -96,11 +117,11 @@ template <> class Result<void>
 	const ResultError m_error;
 
   public:
-	Result(const Result& other) : m_error(other.m_error)
+	Result(const ResultError& error) : m_error(error)
 	{
 	}
 
-	Result(const ResultError& error) : m_error(error)
+	Result(const Result& other) : m_error(other.m_error)
 	{
 	}
 
