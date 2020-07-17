@@ -1,16 +1,6 @@
 #include "Arch/x86/panic.h"
 #include "VirtualMemory/heap.h"
-#include <stddef.h>
-
-void* operator new(size_t, void* p)
-{
-	return p;
-}
-
-void* operator new[](size_t, void* p)
-{
-	return p;
-}
+#include "utils/types.h"
 
 void* operator new(size_t size)
 {
@@ -27,17 +17,7 @@ void operator delete(void* p)
 	return Heap::kfree(p);
 }
 
-void operator delete(void* p, size_t)
-{
-	return Heap::kfree(p);
-}
-
 void operator delete[](void* p)
-{
-	return Heap::kfree(p);
-}
-
-void operator delete[](void* p, size_t)
 {
 	return Heap::kfree(p);
 }

@@ -9,15 +9,15 @@ VFS::~VFS()
 {
 }
 
-Result<FileDescriptor&> VFS::open(const char* path, int mode, int flags)
+Result<FileDescriptor> VFS::open(const char* path, int mode, int flags)
 {
 	auto node = traverse_node(path);
 	if (node.is_error()) {
 		return ResultError(node.error());
 		// TODO: if node not found create it, if CREATE flag is set
 	}
-	FileDescriptor* fd = new FileDescriptor(node.value());
-	return *fd;
+	FileDescriptor fd = FileDescriptor(node.value());
+	return fd;
 }
 
 Result<void> VFS::mount()

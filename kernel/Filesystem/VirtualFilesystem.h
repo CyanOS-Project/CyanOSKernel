@@ -22,7 +22,7 @@ class VFS
   public:
 	VFS();
 	~VFS();
-	static Result<FileDescriptor&> open(const char* path, int mode, int flags);
+	static Result<FileDescriptor> open(const char* path, int mode, int flags);
 	static Result<void> mount();
 	static Result<void> mount_root(FSNode& node);
 	static Result<void> unmount();

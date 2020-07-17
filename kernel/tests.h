@@ -5,12 +5,12 @@
 #include "Filesystem/FileDescriptor.h"
 #include "Filesystem/VirtualFilesystem.h"
 #include "Filesystem/ustar/ustar.h"
+#include "Lib/new.h"
 #include "Tasking/scheduler.h"
 #include "Tasking/semaphore.h"
 #include "utils/PathParser.h"
 #include "utils/bitmap.h"
 #include "utils/list.h"
-
 Semaphore* lock;
 void test_semaphore_thread2(uintptr_t arg)
 {
@@ -107,11 +107,10 @@ void test_tar_filesystem(uintptr_t fs)
 
 	char buff[0x100];
 	memset(buff, 0, 0x100);
-	auto result = fd.value().read(buff, 14);
+	auto result = fd.value().read(buff, 13);
 	if (result.is_error())
 		printf("error reading the file %d\n", result.error());
 	printf(buff);
-	delete tar_fs;
 }
 
 class ParentClass
@@ -184,4 +183,22 @@ void test_path()
 
 	dd.get_element(2, current, 20);
 	printf("element 2: %s\n", current);
+}
+
+class tests
+{
+  private:
+  public:
+	int m_x, m_y, m_z;
+
+	tests(int x, int y, int z) : m_x(x), m_y(y), m_z(z){};
+	tests() : m_x(10), m_y(20), m_z(33){};
+	~tests();
+};
+
+void test_placement_new()
+{
+	void* obj = new char[sizeof(tests)];
+	tests* real_obj = new (obj) tests(100, 200, 300);
+	printf("%d\n", real_obj->m_x);
 }
