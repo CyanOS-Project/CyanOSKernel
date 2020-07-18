@@ -57,8 +57,6 @@ typedef volatile struct PAGE_TABLE_t {
 	PAGE_TABLE_ENTRY entries[NUMBER_OF_PAGE_TABLE_ENTRIES];
 } PAGE_TABLE;
 
-uint32_t get_physical_page(uint32_t virtual_address);
-
 class Paging
 {
   private:
