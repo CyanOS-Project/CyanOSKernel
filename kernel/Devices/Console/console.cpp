@@ -24,6 +24,9 @@ void initiate_console()
 	hPosition = 0;
 	vPosition = 0;
 	video_ram = (uint16_t*)Memory::map(VGATEXTMODE_BUFFER, 0x1000, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
+	if (!video_ram)
+		PANIC("Cannot map text mode memory");
+
 	clearScreen();
 }
 

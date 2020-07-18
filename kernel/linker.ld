@@ -25,6 +25,5 @@ SECTIONS
 	{
 		*(.bss)
 	}
-
 	PROVIDE(KERNEL_END = .);
 }

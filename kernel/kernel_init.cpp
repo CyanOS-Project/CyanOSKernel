@@ -48,9 +48,7 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	// Scheduler::yield();
 	// **************** tests**************************
 
-	uintptr_t ustar_fs = reinterpret_cast<uintptr_t>(
-	    Memory::map(info->ramdisk.start, info->ramdisk.size, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
-	test_tar_filesystem(ustar_fs);
+	test_tar_filesystem(info->ramdisk.start);
 
 	// **************** end tests *********************
 	printf("Going Idle State.\n");

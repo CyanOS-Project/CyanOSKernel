@@ -1,7 +1,13 @@
 #pragma once
 
 #include "Arch/x86/isr.h"
+#include "Arch/x86/paging.h"
+#include "Arch/x86/panic.h"
+#include "Devices/Console/console.h"
+#include "physical.h"
+#include "utils/assert.h"
 #include "utils/types.h"
+#include "virtual.h"
 
 enum MEMORY_TYPE {
 	KERNEL = 1,
@@ -9,12 +15,13 @@ enum MEMORY_TYPE {
 	COPY_ON_WRITE = 4,
 };
 
+#define AVAILABLE_PAGES_START (GET_FRAME(0x100000))
+
 class Memory
 {
   private:
 	static void page_fault_handler(ISRContextFrame* isr_info);
 	static uint32_t parse_flags(uint32_t mem_flags);
-	static unsigned get_kernel_pages();
 	static void* _alloc_no_lock(uint32_t size, uint32_t flags);
 	static void* _alloc_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
 	static void _free_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
@@ -23,6 +30,8 @@ class Memory
 	static void setup_page_fault_handler();
 
   public:
+	static unsigned get_kernel_pages();
+
 	static void setup();
 	static void setup_stage2();
 	static void* alloc(uint32_t size, uint32_t flags);
