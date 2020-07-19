@@ -167,7 +167,7 @@ void* Memory::_alloc_no_lock(void* virtual_address, uint32_t size, uint32_t flag
 	unsigned pages_num = GET_PAGES(size);
 	vAdd = (uintptr_t)virtual_address;
 	if (!VirtualMemory::check_free_pages(vAdd, pages_num)) {
-		return 0;
+		return nullptr;
 	}
 	for (size_t i = 0; i < pages_num; i++) {
 		uintptr_t pAdd = PhysicalMemory::alloc_page(AVAILABLE_PAGES_START);

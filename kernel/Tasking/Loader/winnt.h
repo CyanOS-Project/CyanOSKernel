@@ -6,6 +6,7 @@
 #define IMAGE_NT_OPTIONAL_HDR32_MAGIC    0x10b
 #define IMAGE_SIZEOF_SHORT_NAME          8
 
+#pragma pack(1)
 typedef struct _IMAGE_DOS_HEADER {
 	uint16_t e_magic;
 	uint16_t e_cblp;
@@ -98,3 +99,4 @@ typedef struct _IMAGE_SECTION_HEADER {
 	uint16_t NumberOfLinenumbers;
 	uint32_t Characteristics;
 } IMAGE_SECTION_HEADER;
+#pragma pack()

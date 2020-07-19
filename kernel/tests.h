@@ -6,6 +6,7 @@
 #include "Filesystem/VirtualFilesystem.h"
 #include "Filesystem/ustar/ustar.h"
 #include "Lib/new.h"
+#include "Tasking/Loader/pe.h"
 #include "Tasking/scheduler.h"
 #include "Tasking/semaphore.h"
 #include "utils/PathParser.h"
@@ -105,100 +106,14 @@ void test_tar_filesystem(uintptr_t fs)
 		return;
 	}
 
-	char buff[0x100];
+	char* buff = new char[4000];
 	memset(buff, 0, 0x100);
 	auto result = fd.value().read(buff, 13);
 	if (result.is_error())
 		printf("error reading the file %d\n", result.error());
-	printf(buff);
-}
+	auto loader_result = PELoader::load(buff, 4000);
+	if (loader_result.is_error())
+		printf("error reading the file %d\n", loader_result.error());
 
-class ParentClass
-{
-  private:
-	int d;
-
-  public:
-	ParentClass(int n)
-	{
-		d = n;
-		printf("creating the parent %d class.\n", d);
-	}
-	~ParentClass()
-	{
-		printf("destroying the parent %d class.\n", d);
-	}
-	virtual void hello() = 0;
-
-	void hello2()
-	{
-		printf("this is the parent %d class.\n", d);
-	}
-};
-
-class ChildClass : public ParentClass
-{
-  private:
-	int d;
-
-  public:
-	ChildClass(int n) : ParentClass(n)
-	{
-		d = n;
-		printf("creating the child %d class.\n", d);
-	}
-	~ChildClass()
-	{
-		printf("destroying the child %d class.\n", d);
-	}
-	virtual void hello()
-	{
-		printf("this is the child %d class.\n", d);
-	}
-	void hello2()
-	{
-		printf("this is the child %d class.\n", d);
-	}
-};
-
-void test_virtual_functions()
-{
-	ParentClass* parent;
-	ChildClass child(4);
-	parent = &child;
-	parent->hello();
-	parent->hello2();
-}
-
-void test_path()
-{
-	char current[20];
-	PathParser dd("/mnt/dev/tty");
-	printf("count: %d\n", dd.path_element_count());
-	dd.get_element(0, current, 20);
-	printf("element 0: %s\n", current);
-
-	dd.get_element(1, current, 20);
-	printf("element 1: %s\n", current);
-
-	dd.get_element(2, current, 20);
-	printf("element 2: %s\n", current);
-}
-
-class tests
-{
-  private:
-  public:
-	int m_x, m_y, m_z;
-
-	tests(int x, int y, int z) : m_x(x), m_y(y), m_z(z){};
-	tests() : m_x(10), m_y(20), m_z(33){};
-	~tests();
-};
-
-void test_placement_new()
-{
-	void* obj = new char[sizeof(tests)];
-	tests* real_obj = new (obj) tests(100, 200, 300);
-	printf("%d\n", real_obj->m_x);
+	delete[] buff;
 }

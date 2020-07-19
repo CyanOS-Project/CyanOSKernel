@@ -2,6 +2,7 @@
 
 Result<uintptr_t> PELoader::load(const char* file, size_t size)
 {
+	// validations
 	const IMAGE_DOS_HEADER* dos_header = reinterpret_cast<const IMAGE_DOS_HEADER*>(file);
 	if (dos_header->e_magic != IMAGE_DOS_SIGNATURE)
 		return ResultError(ERROR_INVALID_EXECUTABLE);
@@ -14,11 +15,22 @@ Result<uintptr_t> PELoader::load(const char* file, size_t size)
 
 	const IMAGE_SECTION_HEADER* section_header = reinterpret_cast<const IMAGE_SECTION_HEADER*>(nt_header + 1);
 	for (size_t i = 0; i < nt_header->FileHeader.NumberOfSections; i++) {
-		if (!section_header[i].VirtualAddress || !section_header[i].PointerToRawData ||
-		    !section_header[i].Misc.VirtualSize)
+		const uint32_t section_va = section_header[i].VirtualAddress;
+		const uint32_t section_rd = section_header[i].PointerToRawData;
+		const uint32_t section_raw_size = section_header[i].SizeOfRawData;
+		const uint32_t section_vir_size = section_header[i].Misc.VirtualSize;
+
+		if (!section_va || !section_rd || !section_vir_size)
+			return ResultError(ERROR_INVALID_EXECUTABLE);
+
+		if ((section_rd + section_raw_size) > size)
 			return ResultError(ERROR_INVALID_EXECUTABLE);
 	}
 
+	if (!nt_header->OptionalHeader.AddressOfEntryPoint)
+		return ResultError(ERROR_INVALID_EXECUTABLE);
+
+	// Load PE sections
 	void* start_of_executable = load_pe_sections(file, nt_header);
 	if (!start_of_executable)
 		return ResultError(ERROR_LOADING_EXECUTABLE);
@@ -30,24 +42,24 @@ void* PELoader::load_pe_sections(const char* file, const IMAGE_NT_HEADERS32* nt_
 {
 	const IMAGE_SECTION_HEADER* section_header = reinterpret_cast<const IMAGE_SECTION_HEADER*>(nt_header + 1);
 	const uint32_t section_alignment = nt_header->OptionalHeader.SectionAlignment;
-	// Load header
+	// Load headers
 	void* start_of_executable = Memory::alloc(nt_header->OptionalHeader.SectionAlignment, MEMORY_TYPE::WRITABLE);
 	memset(start_of_executable, 0, section_alignment);
-	memcpy(start_of_executable, file, sizeof(IMAGE_DOS_HEADER));
+	memcpy(start_of_executable, file, nt_header->OptionalHeader.SizeOfHeaders);
+
 	// load sections
-	void* current_section_address = reinterpret_cast<void*>(uintptr_t(start_of_executable) + section_alignment);
 	for (size_t i = 0; i < nt_header->FileHeader.NumberOfSections; i++) {
+		const uint32_t section_va = section_header[i].VirtualAddress;
+		const uint32_t section_rd = section_header[i].PointerToRawData;
+		const uint32_t section_raw_size = section_header[i].SizeOfRawData;
+		const uint32_t section_vir_size = align_to(section_header[i].Misc.VirtualSize, section_alignment);
+		void* current_section_address = reinterpret_cast<void*>(uintptr_t(start_of_executable) + section_va);
 
-		void* current_section_address = Memory::alloc(current_section_address,                     //
-		                                              align_to(section_header[i].Misc.VirtualSize, //
-		                                                       section_alignment),                 //
-		                                              MEMORY_TYPE::WRITABLE);                      //
+		current_section_address = Memory::alloc(current_section_address, section_vir_size, MEMORY_TYPE::WRITABLE);
 		if (!current_section_address)
-			PANIC("Loading Executable Image invalid memory region");
-		memcpy(current_section_address, file + section_header[i].PointerToRawData, section_header[i].SizeOfRawData);
+			PANIC("Loading Executable Image: invalid memory region");
 
-		current_section_address = reinterpret_cast<void*>(uintptr_t(start_of_executable) //
-		                                                  + section_header[i].Misc.VirtualSize);
+		memcpy(current_section_address, file + section_rd, section_raw_size);
 	}
 	return start_of_executable;
 }
