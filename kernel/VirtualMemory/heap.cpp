@@ -13,6 +13,8 @@ void Heap::setup()
 // Returns address of zeroed block of memory.
 void* Heap::kmalloc(unsigned size, unsigned flags)
 {
+	// FIXME: allocate normal memory if the size is greater than MAX_SIZE (there is a bug when less) and handle freeing
+	// too
 	if (!size)
 		return nullptr;
 
@@ -48,6 +50,7 @@ void Heap::kfree(void* addr)
 
 PageFrameBlock* Heap::create_new_page()
 {
+	// FIXME: do some asserts to nullpointers
 	PageFrameBlock* new_page =
 	    (PageFrameBlock*)Memory::alloc(MALLOC_PAGE_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	new_page->size = MALLOC_PAGE_SIZE;

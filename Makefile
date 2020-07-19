@@ -43,7 +43,7 @@ $(IMG): force | $(BIN_KRNL)
 	$(MAKE) OBJ=$(BUILD)/obj/kernel OUT=$(OUT) IMG=$(IMG) -C $(KRL_DIR)	
 
 $(BIN_APPS): | $(DRV_BIN) $(USR_BIN)
-	cp "C:/Users/0xCC/Desktop/file1.exe" $(USR_BIN)/"file1.exe"
+	cp "C:/Users/0xCC/Desktop/file1.exe" $(DRV_BIN)/"file1.exe"
 	echo "hello file 1" > $(DRV_BIN)/"file1.txt"
 	echo "hello file 2" > $(DRV_BIN)/"file2.txt"
 	echo "hello file 3" > $(USR_BIN)/"file3.txt"

@@ -51,14 +51,6 @@ extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_inf
 	return;
 }
 
-inline uintptr_t align_to(uintptr_t size, unsigned alignment)
-{
-	if (size == 0)
-		return alignment;
-	else
-		return size + alignment - (size % alignment);
-}
-
 const char* mmap_entry_type_text[] = {"Unknown"           //
                                       "AVAILABLE",        //
                                       "RESERVED",         //
@@ -96,4 +88,14 @@ BootloaderInfo parse_mbi(uintptr_t multiboot_info)
 		current_tag = (multiboot_tag*)(uintptr_t(current_tag) + align_to(current_tag->size, MULTIBOOT_INFO_ALIGN));
 	}
 	return bootloader_info_local;
+}
+
+inline uintptr_t align_to(uintptr_t size, unsigned alignment)
+{
+	if (size == 0)
+		return alignment;
+	else if ((size % alignment) == 0)
+		return size;
+	else
+		return size + alignment - (size % alignment);
 }

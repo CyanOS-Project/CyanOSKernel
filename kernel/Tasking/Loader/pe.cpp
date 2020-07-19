@@ -2,6 +2,8 @@
 
 Result<uintptr_t> PELoader::load(const char* file, size_t size)
 {
+	ASSERT(file);
+	ASSERT(size);
 	// validations
 	const IMAGE_DOS_HEADER* dos_header = reinterpret_cast<const IMAGE_DOS_HEADER*>(file);
 	if (dos_header->e_magic != IMAGE_DOS_SIGNATURE)
@@ -66,8 +68,10 @@ void* PELoader::load_pe_sections(const char* file, const IMAGE_NT_HEADERS32* nt_
 
 inline uintptr_t PELoader::align_to(uintptr_t size, size_t alignment)
 {
-	if (!size)
-		return 0;
+	if (size == 0)
+		return alignment;
+	else if ((size % alignment) == 0)
+		return size;
 	else
 		return size + alignment - (size % alignment);
 }

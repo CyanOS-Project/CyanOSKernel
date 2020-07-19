@@ -95,25 +95,24 @@ void test_bitmap()
 	printf("find_first_used %d\n", my_bitmap.find_first_used(1));
 }
 
-void test_tar_filesystem(uintptr_t fs)
+void test_tar_filesystem(uintptr_t fs, size_t size)
 {
 	printf("tar at %X\n", fs);
-	TarFS* tar_fs = new TarFS((void*)fs);
+	TarFS* tar_fs = new TarFS((void*)fs, size);
 	VFS::mount_root(tar_fs->get_root_node());
-	auto fd = VFS::open("/Drivers/file2.txt", 0, 0);
+	auto fd = VFS::open("/Drivers/file1.exe", 0, 0);
 	if (fd.is_error()) {
 		printf("error opening the file %d\n", fd.error());
 		return;
 	}
 
-	char* buff = new char[4000];
-	memset(buff, 0, 0x100);
-	auto result = fd.value().read(buff, 13);
+	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
+	memset(buff, 0, 4096);
+	auto result = fd.value().read(buff, 0xc00);
 	if (result.is_error())
 		printf("error reading the file %d\n", result.error());
-	auto loader_result = PELoader::load(buff, 4000);
+	auto loader_result = PELoader::load(buff, 0xc00);
 	if (loader_result.is_error())
-		printf("error reading the file %d\n", loader_result.error());
-
-	delete[] buff;
+		printf("error loading pe file %d\n", loader_result.error());
+	Memory::free(buff, 0xc00, 0);
 }

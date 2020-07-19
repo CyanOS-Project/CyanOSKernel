@@ -48,7 +48,7 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	// Scheduler::yield();
 	// **************** tests**************************
 
-	test_tar_filesystem(info->ramdisk.start);
+	test_tar_filesystem(info->ramdisk.start, info->ramdisk.size);
 
 	// **************** end tests *********************
 	printf("Going Idle State.\n");
