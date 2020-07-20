@@ -1,4 +1,4 @@
-<img width="400" height="80" alt="centered image" src="https://i.imgur.com/KVBFGI0.png">
+<center><img width="400" height="80" alt="centered image" src="https://i.imgur.com/KVBFGI0.png"></center>
 
 # CyanOS: A Hobbyist Operating System [![Build Status](https://travis-ci.com/AymenSekhri/CyanOS.svg?branch=master)](https://travis-ci.com/AymenSekhri/CyanOS)
 
