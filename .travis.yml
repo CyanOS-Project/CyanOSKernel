@@ -1,10 +1,12 @@
 language: cpp
 compiler:
-- gcc
+- g++
 
 before_install:
 - sudo apt-get update
-- sudo apt-get install g++-multilib nasm python
+- sudo apt-get install g++-multilib nasm python cmake
 
 script:
+- mkdir build && cd build
+- cmake ..
 - make
