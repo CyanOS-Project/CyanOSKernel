@@ -15,13 +15,13 @@ def main():
     if(len(sys.argv) != 5):
         print("invalid argument list")
         sys.exit(2)
-    krnl_bin_dir = os.path.relpath(sys.argv[1])
+    krnl_bin = os.path.relpath(sys.argv[1])
     apps_bin_dir = os.path.relpath(sys.argv[2])
     root_dir = os.path.relpath(sys.argv[3])
     iso_out = os.path.relpath(sys.argv[4])
     if os.path.exists(root_dir) == True:
         shutil.rmtree(root_dir)
-    make_root(krnl_bin_dir, root_dir)
+    make_root(krnl_bin, root_dir)
     create_ramdisk(apps_bin_dir, os.path.join(root_dir, "ramdisk.tar"))
     make_iso(root_dir, iso_out)
 
@@ -43,7 +43,7 @@ def make_root(bin_path, out_dir):
     os.makedirs(os.path.join(out_dir, "boot/grub/"))
     make_grub_cfg(os.path.join(out_dir, "boot/grub/grub.cfg"),
                   "/boot/kernel.img")
-    shutil.copyfile(os.path.join(bin_path, "kernel.img"),
+    shutil.copyfile(bin_path,
                     os.path.join(out_dir, "boot/kernel.img"))
 
 

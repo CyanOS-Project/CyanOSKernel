@@ -9,7 +9,7 @@
                 "run"
             ],
             "options": {
-                "cwd": "${workspaceRoot}"
+                "cwd": "${workspaceRoot}/build"
             }
         },
         {
@@ -21,7 +21,7 @@
                 "debug"
             ],
             "options": {
-                "cwd": "${workspaceRoot}"
+                "cwd": "${workspaceRoot}/build"
             }
         },
         {
@@ -33,7 +33,7 @@
                 "qemu-system-i386.exe"
             ],
             "options": {
-                "cwd": "${workspaceRoot}"
+                "cwd": "${workspaceRoot}/build"
             }
         }
     ],

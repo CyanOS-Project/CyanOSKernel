@@ -40,7 +40,7 @@ void TarFS::parse_ustar(size_t size)
 		if (tar_parser->typeflag == USTARFileType::DIRECTORY) {
 			last_parent = &new_node; // FIXME: correct parent folders
 		}
-		volatile uintptr_t aligned_size = align_to(octal_to_decimal(tar_parser->size), TAR_ALIGNMENT);
+		const uintptr_t aligned_size = align_to(octal_to_decimal(tar_parser->size), TAR_ALIGNMENT);
 		tar_parser = (TarHeader*)(uintptr_t(tar_parser + 1) + aligned_size);
 	}
 }
