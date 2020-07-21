@@ -13,6 +13,3 @@ add_custom_command(
     COMMAND ${CMAKE_OBJCOPY} ARGS -O binary $<TARGET_FILE_NAME:${OUTPUT_FILE}> ${OUTPUT_IMAGE}
     COMMENT "Striping the kernel output file..."
 )
-
-add_custom_target(build_kernel
-    DEPENDS  ${OUTPUT_FILE})

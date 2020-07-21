@@ -29,9 +29,7 @@ add_custom_command(
         COMMENT "Creating ISO file..."
 )
 
-add_custom_target(ALL
-    DEPENDS ${OUTPUT_ISO}
-)
+add_custom_target(compile ALL DEPENDS ${OUTPUT_ISO})
 
 add_custom_target(debug
     DEPENDS ${OUTPUT_ISO}
