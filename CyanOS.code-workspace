@@ -38,7 +38,10 @@
 			"cstdarg": "cpp",
 			"cstdio": "cpp",
 			"cstdlib": "cpp",
-			"cwctype": "cpp"
+			"cwctype": "cpp",
+			"iterator": "cpp",
+			"memory_resource": "cpp",
+			"fstream": "cpp"
 		},
 		"C_Cpp.clang_format_fallbackStyle": "{UseTab: Always}",
 		"cSpell.words": [
