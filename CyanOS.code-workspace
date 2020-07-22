@@ -5,48 +5,29 @@
 		}
 	],
 	"settings": {
-		"files.associations": {
-			"array": "cpp",
-			"chrono": "cpp",
-			"string_view": "cpp",
-			"functional": "cpp",
-			"ratio": "cpp",
-			"tuple": "cpp",
-			"type_traits": "cpp",
-			"utility": "cpp",
-			"istream": "cpp",
-			"ostream": "cpp",
-			"complex": "cpp",
-			"sstream": "cpp",
-			"*.tcc": "cpp",
-			"optional": "cpp",
-			"system_error": "cpp",
-			"algorithm": "cpp",
-			"string": "cpp",
-			"atomic": "cpp",
-			"memory": "cpp",
-			"cstdint": "cpp",
-			"initializer_list": "cpp",
-			"typeinfo": "cpp",
-			"list": "cpp",
-			"deque": "cpp",
-			"unordered_map": "cpp",
-			"vector": "cpp",
-			"cwchar": "cpp",
-			"limits": "cpp",
-			"streambuf": "cpp",
-			"cstdarg": "cpp",
-			"cstdio": "cpp",
-			"cstdlib": "cpp",
-			"cwctype": "cpp",
-			"iterator": "cpp",
-			"memory_resource": "cpp",
-			"fstream": "cpp"
+		"editor.tokenColorCustomizations": {
+			"textMateRules": [
+				{
+					"scope": "googletest.failed",
+					"settings": {
+						"foreground": "#f00"
+					}
+				},
+				{
+					"scope": "googletest.passed",
+					"settings": {
+						"foreground": "#0f0"
+					}
+				},
+				{
+					"scope": "googletest.run",
+					"settings": {
+						"foreground": "#0f0"
+					}
+				}
+			]
 		},
-		"C_Cpp.clang_format_fallbackStyle": "{UseTab: Always}",
-		"cSpell.words": [
-			"APIC",
-			"CPUID"
-		]
+		"gtest-adapter.supportLocation": true,
+		"gtest-adapter.debugConfig": "Debug-Tests"
 	}
 }

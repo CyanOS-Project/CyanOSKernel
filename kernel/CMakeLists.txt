@@ -1,5 +1,6 @@
 include_directories(".")
 
+#set(CMAKE_CXX_STANDARD 17)
 SET(GCC_COVERAGE_COMPILE_FLAGS "-m32 -g -Wall --std=c++17 -Og -MMD -fno-pie -ffreestanding -fno-rtti -fno-exceptions -fno-leading-underscore -Werror=return-type")
 SET(GCC_COVERAGE_LINK_FLAGS    "-T ${CMAKE_CURRENT_SOURCE_DIR}/linker.ld -m32 -nostdlib")
 SET(CMAKE_CXX_FLAGS  ${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS})

@@ -1,9 +1,8 @@
-set(CMAKE_ASM_NASM_OBJECT_FORMAT win32)
 cmake_minimum_required(VERSION 3.0.0)
-project(CyanOS VERSION 0.1.0)
+set(CMAKE_ASM_NASM_OBJECT_FORMAT win32)
 enable_language(ASM_NASM)
+project(CyanOS VERSION 0.1.0)
 
-set(CMAKE_CXX_STANDARD 17)
 
 SET(OUTPUT_FILE "kernel")
 SET(OUTPUT_IMAGE ${CMAKE_CURRENT_BINARY_DIR}/${OUTPUT_FILE}.img)
@@ -41,9 +40,11 @@ add_custom_target(run
     COMMAND ${QEMU} ${QEMU_FLAGS} ${OUTPUT_ISO}
 )
 
-
-include(CTest)
 enable_testing()
+add_subdirectory("googletest")
+add_subdirectory("test")
+include(CTest)
+
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)

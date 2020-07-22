@@ -3,7 +3,19 @@
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
+    "gtest-adapter.debugConfig": "Debug-Tests",
     "configurations": [
+        {
+            "name": "Debug-Tests",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/test/tests.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false
+        },
         {
             "type": "gdb",
             "request": "attach",
@@ -15,6 +27,6 @@
             "valuesFormatting": "parseText",
             //"preLaunchTask": "start the debugger",
             "postDebugTask": "stop the debugger"
-        }
-    ]
+        },
+    ],
 }

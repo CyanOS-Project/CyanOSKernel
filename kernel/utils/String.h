@@ -1,7 +1,5 @@
 #pragma once
-#include "Lib/stdlib.h"
-#include "utils/assert.h"
-#include "utils/types.h"
+#include "types.h"
 
 class String
 {
@@ -31,6 +29,10 @@ class String
 	String& insert(size_t pos, const char* s);
 	String& insert(size_t pos, const char* s, size_t len);
 
+	bool operator==(const String& other);
+	bool operator==(const char* other);
+	bool operator!=(const String& other);
+	bool operator!=(const char* other);
 	String substr(size_t pos = 0, size_t len = 0) const;
 	size_t find(const String& str, size_t pos = 0) const;
 	size_t find(const char* s, size_t pos = 0) const;
@@ -38,6 +40,12 @@ class String
 	size_t rfind(const String& str, size_t pos = 0) const;
 	size_t rfind(const char* s, size_t pos = 0) const;
 	size_t rfind(char c, size_t pos = 0) const;
-	inline const char* c_str() const;
-	inline size_t length() const;
+	inline const char* c_str() const
+	{
+		return m_data;
+	}
+	inline size_t length() const
+	{
+		return m_size;
+	}
 };

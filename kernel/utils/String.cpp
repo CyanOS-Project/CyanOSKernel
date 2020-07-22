@@ -1,8 +1,18 @@
 #include "String.h"
+#ifdef __UNIT_TESTS
+	#include <assert.h>
+	#include <stdio.h>
+	#include <string.h>
+	#define ASSERT(x) assert(x)
+#else
+	#include "Lib/stdlib.h"
+	#include "utils/assert.h"
+#endif
 
 String::String(const char* str) : m_size{strlen(str)}, m_data{new char[m_size + 1]}
 {
 	ASSERT(m_data);
+	memcpy(m_data, str, m_size + 1);
 }
 
 String::String(String&& other)
@@ -17,7 +27,7 @@ String::String(const String& other)
 {
 	m_size = other.m_size;
 	m_data = new char[m_size + 1];
-	memcpy(m_data, other.m_data, m_size);
+	memcpy(m_data, other.m_data, m_size + 1);
 }
 
 String& String::operator=(String&& other)
@@ -37,7 +47,7 @@ String& String::operator=(const String& other)
 	if (this != &other) {
 		m_size = other.m_size;
 		m_data = new char[m_size + 1];
-		memcpy(m_data, other.m_data, m_size);
+		memcpy(m_data, other.m_data, m_size + 1);
 	}
 	return *this;
 }
@@ -139,14 +149,6 @@ size_t String::rfind(const char* s, size_t pos = 0) const
 }
 
 size_t String::rfind(char c, size_t pos = 0) const
-{
-}
-
-inline const char* String::c_str() const
-{
-}
-
-inline size_t String::length() const
 {
 }*/
 
