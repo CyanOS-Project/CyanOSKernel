@@ -86,12 +86,16 @@ char String::operator[](size_t off)
 
 String& String::push_back(char c)
 {
-	return insert(m_size, &c);
+	char str[2];
+	str[0] = c;
+	str[1] = 0;
+	return insert(m_size, str);
 }
 
 String& String::pop_back(char c)
 {
-	return insert(0, &c);
+	// FIXME:
+	return *this;
 }
 
 String& String::insert(size_t pos, const String& str)
@@ -101,6 +105,24 @@ String& String::insert(size_t pos, const String& str)
 	memcpy(new_data, m_data, pos);
 	memcpy(new_data + pos, str.m_data, str.m_size);
 	memcpy(new_data + pos + str.m_size, m_data + pos, m_size - pos);
+	new_data[new_len] = 0;
+
+	cleanup();
+
+	m_size = new_len;
+	m_data = new_data;
+	return *this;
+}
+
+String& String::insert(size_t pos, const char* str)
+{
+	size_t str_len = strlen(str);
+	size_t new_len = str_len + m_size;
+	char* new_data = new char[new_len + 1];
+	memcpy(new_data, m_data, pos);
+	memcpy(new_data + pos, str, str_len);
+	memcpy(new_data + pos + str_len, m_data + pos, m_size - pos);
+	new_data[new_len] = 0;
 
 	cleanup();
 
@@ -111,17 +133,71 @@ String& String::insert(size_t pos, const String& str)
 
 String& String::insert(size_t pos, const String& str, size_t subpos, size_t sublen)
 {
+	ASSERT(subpos <= str.m_size);
+	size_t str_len = str.m_size > sublen ? sublen : str.m_size;
+	size_t new_len = str_len + m_size;
+	char* new_data = new char[new_len + 1];
+	memcpy(new_data, m_data, pos);
+	memcpy(new_data + pos, str.m_data + subpos, str_len);
+	memcpy(new_data + pos + str_len, m_data + pos, m_size - pos);
+	new_data[new_len] = 0;
+
+	cleanup();
+
+	m_size = new_len;
+	m_data = new_data;
 	return *this;
 }
 
-String& String::insert(size_t pos, const char* s)
+String& String::insert(size_t pos, const char* str, size_t subpos)
 {
+	ASSERT(subpos <= strlen(str));
+	size_t str_len = strlen(str) - subpos;
+
+	size_t new_len = str_len + m_size;
+	char* new_data = new char[new_len + 1];
+	memcpy(new_data, m_data, pos);
+	memcpy(new_data + pos, str + subpos, str_len);
+	memcpy(new_data + pos + str_len, m_data + pos, m_size - pos);
+	new_data[new_len] = 0;
+
+	cleanup();
+
+	m_size = new_len;
+	m_data = new_data;
 	return *this;
 }
 
-String& String::insert(size_t pos, const char* s, size_t len)
+bool String::operator==(const String& other)
 {
-	return *this;
+	if (strcmp(m_data, other.m_data))
+		return false;
+	if (m_size != other.m_size)
+		return false;
+	return true;
+}
+
+bool String::operator==(const char* other)
+{
+	if (strcmp(m_data, other))
+		return false;
+	return true;
+}
+
+bool String::operator!=(const String& other)
+{
+	if (!strcmp(m_data, other.m_data))
+		return false;
+	if (m_size == other.m_size)
+		return false;
+	return true;
+}
+
+bool String::operator!=(const char* other)
+{
+	if (!strcmp(m_data, other))
+		return false;
+	return true;
 }
 /*
 String String::substr(size_t pos = 0, size_t len = 0) const

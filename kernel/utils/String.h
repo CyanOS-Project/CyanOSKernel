@@ -26,8 +26,8 @@ class String
 	String& pop_back(char c);
 	String& insert(size_t pos, const String& str);
 	String& insert(size_t pos, const String& str, size_t subpos, size_t sublen);
-	String& insert(size_t pos, const char* s);
-	String& insert(size_t pos, const char* s, size_t len);
+	String& insert(size_t pos, const char* str);
+	String& insert(size_t pos, const char* str, size_t subpos);
 
 	bool operator==(const String& other);
 	bool operator==(const char* other);
