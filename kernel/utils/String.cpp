@@ -9,10 +9,20 @@
 	#include "utils/assert.h"
 #endif
 
+const size_t String::END = -1;
+const size_t String::NOT_FOUND = -1;
+
 String::String(const char* str) : m_size{strlen(str)}, m_data{new char[m_size + 1]}
 {
 	ASSERT(m_data);
 	memcpy(m_data, str, m_size + 1);
+}
+
+String::String(const char* str, size_t len) : m_size{len}, m_data{new char[m_size + 1]}
+{
+	ASSERT(m_data);
+	memcpy(m_data, str, m_size);
+	m_data[m_size] = 0;
 }
 
 String::String(String&& other)
@@ -59,27 +69,27 @@ String::~String()
 
 String& String::operator+=(const String& other)
 {
-	return insert(m_size, other);
+	return insert(END, other);
 }
 
 String& String::operator+=(const char* other)
 {
-	return insert(m_size, other);
+	return insert(END, other);
 }
 
 String& String::operator+=(char other)
 {
-	return insert(m_size, &other);
+	return insert(END, &other);
 }
 
-String String::operator+(const String& other)
+String String::operator+(const String& other) const
 {
 	String new_string{*this};
 	new_string += other;
 	return new_string;
 }
 
-char String::operator[](size_t off)
+char String::operator[](size_t off) const
 {
 	return m_data[off];
 }
@@ -89,17 +99,24 @@ String& String::push_back(char c)
 	char str[2];
 	str[0] = c;
 	str[1] = 0;
-	return insert(m_size, str);
+	return insert(END, str);
 }
 
-String& String::pop_back(char c)
+String& String::pop_back()
 {
-	// FIXME:
+	ASSERT(m_size);
+	m_size--;
+	m_data[m_size] = 0;
 	return *this;
 }
 
 String& String::insert(size_t pos, const String& str)
 {
+	if (pos == END)
+		pos = m_size;
+
+	ASSERT(pos <= m_size);
+
 	size_t new_len = str.m_size + m_size;
 	char* new_data = new char[new_len + 1];
 	memcpy(new_data, m_data, pos);
@@ -116,6 +133,11 @@ String& String::insert(size_t pos, const String& str)
 
 String& String::insert(size_t pos, const char* str)
 {
+	if (pos == END)
+		pos = m_size;
+
+	ASSERT(pos <= m_size);
+
 	size_t str_len = strlen(str);
 	size_t new_len = str_len + m_size;
 	char* new_data = new char[new_len + 1];
@@ -133,7 +155,13 @@ String& String::insert(size_t pos, const char* str)
 
 String& String::insert(size_t pos, const String& str, size_t subpos, size_t sublen)
 {
-	ASSERT(subpos <= str.m_size);
+	if (subpos == END)
+		subpos = str.m_size;
+	if (pos == END)
+		pos = m_size;
+
+	ASSERT(subpos + sublen <= str.m_size);
+
 	size_t str_len = str.m_size > sublen ? sublen : str.m_size;
 	size_t new_len = str_len + m_size;
 	char* new_data = new char[new_len + 1];
@@ -149,16 +177,20 @@ String& String::insert(size_t pos, const String& str, size_t subpos, size_t subl
 	return *this;
 }
 
-String& String::insert(size_t pos, const char* str, size_t subpos)
+String& String::insert(size_t pos, const char* str, size_t subpos, size_t sublen)
 {
-	ASSERT(subpos <= strlen(str));
-	size_t str_len = strlen(str) - subpos;
+	if (subpos == END)
+		subpos = strlen(str);
+	if (pos == END)
+		pos = m_size;
 
-	size_t new_len = str_len + m_size;
+	ASSERT(subpos + sublen <= strlen(str));
+
+	const size_t new_len = sublen + m_size;
 	char* new_data = new char[new_len + 1];
 	memcpy(new_data, m_data, pos);
-	memcpy(new_data + pos, str + subpos, str_len);
-	memcpy(new_data + pos + str_len, m_data + pos, m_size - pos);
+	memcpy(new_data + pos, str + subpos, sublen);
+	memcpy(new_data + pos + sublen, m_data + pos, m_size - pos);
 	new_data[new_len] = 0;
 
 	cleanup();
@@ -168,7 +200,7 @@ String& String::insert(size_t pos, const char* str, size_t subpos)
 	return *this;
 }
 
-bool String::operator==(const String& other)
+bool String::operator==(const String& other) const
 {
 	if (strcmp(m_data, other.m_data))
 		return false;
@@ -177,14 +209,14 @@ bool String::operator==(const String& other)
 	return true;
 }
 
-bool String::operator==(const char* other)
+bool String::operator==(const char* other) const
 {
 	if (strcmp(m_data, other))
 		return false;
 	return true;
 }
 
-bool String::operator!=(const String& other)
+bool String::operator!=(const String& other) const
 {
 	if (!strcmp(m_data, other.m_data))
 		return false;
@@ -193,40 +225,91 @@ bool String::operator!=(const String& other)
 	return true;
 }
 
-bool String::operator!=(const char* other)
+bool String::operator!=(const char* other) const
 {
 	if (!strcmp(m_data, other))
 		return false;
 	return true;
 }
-/*
-String String::substr(size_t pos = 0, size_t len = 0) const
+
+String String::substr(size_t pos, size_t len) const
 {
+	if (pos == END)
+		pos = m_size;
+
+	ASSERT(pos + len <= m_size);
+	return String(m_data + pos, len);
 }
 
-size_t String::find(const String& str, size_t pos = 0) const
+size_t String::find(const String& str, size_t pos) const
 {
+	if (pos == END)
+		pos = m_size;
+
+	ASSERT(pos <= m_size);
+	for (size_t i = pos; i < (m_size - str.m_size) + 1; i++) {
+		if (!strncmp(m_data + i, str.m_data, str.m_size))
+			return i;
+	}
+	return NOT_FOUND;
 }
 
-size_t String::find(const char* s, size_t pos = 0) const
+size_t String::find(const char* str, size_t pos) const
 {
+	if (pos == END)
+		pos = m_size;
+
+	ASSERT(pos <= m_size);
+	const size_t str_len = strlen(str);
+	for (size_t i = pos; i < (m_size - str_len) + 1; i++) {
+		if (!strncmp(m_data + i, str, str_len))
+			return i;
+	}
+	return NOT_FOUND;
 }
 
-size_t String::find(char c, size_t pos = 0) const
+size_t String::find(char c, size_t pos) const
 {
+	char str[2];
+	str[0] = c;
+	str[1] = 0;
+	return find(str, pos);
 }
 
-size_t String::rfind(const String& str, size_t pos = 0) const
+size_t String::rfind(const String& str, size_t pos) const
 {
+	if (pos == END)
+		pos = m_size;
+
+	ASSERT(pos <= m_size);
+	for (int i = pos - str.m_size; i >= 0; i--) {
+		if (!strncmp(m_data + i, str.m_data, str.m_size))
+			return i;
+	}
+	return NOT_FOUND;
 }
 
-size_t String::rfind(const char* s, size_t pos = 0) const
+size_t String::rfind(const char* str, size_t pos) const
 {
+	if (pos == END)
+		pos = m_size;
+
+	ASSERT(pos <= m_size);
+	const size_t str_len = strlen(str);
+	for (int i = pos - str_len; i >= 0; i--) {
+		if (!strncmp(m_data + i, str, str_len))
+			return i;
+	}
+	return NOT_FOUND;
 }
 
-size_t String::rfind(char c, size_t pos = 0) const
+size_t String::rfind(char c, size_t pos) const
 {
-}*/
+	char str[2];
+	str[0] = c;
+	str[1] = 0;
+	return rfind(str, pos);
+}
 
 inline void String::cleanup()
 {

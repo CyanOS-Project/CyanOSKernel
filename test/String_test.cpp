@@ -16,8 +16,11 @@ int main(int argc, char** argv)
 TEST(String_Test, Construction)
 {
 	const char* str_data = "hello world";
-	String str1 = String(str_data);
+	String str0 = String(str_data, 5);
+	EXPECT_EQ(strcmp("hello", str0.c_str()), 0);
+	EXPECT_EQ(strlen("hello"), str0.length());
 
+	String str1 = String(str_data);
 	EXPECT_EQ(strcmp(str_data, str1.c_str()), 0);
 	EXPECT_EQ(strlen(str_data), str1.length());
 
@@ -69,8 +72,8 @@ TEST(String_Test, Insertion)
 	str3.insert(6, str0, 7, 4);
 	EXPECT_TRUE(str3 == "Hello str0 str3");
 
-	str4.insert(6, str_data, 7);
-	EXPECT_TRUE(str4 == "Hello str0) str4");
+	str4.insert(6, str_data, 7, 4);
+	EXPECT_TRUE(str4 == "Hello str0 str4");
 }
 
 TEST(String_Test, Comparision)
@@ -109,7 +112,57 @@ TEST(String_Test, Appending)
 	str.push_back('!');
 	EXPECT_TRUE(str == "Hello earth!");
 
-	/*str = String{str_data};
-	str.pop_back('!');
-	EXPECT_TRUE(str == "!Hello earth");*/
+	str = String{str_data};
+	str.pop_back();
+	EXPECT_TRUE(str == "Hello eart");
+}
+
+TEST(String_Test, Searching)
+{
+	const char* str_data = "Hello earth and earthings, Mars and martians!";
+	String str = String{str_data};
+
+	// find
+	ASSERT_EQ(str.find('e', 0), 1);
+	ASSERT_EQ(str.find('e', 2), 6);
+	ASSERT_EQ(str.find('!', 2), 44);
+	ASSERT_EQ(str.find('#', 2), String::NOT_FOUND);
+
+	ASSERT_EQ(str.find(String("earth"), 0), 6);
+	ASSERT_EQ(str.find(String("earth"), 8), 16);
+	ASSERT_EQ(str.find(String("!"), 0), 44);
+	ASSERT_EQ(str.find(String("Pluto-people"), 0), String::NOT_FOUND);
+
+	ASSERT_EQ(str.find("earth", 0), 6);
+	ASSERT_EQ(str.find("earth", 8), 16);
+	ASSERT_EQ(str.find("!", 0), 44);
+	ASSERT_EQ(str.find("Pluto-people", 0), String::NOT_FOUND);
+
+	// reverse find
+	ASSERT_EQ(str.rfind('m'), 36);
+	ASSERT_EQ(str.rfind('m', String::END), 36);
+	ASSERT_EQ(str.rfind('s', 36), 30);
+	ASSERT_EQ(str.rfind('H', 5), 0);
+	ASSERT_EQ(str.rfind('#', String::END), String::NOT_FOUND);
+
+	ASSERT_EQ(str.rfind(String("earth")), 16);
+	ASSERT_EQ(str.rfind(String("earth"), 25), 16);
+	ASSERT_EQ(str.rfind(String("earth"), 11), 6);
+	ASSERT_EQ(str.rfind(String("!"), String::END), 44);
+	ASSERT_EQ(str.rfind(String("Pluto-people"), 0), String::NOT_FOUND);
+
+	ASSERT_EQ(str.rfind("earth"), 16);
+	ASSERT_EQ(str.rfind("earth", 25), 16);
+	ASSERT_EQ(str.rfind("earth", 11), 6);
+	ASSERT_EQ(str.rfind("!", String::END), 44);
+	ASSERT_EQ(str.rfind("Pluto-people", 0), String::NOT_FOUND);
+}
+
+TEST(String_Test, SubString)
+{
+	const char* str_data = "Hello earth and earthings, Mars and martians!";
+	String str = String{str_data};
+	ASSERT_TRUE(str.substr(6, 5) == "earth");
+	ASSERT_TRUE(str.substr(0, 5) == "Hello");
+	ASSERT_TRUE(str.substr(36, 9) == "martians!");
 }
