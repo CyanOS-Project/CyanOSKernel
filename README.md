@@ -23,36 +23,26 @@
 - [ ] USB.
 
 ## Building CyanOS
-### Windows
-#### Setting up
-* The kernel is compiled using `g++` so you need to download the latest version of [MinGW32](https://osdn.net/projects/mingw/releases/).
-* From `MinGW Installation Manager`, make sure you already have installed `mingw-binutils`, `mingw-gcc`, `mingw-gcc-g++`, `mingw-gdb` and `mingw-make`.
-* Add the `bin` folder path of `mingw` to the environment variables.
-* Download [nasm](https://www.nasm.us/) and add it's folder to the environment variables.
-* For emulating and testing the operating system you need to download 32bit version of [qemu](https://www.qemu.org/download/).
-* Add qemu main folder's path to the environment variables.
-#### Building
-Using `git` or `Cygwin` bash, type the following commands
-```
-git clone https://github.com/AymenSekhri/CyanOS.git
-cd ./CyanOS
-make clean && make run
-```
-
-### Linux (Ubuntu)
-#### Setting up
-Using bash, type the following commands to install the required packages
+#### Requirement
 ```
 sudo apt-get update
-sudo apt-get install build-essential gcc-multilib g++-multilib nasm qemu
+sudo apt-get install build-essential g++-multilib nasm python cmake grub2 xorriso qemu
 ```
-#### Building
+For Windows users, you can build and run the system on WSL(Windows Subsystem for Linux). Or you can use build it using [MinGW32](https://osdn.net/projects/mingw/releases/), [nasm](https://www.nasm.us/) and [CMake](https://cmake.org/download) and run it using [qemu](https://www.qemu.org/download/), though it still needs WSL make bootable ISO using `grub2-rescue`.
 
+#### Building
 ```
 git clone https://github.com/AymenSekhri/CyanOS.git
 cd ./CyanOS
-make clean && make run
+mkdir build && cd build
+cmake ..
+make && make test
 ```
+And you can boot up the OS in Qemu using:
+```
+make run
+```
+
 
 ## Useful resources:
 * Operating Systems: Internals And Design Principles By William Stallings.
