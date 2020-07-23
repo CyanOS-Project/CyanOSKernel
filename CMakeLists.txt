@@ -16,9 +16,8 @@ SET(QEMU_FLAGS -no-reboot -no-shutdown -m 128 -d cpu_reset -boot d -cdrom)
 SET(QEMU_FLAGS_DEBUG -S -gdb tcp::5555)
 file(MAKE_DIRECTORY ${BINS_DIRECTORY} ${DRVS_DIRECTORY} ${USER_DIRECTORY})
 
-#add_subdirectory("kernel")
+add_subdirectory("kernel")
 
-#add_dependencies(create_iso ${PROJECT_NAME})
 #set(CMAKE_CXX_CLANG_TIDY clang-tidy -checks='*',-fix=c++17)
 
 add_custom_command(
