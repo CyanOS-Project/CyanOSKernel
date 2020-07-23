@@ -7,12 +7,6 @@
 #include "utils/String.h"
 #include <gtest/gtest.h>
 
-int main(int argc, char** argv)
-{
-	testing::InitGoogleTest(&argc, argv);
-	return RUN_ALL_TESTS();
-}
-
 TEST(String_Test, Construction)
 {
 	const char* str_data = "hello world";

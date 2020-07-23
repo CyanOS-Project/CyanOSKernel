@@ -62,6 +62,15 @@ String& String::operator=(const String& other)
 	return *this;
 }
 
+String& String::operator=(const char* str)
+{
+	m_size = strlen(str);
+	m_data = new char[m_size + 1];
+	ASSERT(m_data);
+	memcpy(m_data, str, m_size + 1);
+	return *this;
+}
+
 String::~String()
 {
 	cleanup();
@@ -117,7 +126,7 @@ String& String::insert(size_t pos, const String& str)
 
 	ASSERT(pos <= m_size);
 
-	size_t new_len = str.m_size + m_size;
+	const size_t new_len = str.m_size + m_size;
 	char* new_data = new char[new_len + 1];
 	memcpy(new_data, m_data, pos);
 	memcpy(new_data + pos, str.m_data, str.m_size);
@@ -138,8 +147,8 @@ String& String::insert(size_t pos, const char* str)
 
 	ASSERT(pos <= m_size);
 
-	size_t str_len = strlen(str);
-	size_t new_len = str_len + m_size;
+	const size_t str_len = strlen(str);
+	const size_t new_len = str_len + m_size;
 	char* new_data = new char[new_len + 1];
 	memcpy(new_data, m_data, pos);
 	memcpy(new_data + pos, str, str_len);
@@ -162,8 +171,8 @@ String& String::insert(size_t pos, const String& str, size_t subpos, size_t subl
 
 	ASSERT(subpos + sublen <= str.m_size);
 
-	size_t str_len = str.m_size > sublen ? sublen : str.m_size;
-	size_t new_len = str_len + m_size;
+	const size_t str_len = str.m_size > sublen ? sublen : str.m_size;
+	const size_t new_len = str_len + m_size;
 	char* new_data = new char[new_len + 1];
 	memcpy(new_data, m_data, pos);
 	memcpy(new_data + pos, str.m_data + subpos, str_len);
@@ -202,9 +211,9 @@ String& String::insert(size_t pos, const char* str, size_t subpos, size_t sublen
 
 bool String::operator==(const String& other) const
 {
-	if (strcmp(m_data, other.m_data))
-		return false;
 	if (m_size != other.m_size)
+		return false;
+	if (strcmp(m_data, other.m_data))
 		return false;
 	return true;
 }
@@ -218,9 +227,9 @@ bool String::operator==(const char* other) const
 
 bool String::operator!=(const String& other) const
 {
-	if (!strcmp(m_data, other.m_data))
-		return false;
 	if (m_size == other.m_size)
+		return false;
+	if (!strcmp(m_data, other.m_data))
 		return false;
 	return true;
 }
