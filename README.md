@@ -23,12 +23,12 @@
 - [ ] USB.
 
 ## Building CyanOS
-#### Requirement
+#### Requirements
 ```
 sudo apt-get update
 sudo apt-get install build-essential g++-multilib nasm python cmake grub2 xorriso qemu
 ```
-For Windows users, you can build and run the system on WSL(Windows Subsystem for Linux). Or you can use build it using [MinGW32](https://osdn.net/projects/mingw/releases/), [nasm](https://www.nasm.us/) and [CMake](https://cmake.org/download) and run it using [qemu](https://www.qemu.org/download/), though it still needs WSL make bootable ISO using `grub2-rescue`.
+For Windows users, you can build and run the system on WSL(Windows Subsystem for Linux). Or you can build it using [MinGW32](https://osdn.net/projects/mingw/releases/), [nasm](https://www.nasm.us/) and [CMake](https://cmake.org/download) and run it using [qemu](https://www.qemu.org/download/), though it still needs WSL to make a bootable ISO using `grub2-rescue`.
 
 #### Building
 ```
