@@ -1,6 +1,13 @@
 #pragma once
-#include "Lib/stl.h"
-#include "assert.h"
+
+#include "stl.h"
+#include "types.h"
+#ifdef __UNIT_TESTS
+	#include <assert.h>
+	#define ASSERT(x) assert(x)
+#else
+	#include "assert.h"
+#endif
 
 template <class T> class CircularQueue
 {
@@ -79,7 +86,7 @@ template <class T> void CircularQueue<T>::Iterator::move_cursor(int index)
 }
 
 // Increment the current node pointer.
-template <class T> typename CircularQueue<T>::Iterator& CircularQueue<T>::Iterator::operator++(int)
+template <class T> typename CircularQueue<T>::Iterator& CircularQueue<T>::Iterator::operator++(int arg)
 {
 	const auto next = m_current->next;
 	if (next == m_head) {
@@ -231,14 +238,14 @@ template <class T> template <typename... U> T& CircularQueue<T>::emplace_front(U
 }
 
 // Push data to the back of the list.
-template <class T> T& CircularQueue<T>::push_back(T&& new_data)
+template <class T> T& CircularQueue<T>::push_back(const T& new_data)
 {
 	Node* new_node = new Node{new_data};
 	link_node(new_node, m_head);
 	return new_node->data;
 }
 
-template <class T> T& CircularQueue<T>::push_front(T&& new_data)
+template <class T> T& CircularQueue<T>::push_front(const T& new_data)
 {
 	T& new_node_data = push_back(new_data);
 	m_head = m_head->prev;
@@ -246,14 +253,14 @@ template <class T> T& CircularQueue<T>::push_front(T&& new_data)
 }
 
 // Push data to the back of the list.
-template <class T> T& CircularQueue<T>::push_back(const T& new_data)
+template <class T> T& CircularQueue<T>::push_back(T&& new_data)
 {
 	Node* new_node = new Node{move(new_data)};
 	link_node(new_node, m_head);
 	return new_node->data;
 }
 
-template <class T> T& CircularQueue<T>::push_front(const T& new_data)
+template <class T> T& CircularQueue<T>::push_front(T&& new_data)
 {
 	T& new_node_data = push_back(move(new_data));
 	m_head = m_head->prev;
