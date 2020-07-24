@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Arch/x86/panic.h"
-#include "assert.h"
 #include "types.h"
 
 #define MAX_BITMAP_SIZE       24576

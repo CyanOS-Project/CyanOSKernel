@@ -1,13 +1,19 @@
 #include "bitmap.h"
 
+#ifdef __UNIT_TESTS
+	#include <assert.h>
+	#include <stdio.h>
+	#include <string.h>
+	#define ASSERT(x) assert(x)
+#else
+	#include "Lib/stdlib.h"
+	#include "utils/assert.h"
+#endif
 Bitmap::Bitmap(size_t size) : m_size(size)
 {
-	if (size <= MAX_BITMAP_SIZE) {
-		m_bitmap_data = new uint8_t[size / 8];
-	} else {
-		m_bitmap_data = nullptr;
-		PANIC("size is higher than MAX_BITMAP_SIZE");
-	}
+	ASSERT(size <= MAX_BITMAP_SIZE);
+	m_bitmap_data = new uint8_t[size / 8];
+	memset(m_bitmap_data, 0, sizeof(size / 8));
 }
 
 Bitmap::~Bitmap()
@@ -53,45 +59,37 @@ void Bitmap::set_unused(unsigned position, unsigned count)
 
 unsigned Bitmap::find_first_unused(unsigned count)
 {
-	uint32_t first_found = 0;
-	uint32_t remaining_count = count;
-	for (size_t i = 0; i < sizeof(m_bitmap_data); i++) {
-		if ((m_bitmap_data[i] == 0xFF) && (remaining_count != count)) {
+	size_t remaining_count = count;
+	size_t bit_index = 0;
+	while (bit_index < m_size) {
+		if (m_bitmap_data[bit_index / 8] == 0xFF)
+			bit_index += 8;
+		if (!CHECK_BIT(m_bitmap_data[bit_index / 8], bit_index % 8))
+			remaining_count--;
+		else
 			remaining_count = count;
-		} else {
-			for (size_t bit = 0; bit < 8; bit++) {
-				if (!CHECK_BIT(m_bitmap_data[i], bit)) {
-					if (remaining_count == count)
-						first_found = bit + i * 8;
-					if (!(--remaining_count))
-						return first_found;
-				} else if (remaining_count != count) {
-					remaining_count = count;
-				}
-			}
-		}
+
+		if (!remaining_count)
+			return bit_index - count + 1;
+		bit_index++;
 	}
 	return BITMAP_NO_BITS_LEFT;
 }
 unsigned Bitmap::find_first_used(unsigned count)
 {
-	uint32_t first_found = 0;
-	uint32_t remaining_count = count;
-	for (size_t i = 0; i < sizeof(m_bitmap_data); i++) {
-		if ((m_bitmap_data[i] == 0x00) && (remaining_count != count)) {
+	size_t remaining_count = count;
+	size_t bit_index = 0;
+	while (bit_index < m_size) {
+		if (m_bitmap_data[bit_index / 8] == 0)
+			bit_index += 8;
+		if (CHECK_BIT(m_bitmap_data[bit_index / 8], bit_index % 8))
+			remaining_count--;
+		else
 			remaining_count = count;
-		} else {
-			for (size_t bit = 0; bit < 8; bit++) {
-				if (CHECK_BIT(m_bitmap_data[i], bit)) {
-					if (remaining_count == count)
-						first_found = bit + i * 8;
-					if (!(--remaining_count))
-						return first_found;
-				} else if (remaining_count != count) {
-					remaining_count = count;
-				}
-			}
-		}
+
+		if (!remaining_count)
+			return bit_index - count + 1;
+		bit_index++;
 	}
 	return BITMAP_NO_BITS_LEFT;
 }
