@@ -14,7 +14,7 @@ TEST(PathParser_Test, ElementsCounting)
 TEST(PathParser_Test, GettingElements)
 {
 	PathParser path("/mnt/fat32/c/users/goku/rocks");
-	char element[MAX_PATH];
+	char element[256];
 
 	EXPECT_EQ(path.get_element(0, element, MAX_PATH), 0);
 	EXPECT_EQ(strcmp(element, "mnt"), 0);
