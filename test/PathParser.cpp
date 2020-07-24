@@ -5,6 +5,7 @@
 #include "utils/PathParser.h"
 #include <gtest/gtest.h>
 
+#define MAX_PATH_ELEMENT 256
 TEST(PathParser_Test, ElementsCounting)
 {
 	PathParser path("/mnt/c/user/goku/rocks");
@@ -14,23 +15,23 @@ TEST(PathParser_Test, ElementsCounting)
 TEST(PathParser_Test, GettingElements)
 {
 	PathParser path("/mnt/fat32/c/users/goku/rocks");
-	char element[256];
+	char element[MAX_PATH_ELEMENT];
 
-	EXPECT_EQ(path.get_element(0, element, MAX_PATH), 0);
+	EXPECT_EQ(path.get_element(0, element, MAX_PATH_ELEMENT), 0);
 	EXPECT_EQ(strcmp(element, "mnt"), 0);
 
-	EXPECT_EQ(path.get_element(1, element, MAX_PATH), 0);
+	EXPECT_EQ(path.get_element(1, element, MAX_PATH_ELEMENT), 0);
 	EXPECT_EQ(strcmp(element, "fat32"), 0);
 
-	EXPECT_EQ(path.get_element(2, element, MAX_PATH), 0);
+	EXPECT_EQ(path.get_element(2, element, MAX_PATH_ELEMENT), 0);
 	EXPECT_EQ(strcmp(element, "c"), 0);
 
-	EXPECT_EQ(path.get_element(3, element, MAX_PATH), 0);
+	EXPECT_EQ(path.get_element(3, element, MAX_PATH_ELEMENT), 0);
 	EXPECT_EQ(strcmp(element, "users"), 0);
 
-	EXPECT_EQ(path.get_element(4, element, MAX_PATH), 0);
+	EXPECT_EQ(path.get_element(4, element, MAX_PATH_ELEMENT), 0);
 	EXPECT_EQ(strcmp(element, "goku"), 0);
 
-	EXPECT_EQ(path.get_element(5, element, MAX_PATH), 0);
+	EXPECT_EQ(path.get_element(5, element, MAX_PATH_ELEMENT), 0);
 	EXPECT_EQ(strcmp(element, "rocks"), 0);
 }
