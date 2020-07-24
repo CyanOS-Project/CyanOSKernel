@@ -2,7 +2,7 @@
 #ifdef __UNIT_TESTS
 	#include <assert.h>
 	#include <stdio.h>
-	#include <string.h>
+	#include <cstring>
 	#define ASSERT(x) assert(x)
 #else
 	#include "Lib/stdlib.h"

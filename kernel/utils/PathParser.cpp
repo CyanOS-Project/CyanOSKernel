@@ -1,5 +1,15 @@
 #include "PathParser.h"
 
+#ifdef __UNIT_TESTS
+	#include <assert.h>
+	#include <stdio.h>
+	#include <cstring>
+	#define ASSERT(x) assert(x)
+#else
+	#include "Lib/stdlib.h"
+	#include "utils/assert.h"
+#endif
+
 PathParser::PathParser(const char* path) : m_path(path), m_len(strlen(path))
 {
 }
@@ -26,7 +36,7 @@ unsigned PathParser::path_element_count()
 	return count + 1;
 }
 
-int PathParser::get_element(unsigned element_index, char* element, unsigned len)
+int PathParser::get_element(unsigned element_index, char* element, unsigned max_len)
 {
 	const char* current = m_path;
 	if (*current == SPLITER)
@@ -37,6 +47,9 @@ int PathParser::get_element(unsigned element_index, char* element, unsigned len)
 		element_index--;
 	}
 	size_t current_len = size_t(get_next_element(current)) - size_t(current) - 1;
+	if (max_len < current_len)
+		return 1;
+
 	memcpy(element, current, current_len);
 	element[current_len] = 0;
 	return 0;

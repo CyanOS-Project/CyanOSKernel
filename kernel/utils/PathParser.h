@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Lib/stdlib.h"
 #define SPLITER '/'
 class PathParser
 {
@@ -13,6 +12,6 @@ class PathParser
 	PathParser(const char* path);
 	~PathParser();
 	unsigned path_element_count();
-	int get_element(unsigned element_index, char* element, unsigned len);
+	int get_element(unsigned element_index, char* element, unsigned max_len);
 	bool is_valid();
 };

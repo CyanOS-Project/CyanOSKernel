@@ -57,44 +57,6 @@ void test_threading(uintptr_t arg)
 	}
 }
 
-typedef struct Stuff_t {
-	int value1;
-	int value2;
-} Stuff;
-
-void test_lists()
-{
-	CircularQueue<Stuff>* list = new CircularQueue<Stuff>;
-	CircularQueue<Stuff>* list2 = new CircularQueue<Stuff>;
-
-	list->push_back({1, 2});
-	list->push_back({2, 4});
-	list->push_back({1, 2});
-	list->push_back({1, 2});
-	printf("List 1:\n");
-	list->move_head_to_other_list(list2);
-	list->move_head_to_other_list(list2);
-	// list->move_head_to_other_list(list2);
-	// list->move_head_to_other_list(list2);
-	list->remove(0);
-
-	for (CircularQueue<Stuff>::Iterator i = list->begin(); i != list->end(); ++i) {
-		printf("%d %d\n", *i, *i);
-	}
-}
-
-void test_bitmap()
-{
-	Bitmap my_bitmap(10);
-	my_bitmap.set_used(2);
-	printf("find_first_used %d\n", my_bitmap.find_first_unused(5));
-	my_bitmap.set_unused(2);
-	printf("find_first_used %d\n", my_bitmap.find_first_unused(5));
-	my_bitmap.set_used(8);
-	printf("find_first_used %d\n", my_bitmap.find_first_used(5));
-	printf("find_first_used %d\n", my_bitmap.find_first_used(1));
-}
-
 void test_tar_filesystem(uintptr_t fs, size_t size)
 {
 	printf("tar at %X\n", fs);
