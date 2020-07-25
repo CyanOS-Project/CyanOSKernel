@@ -8,6 +8,9 @@
 
 #define MAX_OFFSET (SIZE_MAX / 4)
 enum class SeekOrigin { SET, CURRENT, END };
+struct FileInfo {
+	size_t size;
+};
 
 class FileDescriptor
 {
@@ -25,7 +28,7 @@ class FileDescriptor
 	Result<void> read(void* buff, size_t size);
 	Result<void> write(void* buff, size_t size);
 	Result<void> seek(int offset, SeekOrigin origin);
-	Result<void> fstat();
+	Result<FileInfo> fstat();
 	Result<void> ioctl();
 	Result<void> mmap();
 };

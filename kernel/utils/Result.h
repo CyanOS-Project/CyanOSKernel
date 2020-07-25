@@ -5,7 +5,7 @@ class ResultError
 {
   public:
 	const unsigned m_error;
-	ResultError(unsigned error) : m_error(error)
+	explicit ResultError(unsigned error) : m_error(error)
 	{
 	}
 
@@ -58,7 +58,7 @@ template <typename T> class Result
 		return m_error.m_error;
 	}
 
-	T& value()
+	inline T& value()
 	{
 		ASSERT(!is_error())
 		return m_storage;
@@ -100,7 +100,7 @@ template <typename T> class Result<T&>
 		return m_error.m_error;
 	}
 
-	T& value()
+	inline T& value()
 	{
 		ASSERT(!is_error())
 		return *m_storage;

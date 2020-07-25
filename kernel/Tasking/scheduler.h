@@ -1,9 +1,20 @@
 #pragma once
 
+#include "Arch/x86/asm.h"
 #include "Arch/x86/context.h"
+#include "Arch/x86/gdt.h"
 #include "Arch/x86/isr.h"
 #include "Arch/x86/paging.h"
+#include "Arch/x86/panic.h"
 #include "Arch/x86/spinlock.h"
+#include "Devices/Console/console.h"
+#include "Devices/Timer/pit.h"
+#include "Filesystem/VirtualFilesystem.h"
+#include "Loader/pe.h"
+#include "VirtualMemory/heap.h"
+#include "VirtualMemory/memory.h"
+#include "utils/Result.h"
+#include "utils/assert.h"
 #include "utils/bitmap.h"
 #include "utils/list.h"
 #include "utils/types.h"
@@ -67,10 +78,12 @@ class Scheduler
 	static unsigned reserve_tid();
 	static unsigned reserve_pid();
 	static void create_tcb(uintptr_t task_stack, uintptr_t task_current_stack, ProcessControlBlock* parent);
+	static void create_new_thread(ProcessControlBlock* process, thread_function address, uintptr_t argument);
+	static Result<uintptr_t> load_executable(const char* path);
+	static ProcessControlBlock& create_shalow_process(const char* name);
 
   public:
-	static void create_new_thread(ProcessControlBlock* process, thread_function address, uintptr_t argument);
-	static ProcessControlBlock& create_new_process(const char* name);
+	static Result<ProcessControlBlock&> create_new_process(const char* name, const char* path);
 	static void schedule(ISRContextFrame* current_context, ScheduleType type);
 	static void block_current_thread(ThreadState reason, CircularQueue<ThreadControlBlock>* waiting_list);
 	static void unblock_thread(CircularQueue<ThreadControlBlock>* waiting_list);

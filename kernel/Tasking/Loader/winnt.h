@@ -1,3 +1,5 @@
+#pragma once
+
 #include "utils/types.h"
 
 #define IMAGE_NUMBEROF_DIRECTORY_ENTRIES 16

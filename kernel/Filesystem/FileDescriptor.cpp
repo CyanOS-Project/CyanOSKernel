@@ -51,25 +51,21 @@ Result<void> FileDescriptor::seek(int offset, SeekOrigin origin)
 		}
 		case SeekOrigin::CURRENT: {
 			// FIXME: check overflow
-			int new_offset = offset + m_current_position;
-			if (new_offset < 0)
-				return ResultError(ERROR_EOF);
-			if (size_t(new_offset) > m_node.m_size)
+			if (((offset > 0) && (size_t(offset) > (m_node.m_size - m_current_position))) ||
+			    ((offset < 0) && (size_t(-offset) > m_current_position)))
 				return ResultError(ERROR_EOF);
 
-			m_current_position = new_offset;
+			m_current_position = offset + m_current_position;
 			break;
 		}
 		case SeekOrigin::END: {
 			// FIXME: check overflow
-			size_t new_offset = m_node.m_size + offset;
-			if (new_offset < 0)
+			if (offset > 0)
 				return ResultError(ERROR_EOF);
-			if (size_t(new_offset) > m_node.m_size) {
+			if (size_t(-offset) > m_node.m_size)
 				return ResultError(ERROR_EOF);
-			}
 
-			m_current_position = new_offset;
+			m_current_position = m_node.m_size + offset;
 			break;
 		}
 		default:
@@ -78,9 +74,9 @@ Result<void> FileDescriptor::seek(int offset, SeekOrigin origin)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> FileDescriptor::fstat()
+Result<FileInfo> FileDescriptor::fstat()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return FileInfo{m_node.m_size};
 }
 
 Result<void> FileDescriptor::ioctl()

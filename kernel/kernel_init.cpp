@@ -38,13 +38,14 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	printStatus("Setting up core components.", true);
 	Heap::setup();
 	Scheduler::setup();
-	auto& new_proc = Scheduler::create_new_process("test_process");
-	Scheduler::create_new_thread(&new_proc, test_threading, 0);
 	PIC::setup();
 	PIT::setup();
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
-	// Scheduler::yield();
+	TarFS* tar_fs = new TarFS(reinterpret_cast<void*>(info->ramdisk.start), info->ramdisk.size);
+	VFS::mount_root(tar_fs->get_root_node());
+	Scheduler::create_new_process("test_process", "/Drivers/file1.exe");
+	Scheduler::yield();
 	// **************** tests**************************
 
 	test_tar_filesystem(info->ramdisk.start, info->ramdisk.size);

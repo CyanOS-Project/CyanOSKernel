@@ -1,13 +1,4 @@
 #include "scheduler.h"
-#include "Arch/x86/asm.h"
-#include "Arch/x86/gdt.h"
-#include "Arch/x86/isr.h"
-#include "Arch/x86/panic.h"
-#include "Devices/Console/console.h"
-#include "Devices/Timer/pit.h"
-#include "VirtualMemory/heap.h"
-#include "VirtualMemory/memory.h"
-#include "utils/assert.h"
 
 CircularQueue<ThreadControlBlock>* Scheduler::ready_threads;
 CircularQueue<ThreadControlBlock>* Scheduler::sleeping_threads;
@@ -34,8 +25,8 @@ void Scheduler::setup()
 	m_pid_bitmap = new Bitmap(MAX_BITMAP_SIZE);
 	current_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
-	auto& new_proc = create_new_process("idle_process");
-	create_new_thread(&new_proc, idle, 0);
+	// auto& new_proc = create_new_process("idle_process");
+	// create_new_thread(&new_proc, idle, 0);
 }
 
 // Select next process, save and switch context.
@@ -98,10 +89,11 @@ void Scheduler::yield()
 	asm volatile("int $0x81");
 }
 
-ProcessControlBlock& Scheduler::create_new_process(const char* name)
+ProcessControlBlock& Scheduler::create_shalow_process(const char* name)
 {
 	spinlock_acquire(&scheduler_lock);
 	unsigned str_len = strlen(name) + 1;
+	// FIXME: memory leak
 	char* proc_name = new char[str_len];
 	ProcessControlBlock new_process;
 	memset(&new_process, 0, sizeof(ProcessControlBlock));
@@ -111,9 +103,44 @@ ProcessControlBlock& Scheduler::create_new_process(const char* name)
 	new_process.parent = 0;
 	new_process.pid = reserve_pid();
 	new_process.page_directory = Memory::create_new_virtual_space();
-	processes->push_front(new_process);
-	auto& pcb = processes->head();
+	auto& pcb = processes->push_front(new_process);
 	spinlock_release(&scheduler_lock);
+	return pcb;
+}
+
+Result<uintptr_t> Scheduler::load_executable(const char* path)
+{
+	auto fd = VFS::open(path, 0, 0);
+	if (fd.is_error()) {
+		printf("error opening the file %d\n", fd.error());
+		return ResultError(fd.error());
+	}
+	auto file_info = fd.value().fstat();
+	// FIXME: implement smart pointers and use it here.
+	char* buff = static_cast<char*>(Memory::alloc(file_info.value().size, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
+	memset(buff, 0, file_info.value().size);
+	auto result = fd.value().read(buff, file_info.value().size);
+	if (result.is_error())
+		return ResultError(result.error());
+
+	auto execable_entrypoint = PELoader::load(buff, file_info.value().size);
+	if (execable_entrypoint.is_error())
+		return ResultError(execable_entrypoint.error());
+	Memory::free(buff, file_info.value().size, 0);
+
+	return execable_entrypoint.value();
+}
+
+Result<ProcessControlBlock&> Scheduler::create_new_process(const char* name, const char* path)
+{
+	auto& pcb = create_shalow_process(name);
+
+	auto execable_entrypoint = load_executable(path);
+	if (execable_entrypoint.is_error())
+		return ResultError(execable_entrypoint.error());
+
+	create_new_thread(&pcb, reinterpret_cast<thread_function>(execable_entrypoint.value()), 0);
+
 	return pcb;
 }
 
