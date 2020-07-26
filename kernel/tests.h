@@ -10,6 +10,7 @@
 #include "Tasking/scheduler.h"
 #include "Tasking/semaphore.h"
 #include "utils/PathParser.h"
+#include "utils/SharedPointer.h"
 #include "utils/UniquePointer.h"
 #include "utils/bitmap.h"
 #include "utils/list.h"

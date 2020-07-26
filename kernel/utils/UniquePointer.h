@@ -23,6 +23,7 @@ template <typename T> class UniquePointer
 
 	UniquePointer& operator=(UniquePointer&& other)
 	{
+		ASSERT(this != &other);
 		delete m_storage;
 		m_storage = other.m_storage;
 		other.m_storage = nullptr;
@@ -33,8 +34,7 @@ template <typename T> class UniquePointer
 	UniquePointer& operator=(const UniquePointer& other) = delete;
 	~UniquePointer()
 	{
-		delete m_storage;
-		m_storage = nullptr;
+		destroy();
 	}
 
 	T& operator*()
@@ -65,9 +65,9 @@ template <typename T> class UniquePointer
 
 	T* reset()
 	{
-		delete m_storage;
-		m_storage = nullptr;
-		return m_storage;
+		T* tmp = m_storage;
+		destroy();
+		return tmp;
 	}
 
 	T* get()
@@ -77,4 +77,10 @@ template <typename T> class UniquePointer
 
   private:
 	T* m_storage;
+
+	void destroy()
+	{
+		delete m_storage;
+		m_storage = nullptr;
+	}
 };
