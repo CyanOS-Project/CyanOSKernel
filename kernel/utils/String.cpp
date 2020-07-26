@@ -42,23 +42,22 @@ String::String(const String& other)
 
 String& String::operator=(String&& other)
 {
-	if (this != &other) {
-		cleanup();
+	ASSERT(this != &other);
 
-		m_size = other.m_size;
-		m_data = other.m_data;
-		other.m_data = nullptr;
-	}
+	cleanup();
+	m_size = other.m_size;
+	m_data = other.m_data;
+	other.m_data = nullptr;
 	return *this;
 }
 
 String& String::operator=(const String& other)
 {
-	if (this != &other) {
-		m_size = other.m_size;
-		m_data = new char[m_size + 1];
-		memcpy(m_data, other.m_data, m_size + 1);
-	}
+	ASSERT(this != &other);
+
+	m_size = other.m_size;
+	m_data = new char[m_size + 1];
+	memcpy(m_data, other.m_data, m_size + 1);
 	return *this;
 }
 
@@ -322,7 +321,7 @@ size_t String::rfind(char c, size_t pos) const
 
 inline void String::cleanup()
 {
-	if (m_data)
-		delete[] m_data;
+	delete[] m_data;
+	m_data = nullptr;
 	m_size = 0;
 }

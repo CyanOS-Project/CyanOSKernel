@@ -44,6 +44,9 @@ void* Heap::kmalloc(unsigned size, unsigned flags)
 // Frees block of memory allocated by kmalloc.
 void Heap::kfree(void* addr)
 {
+	if (!addr)
+		return;
+
 	BlockHeader* current_block = (BlockHeader*)ADDR_TO_HEADER(addr);
 	unlink_block(current_block);
 }
