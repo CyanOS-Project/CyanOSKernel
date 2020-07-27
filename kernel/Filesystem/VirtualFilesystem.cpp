@@ -11,6 +11,8 @@ VFS::~VFS()
 
 Result<FileDescriptor> VFS::open(const char* path, int mode, int flags)
 {
+	UNUSED(mode);
+	UNUSED(flags);
 	auto node = traverse_node(path);
 	if (node.is_error()) {
 		return ResultError(node.error());

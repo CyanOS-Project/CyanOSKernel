@@ -48,12 +48,12 @@ template <typename T> class Result
 	{
 	}
 
-	inline const bool is_error() const
+	inline bool is_error() const
 	{
 		return m_error.m_error != 0;
 	}
 
-	inline const unsigned error() const
+	inline unsigned error() const
 	{
 		return m_error.m_error;
 	}
@@ -90,12 +90,12 @@ template <typename T> class Result<T&>
 
 	Result(T&& result) = delete;
 
-	inline const bool is_error() const
+	inline bool is_error() const
 	{
 		return m_error.m_error != 0;
 	}
 
-	inline const unsigned error() const
+	inline unsigned error() const
 	{
 		return m_error.m_error;
 	}
@@ -125,12 +125,12 @@ template <> class Result<void>
 	{
 	}
 
-	inline const bool is_error() const
+	inline bool is_error() const
 	{
 		return m_error.m_error != 0;
 	}
 
-	inline const unsigned error() const
+	inline unsigned error() const
 	{
 		return m_error.m_error;
 	}

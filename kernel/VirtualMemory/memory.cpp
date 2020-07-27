@@ -155,6 +155,7 @@ void Memory::_unmap_no_lock(void* virtual_address, uint32_t size, uint32_t flags
 
 void Memory::_free_no_lock(void* virtual_address, uint32_t size, uint32_t flags)
 {
+	UNUSED(flags);
 	unsigned pages_num = GET_PAGES(size);
 	uintptr_t pAdd = Paging::get_physical_page((uintptr_t)virtual_address);
 	PhysicalMemory::free_pages(pAdd, pages_num);

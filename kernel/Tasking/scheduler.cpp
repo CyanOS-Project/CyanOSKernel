@@ -69,6 +69,7 @@ void Scheduler::sleep(unsigned ms)
 
 void Scheduler::block_current_thread(ThreadState reason, CircularQueue<ThreadControlBlock>* waiting_list)
 {
+	UNUSED(reason);
 	spinlock_acquire(&scheduler_lock);
 	ThreadControlBlock& current = ready_threads->head();
 	current.state = ThreadState::BLOCKED_LOCK;

@@ -18,7 +18,3 @@ void switch_task_stack(uint32_t task_stack_start)
 {
 	GDT::set_tss_stack(task_stack_start);
 }
-
-void save_task_stack(ISRContextFrame& context_frame)
-{
-}

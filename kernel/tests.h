@@ -5,7 +5,6 @@
 #include "Filesystem/FileDescriptor.h"
 #include "Filesystem/VirtualFilesystem.h"
 #include "Filesystem/ustar/ustar.h"
-#include "Lib/new.h"
 #include "Tasking/Loader/pe.h"
 #include "Tasking/scheduler.h"
 #include "Tasking/semaphore.h"

@@ -96,6 +96,7 @@ void __printf(const char* s, ...)
 
 void setMode(TerminalMode Mode)
 {
+	UNUSED(Mode);
 	video_ram = (uint16_t*)VGATEXTMODE_BUFFER;
 }
 

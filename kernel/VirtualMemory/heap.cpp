@@ -13,6 +13,7 @@ void Heap::setup()
 // Returns address of zeroed block of memory.
 void* Heap::kmalloc(unsigned size, unsigned flags)
 {
+	UNUSED(flags);
 	// FIXME: allocate normal memory if the size is greater than MAX_SIZE (there is a bug when less) and handle freeing
 	// too
 	if (!size)

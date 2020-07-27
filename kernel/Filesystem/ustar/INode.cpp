@@ -28,6 +28,9 @@ Result<void> INode::read(void* buff, size_t offset, size_t size)
 
 Result<void> INode::write(void* buff, size_t offset, size_t size)
 {
+	UNUSED(buff);
+	UNUSED(offset);
+	UNUSED(size);
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
@@ -48,21 +51,27 @@ Result<void> INode::remove()
 
 Result<void> INode::create(char* name, void* info)
 {
+	UNUSED(name);
+	UNUSED(info);
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> INode::mkdir(char* name, void* info)
 {
+	UNUSED(name);
+	UNUSED(info);
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> INode::link(FSNode& node)
 {
+	UNUSED(node);
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> INode::unlink(FSNode& node)
 {
+	UNUSED(node);
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
