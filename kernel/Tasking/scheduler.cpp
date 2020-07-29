@@ -49,6 +49,8 @@ void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
 		if (next_thread.parent->pid != current_thread->parent->pid) {
 			switch_page_directory(next_thread.parent->page_directory);
 		}
+	} else {
+		switch_page_directory(next_thread.parent->page_directory);
 	}
 	current_thread = &next_thread;
 	load_context(current_context, &next_thread);
@@ -90,17 +92,20 @@ void Scheduler::yield()
 	asm volatile("int $0x81");
 }
 
-ProcessControlBlock& Scheduler::create_shalow_process(const char* name)
+ProcessControlBlock& Scheduler::create_shallow_process(const char* name, const char* path)
 {
 	spinlock_acquire(&scheduler_lock);
-	unsigned str_len = strlen(name) + 1;
+	size_t name_len = strlen(name) + 1;
+	size_t path_len = strlen(path) + 1;
 	// FIXME: memory leak
-	char* proc_name = new char[str_len];
+	char* proc_name = new char[name_len];
+	char* proc_path = new char[path_len];
 	ProcessControlBlock new_process;
 	memset(&new_process, 0, sizeof(ProcessControlBlock));
-	memset(proc_name, 0, sizeof(str_len));
-	memcpy(proc_name, name, str_len);
+	memcpy(proc_name, name, name_len);
+	memcpy(proc_path, path, path_len);
 	new_process.name = proc_name;
+	new_process.path = proc_path;
 	new_process.parent = 0;
 	new_process.pid = reserve_pid();
 	new_process.page_directory = Memory::create_new_virtual_space();
@@ -134,14 +139,8 @@ Result<uintptr_t> Scheduler::load_executable(const char* path)
 
 Result<ProcessControlBlock&> Scheduler::create_new_process(const char* name, const char* path)
 {
-	auto& pcb = create_shalow_process(name);
-
-	auto execable_entrypoint = load_executable(path);
-	if (execable_entrypoint.is_error())
-		return ResultError(execable_entrypoint.error());
-
-	create_new_thread(&pcb, reinterpret_cast<thread_function>(execable_entrypoint.value()), 0);
-
+	auto& pcb = create_shallow_process(name, path);
+	create_new_thread(&pcb, initiate_process, uintptr_t(&pcb));
 	return pcb;
 }
 
@@ -149,10 +148,11 @@ void Scheduler::create_new_thread(ProcessControlBlock* parent_process, thread_fu
 {
 	spinlock_acquire(&scheduler_lock);
 
-	void* thread_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
-	uintptr_t stack_pointer =
-	    setup_task_stack_context(thread_stack, STACK_SIZE, uintptr_t(address), uintptr_t(idle), argument);
-	create_tcb(uintptr_t(thread_stack), stack_pointer, parent_process);
+	void* thread_kernel_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
+
+	uintptr_t stack_pointer = setup_task_stack_context(thread_kernel_stack, STACK_SIZE, uintptr_t(address), //
+	                                                   uintptr_t(idle), argument);
+	create_tcb(uintptr_t(thread_kernel_stack), stack_pointer, parent_process);
 
 	spinlock_release(&scheduler_lock);
 }
@@ -177,14 +177,14 @@ void Scheduler::wake_up_sleepers()
 	}
 }
 
-void Scheduler::create_tcb(uintptr_t task_stack_start, uintptr_t task_stack_pointer,
+void Scheduler::create_tcb(uintptr_t kernel_stack_start, uintptr_t kernel_stack_pointer,
                            ProcessControlBlock* parent_process)
 {
 	ThreadControlBlock new_thread;
 	memset((char*)&new_thread, 0, sizeof(ThreadControlBlock));
 	new_thread.tid = reserve_tid();
-	new_thread.task_stack_start = task_stack_start;
-	new_thread.task_stack_pointer = task_stack_pointer;
+	new_thread.kernel_stack_start = kernel_stack_start;
+	new_thread.kernel_stack_pointer = kernel_stack_pointer;
 	new_thread.state = ThreadState::READY;
 	if (parent_process)
 		new_thread.parent = parent_process;
@@ -210,14 +210,14 @@ unsigned Scheduler::reserve_pid()
 // Switch the returned context of the current IRQ.
 void Scheduler::load_context(ISRContextFrame* current_context, const ThreadControlBlock* thread)
 {
-	current_context->context_stack = thread->task_stack_pointer;
-	switch_task_stack(thread->task_stack_start);
+	current_context->context_stack = thread->kernel_stack_pointer;
+	switch_task_stack(thread->kernel_stack_start);
 }
 
 // Save current context into its TCB.
 void Scheduler::save_context(const ISRContextFrame* current_context, ThreadControlBlock* thread)
 {
-	thread->task_stack_pointer = current_context->context_stack;
+	thread->kernel_stack_pointer = current_context->context_stack;
 }
 
 // Switch to page directory
@@ -229,4 +229,18 @@ void Scheduler::switch_page_directory(uintptr_t page_directory)
 void Scheduler::schedule_handler(ISRContextFrame* frame)
 {
 	schedule(frame, ScheduleType::FORCED);
+}
+
+void Scheduler::initiate_process(uintptr_t __pcb)
+{
+	ProcessControlBlock* pcb = reinterpret_cast<ProcessControlBlock*>(__pcb);
+	auto execable_entrypoint = load_executable(pcb->path);
+	if (execable_entrypoint.is_error())
+		return;
+	// return ResultError(execable_entrypoint.error());
+	void* thread_user_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE);
+
+	printf("entring...\n");
+	enter_usermode(execable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE);
+	idle(0);
 }

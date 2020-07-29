@@ -44,6 +44,7 @@ enum class ScheduleType {
 typedef struct ProcessControlBlock_t {
 	unsigned pid;
 	const char* name;
+	const char* path;
 	uintptr_t page_directory;
 	ProcessState state;
 	ProcessControlBlock_t* parent;
@@ -52,8 +53,9 @@ typedef struct ProcessControlBlock_t {
 typedef struct ThreadControlBlock_t {
 	unsigned tid;
 	unsigned sleep_ticks;
-	uintptr_t task_stack_start;
-	uintptr_t task_stack_pointer;
+	uintptr_t kernel_stack_start;
+	uintptr_t user_stack_start;
+	uintptr_t kernel_stack_pointer;
 	ThreadState state;
 	ProcessControlBlock* parent;
 } ThreadControlBlock;
@@ -77,10 +79,12 @@ class Scheduler
 	static void select_next_thread();
 	static unsigned reserve_tid();
 	static unsigned reserve_pid();
-	static void create_tcb(uintptr_t task_stack, uintptr_t task_current_stack, ProcessControlBlock* parent);
+	static void create_tcb(uintptr_t kernel_stack_start, uintptr_t kernel_stack_pointer,
+	                       ProcessControlBlock* parent_process);
 	static void create_new_thread(ProcessControlBlock* process, thread_function address, uintptr_t argument);
 	static Result<uintptr_t> load_executable(const char* path);
-	static ProcessControlBlock& create_shalow_process(const char* name);
+	static ProcessControlBlock& create_shallow_process(const char* name, const char* path);
+	static void initiate_process(uintptr_t pcb);
 
   public:
 	static Result<ProcessControlBlock&> create_new_process(const char* name, const char* path);

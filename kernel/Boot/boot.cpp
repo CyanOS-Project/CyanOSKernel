@@ -1,6 +1,7 @@
 
 #include "boot.h"
 #include "Arch/x86/asm.h"
+#include "Arch/x86/gdt.h"
 #include "Arch/x86/paging.h"
 #include "Devices/Console/console.h"
 #include "VirtualMemory/memory.h"

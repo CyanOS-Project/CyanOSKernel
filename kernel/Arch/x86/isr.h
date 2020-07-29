@@ -4,15 +4,19 @@
 
 #define PF_PRESENT(x) (x & 1)  // The fault was caused by a page-level protection violation.
 #define PF_WR(x)      (x & 2)  // The access causing the fault was a write.
-#define PF_US(x)      (x & 3)  // A user-mode access caused the fault.
-#define PF_RSVD(x)    (x & 4)  // The fault was caused by a reserved bit violation.
-#define PF_ID(x)      (x & 5)  // The fault was caused by an instruction fetch.
-#define PF_PK(x)      (x & 6)  // There was a protection-key violation.
-#define PF_SGK(x)     (x & 16) // The fault resulted from violation of SGX-specific access-control requirements.
+#define PF_US(x)      (x & 4)  // A user-mode access caused the fault.
+#define PF_RSVD(x)    (x & 8)  // The fault was caused by a reserved bit violation.
+#define PF_ID(x)      (x & 16) // The fault was caused by an instruction fetch.
+#define PF_PK(x)      (x & 32) // There was a protection-key violation.
+#define PF_SGK(x)     (x & 62) // The fault resulted from violation of SGX-specific access-control requirements.
 
 #define SCHEDULE_IRQ 0x81
 
 struct RegistersContext {
+	uint32_t ds;
+	uint32_t es;
+	uint32_t fs;
+	uint32_t gs;
 	uint32_t eax;
 	uint32_t ebx;
 	uint32_t ecx;

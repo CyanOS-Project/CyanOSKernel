@@ -21,17 +21,22 @@ void GDT::setup()
 	fill_gdt_entry(SEGMENT_INDEX(UCS_SELECTOR), 0, 0xFFFFF, GDT_CODE_PL3, 0x0D);
 	fill_gdt_entry(SEGMENT_INDEX(UDS_SELECTOR), 0, 0xFFFFF, GDT_DATA_PL3, 0x0D);
 	// TSS
-	fill_gdt_entry(SEGMENT_INDEX(TSS_SELECTOR), (uint32_t)&tss_entry, sizeof(TSS_ENTRY), GDT_TSS_PL3, 0x0D);
+	fill_gdt_entry(SEGMENT_INDEX(TSS_SELECTOR), (uint32_t)&tss_entry, sizeof(TSS_ENTRY), GDT_TSS_PL3, 0);
 
 	load_gdt();
 
 	load_segments(KCS_SELECTOR, KDS_SELECTOR);
+	setup_tss(0);
 }
 
 void GDT::set_tss_stack(uint32_t kernel_stack)
 {
 	tss_entry.esp0 = kernel_stack;
 	tss_entry.ss0 = KDS_SELECTOR;
+	//--------------------------
+	// tss_entry.cs = KCS_SELECTOR;
+	// tss_entry.es = tss_entry.ss = tss_entry.fs = tss_entry.ds = tss_entry.gs = KDS_SELECTOR;
+	// load_tss(TSS_SELECTOR);
 }
 
 void GDT::setup_tss(uint32_t kernel_stack)

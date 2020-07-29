@@ -4,30 +4,44 @@ extern interrupt_dispatcher
 dd isr%1
 %endmacro
 
+%macro ISR_COMMON 0
+	pusha
+	push ds
+	push es
+	push fs
+	push gs
+	mov ax, ss
+	mov ds, ax
+	mov es, ax
+	mov fs, ax
+	mov gs, ax
+	push esp
+	call interrupt_dispatcher
+	pop esp
+	pop gs
+	pop fs
+	pop es
+	pop ds
+	popa
+	add esp, 8
+	iret
+%endmacro
+
 %macro ISR_NOERRCODE 1     
 	isr%1:
 		push dword 0
 		push dword %1
-		pusha
-		push esp
-		call interrupt_dispatcher
-		pop esp
-		popa
-	 	add esp, 8
-	 	iret
+		ISR_COMMON
+		
 %endmacro
 
 %macro ISR_ERRCODE 1
 	isr%1:
 		push dword %1
-		pusha
-		push esp
-		call interrupt_dispatcher
-		pop esp
-		popa
-		add esp, 8
-		iret
+		ISR_COMMON
 %endmacro
+
+
 
 ISR_NOERRCODE 	0
 ISR_NOERRCODE 	1

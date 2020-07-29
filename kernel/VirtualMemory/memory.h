@@ -31,7 +31,6 @@ class Memory
 
   public:
 	static unsigned get_kernel_pages();
-
 	static void setup();
 	static void setup_stage2();
 	static void* alloc(uint32_t size, uint32_t flags);

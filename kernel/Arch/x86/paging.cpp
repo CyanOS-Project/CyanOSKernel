@@ -93,7 +93,7 @@ void Paging::unmap_pages(uint32_t virtual_address, uint32_t pages)
 
 void Paging::map_page_table(uint32_t virtual_address, uint32_t pt_virtual_address)
 {
-	uint32_t page_flags = PAGE_FLAGS_PRESENT | PAGE_FLAGS_WRITABLE;
+	uint32_t page_flags = PAGE_FLAGS_PRESENT | PAGE_FLAGS_WRITABLE | PAGE_FLAGS_USER;
 	PAGE_DIRECTORY* page_dir = (PAGE_DIRECTORY*)GET_PAGE_VIRTUAL_ADDRESS(RECURSIVE_ENTRY, RECURSIVE_ENTRY);
 	uint32_t pt_frame = get_physical_page(pt_virtual_address);
 	fill_directory_entry(&page_dir->entries[GET_PDE_INDEX(virtual_address)], pt_frame, page_flags);
@@ -181,6 +181,7 @@ void Paging::fill_directory_PSE_entry(PAGE_DIRECTORY_ENTRY* page_direcotry_entry
 
 void Paging::fill_page_table_entry(PAGE_TABLE_ENTRY* page_table_entry, uint16_t physical_frame, uint32_t flags)
 {
+	// FIXME: accessing bits directly is so slow.
 	page_table_entry->unused = 0;
 	page_table_entry->global = BOOL(flags & PAGE_FLAGS_GLOBAL);
 	page_table_entry->pwt = 0;
