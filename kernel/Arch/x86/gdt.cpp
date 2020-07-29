@@ -10,7 +10,7 @@ void GDT::setup()
 	memset((void*)&tss_entry, 0, sizeof(TSS_ENTRY));
 	memset((void*)&gdt_entries, 0, sizeof(GDT_ENTRY) * GDT_NUMBER_OF_ENTRIES);
 
-	fill_gdt((uint32_t)&gdt_entries, GDT_NUMBER_OF_ENTRIES * sizeof(GDT_ENTRY));
+	fill_gdt((uint32_t)&gdt_entries, GDT_NUMBER_OF_ENTRIES * sizeof(GDT_ENTRY) - 1);
 
 	// Empty Entry
 	fill_gdt_entry(0, 0, 0, 0, 0);
@@ -21,7 +21,7 @@ void GDT::setup()
 	fill_gdt_entry(SEGMENT_INDEX(UCS_SELECTOR), 0, 0xFFFFF, GDT_CODE_PL3, 0x0D);
 	fill_gdt_entry(SEGMENT_INDEX(UDS_SELECTOR), 0, 0xFFFFF, GDT_DATA_PL3, 0x0D);
 	// TSS
-	fill_gdt_entry(SEGMENT_INDEX(TSS_SELECTOR), (uint32_t)&tss_entry, sizeof(TSS_ENTRY), GDT_TSS_PL3, 0);
+	fill_gdt_entry(SEGMENT_INDEX(TSS_SELECTOR), uint32_t(&tss_entry), sizeof(TSS_ENTRY), GDT_TSS_PL3, 0);
 
 	load_gdt();
 
@@ -31,12 +31,9 @@ void GDT::setup()
 
 void GDT::set_tss_stack(uint32_t kernel_stack)
 {
+	memset((void*)&tss_entry, 0, sizeof(TSS_ENTRY));
 	tss_entry.esp0 = kernel_stack;
 	tss_entry.ss0 = KDS_SELECTOR;
-	//--------------------------
-	// tss_entry.cs = KCS_SELECTOR;
-	// tss_entry.es = tss_entry.ss = tss_entry.fs = tss_entry.ds = tss_entry.gs = KDS_SELECTOR;
-	// load_tss(TSS_SELECTOR);
 }
 
 void GDT::setup_tss(uint32_t kernel_stack)

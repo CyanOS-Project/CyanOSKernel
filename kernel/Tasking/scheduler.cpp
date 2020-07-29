@@ -152,7 +152,7 @@ void Scheduler::create_new_thread(ProcessControlBlock* parent_process, thread_fu
 
 	uintptr_t stack_pointer = setup_task_stack_context(thread_kernel_stack, STACK_SIZE, uintptr_t(address), //
 	                                                   uintptr_t(idle), argument);
-	create_tcb(uintptr_t(thread_kernel_stack), stack_pointer, parent_process);
+	create_tcb(uintptr_t(thread_kernel_stack), STACK_SIZE, stack_pointer, parent_process);
 
 	spinlock_release(&scheduler_lock);
 }
@@ -177,13 +177,14 @@ void Scheduler::wake_up_sleepers()
 	}
 }
 
-void Scheduler::create_tcb(uintptr_t kernel_stack_start, uintptr_t kernel_stack_pointer,
+void Scheduler::create_tcb(uintptr_t kernel_stack_start, size_t kernel_stack_size, uintptr_t kernel_stack_pointer,
                            ProcessControlBlock* parent_process)
 {
 	ThreadControlBlock new_thread;
 	memset((char*)&new_thread, 0, sizeof(ThreadControlBlock));
 	new_thread.tid = reserve_tid();
 	new_thread.kernel_stack_start = kernel_stack_start;
+	new_thread.kernel_stack_end = kernel_stack_start + kernel_stack_size;
 	new_thread.kernel_stack_pointer = kernel_stack_pointer;
 	new_thread.state = ThreadState::READY;
 	if (parent_process)
@@ -211,7 +212,7 @@ unsigned Scheduler::reserve_pid()
 void Scheduler::load_context(ISRContextFrame* current_context, const ThreadControlBlock* thread)
 {
 	current_context->context_stack = thread->kernel_stack_pointer;
-	switch_task_stack(thread->kernel_stack_start);
+	switch_task_stack(thread->kernel_stack_end);
 }
 
 // Save current context into its TCB.
@@ -234,13 +235,13 @@ void Scheduler::schedule_handler(ISRContextFrame* frame)
 void Scheduler::initiate_process(uintptr_t __pcb)
 {
 	ProcessControlBlock* pcb = reinterpret_cast<ProcessControlBlock*>(__pcb);
-	auto execable_entrypoint = load_executable(pcb->path);
-	if (execable_entrypoint.is_error())
+	auto executable_entrypoint = load_executable(pcb->path);
+	if (executable_entrypoint.is_error())
 		return;
 	// return ResultError(execable_entrypoint.error());
 	void* thread_user_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE);
 
 	printf("entring...\n");
-	enter_usermode(execable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE);
+	enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE);
 	idle(0);
 }
