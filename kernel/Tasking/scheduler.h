@@ -11,6 +11,7 @@
 #include "Devices/Timer/pit.h"
 #include "Filesystem/VirtualFilesystem.h"
 #include "Loader/pe.h"
+#include "SystemCall.h"
 #include "VirtualMemory/heap.h"
 #include "VirtualMemory/memory.h"
 #include "utils/Result.h"

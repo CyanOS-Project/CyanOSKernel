@@ -25,6 +25,7 @@ void Scheduler::setup()
 	m_pid_bitmap = new Bitmap(MAX_BITMAP_SIZE);
 	current_thread = nullptr;
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
+	SystemCall::setup();
 	// auto& new_proc = create_new_process("idle_process");
 	// create_new_thread(&new_proc, idle, 0);
 }

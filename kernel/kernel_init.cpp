@@ -44,7 +44,7 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	printf("Welcome to CyanOS.\n");
 	TarFS* tar_fs = new TarFS(reinterpret_cast<void*>(info->ramdisk.start), info->ramdisk.size);
 	VFS::mount_root(tar_fs->get_root_node());
-	Scheduler::create_new_process("test_process", "/Drivers/file1.exe");
+	Scheduler::create_new_process("test_process", "/Drivers/syscall.exe");
 	Scheduler::yield();
 	// **************** tests**************************
 
