@@ -151,8 +151,8 @@ void Scheduler::create_new_thread(ProcessControlBlock* parent_process, thread_fu
 
 	void* thread_kernel_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
 
-	uintptr_t stack_pointer = setup_task_stack_context(thread_kernel_stack, STACK_SIZE, uintptr_t(address), //
-	                                                   uintptr_t(idle), argument);
+	uintptr_t stack_pointer = Context::setup_task_stack_context(thread_kernel_stack, STACK_SIZE, uintptr_t(address), //
+	                                                            uintptr_t(idle), argument);
 	create_tcb(uintptr_t(thread_kernel_stack), STACK_SIZE, stack_pointer, parent_process);
 
 	spinlock_release(&scheduler_lock);
@@ -213,7 +213,7 @@ unsigned Scheduler::reserve_pid()
 void Scheduler::load_context(ISRContextFrame* current_context, const ThreadControlBlock* thread)
 {
 	current_context->context_stack = thread->kernel_stack_pointer;
-	switch_task_stack(thread->kernel_stack_end);
+	Context::switch_task_stack(thread->kernel_stack_end);
 }
 
 // Save current context into its TCB.
@@ -243,6 +243,6 @@ void Scheduler::initiate_process(uintptr_t __pcb)
 	void* thread_user_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE);
 
 	printf("entring...\n");
-	enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE);
+	Context::enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE);
 	idle(0);
 }
