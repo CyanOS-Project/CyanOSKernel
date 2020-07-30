@@ -1,6 +1,9 @@
 #pragma once
 
+#include "gdt.h"
+#include "isr.h"
 #include "kernel_map.h"
+#include "paging.h"
 #include "utils/types.h"
 
 #define NUMBER_OF_IDT_ENTRIES    256

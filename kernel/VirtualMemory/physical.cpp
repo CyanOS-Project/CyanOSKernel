@@ -1,8 +1,5 @@
 #include "physical.h"
-#include "Arch/x86/paging.h"
-#include "Arch/x86/panic.h"
-#include "Lib/stdlib.h"
-#include "utils/assert.h"
+
 
 volatile uint8_t PhysicalMemory::physical_memory_tracer[MAX_PHYSICAL_4K_PAGES / 8];
 volatile unsigned PhysicalMemory::physical_memory_size;

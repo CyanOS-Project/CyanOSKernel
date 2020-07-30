@@ -96,4 +96,5 @@ class Scheduler
 	static void setup();
 	static void sleep(unsigned ms);
 	static void yield();
+	static void terminate_thread(ThreadControlBlock* thread);
 };

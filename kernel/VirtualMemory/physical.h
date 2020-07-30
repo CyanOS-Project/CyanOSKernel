@@ -1,6 +1,10 @@
 #pragma once
 
+#include "Arch/x86/paging.h"
+#include "Arch/x86/panic.h"
+#include "Lib/stdlib.h"
 #include "kernel_map.h"
+#include "utils/assert.h"
 #include "utils/types.h"
 
 #define MAX_PHYSICAL_4K_PAGES (1024 * 1024)

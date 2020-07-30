@@ -1,6 +1,8 @@
 #pragma once
 
+#include "asm.h"
 #include "utils/types.h"
+
 typedef volatile struct spinlock_t {
 	uint32_t value;
 	uint32_t eflags;

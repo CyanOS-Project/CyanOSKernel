@@ -1,7 +1,4 @@
 #include "idt.h"
-#include "gdt.h"
-#include "isr.h"
-#include "paging.h"
 
 volatile IDT_DISCRIPTOR IDT::idt __attribute__((aligned(4)));
 volatile IDTEntry IDT::idt_entries[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(PAGE_SIZE)));

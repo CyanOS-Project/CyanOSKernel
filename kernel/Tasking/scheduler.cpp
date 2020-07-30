@@ -241,8 +241,15 @@ void Scheduler::initiate_process(uintptr_t __pcb)
 		return;
 	// return ResultError(execable_entrypoint.error());
 	void* thread_user_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE);
-
-	printf("entring...\n");
 	Context::enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE);
 	idle(0);
+}
+
+void Scheduler::terminate_thread(ThreadControlBlock* thread)
+{
+	for (auto&& thr = ready_threads->begin(); thr != ready_threads->end(); ++thr) {
+		if (thr->tid == thread->tid) {
+			ready_threads->remove(thr);
+		}
+	}
 }

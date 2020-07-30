@@ -1,6 +1,4 @@
 #include "heap.h"
-#include "Arch/x86/paging.h"
-#include "Lib/stdlib.h"
 
 volatile PageFrameBlock* Heap::malloc_mem;
 

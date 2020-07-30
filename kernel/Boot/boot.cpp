@@ -1,12 +1,6 @@
 
 #include "boot.h"
-#include "Arch/x86/asm.h"
-#include "Arch/x86/gdt.h"
-#include "Arch/x86/paging.h"
-#include "Devices/Console/console.h"
-#include "VirtualMemory/memory.h"
-#include "kernel_map.h"
-#include "utils/assert.h"
+
 
 extern uint32_t KERNEL_END;
 extern uint32_t KERNEL_START;

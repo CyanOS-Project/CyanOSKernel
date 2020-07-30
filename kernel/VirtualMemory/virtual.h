@@ -4,6 +4,7 @@
 #include "Arch/x86/panic.h"
 #include "kernel_map.h"
 #include "memory.h"
+#include "utils/assert.h"
 #include "utils/types.h"
 
 class VirtualMemory

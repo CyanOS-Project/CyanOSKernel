@@ -1,5 +1,4 @@
 #include "semaphore.h"
-#include "Lib/stdlib.h"
 
 Semaphore::Semaphore(int t_max_count) :
     m_max_count(t_max_count),

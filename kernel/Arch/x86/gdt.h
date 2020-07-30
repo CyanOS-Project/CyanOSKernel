@@ -1,6 +1,8 @@
 #pragma once
 
+#include "Lib/stdlib.h"
 #include "kernel_map.h"
+#include "paging.h"
 #include "utils/types.h"
 
 #define GDT_NUMBER_OF_ENTRIES              6

@@ -1,6 +1,4 @@
 #include "gdt.h"
-#include "Lib/stdlib.h"
-#include "paging.h"
 
 volatile GDT_DESCRIPTOR GDT::gdt __attribute__((aligned(8)));
 volatile GDT_ENTRY GDT::gdt_entries[GDT_NUMBER_OF_ENTRIES] __attribute__((aligned(PAGE_SIZE)));

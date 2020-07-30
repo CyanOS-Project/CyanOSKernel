@@ -1,5 +1,4 @@
 #include "spinlock.h"
-#include "asm.h"
 
 void spinlock_init(SpinLock* lock)
 {

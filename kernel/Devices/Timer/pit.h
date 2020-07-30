@@ -1,6 +1,10 @@
 #pragma once
 
+#include "Arch/x86/asm.h"
 #include "Arch/x86/isr.h"
+#include "Arch/x86/pic.h"
+#include "Devices/Console/console.h"
+#include "Tasking/scheduler.h"
 
 #define I86_PIT_REG_COUNTER0 0x40
 #define I86_PIT_REG_COUNTER1 0x41

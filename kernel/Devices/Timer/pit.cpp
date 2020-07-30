@@ -1,9 +1,4 @@
 #include "pit.h"
-#include "Arch/x86/asm.h"
-#include "Arch/x86/panic.h"
-#include "Arch/x86/pic.h"
-#include "Devices/Console/console.h"
-#include "Tasking/scheduler.h"
 
 unsigned PIT::ticks;
 void PIT::setup()

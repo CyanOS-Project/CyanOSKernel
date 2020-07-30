@@ -1,5 +1,4 @@
 #include "virtual.h"
-#include "utils/assert.h"
 
 uintptr_t VirtualMemory::find_pages(uint32_t start_address, uint32_t end_address, uint32_t pages_num)
 {

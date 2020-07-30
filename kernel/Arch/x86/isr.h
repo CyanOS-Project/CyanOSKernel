@@ -1,5 +1,8 @@
 #pragma once
 
+#include "asm.h"
+#include "gdt.h"
+#include "idt.h"
 #include "utils/types.h"
 
 #define PF_PRESENT(x) (x & 1)  // The fault was caused by a page-level protection violation.

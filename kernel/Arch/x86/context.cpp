@@ -1,5 +1,4 @@
 #include "context.h"
-#include "gdt.h"
 
 uint32_t Context::setup_task_stack_context(void* stack, uint32_t stack_size, uint32_t start_function,
                                            uint32_t return_function, uint32_t argument)

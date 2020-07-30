@@ -1,9 +1,6 @@
 
 #include "isr.h"
 #include "Devices/Console/console.h"
-#include "asm.h"
-#include "gdt.h"
-#include "idt.h"
 
 static isr_function interrupt_dispatcher_vector[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(4)));
 

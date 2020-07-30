@@ -1,4 +1,5 @@
 #include "rtc.h"
+
 uint8_t RTC::BCDtoBYTE(uint8_t BCD)
 {
 	uint8_t H = BCD >> 4;

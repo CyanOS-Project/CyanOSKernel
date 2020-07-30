@@ -2,6 +2,8 @@
 
 #include "isr.h"
 #include "utils/types.h"
+#include "gdt.h"
+
 
 class Context
 {
