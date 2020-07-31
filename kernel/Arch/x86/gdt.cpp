@@ -59,7 +59,7 @@ void GDT::fill_gdt(uint32_t base, uint16_t limit)
 
 void GDT::load_gdt()
 {
-	asm volatile("LGDT (%0)" : : "r"(&gdt));
+	asm volatile("LGDT [%0]" : : "r"(&gdt));
 }
 
 void GDT::load_tss(uint16_t tss)
@@ -69,17 +69,18 @@ void GDT::load_tss(uint16_t tss)
 
 void GDT::load_segments(uint16_t code_segment, uint16_t data_segment)
 {
-	asm volatile(" MOVW %0,%%ds   \t\n\
-				   MOVW %0,%%es   \t\n\
-				   MOVW %0,%%ss   \t\n\
-				   MOVW %0,%%fs   \t\n\
-				   MOVW %0,%%gs"
+	asm volatile(" MOV %%ds,%0   \t\n\
+				   MOV %%es,%0   \t\n\
+				   MOV %%ss,%0   \t\n\
+				   MOV %%fs,%0   \t\n\
+				   MOV %%gs,%0"
 	             :
 	             : "r"(data_segment));
-	asm volatile("PUSHL %0\n      \t\n\
-				  PUSHL $far_jmp%=   \t\n\
+
+	asm volatile("PUSH %0\n      \t\n\
+				  PUSH OFFSET far_jmp   \t\n\
 				  RETF            \t\n\
-				  far_jmp%=:         \t\n\
+				  far_jmp:         \t\n\
 				  nop"
 	             :
 	             : "r"((uint32_t)code_segment));

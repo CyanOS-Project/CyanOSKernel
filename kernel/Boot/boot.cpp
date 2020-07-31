@@ -1,7 +1,6 @@
 
 #include "boot.h"
 
-
 extern uint32_t KERNEL_END;
 extern uint32_t KERNEL_START;
 BootloaderInfo bootloader_info;
@@ -30,6 +29,7 @@ __attribute__((section(".multiboot2"))) const volatile Mutiboot2_Header my_multi
 };
 extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_info)
 {
+
 	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
 		HLT();
 

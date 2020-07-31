@@ -31,6 +31,7 @@ void display_time()
 
 extern "C" void kernel_init(BootloaderInfo* info)
 {
+
 	GDT::setup();
 	IDT::setup();
 	Memory::setup_stage2();

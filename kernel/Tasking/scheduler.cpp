@@ -90,7 +90,7 @@ void Scheduler::unblock_thread(CircularQueue<ThreadControlBlock>* waiting_list)
 // schedule another thread.
 void Scheduler::yield()
 {
-	asm volatile("int $0x81");
+	asm volatile("int 0x81");
 }
 
 ProcessControlBlock& Scheduler::create_shallow_process(const char* name, const char* path)

@@ -195,14 +195,14 @@ void Paging::fill_page_table_entry(PAGE_TABLE_ENTRY* page_table_entry, uint16_t 
 
 void Paging::load_page_directory(uint32_t page_direcotry)
 {
-	asm("MOV %0,%%CR3" : : "r"(page_direcotry) :);
+	asm("MOV %%CR3,%0" : : "r"(page_direcotry) :);
 }
 
 void Paging::enable_paging()
 {
-	asm("MOV %%CR0, %%EAX;"
-	    "OR %0,%%EAX;"
-	    "MOV %%EAX, %%CR0;"
+	asm("MOV %%EAX,%%CR0;"
+	    "OR  %%EAX,%0;"
+	    "MOV %%CR0,%%EAX ;"
 	    :
 	    : "i"(CR0_WP | CR0_PAGING)
 	    : "eax");
@@ -210,9 +210,9 @@ void Paging::enable_paging()
 
 void Paging::enable_PSE()
 {
-	asm("MOV %%CR4, %%EAX;"
-	    "OR %0,%%EAX;"
-	    "MOV %%EAX, %%CR4;"
+	asm("MOV %%EAX,%%CR4;"
+	    "OR %%EAX,%0;"
+	    "MOV %%CR4,%%EAX;"
 	    :
 	    : "i"(CR4_PSE)
 	    : "eax");
@@ -220,5 +220,5 @@ void Paging::enable_PSE()
 
 void Paging::invalidate_page(uint32_t addr)
 {
-	asm volatile("invlpg (%0)" ::"r"(addr) : "memory");
+	asm volatile("invlpg [%0]" ::"r"(addr) : "memory");
 }
