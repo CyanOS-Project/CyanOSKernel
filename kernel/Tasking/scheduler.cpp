@@ -44,13 +44,13 @@ Thread& Scheduler::select_next_thread()
 	Thread* next_thread = nullptr;
 	size_t threads_index = 0;
 	Thread::for_each_ready([&](auto& thread) {
-		if (threads_index++ == rr_index % Thread::number_of_read_threads()) {
+		if (threads_index++ == rr_index % Thread::number_of_ready_threads()) {
 			next_thread = &thread;
 			return IterationDecision::Break;
 		}
 		return IterationDecision::Continue;
 	});
-	rr_index = (rr_index + 1) % Thread::number_of_read_threads();
+	rr_index = (rr_index + 1) % Thread::number_of_ready_threads();
 	return *next_thread;
 }
 

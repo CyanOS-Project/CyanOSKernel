@@ -58,7 +58,7 @@ class Thread
 	static void yield();
 	static void setup();
 
-	inline static number_of_read_threads()
+	inline static size_t number_of_ready_threads()
 	{
 		return ready_threads->size();
 	}
