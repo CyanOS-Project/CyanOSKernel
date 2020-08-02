@@ -1,4 +1,5 @@
 #include "pit.h"
+#include "Tasking/scheduler.h"
 
 unsigned PIT::ticks;
 void PIT::setup()

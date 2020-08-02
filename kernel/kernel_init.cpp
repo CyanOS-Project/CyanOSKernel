@@ -8,6 +8,8 @@
 #include "Devices/Console/console.h"
 #include "Devices/RTC/rtc.h"
 #include "Devices/Timer/pit.h"
+#include "Tasking/Process.h"
+#include "Tasking/Thread.h"
 #include "Tasking/scheduler.h"
 #include "Tasking/semaphore.h"
 #include "VirtualMemory/heap.h"
@@ -24,7 +26,7 @@ void display_time()
 		RTC::get_time(&date);
 		printf("Time is %d:%d:%d  %d-%d-20%d\n", date.year, date.minutes, date.seconds, date.day_of_month, date.month,
 		       date.year);
-		Scheduler::sleep(500);
+		// Scheduler::sleep(500);
 		removeLine();
 	}
 }
@@ -45,8 +47,8 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	printf("Welcome to CyanOS.\n");
 	TarFS* tar_fs = new TarFS(reinterpret_cast<void*>(info->ramdisk.start), info->ramdisk.size);
 	VFS::mount_root(tar_fs->get_root_node());
-	Scheduler::create_new_process("test_process", "/Drivers/syscall.exe");
-	Scheduler::yield();
+	Process::create_new_process("test_process", "/Drivers/syscall.exe");
+	Thread::yield();
 	// **************** tests**************************
 
 	test_tar_filesystem(info->ramdisk.start, info->ramdisk.size);
