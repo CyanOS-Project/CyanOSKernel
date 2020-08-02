@@ -48,7 +48,7 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	TarFS* tar_fs = new TarFS(reinterpret_cast<void*>(info->ramdisk.start), info->ramdisk.size);
 	VFS::mount_root(tar_fs->get_root_node());
 	Process::create_new_process("test_process", "/Drivers/syscall.exe");
-	// Process::create_new_process("test_process", "/Drivers/syscall.exe");
+	Process::create_new_process("test_process", "/Drivers/syscall.exe");
 	Thread::yield();
 	// **************** tests**************************
 
