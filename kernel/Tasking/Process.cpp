@@ -14,11 +14,15 @@ Result<Process&> Process::create_new_process(const char* name, const char* path)
 {
 	// FIXME:lock it here
 	auto& pcb = processes->emplace_back(name, path);
-	Thread::create_thread(&pcb, initiate_process, uintptr_t(&pcb));
+	Thread::create_thread(pcb, initiate_process, uintptr_t(&pcb));
 	return pcb;
 }
 
-Process::Process(const char* name, const char* path)
+Process::Process(const char* name, const char* path) :
+    m_pid{reserve_pid()},
+    m_page_directory{Memory::create_new_virtual_space()},
+    m_state{ProcessState::ACTIVE},
+    m_parent{nullptr}
 {
 	size_t name_len = strlen(name) + 1;
 	size_t path_len = strlen(path) + 1;
@@ -30,8 +34,12 @@ Process::Process(const char* name, const char* path)
 	m_name = proc_name;
 	m_path = proc_path;
 	m_parent = nullptr;
-	m_pid = reserve_pid();
-	m_page_directory = Memory::create_new_virtual_space();
+}
+
+Process::~Process()
+{
+	delete[] m_name;
+	delete[] m_path;
 }
 
 Result<uintptr_t> Process::load_executable(const char* path)
@@ -66,10 +74,14 @@ unsigned Process::reserve_pid()
 
 void Process::initiate_process(uintptr_t __pcb)
 {
+	/*printf("hello\n");
+	Thread::sleep(1000);
+	printf("bye\n");*/
+
 	Process* pcb = reinterpret_cast<Process*>(__pcb);
-	auto executable_entrypoint = pcb->load_executable(pcb->m_path);
+	auto&& executable_entrypoint = pcb->load_executable(pcb->m_path);
 	if (executable_entrypoint.is_error())
-		return;
+		return; // Remove thread
 	// return ResultError(execable_entrypoint.error());
 	void* thread_user_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE);
 	Context::enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE);

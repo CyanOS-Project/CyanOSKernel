@@ -36,7 +36,7 @@ class Scheduler
 	static void save_context(const ISRContextFrame* current_context, Thread* thread);
 	static void wake_up_sleepers();
 	static void schedule_handler(ISRContextFrame* frame);
-	static void select_next_thread();
+	static Thread& select_next_thread();
 
   public:
 	static void schedule(ISRContextFrame* current_context, ScheduleType type);

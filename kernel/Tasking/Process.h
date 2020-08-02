@@ -19,21 +19,22 @@ enum class ProcessState {
 class Process
 {
   private:
-	unsigned reserve_pid();
-	Result<uintptr_t> load_executable(const char* path);
-	SpinLock lock;
 	static Bitmap* pid_bitmap;
 	static CircularQueue<Process>* processes;
 	static void initiate_process(uintptr_t pcb);
 
+	unsigned reserve_pid();
+	Result<uintptr_t> load_executable(const char* path);
+	SpinLock lock;
+
   public:
 	//--PCB
-	unsigned m_pid;
+	const unsigned m_pid;
 	const char* m_name;
 	const char* m_path;
-	uintptr_t m_page_directory;
-	ProcessState m_state;
-	Process* m_parent;
+	const uintptr_t m_page_directory;
+	const ProcessState m_state;
+	const Process* m_parent;
 	//---------
 	static Result<Process&> create_new_process(const char* name, const char* path);
 	Process(const char* name, const char* path);
