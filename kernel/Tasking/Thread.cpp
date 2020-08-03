@@ -1,21 +1,23 @@
 #include "Thread.h"
 #include "WaitQueue.h"
 
-CircularQueue<Thread*>* Thread::ready_threads = nullptr;
-CircularQueue<Thread*>* Thread::sleeping_threads = nullptr;
+IntrusiveList<Thread>* Thread::ready_threads = nullptr;
+IntrusiveList<Thread>* Thread::sleeping_threads = nullptr;
 Thread* Thread::current = nullptr;
 Bitmap* Thread::m_tid_bitmap;
 
 void Thread::setup()
 {
 	m_tid_bitmap = new Bitmap(MAX_BITMAP_SIZE);
-	ready_threads = new CircularQueue<Thread*>;
-	sleeping_threads = new CircularQueue<Thread*>;
+	ready_threads = new IntrusiveList<Thread>;
+	sleeping_threads = new IntrusiveList<Thread>;
 }
 
-void Thread::create_thread(Process& parent_process, thread_function address, uintptr_t argument)
+Thread& Thread::create_thread(Process& parent_process, thread_function address, uintptr_t argument)
 {
-	ready_threads->emplace_back(new Thread(parent_process, address, argument));
+	Thread& new_thread = *new Thread(parent_process, address, argument);
+	ready_threads->push_back(new_thread);
+	return new_thread;
 }
 
 Thread::Thread(Process& parent_process, thread_function address, uintptr_t argument) :
@@ -40,7 +42,7 @@ Thread::~Thread()
 void Thread::wake_up()
 {
 	spinlock_acquire(&m_lock);
-	ready_threads->push_back(this);
+	ready_threads->push_back(*this);
 	m_state = ThreadState::RUNNING;
 	spinlock_release(&m_lock);
 }
@@ -48,17 +50,11 @@ void Thread::wake_up()
 void Thread::wait_on(WaitQueue& queue)
 {
 	spinlock_acquire(&m_lock);
-	// FIXME: moving from queues this way costs 2 heap allocation instead of zero !
-	// FIXME: implement find method on list.
-	auto&& this_thread = ready_threads->begin();
-	for (; this_thread != ready_threads->end(); ++this_thread) {
-		if ((*this_thread)->tid() == m_tid)
-			break;
-	}
-	ready_threads->remove(this_thread);
+	ready_threads->remove(*this);
 	queue.enqueue(*this);
 	m_state = ThreadState::BLOCKED_LOCK;
 	spinlock_release(&m_lock);
+	yield();
 }
 
 // schedule another thread.
@@ -97,7 +93,8 @@ void Thread::sleep(unsigned ms)
 	spinlock_acquire(&current->m_lock);
 	current->m_sleep_ticks = PIT::ticks + ms;
 	current->m_state = ThreadState::BLOCKED_SLEEP;
-	ready_threads->move_head_to_other_list(sleeping_threads);
+	ready_threads->remove(*current);
+	sleeping_threads->push_back(*current);
 	spinlock_release(&current->m_lock);
 	yield();
 }

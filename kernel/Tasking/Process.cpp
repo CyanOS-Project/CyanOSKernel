@@ -10,7 +10,7 @@ void Process::setup()
 	processes = new CircularQueue<Process>;
 }
 
-Result<Process&> Process::create_new_process(const char* name, const char* path)
+Process& Process::create_new_process(const char* name, const char* path)
 {
 	// FIXME:lock it here
 	auto& pcb = processes->emplace_back(name, path);

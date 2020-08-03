@@ -36,7 +36,7 @@ class Process
 	const ProcessState m_state;
 	const Process* m_parent;
 	//---------
-	static Result<Process&> create_new_process(const char* name, const char* path);
+	static Process& create_new_process(const char* name, const char* path);
 	Process(const char* name, const char* path);
 	~Process();
 	static void setup();

@@ -1,6 +1,6 @@
 #pragma once
 #include "Thread.h"
-#include "utils/list.h"
+#include "utils/IntrusiveList.h"
 
 class WaitQueue
 {
@@ -18,5 +18,5 @@ class WaitQueue
 	~WaitQueue();
 
   private:
-	CircularQueue<Thread*> m_threads;
+	IntrusiveList<Thread> m_threads;
 };
