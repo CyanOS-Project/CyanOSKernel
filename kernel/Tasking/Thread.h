@@ -15,7 +15,7 @@ enum class ThreadState {
 	RUNNING,
 	READY,
 	BLOCKED_SLEEP,
-	BLOCKED_LOCK,
+	BLOCKED_QUEUE,
 	BLOCKED_IO,
 	SUSPENDED,
 };
@@ -52,7 +52,8 @@ class Thread : public IntrusiveListNode<Thread>
 	// void block(ThreadState reason);
 	// void suspend(int reason);
 	// void resume();
-	void wake_up();
+	void wake_up_from_queue();
+	void wake_up_from_sleep();
 	void wait_on(WaitQueue& queue);
 	void terminate();
 	static void sleep(unsigned ms);
@@ -79,8 +80,8 @@ class Thread : public IntrusiveListNode<Thread>
 
 	template <typename Callback> static void for_each_sleeping(Callback callback)
 	{
-		for (auto&& thread = Thread::sleeping_threads->begin(); thread != Thread::sleeping_threads->end(); ++thread) {
-			auto ret = callback(*thread);
+		for (auto&& thread : *Thread::sleeping_threads) {
+			auto ret = callback(thread);
 			if (ret == IterationDecision::Break) {
 				break;
 			} else if (ret == IterationDecision::Restart) {
@@ -92,8 +93,8 @@ class Thread : public IntrusiveListNode<Thread>
 
 	template <typename Callback> static void for_each_ready(Callback callback)
 	{
-		for (auto&& thread = Thread::ready_threads->begin(); thread != Thread::ready_threads->end(); ++thread) {
-			auto ret = callback(*thread);
+		for (auto&& thread : *Thread::ready_threads) {
+			auto ret = callback(thread);
 			if (ret == IterationDecision::Break) {
 				break;
 			} else if (ret == IterationDecision::Restart) {

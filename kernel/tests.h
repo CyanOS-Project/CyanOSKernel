@@ -19,7 +19,7 @@ void test_semaphore_thread2(uintptr_t arg)
 	printf("Thread2:\n");
 	lock->acquire();
 	printf("Semaphore acquired by thread2\n");
-	// Scheduler::sleep(1000);
+	Thread::sleep(1000);
 	lock->release();
 	printf("Semaphore released by thread2\n");
 	while (1) {
@@ -34,7 +34,8 @@ void test_semaphore(uintptr_t arg)
 	lock->acquire();
 	Thread::create_thread(Thread::current->get_process(), test_semaphore_thread2, 0);
 	printf("Semaphore acquired by thread1\n");
-	// Thread::sleep(500);
+	Thread::sleep(3000);
+	printf("wakeup thread1\n");
 	lock->release();
 	printf("Semaphore released by thread1\n");
 	while (1) {

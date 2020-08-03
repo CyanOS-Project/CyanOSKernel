@@ -59,8 +59,7 @@ void Scheduler::wake_up_sleepers()
 	Thread::for_each_sleeping([](Thread& thread) {
 		if (thread.m_sleep_ticks <= PIT::ticks) {
 			thread.m_sleep_ticks = 0;
-			// Thread::sleeping_threads->move_to_other_list(Thread::ready_threads, &thread);
-			thread.wake_up();
+			thread.wake_up_from_sleep();
 			return IterationDecision::Restart; // FIXME: why restart?
 		}
 		return IterationDecision::Continue;

@@ -39,9 +39,18 @@ Thread::~Thread()
 {
 }
 
-void Thread::wake_up()
+void Thread::wake_up_from_queue()
 {
 	spinlock_acquire(&m_lock);
+	ready_threads->push_back(*this);
+	m_state = ThreadState::RUNNING;
+	spinlock_release(&m_lock);
+}
+
+void Thread::wake_up_from_sleep()
+{
+	spinlock_acquire(&m_lock);
+	sleeping_threads->remove(*this);
 	ready_threads->push_back(*this);
 	m_state = ThreadState::RUNNING;
 	spinlock_release(&m_lock);
@@ -52,7 +61,7 @@ void Thread::wait_on(WaitQueue& queue)
 	spinlock_acquire(&m_lock);
 	ready_threads->remove(*this);
 	queue.enqueue(*this);
-	m_state = ThreadState::BLOCKED_LOCK;
+	m_state = ThreadState::BLOCKED_QUEUE;
 	spinlock_release(&m_lock);
 	yield();
 }

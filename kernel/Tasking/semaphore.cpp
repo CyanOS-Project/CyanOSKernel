@@ -16,8 +16,8 @@ void Semaphore::acquire()
 		m_count++;
 		spinlock_release(&m_spinlock);
 	} else {
-		Thread::current->wait_on(m_queue);
 		spinlock_release(&m_spinlock);
+		Thread::current->wait_on(m_queue);
 		acquire();
 	}
 }

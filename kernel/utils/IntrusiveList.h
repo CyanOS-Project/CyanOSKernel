@@ -1,6 +1,12 @@
 #pragma once
 
 #include "utils/types.h"
+#ifdef __UNIT_TESTS
+	#include <assert.h>
+	#define ASSERT(x) assert(x)
+#else
+	#include "assert.h"
+#endif
 
 template <typename T> class IntrusiveList;
 // Inherit from this class to use it in IntrusiveList
@@ -8,6 +14,7 @@ template <typename T> class IntrusiveListNode
 {
 	T* next = nullptr;
 	T* prev = nullptr;
+	IntrusiveList<T>* owner = nullptr;
 	friend class IntrusiveList<T>;
 };
 
@@ -95,6 +102,7 @@ template <typename T> T* IntrusiveList<T>::Iterator::operator->()
 
 template <typename T> void IntrusiveList<T>::remove_node(T& node)
 {
+	ASSERT(node.owner == this);
 	if ((m_head == &node) && (m_tail == &node)) {
 		m_head = m_tail = nullptr;
 	} else if (m_head == &node) {
@@ -107,11 +115,15 @@ template <typename T> void IntrusiveList<T>::remove_node(T& node)
 		node.prev->next = node.next;
 		node.next->prev = node.prev;
 	}
+	node.owner = nullptr;
 	m_count--;
 }
 
 template <typename T> void IntrusiveList<T>::append_node(T& node)
 {
+	if (node.owner == nullptr)
+		node.owner = this;
+
 	if (!m_head) {
 		node.prev = nullptr;
 		node.next = nullptr;
