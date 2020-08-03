@@ -12,7 +12,7 @@
 - [x] Multi-threading.
 - [x] Mutex/Semaphores.
 - [x] Multi-programming.
-- [ ] User space.
+- [x] User space.
 - [ ] System calls.
 - [ ] Inter-process communication.
 - [ ] Filesystem.
