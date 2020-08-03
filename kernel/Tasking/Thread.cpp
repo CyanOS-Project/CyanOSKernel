@@ -32,7 +32,7 @@ Thread::Thread(Process& parent_process, thread_function address, uintptr_t argum
 	m_kernel_stack_start = uintptr_t(thread_kernel_stack);
 	m_kernel_stack_end = m_kernel_stack_start + STACK_SIZE;
 	m_kernel_stack_pointer = stack_pointer;
-	m_state = ThreadState::READY;
+	m_state = ThreadState::RUNNABLE;
 }
 
 Thread::~Thread()
@@ -43,7 +43,7 @@ void Thread::wake_up_from_queue()
 {
 	spinlock_acquire(&m_lock);
 	ready_threads->push_back(*this);
-	m_state = ThreadState::RUNNING;
+	m_state = ThreadState::RUNNABLE;
 	spinlock_release(&m_lock);
 }
 
@@ -52,7 +52,7 @@ void Thread::wake_up_from_sleep()
 	spinlock_acquire(&m_lock);
 	sleeping_threads->remove(*this);
 	ready_threads->push_back(*this);
-	m_state = ThreadState::RUNNING;
+	m_state = ThreadState::RUNNABLE;
 	spinlock_release(&m_lock);
 }
 
@@ -66,7 +66,6 @@ void Thread::wait_on(WaitQueue& queue)
 	yield();
 }
 
-// schedule another thread.
 void Thread::yield()
 {
 	asm volatile("int 0x81");
@@ -89,12 +88,8 @@ unsigned Thread::reserve_tid()
 void Thread::terminate()
 {
 	spinlock_acquire(&m_lock);
-	/*for (auto&& thr = ready_threads->begin(); thr != ready_threads->end(); ++thr) {
-	    if (thr->tid == thread->tid) {
-	        ready_threads->remove(thr);
-	    }
-	}*/
-	spinlock_release(&m_lock);
+	ASSERT(m_state == ThreadState::RUNNABLE);
+	this->~Thread();
 }
 
 void Thread::sleep(unsigned ms)

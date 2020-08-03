@@ -60,7 +60,6 @@ void Scheduler::wake_up_sleepers()
 		if (thread.m_sleep_ticks <= PIT::ticks) {
 			thread.m_sleep_ticks = 0;
 			thread.wake_up_from_sleep();
-			return IterationDecision::Restart; // FIXME: why restart?
 		}
 		return IterationDecision::Continue;
 	});

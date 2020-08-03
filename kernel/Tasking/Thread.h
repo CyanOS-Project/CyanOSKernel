@@ -12,8 +12,7 @@
 #include "utils/types.h"
 
 enum class ThreadState {
-	RUNNING,
-	READY,
+	RUNNABLE,
 	BLOCKED_SLEEP,
 	BLOCKED_QUEUE,
 	BLOCKED_IO,
@@ -49,9 +48,6 @@ class Thread : public IntrusiveListNode<Thread>
 
 	Thread(Process& process, thread_function address, uintptr_t argument);
 	~Thread();
-	// void block(ThreadState reason);
-	// void suspend(int reason);
-	// void resume();
 	void wake_up_from_queue();
 	void wake_up_from_sleep();
 	void wait_on(WaitQueue& queue);
@@ -80,12 +76,11 @@ class Thread : public IntrusiveListNode<Thread>
 
 	template <typename Callback> static void for_each_sleeping(Callback callback)
 	{
-		for (auto&& thread : *Thread::sleeping_threads) {
-			auto ret = callback(thread);
+		auto&& thread = Thread::sleeping_threads->begin();
+		while (thread != Thread::sleeping_threads->end()) {
+			auto iterator_copy = thread++;
+			auto ret = callback(*iterator_copy);
 			if (ret == IterationDecision::Break) {
-				break;
-			} else if (ret == IterationDecision::Restart) {
-				for_each_sleeping(callback);
 				break;
 			}
 		}
@@ -93,12 +88,11 @@ class Thread : public IntrusiveListNode<Thread>
 
 	template <typename Callback> static void for_each_ready(Callback callback)
 	{
-		for (auto&& thread : *Thread::ready_threads) {
-			auto ret = callback(thread);
+		auto&& thread = Thread::ready_threads->begin();
+		while (thread != Thread::ready_threads->end()) {
+			auto iterator_copy = thread++;
+			auto ret = callback(*iterator_copy);
 			if (ret == IterationDecision::Break) {
-				break;
-			} else if (ret == IterationDecision::Restart) {
-				for_each_sleeping(callback);
 				break;
 			}
 		}

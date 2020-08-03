@@ -33,10 +33,12 @@ template <typename T> class IntrusiveList
 	{
 	  public:
 		Iterator(T* node);
+		Iterator(const Iterator& other);
 		~Iterator() = default;
 		bool operator==(const Iterator& other);
 		bool operator!=(const Iterator& other);
 		Iterator& operator++();
+		Iterator operator++(int);
 		T& operator*();
 		T* operator->();
 
@@ -70,6 +72,7 @@ template <typename T> class IntrusiveList
 	{
 		return !m_count;
 	}
+
 	inline size_t size() const
 	{
 		return m_count;
@@ -78,23 +81,39 @@ template <typename T> class IntrusiveList
 template <typename T> IntrusiveList<T>::Iterator::Iterator(T* node) : m_node{node}
 {
 }
+
+template <typename T> IntrusiveList<T>::Iterator::Iterator(const Iterator& other) : m_node{other.m_node}
+{
+}
+
 template <typename T> bool IntrusiveList<T>::Iterator::operator==(const Iterator& other)
 {
 	return m_node == other.m_node;
 }
+
 template <typename T> bool IntrusiveList<T>::Iterator::operator!=(const Iterator& other)
 {
 	return m_node != other.m_node;
 }
+
 template <typename T> typename IntrusiveList<T>::Iterator& IntrusiveList<T>::Iterator::operator++()
 {
 	m_node = m_node->next;
 	return *this;
 }
+
+template <typename T> typename IntrusiveList<T>::Iterator IntrusiveList<T>::Iterator::operator++(int)
+{
+	Iterator old(*this);
+	m_node = m_node->next;
+	return old;
+}
+
 template <typename T> T& IntrusiveList<T>::Iterator::operator*()
 {
 	return *m_node;
 }
+
 template <typename T> T* IntrusiveList<T>::Iterator::operator->()
 {
 	return m_node;
@@ -140,7 +159,8 @@ template <typename T> void IntrusiveList<T>::append_node(T& node)
 template <typename T> void IntrusiveList<T>::push_back(T& node)
 {
 	append_node(node);
-};
+}
+
 template <typename T> T* IntrusiveList<T>::pop_front()
 {
 	if (!m_head) {
@@ -149,7 +169,7 @@ template <typename T> T* IntrusiveList<T>::pop_front()
 	T* node = m_head;
 	remove_node(*node);
 	return node;
-};
+}
 
 template <typename T> T* IntrusiveList<T>::remove(T& node)
 {

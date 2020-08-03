@@ -2,10 +2,7 @@
 
 #include "Arch/x86/asm.h"
 #include "Arch/x86/context.h"
-#include "Arch/x86/gdt.h"
 #include "Arch/x86/isr.h"
-#include "Arch/x86/paging.h"
-#include "Arch/x86/panic.h"
 #include "Arch/x86/spinlock.h"
 #include "Devices/Console/console.h"
 #include "Devices/Timer/pit.h"
@@ -14,12 +11,8 @@
 #include "Process.h"
 #include "SystemCall.h"
 #include "Thread.h"
-#include "VirtualMemory/heap.h"
-#include "VirtualMemory/memory.h"
 #include "utils/Result.h"
 #include "utils/assert.h"
-#include "utils/bitmap.h"
-#include "utils/list.h"
 #include "utils/types.h"
 
 enum class ScheduleType {
