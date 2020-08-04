@@ -89,6 +89,7 @@ void Thread::terminate()
 {
 	spinlock_acquire(&m_lock);
 	ASSERT(m_state == ThreadState::RUNNABLE);
+	ready_threads->remove(*this);
 	this->~Thread();
 }
 

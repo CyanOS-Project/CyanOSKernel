@@ -74,10 +74,6 @@ unsigned Process::reserve_pid()
 
 void Process::initiate_process(uintptr_t __pcb)
 {
-	/*printf("hello\n");
-	Thread::sleep(1000);
-	printf("bye\n");*/
-
 	Process* pcb = reinterpret_cast<Process*>(__pcb);
 	auto&& executable_entrypoint = pcb->load_executable(pcb->m_path);
 	if (executable_entrypoint.is_error())

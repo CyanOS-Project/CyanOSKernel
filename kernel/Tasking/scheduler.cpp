@@ -9,8 +9,6 @@ void Scheduler::setup()
 	SystemCall::setup();
 	Process::setup();
 	Thread::setup();
-	// auto& new_proc = create_new_process("idle_process");
-	// create_new_thread(&new_proc, idle, 0);
 }
 
 void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
@@ -23,10 +21,8 @@ void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
 
 	if (Thread::current) {
 		save_context(current_context, Thread::current);
-		// Thread::current->m_state = ThreadState::READY;
 	}
 	Thread& next_thread = select_next_thread();
-	// next_thread.m_state = ThreadState::RUNNING;
 	if (Thread::current) {
 		if (next_thread.m_parent.m_pid != Thread::current->m_parent.m_pid) {
 			switch_page_directory(next_thread.m_parent.m_page_directory);

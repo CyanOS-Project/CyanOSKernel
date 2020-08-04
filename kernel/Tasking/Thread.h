@@ -41,12 +41,12 @@ class Thread : public IntrusiveListNode<Thread>
 	Process& m_parent;
 	ThreadState m_state;
 	unsigned reserve_tid();
+	Thread(Process& process, thread_function address, uintptr_t argument);
 
   public:
 	static Thread* current;
 	static Thread& create_thread(Process& parent_process, thread_function address, uintptr_t argument);
 
-	Thread(Process& process, thread_function address, uintptr_t argument);
 	~Thread();
 	void wake_up_from_queue();
 	void wake_up_from_sleep();
