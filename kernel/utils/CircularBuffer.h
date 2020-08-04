@@ -1,5 +1,6 @@
 #pragma once
 
+#include "utils/stl.h"
 #include "utils/types.h"
 #ifdef __UNIT_TESTS
 	#include <assert.h>
@@ -10,27 +11,32 @@
 template <typename T> class CircularBuffer
 {
   private:
-	T m_data[];
+	T* m_data;
 	size_t m_head;
 	size_t m_tail;
-	size_t m_current_size;
+	size_t m_count;
 	const size_t m_size;
 
   public:
 	explicit CircularBuffer(size_t size);
 	void queue(const T&);
-	T& pop();
+	void queue(T&&);
+	T dequeue();
 	inline bool is_empty()
 	{
-		return m_current_size == 0;
+		return m_count == 0;
 	}
 	bool is_full()
 	{
-		return m_current_size == m_size;
+		return m_count == m_size;
 	}
 	size_t size()
 	{
-		return m_current_size;
+		return m_size;
+	};
+	size_t count()
+	{
+		return m_count;
 	};
 	~CircularBuffer();
 };
@@ -40,7 +46,7 @@ CircularBuffer<T>::CircularBuffer(size_t size) :
     m_data{new T[size]}, //
     m_head{0},
     m_tail{0},
-    m_current_size{0},
+    m_count{0},
     m_size{size}
 {
 }
@@ -50,15 +56,25 @@ template <typename T> void CircularBuffer<T>::queue(const T& data_to_queue)
 	ASSERT(!is_full());
 	m_data[m_tail] = data_to_queue;
 	m_tail = (++m_tail) % m_size;
-	m_current_size++;
+	m_count++;
 }
 
-template <typename T> T& CircularBuffer<T>::pop()
+template <typename T> void CircularBuffer<T>::queue(T&& data_to_queue)
 {
-	ASSERT(!is_empty);
-	T& ret_data = m_data[m_head];
-	m_head = (++m_head) % m_head;
-	m_current_size--;
+	ASSERT(!is_full());
+	m_data[m_tail] = move(data_to_queue);
+	m_tail = (++m_tail) % m_size;
+	m_count++;
+}
+
+template <typename T> T CircularBuffer<T>::dequeue()
+{
+	ASSERT(!is_empty());
+	T ret_data = move(m_data[m_head]);
+	m_data[m_head].~T();
+	m_head = (++m_head) % m_size;
+	m_count--;
+	return ret_data;
 }
 
 template <typename T> CircularBuffer<T>::~CircularBuffer()
