@@ -16,6 +16,7 @@
 Semaphore* lock;
 void test_semaphore_thread2(uintptr_t arg)
 {
+	UNUSED(arg);
 	printf("Thread2:\n");
 	lock->acquire();
 	printf("Semaphore acquired by thread2\n");
@@ -29,6 +30,7 @@ void test_semaphore_thread2(uintptr_t arg)
 
 void test_semaphore(uintptr_t arg)
 {
+	UNUSED(arg);
 	printf("Thread1:\n");
 	lock = new Semaphore(1);
 	lock->acquire();

@@ -50,23 +50,27 @@ Result<void> Pipe::mkdir(char* name, void* info)
 {
 	UNUSED(name);
 	UNUSED(info);
+	PANIC("mkdir not implemented");
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> Pipe::link(FSNode& node)
 {
 	UNUSED(node);
+	PANIC("link not implemented");
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> Pipe::unlink(FSNode& node)
 {
 	UNUSED(node);
+	PANIC("unlink not implemented");
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<FSNode&> Pipe::dir_lookup(char* file_name)
 {
 	UNUSED(file_name);
+	PANIC("dir_lookup not implemented");
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }

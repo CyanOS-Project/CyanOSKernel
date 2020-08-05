@@ -3,10 +3,10 @@
 #include "Filesystem/VirtualFilesystem.h"
 #include "Loader/pe.h"
 #include "VirtualMemory/memory.h"
+#include "utils/List.h"
 #include "utils/Result.h"
 #include "utils/assert.h"
 #include "utils/bitmap.h"
-#include "utils/list.h"
 #include "utils/types.h"
 
 enum class ProcessState {
@@ -20,7 +20,7 @@ class Process
 {
   private:
 	static Bitmap* pid_bitmap;
-	static CircularQueue<Process>* processes;
+	static List<Process>* processes;
 	static void initiate_process(uintptr_t pcb);
 
 	unsigned reserve_pid();

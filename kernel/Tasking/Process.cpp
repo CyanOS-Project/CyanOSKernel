@@ -1,13 +1,13 @@
 #include "Process.h"
 #include "Thread.h"
 
-CircularQueue<Process>* Process::processes;
+List<Process>* Process::processes;
 Bitmap* Process::pid_bitmap;
 
 void Process::setup()
 {
 	pid_bitmap = new Bitmap(MAX_BITMAP_SIZE);
-	processes = new CircularQueue<Process>;
+	processes = new List<Process>;
 }
 
 Process& Process::create_new_process(const char* name, const char* path)

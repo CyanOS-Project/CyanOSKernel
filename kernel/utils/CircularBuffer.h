@@ -79,5 +79,5 @@ template <typename T> T CircularBuffer<T>::dequeue()
 
 template <typename T> CircularBuffer<T>::~CircularBuffer()
 {
-	delete[] m_data;
+	delete m_data;
 }

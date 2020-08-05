@@ -1,6 +1,6 @@
 #include "INode.h"
 
-INode::INode(const char* name, size_t size, char* data) : m_data(data), m_children(new CircularQueue<INode>)
+INode::INode(const char* name, size_t size, char* data) : m_data(data), m_children(new List<INode>)
 {
 	FSNode::m_size = size;
 	memcpy(m_filename, name, strlen(name) + 1);

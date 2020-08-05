@@ -1,8 +1,7 @@
 #ifdef __STRICT_ANSI__
 	#undef __STRICT_ANSI__
 #endif
-
-#include "utils/CircularList.h"
+#include "utils/List.h"
 #include <gtest/gtest.h>
 
 struct TestStruct {
@@ -18,10 +17,10 @@ struct TestStruct {
 	}
 };
 
-TEST(CircularQueue_Test, Iteration)
+TEST(List_Test, Iteration)
 {
 	TestStruct raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
-	CircularQueue<TestStruct> list;
+	List<TestStruct> list;
 	for (size_t i = 0; i < 3; i++) {
 		list.push_back(raw_list[i]);
 	}
@@ -35,35 +34,35 @@ TEST(CircularQueue_Test, Iteration)
 	}
 }
 
-TEST(CircularQueue_Test, Removing)
+TEST(List_Test, Erasing)
 {
 	TestStruct raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
-	CircularQueue<TestStruct> list;
+	List<TestStruct> list;
 	for (size_t i = 0; i < 3; i++) {
 		list.push_back(raw_list[i]);
 	}
 
 	EXPECT_EQ(list.size(), 3);
 
-	list.remove(1);
+	list.erase(++list.begin());
 	EXPECT_EQ(list.size(), 2);
 	EXPECT_TRUE(list[0] == raw_list[0]);
 	EXPECT_TRUE(list[1] == raw_list[2]);
 
-	list.remove(1);
+	list.erase(++list.begin());
 	EXPECT_EQ(list.size(), 1);
 	EXPECT_TRUE(list[0] == raw_list[0]);
 
-	list.remove(0);
+	list.erase(list.begin());
 	EXPECT_EQ(list.size(), 0);
 }
 
-TEST(CircularQueue_Test, MovingBetweenLists)
+TEST(List_Test, Splicing)
 {
 	TestStruct raw_list1[] = {{1, 2}, {3, 4}, {5, 6}};
 	TestStruct raw_list2[] = {{10, 20}, {30, 40}, {50, 60}, {70, 80}};
-	CircularQueue<TestStruct> list1;
-	CircularQueue<TestStruct> list2;
+	List<TestStruct> list1;
+	List<TestStruct> list2;
 	for (size_t i = 0; i < 3; i++) {
 		list1.push_back(raw_list1[i]);
 	}
@@ -74,15 +73,16 @@ TEST(CircularQueue_Test, MovingBetweenLists)
 	EXPECT_EQ(list1.size(), 3);
 	EXPECT_EQ(list2.size(), 4);
 
-	list2.move_head_to_other_list(&list1);
+	list2.splice(list1, list2.begin());
 
 	EXPECT_EQ(list1.size(), 4);
 	EXPECT_EQ(list2.size(), 3);
 	EXPECT_TRUE(list1[3] == raw_list2[0]);
 
 	auto itr{list2.begin()};
-	itr.move_cursor(2);
-	list2.move_to_other_list(&list1, itr);
+	itr++;
+	itr++;
+	list2.splice(list1, itr);
 
 	EXPECT_EQ(list1.size(), 5);
 	EXPECT_EQ(list2.size(), 2);

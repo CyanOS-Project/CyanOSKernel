@@ -3,8 +3,8 @@
 #include "Filesystem/FSNode.h"
 #include "Lib/stdlib.h"
 #include "utils/ErrorCodes.h"
+#include "utils/List.h"
 #include "utils/Result.h"
-#include "utils/list.h"
 #include "utils/types.h"
 
 class INode : public FSNode
@@ -12,7 +12,7 @@ class INode : public FSNode
   private:
 	char m_filename[MAX_FILE_NAME];
 	char* m_data;
-	CircularQueue<INode>* m_children;
+	List<INode>* m_children;
 
   public:
 	INode(const char* name, size_t size, char* data);
