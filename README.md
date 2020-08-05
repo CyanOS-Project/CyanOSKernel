@@ -13,11 +13,13 @@
 - [x] Mutex/Semaphores.
 - [x] Multi-programming.
 - [x] User space.
+- [x] Virtual File System.
+- [ ] FS: Pipes
 - [ ] System calls.
 - [ ] Inter-process communication.
-- [ ] Filesystem.
-- [ ] Keyboard driver.
 - [ ] PCI bus.
+- [ ] FS: fat32/ext2.
+- [ ] Keyboard driver.
 - [ ] GUI.
 - [ ] Network Driver.
 - [ ] USB.
