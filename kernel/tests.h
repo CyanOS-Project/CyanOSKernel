@@ -12,7 +12,6 @@
 #include "utils/SharedPointer.h"
 #include "utils/UniquePointer.h"
 #include "utils/bitmap.h"
-#include "utils/list.h"
 Semaphore* lock;
 void test_semaphore_thread2(uintptr_t arg)
 {

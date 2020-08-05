@@ -17,7 +17,6 @@
 #include "VirtualMemory/virtual.h"
 #include "tests.h"
 #include "utils/assert.h"
-#include "utils/list.h"
 
 void display_time()
 {
