@@ -115,15 +115,15 @@ TEST(List_Test, Inserting)
 	list.emplace_back(3, 3);
 	EXPECT_TRUE(list[0] == TestStruct({2, 2}));
 	EXPECT_TRUE(list[1] == TestStruct({1, 1}));
-	EXPECT_TRUE(list[1] == TestStruct({3, 3}));
+	EXPECT_TRUE(list[2] == TestStruct({3, 3}));
 	EXPECT_EQ(list.size(), 3);
 
 	list.insert(++list.begin(), TestStruct({4, 4}));
 
 	EXPECT_TRUE(list[0] == TestStruct({2, 2}));
 	EXPECT_TRUE(list[1] == TestStruct({1, 1}));
-	EXPECT_TRUE(list[1] == TestStruct({4, 4}));
-	EXPECT_TRUE(list[1] == TestStruct({3, 3}));
+	EXPECT_TRUE(list[2] == TestStruct({4, 4}));
+	EXPECT_TRUE(list[3] == TestStruct({3, 3}));
 	EXPECT_EQ(list.size(), 4);
 
 	EXPECT_TRUE(list.head() == TestStruct({2, 2}));
