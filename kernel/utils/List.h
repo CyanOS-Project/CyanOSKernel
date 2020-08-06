@@ -22,8 +22,6 @@ template <class T> class List
 	void remove_node(Node& new_node);
 	void append_node(Node& new_node, Node* node);
 	void prepend_node(Node& new_node, Node* node);
-
-  public:
 	class Iterator
 	{
 	  private:
@@ -41,6 +39,8 @@ template <class T> class List
 		T& operator*();
 		friend List<T>;
 	};
+
+  public:
 	List();
 	~List();
 	Iterator begin();
@@ -76,7 +76,6 @@ template <class T> List<T>::Iterator::Iterator(Node* t_node) : m_current{t_node}
 {
 }
 
-// Increment the current node pointer.
 template <class T> typename List<T>::Iterator List<T>::Iterator::operator++(int arg)
 {
 	Iterator old{*this};
@@ -84,7 +83,6 @@ template <class T> typename List<T>::Iterator List<T>::Iterator::operator++(int 
 	return old;
 }
 
-// Increment the current node pointer.
 template <class T> typename List<T>::Iterator& List<T>::Iterator::operator++()
 {
 	m_current = m_current->next;
@@ -122,12 +120,7 @@ template <class T> List<T>::List() : m_head{nullptr}, m_tail{nullptr}, m_count{0
 
 template <class T> List<T>::~List()
 {
-	Node* node_iterator = m_head;
-	while (node_iterator) {
-		Node* next = node_iterator->next;
-		delete node_iterator;
-		node_iterator = next;
-	}
+	clear();
 }
 
 template <class T> void List<T>::clear()
@@ -138,9 +131,10 @@ template <class T> void List<T>::clear()
 		delete node_iterator;
 		node_iterator = next;
 	}
+	m_head = nullptr;
+	m_count = 0;
 }
 
-// Move node to other list.
 template <class T> void List<T>::splice(List<T>& list, const Iterator& itr)
 {
 	remove_node(*itr.m_current);
@@ -164,7 +158,6 @@ template <class T> void List<T>::remove_node(Node& node)
 	m_count--;
 }
 
-// link a new node before `pnode`.
 template <class T> void List<T>::append_node(Node& new_node, Node* node)
 {
 	if (!m_head) {
@@ -203,13 +196,11 @@ template <class T> void List<T>::prepend_node(Node& new_node, Node* node)
 	m_count++;
 }
 
-// Get iterator object for the head node.
 template <class T> typename List<T>::Iterator List<T>::begin()
 {
 	return Iterator(m_head);
 }
 
-// Get iterator object for the last node.
 template <class T> typename List<T>::Iterator List<T>::end()
 {
 	return Iterator(nullptr);
@@ -240,7 +231,6 @@ template <class T> template <class Predicate> void List<T>::remove_if(Predicate 
 	}
 }
 
-// Push data to the back of the list.
 template <class T> T& List<T>::push_back(const T& new_data)
 {
 	Node* new_node = new Node{new_data, nullptr, nullptr};
@@ -255,7 +245,6 @@ template <class T> T& List<T>::push_front(const T& new_data)
 	return new_node->data;
 }
 
-// Push data to the back of the list.
 template <class T> T& List<T>::push_back(T&& new_data)
 {
 	Node* new_node = new Node{move(new_data), nullptr, nullptr};
@@ -270,7 +259,6 @@ template <class T> T& List<T>::push_front(T&& new_data)
 	return new_node->data;
 }
 
-// Remove the last node.
 template <class T> void List<T>::pop_back()
 {
 	ASSERT(m_tail);
@@ -278,7 +266,6 @@ template <class T> void List<T>::pop_back()
 	delete m_tail;
 }
 
-// Remove the first node.
 template <class T> void List<T>::pop_front()
 {
 	ASSERT(m_head);
@@ -286,21 +273,19 @@ template <class T> void List<T>::pop_front()
 	delete m_head;
 }
 
-template <class T> void List<T>::insert(const Iterator& pos, const T& new_node)
+template <class T> void List<T>::insert(const Iterator& pos, const T& new_data)
 {
-	append_node(new_node, pos.m_current);
+	Node* new_node = new Node{new_data, nullptr, nullptr};
+	append_node(*new_node, pos.m_current);
 }
 
-// Remove a node whose selected by Iterator.
 template <class T> void List<T>::erase(const Iterator& itr)
 {
-
 	ASSERT(itr.m_current);
 	remove_node(*itr.m_current);
 	delete itr.m_current;
 }
 
-// Get data of the head node.
 template <class T> T& List<T>::head()
 {
 	ASSERT(m_head);
@@ -322,10 +307,7 @@ template <class T> T& List<T>::operator[](int index)
 
 template <class T> bool List<T>::is_empty()
 {
-	if (m_count)
-		return false;
-	else
-		return true;
+	return !size();
 }
 
 template <class T> size_t List<T>::size()

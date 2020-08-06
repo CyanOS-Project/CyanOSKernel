@@ -26,6 +26,7 @@ TEST(List_Test, Iteration)
 	}
 
 	EXPECT_EQ(list.size(), 3);
+	EXPECT_FALSE(list.is_empty());
 
 	size_t index = 0;
 	for (auto&& i : list) {
@@ -43,6 +44,7 @@ TEST(List_Test, Erasing)
 	}
 
 	EXPECT_EQ(list.size(), 3);
+	EXPECT_FALSE(list.is_empty());
 
 	list.erase(++list.begin());
 	EXPECT_EQ(list.size(), 2);
@@ -55,6 +57,18 @@ TEST(List_Test, Erasing)
 
 	list.erase(list.begin());
 	EXPECT_EQ(list.size(), 0);
+	EXPECT_TRUE(list.is_empty());
+
+	for (size_t i = 0; i < 3; i++) {
+		list.push_back(raw_list[i]);
+	}
+	EXPECT_EQ(list.size(), 3);
+	EXPECT_FALSE(list.is_empty());
+
+	list.clear();
+
+	EXPECT_EQ(list.size(), 0);
+	EXPECT_TRUE(list.is_empty());
 }
 
 TEST(List_Test, Splicing)
@@ -72,6 +86,8 @@ TEST(List_Test, Splicing)
 
 	EXPECT_EQ(list1.size(), 3);
 	EXPECT_EQ(list2.size(), 4);
+	EXPECT_FALSE(list1.is_empty());
+	EXPECT_FALSE(list2.is_empty());
 
 	list2.splice(list1, list2.begin());
 
@@ -87,4 +103,29 @@ TEST(List_Test, Splicing)
 	EXPECT_EQ(list1.size(), 5);
 	EXPECT_EQ(list2.size(), 2);
 	EXPECT_TRUE(list1[4] == raw_list2[3]);
+	EXPECT_FALSE(list1.is_empty());
+	EXPECT_FALSE(list2.is_empty());
+}
+
+TEST(List_Test, Inserting)
+{
+	List<TestStruct> list;
+	list.emplace_back(1, 1);
+	list.emplace_front(2, 2);
+	list.emplace_back(3, 3);
+	EXPECT_TRUE(list[0] == TestStruct({2, 2}));
+	EXPECT_TRUE(list[1] == TestStruct({1, 1}));
+	EXPECT_TRUE(list[1] == TestStruct({3, 3}));
+	EXPECT_EQ(list.size(), 3);
+
+	list.insert(++list.begin(), TestStruct({4, 4}));
+
+	EXPECT_TRUE(list[0] == TestStruct({2, 2}));
+	EXPECT_TRUE(list[1] == TestStruct({1, 1}));
+	EXPECT_TRUE(list[1] == TestStruct({4, 4}));
+	EXPECT_TRUE(list[1] == TestStruct({3, 3}));
+	EXPECT_EQ(list.size(), 4);
+
+	EXPECT_TRUE(list.head() == TestStruct({2, 2}));
+	EXPECT_TRUE(list.tail() == TestStruct({3, 3}));
 }
