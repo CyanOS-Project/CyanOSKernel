@@ -1,4 +1,7 @@
 #include "pe.h"
+#include "Lib/stdlib.h"
+#include "VirtualMemory/memory.h"
+#include "utils/ErrorCodes.h"
 
 Result<uintptr_t> PELoader::load(const char* file, size_t size)
 {

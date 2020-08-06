@@ -1,4 +1,12 @@
 #include "scheduler.h"
+#include "Arch/x86/asm.h"
+#include "Arch/x86/isr.h"
+#include "Devices/Console/console.h"
+#include "Devices/Timer/pit.h"
+#include "Filesystem/VirtualFilesystem.h"
+#include "Loader/pe.h"
+#include "SystemCall.h"
+#include "utils/assert.h"
 
 SpinLock Scheduler::scheduler_lock;
 

@@ -1,8 +1,9 @@
 #pragma once
 
-#include "Lib/stdlib.h"
+#include "Arch/x86/spinlock.h"
 #include "WaitQueue.h"
 #include "utils/types.h"
+
 class Semaphore
 {
   private:
@@ -12,8 +13,8 @@ class Semaphore
 	WaitQueue m_queue;
 
   public:
-	Semaphore(size_t t_max_count);
+	explicit Semaphore(size_t t_max_count, size_t t_initial_value = 0);
 	~Semaphore();
-	void acquire();
-	void release();
+	void acquire(size_t num = 1);
+	void release(size_t num = 1);
 };

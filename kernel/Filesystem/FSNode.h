@@ -16,11 +16,11 @@ class FSNode
 	virtual Result<bool> can_read() = 0;
 	virtual Result<bool> can_write() = 0;
 	virtual Result<void> remove() = 0;
-	virtual Result<void> create(char* name, void* info) = 0;
-	virtual Result<void> mkdir(char* name, void* info) = 0;
+	virtual Result<void> create(const char* name, void* info) = 0;
+	virtual Result<void> mkdir(const char* name, void* info) = 0;
 	virtual Result<void> link(FSNode& node) = 0;
 	virtual Result<void> unlink(FSNode& node) = 0;
-	virtual Result<FSNode&> dir_lookup(char* file_name) = 0;
+	virtual Result<FSNode&> dir_lookup(const char* file_name) = 0;
 };
 
 #define MAX_FILE_NAME 64

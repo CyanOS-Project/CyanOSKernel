@@ -1,22 +1,16 @@
 #include "INode.h"
+#include "Lib/stdlib.h"
+#include "utils/ErrorCodes.h"
+#include "utils/stl.h"
 
-INode::INode(const char* name, size_t size, char* data) : m_data(data), m_children(new List<INode>)
+INode::INode(const char* name, size_t size, char* data) : m_data(data)
 {
 	FSNode::m_size = size;
 	memcpy(m_filename, name, strlen(name) + 1);
 }
 
-INode::INode(INode&& other) : m_data(other.m_data), m_children(other.m_children)
-{
-	FSNode::m_size = other.m_size;
-	memcpy(m_filename, other.m_filename, strlen(other.m_filename) + 1);
-	other.m_children = nullptr;
-}
-
 INode::~INode()
 {
-	if (m_children)
-		delete m_children;
 }
 
 Result<void> INode::read(void* buff, size_t offset, size_t size)
@@ -49,14 +43,14 @@ Result<void> INode::remove()
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<void> INode::create(char* name, void* info)
+Result<void> INode::create(const char* name, void* info)
 {
 	UNUSED(name);
 	UNUSED(info);
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<void> INode::mkdir(char* name, void* info)
+Result<void> INode::mkdir(const char* name, void* info)
 {
 	UNUSED(name);
 	UNUSED(info);
@@ -75,9 +69,9 @@ Result<void> INode::unlink(FSNode& node)
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<FSNode&> INode::dir_lookup(char* file_name)
+Result<FSNode&> INode::dir_lookup(const char* file_name)
 {
-	for (auto& i : *m_children) {
+	for (auto& i : m_children) {
 		if (strcmp(file_name, i.m_filename) == 0) {
 			return i;
 		}

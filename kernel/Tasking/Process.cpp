@@ -1,5 +1,10 @@
 #include "Process.h"
+#include "Arch/x86/context.h"
+#include "Filesystem/VirtualFilesystem.h"
+#include "Loader/pe.h"
 #include "Thread.h"
+#include "VirtualMemory/memory.h"
+#include "utils/assert.h"
 
 List<Process>* Process::processes;
 Bitmap* Process::pid_bitmap;

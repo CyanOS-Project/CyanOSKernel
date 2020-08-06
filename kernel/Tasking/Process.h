@@ -1,11 +1,8 @@
 #pragma once
 
-#include "Filesystem/VirtualFilesystem.h"
-#include "Loader/pe.h"
-#include "VirtualMemory/memory.h"
+#include "Arch/x86/spinlock.h"
 #include "utils/List.h"
 #include "utils/Result.h"
-#include "utils/assert.h"
 #include "utils/bitmap.h"
 #include "utils/types.h"
 

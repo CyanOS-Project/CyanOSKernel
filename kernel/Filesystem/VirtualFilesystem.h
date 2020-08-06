@@ -1,14 +1,9 @@
 #pragma once
 
-#include "Arch/x86/panic.h"
 #include "FSNode.h"
 #include "FileDescriptor.h"
-#include "pipes/Pipe.h"
-#include "ustar/INode.h"
-#include "utils/ErrorCodes.h"
 #include "utils/PathParser.h"
 #include "utils/Result.h"
-#include "utils/assert.h"
 #include "utils/types.h"
 
 class VFS
@@ -20,10 +15,9 @@ class VFS
 	static Result<FSNode&> traverse_node_deep(PathParser& parser, size_t depth);
 
   public:
-	VFS();
-	~VFS();
+	static void setup();
 	static Result<FileDescriptor> open(const char* path, int mode, int flags);
-	static Result<void> mount();
+	static Result<void> mount(const char* path, FSNode& m_root_node);
 	static Result<void> mount_root(FSNode& node);
 	static Result<void> unmount();
 	static Result<void> remove();

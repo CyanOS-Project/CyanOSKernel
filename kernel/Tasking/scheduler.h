@@ -1,18 +1,10 @@
 #pragma once
 
-#include "Arch/x86/asm.h"
 #include "Arch/x86/context.h"
-#include "Arch/x86/isr.h"
 #include "Arch/x86/spinlock.h"
-#include "Devices/Console/console.h"
-#include "Devices/Timer/pit.h"
-#include "Filesystem/VirtualFilesystem.h"
-#include "Loader/pe.h"
 #include "Process.h"
-#include "SystemCall.h"
 #include "Thread.h"
 #include "utils/Result.h"
-#include "utils/assert.h"
 #include "utils/types.h"
 
 enum class ScheduleType {

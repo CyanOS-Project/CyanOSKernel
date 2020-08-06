@@ -58,11 +58,11 @@ template <class T> class List
 	template <class Predicate> void remove_if(Predicate predicate);
 	void clear();
 	void splice(List<T>& list, const Iterator& itr);
-	bool is_empty();
-	size_t size();
-	T& head();
-	T& tail();
-	T& operator[](int index);
+	bool is_empty() const;
+	size_t size() const;
+	T& head() const;
+	T& tail() const;
+	T& operator[](int index) const;
 };
 
 template <class T> List<T>::Iterator::Iterator(Node* t_head, size_t index) : m_current{t_head}
@@ -286,31 +286,31 @@ template <class T> void List<T>::erase(const Iterator& itr)
 	delete itr.m_current;
 }
 
-template <class T> T& List<T>::head()
+template <class T> T& List<T>::head() const
 {
 	ASSERT(m_head);
 	return m_head->data;
 }
 
-template <class T> T& List<T>::tail()
+template <class T> T& List<T>::tail() const
 {
 	ASSERT(m_head);
 	return m_tail->data;
 }
 
-template <class T> T& List<T>::operator[](int index)
+template <class T> T& List<T>::operator[](int index) const
 {
 	ASSERT(index < m_count);
 	Iterator itr(m_head, index);
 	return *itr;
 }
 
-template <class T> bool List<T>::is_empty()
+template <class T> bool List<T>::is_empty() const
 {
 	return !size();
 }
 
-template <class T> size_t List<T>::size()
+template <class T> size_t List<T>::size() const
 {
 	return m_count;
 }

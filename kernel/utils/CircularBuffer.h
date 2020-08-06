@@ -18,7 +18,7 @@ template <typename T> class CircularBuffer
 	const size_t m_size;
 
   public:
-	explicit CircularBuffer(size_t size);
+	explicit CircularBuffer(const size_t size);
 	void queue(const T&);
 	void queue(T&&);
 	T dequeue();
@@ -42,7 +42,7 @@ template <typename T> class CircularBuffer
 };
 
 template <typename T>
-CircularBuffer<T>::CircularBuffer(size_t size) :
+CircularBuffer<T>::CircularBuffer(const size_t size) :
     m_data{new T[size]}, //
     m_head{0},
     m_tail{0},

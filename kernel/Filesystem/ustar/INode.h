@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Filesystem/FSNode.h"
-#include "Lib/stdlib.h"
-#include "utils/ErrorCodes.h"
 #include "utils/List.h"
 #include "utils/Result.h"
 #include "utils/types.h"
@@ -12,13 +10,13 @@ class INode : public FSNode
   private:
 	char m_filename[MAX_FILE_NAME];
 	char* m_data;
-	List<INode>* m_children;
+	List<INode> m_children;
 
   public:
-	INode(const char* name, size_t size, char* data);
-	INode(INode&& other);
-	INode& operator=(const INode&& other);
-	INode& operator=(INode& other);
+	explicit INode(const char* name, size_t size, char* data);
+	INode(const INode& other) = default;
+	INode& operator=(const INode& other) = delete;
+	INode& operator=(INode&& other) = delete;
 	~INode();
 
 	Result<void> read(void* buff, size_t offset, size_t size);
@@ -26,11 +24,11 @@ class INode : public FSNode
 	Result<bool> can_read();
 	Result<bool> can_write();
 	Result<void> remove();
-	Result<void> create(char* name, void* info);
-	Result<void> mkdir(char* name, void* info);
+	Result<void> create(const char* name, void* info);
+	Result<void> mkdir(const char* name, void* info);
 	Result<void> link(FSNode& node);
 	Result<void> unlink(FSNode& node);
-	Result<FSNode&> dir_lookup(char* file_name);
+	Result<FSNode&> dir_lookup(const char* file_name);
 
 	friend class TarFS;
 };

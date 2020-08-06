@@ -1,4 +1,6 @@
 #include "SystemCall.h"
+#include "Arch/x86/isr.h"
+#include "Devices/Console/console.h"
 
 void SystemCall::setup()
 {

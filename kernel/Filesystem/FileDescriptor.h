@@ -1,12 +1,9 @@
 #pragma once
 
-#include "Filesystem/pipes/Pipe.h"
-#include "Filesystem/ustar/INode.h"
-#include "utils/ErrorCodes.h"
+#include "FSNode.h"
 #include "utils/Result.h"
 #include "utils/types.h"
 
-#define MAX_OFFSET (SIZE_MAX / 4)
 enum class SeekOrigin { SET, CURRENT, END };
 struct FileInfo {
 	size_t size;

@@ -20,7 +20,7 @@ FSNode& TarFS::get_root_node()
 
 INode& TarFS::add_child_node(INode& parent, const char* name, const size_t size, char* data)
 {
-	return parent.m_children->emplace_back(name, size, data);
+	return parent.m_children.emplace_back(name, size, data);
 }
 
 void TarFS::parse_ustar(size_t size)

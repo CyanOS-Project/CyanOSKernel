@@ -1,14 +1,14 @@
 #pragma once
 #include "semaphore.h"
 
-/*class Mutex
+class Mutex
 {
   private:
-    Semaphore* m_lock;
+	Semaphore m_lock;
 
   public:
-    Mutex();
-    ~Mutex();
-    void acquire();
-    void release();
-};*/
+	Mutex();
+	~Mutex();
+	void acquire();
+	void release();
+};

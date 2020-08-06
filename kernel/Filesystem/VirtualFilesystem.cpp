@@ -1,12 +1,15 @@
 #include "VirtualFilesystem.h"
+#include "Arch/x86/panic.h"
+#include "Mountpoint.h"
+#include "pipes/Pipe.h"
+#include "ustar/INode.h"
+#include "utils/ErrorCodes.h"
+#include "utils/assert.h"
 
 FSNode* VFS::m_root;
-VFS::VFS()
+void VFS::setup()
 {
-}
-
-VFS::~VFS()
-{
+	Mountpoint::setup();
 }
 
 Result<FileDescriptor> VFS::open(const char* path, int mode, int flags)
@@ -22,9 +25,14 @@ Result<FileDescriptor> VFS::open(const char* path, int mode, int flags)
 	return fd;
 }
 
-Result<void> VFS::mount()
+Result<void> VFS::mount(const char* path, FSNode& m_root_node)
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	auto node_result = traverse_node(path);
+	if (node_result.is_error())
+		return ResultError(node_result.error());
+
+	Mountpoint::register_mountpoint(node_result.value(), m_root_node);
+	return ResultError(ERROR_SUCCESS);
 }
 
 Result<void> VFS::mount_root(FSNode& node)
@@ -104,7 +112,7 @@ Result<FSNode&> VFS::traverse_node_deep(PathParser& parser, size_t depth)
 		auto next_node = current->dir_lookup(last_element);
 		if (next_node.is_error())
 			return ResultError(next_node.error());
-		current = &next_node.value();
+		current = &Mountpoint::translate_mountpoint(next_node.value());
 	}
 	return *current;
 }

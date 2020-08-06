@@ -1,4 +1,7 @@
 #include "FileDescriptor.h"
+#include "Filesystem/pipes/Pipe.h"
+#include "Filesystem/ustar/INode.h"
+#include "utils/ErrorCodes.h"
 
 FileDescriptor::FileDescriptor(FSNode& node) : m_node(node)
 {
