@@ -55,7 +55,7 @@ template <typename T> void CircularBuffer<T>::queue(const T& data_to_queue)
 {
 	ASSERT(!is_full());
 	m_data[m_tail] = data_to_queue;
-	m_tail = (++m_tail) % m_size;
+	m_tail = (m_tail + 1) % m_size;
 	m_count++;
 }
 
@@ -63,7 +63,7 @@ template <typename T> void CircularBuffer<T>::queue(T&& data_to_queue)
 {
 	ASSERT(!is_full());
 	m_data[m_tail] = move(data_to_queue);
-	m_tail = (++m_tail) % m_size;
+	m_tail = (m_tail + 1) % m_size;
 	m_count++;
 }
 
@@ -72,7 +72,7 @@ template <typename T> T CircularBuffer<T>::dequeue()
 	ASSERT(!is_empty());
 	T ret_data = move(m_data[m_head]);
 	m_data[m_head].~T();
-	m_head = (++m_head) % m_size;
+	m_head = (m_head + 1) % m_size;
 	m_count--;
 	return ret_data;
 }

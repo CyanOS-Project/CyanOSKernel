@@ -15,6 +15,6 @@ class Semaphore
   public:
 	explicit Semaphore(size_t t_max_count, size_t t_initial_value = 0);
 	~Semaphore();
-	void acquire(size_t num = 1);
-	void release(size_t num = 1);
+	void acquire();
+	void release();
 };

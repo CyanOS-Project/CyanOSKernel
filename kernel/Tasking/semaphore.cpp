@@ -10,12 +10,12 @@ Semaphore::~Semaphore()
 {
 }
 
-void Semaphore::acquire(size_t num)
+void Semaphore::acquire()
 {
 	spinlock_acquire(&m_spinlock);
 
-	if ((m_count + num) < m_max_count) {
-		m_count += num;
+	if (m_count < m_max_count) {
+		m_count++;
 		spinlock_release(&m_spinlock);
 	} else {
 		spinlock_release(&m_spinlock);
@@ -24,12 +24,12 @@ void Semaphore::acquire(size_t num)
 	}
 }
 
-void Semaphore::release(size_t num)
+void Semaphore::release()
 {
 	if (!m_count)
 		return;
 	spinlock_acquire(&m_spinlock);
 	m_queue.wake_up();
-	m_count -= num;
+	m_count--;
 	spinlock_release(&m_spinlock);
 }

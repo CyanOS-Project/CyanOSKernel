@@ -6,6 +6,7 @@
 #include "Arch/x86/panic.h"
 #include "Arch/x86/pic.h"
 #include "Devices/Console/console.h"
+#include "Devices/DebugPort/DebugPort.h"
 #include "Devices/RTC/rtc.h"
 #include "Devices/Timer/pit.h"
 #include "Tasking/Process.h"
@@ -17,7 +18,6 @@
 #include "VirtualMemory/virtual.h"
 #include "tests.h"
 #include "utils/assert.h"
-
 void display_time()
 {
 	while (1) {
@@ -32,7 +32,7 @@ void display_time()
 
 extern "C" void kernel_init(BootloaderInfo* info)
 {
-
+	DebugPort::write("Welcome To CyanOS", DebugColor::Bright_Cyan);
 	GDT::setup();
 	IDT::setup();
 	Memory::setup_stage2();
