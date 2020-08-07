@@ -34,7 +34,7 @@ For Windows users, you can build and run the system on WSL(Windows Subsystem for
 
 #### Building
 ```
-git clone https://github.com/AymenSekhri/CyanOS.git
+git clone --recursive https://github.com/AymenSekhri/CyanOS.git
 cd ./CyanOS
 mkdir build && cd build
 cmake ..
