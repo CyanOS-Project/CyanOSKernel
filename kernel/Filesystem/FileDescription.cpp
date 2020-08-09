@@ -1,28 +1,28 @@
-#include "FileDescriptor.h"
+#include "FileDescription.h"
 #include "Filesystem/pipes/Pipe.h"
 #include "Filesystem/ustar/INode.h"
 #include "utils/ErrorCodes.h"
 
-FileDescriptor::FileDescriptor(FSNode& node) : m_node(node)
+FileDescription::FileDescription(FSNode& node) : m_node(node)
 {
 }
 
-FileDescriptor::~FileDescriptor()
+FileDescription::~FileDescription()
 {
 	close();
 }
 
-Result<void> FileDescriptor::open()
+Result<void> FileDescription::open()
 {
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<void> FileDescriptor::close()
+Result<void> FileDescription::close()
 {
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<void> FileDescriptor::read(void* buff, size_t size)
+Result<void> FileDescription::read(void* buff, size_t size)
 {
 	size_t reading_size = m_current_position + size;
 	if (reading_size > m_node.m_size) {
@@ -31,7 +31,7 @@ Result<void> FileDescriptor::read(void* buff, size_t size)
 	return m_node.read(buff, m_current_position, size);
 }
 
-Result<void> FileDescriptor::write(void* buff, size_t size)
+Result<void> FileDescription::write(void* buff, size_t size)
 {
 	size_t offset = m_current_position + size;
 	if (offset > m_node.m_size) {
@@ -40,7 +40,7 @@ Result<void> FileDescriptor::write(void* buff, size_t size)
 	return m_node.read(buff, offset, size);
 }
 
-Result<void> FileDescriptor::seek(int offset, SeekOrigin origin)
+Result<void> FileDescription::seek(int offset, SeekOrigin origin)
 {
 	switch (origin) {
 		case SeekOrigin::SET: {
@@ -77,17 +77,17 @@ Result<void> FileDescriptor::seek(int offset, SeekOrigin origin)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<FileInfo> FileDescriptor::fstat()
+Result<FileInfo> FileDescription::fstat()
 {
 	return FileInfo{m_node.m_size};
 }
 
-Result<void> FileDescriptor::ioctl()
+Result<void> FileDescription::ioctl()
 {
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<void> FileDescriptor::mmap()
+Result<void> FileDescription::mmap()
 {
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }

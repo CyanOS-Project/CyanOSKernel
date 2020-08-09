@@ -55,7 +55,7 @@ class Thread : public IntrusiveListNode<Thread>
 	{
 		return m_tid;
 	}
-	inline Process& get_process()
+	inline Process& parent_process()
 	{
 		return m_parent;
 	};

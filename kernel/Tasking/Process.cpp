@@ -27,7 +27,8 @@ Process::Process(const char* name, const char* path) :
     m_pid{reserve_pid()},
     m_page_directory{Memory::create_new_virtual_space()},
     m_state{ProcessState::ACTIVE},
-    m_parent{nullptr}
+    m_parent{nullptr},
+    file_descriptors{}
 {
 	size_t name_len = strlen(name) + 1;
 	size_t path_len = strlen(path) + 1;
@@ -51,7 +52,7 @@ Result<uintptr_t> Process::load_executable(const char* path)
 {
 	auto fd = VFS::open(path, 0, 0);
 	if (fd.is_error()) {
-		printf("error opening the file %d\n", fd.error());
+		printf("error opening the file, error: %d\n", fd.error());
 		return ResultError(fd.error());
 	}
 	auto file_info = fd.value().fstat();

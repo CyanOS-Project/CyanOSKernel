@@ -9,7 +9,7 @@ struct FileInfo {
 	size_t size;
 };
 
-class FileDescriptor
+class FileDescription
 {
   private:
 	FSNode& m_node;
@@ -18,8 +18,8 @@ class FileDescriptor
 	bool m_has_changed = false;
 
   public:
-	FileDescriptor(FSNode& node);
-	~FileDescriptor();
+	FileDescription(FSNode& node);
+	~FileDescription();
 	Result<void> open();
 	Result<void> close();
 	Result<void> read(void* buff, size_t size);

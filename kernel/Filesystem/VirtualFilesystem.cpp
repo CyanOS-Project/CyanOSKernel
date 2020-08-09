@@ -1,18 +1,22 @@
 #include "VirtualFilesystem.h"
 #include "Arch/x86/panic.h"
 #include "Mountpoint.h"
+#include "Tasking/Thread.h"
 #include "pipes/Pipe.h"
 #include "ustar/INode.h"
 #include "utils/ErrorCodes.h"
 #include "utils/assert.h"
 
 FSNode* VFS::m_root;
+List<FileDescription>* VFS::m_file_description;
+
 void VFS::setup()
 {
+	m_file_description = new List<FileDescription>;
 	Mountpoint::setup();
 }
 
-Result<FileDescriptor> VFS::open(const char* path, int mode, int flags)
+Result<FileDescription&> VFS::open(const char* path, int mode, int flags)
 {
 	UNUSED(mode);
 	UNUSED(flags);
@@ -21,7 +25,8 @@ Result<FileDescriptor> VFS::open(const char* path, int mode, int flags)
 		return ResultError(node.error());
 		// TODO: if node not found create it, if CREATE flag is set
 	}
-	FileDescriptor fd = FileDescriptor(node.value());
+	FileDescription& fd = m_file_description->emplace_back(node.value());
+	Thread::current->parent_process().file_descriptors.push_back(&fd);
 	return fd;
 }
 
@@ -105,6 +110,9 @@ Result<FSNode&> VFS::traverse_node(const char* path)
 
 Result<FSNode&> VFS::traverse_node_deep(PathParser& parser, size_t depth)
 {
+	if (!m_root)
+		return ResultError(ERROR_NO_ROOT_NODE);
+
 	FSNode* current = m_root;
 	char last_element[MAX_FILE_NAME];
 	for (size_t i = 0; i < depth; i++) {

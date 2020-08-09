@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Arch/x86/spinlock.h"
+#include "Filesystem/FileDescription.h"
 #include "utils/List.h"
 #include "utils/Result.h"
 #include "utils/bitmap.h"
@@ -32,6 +33,7 @@ class Process
 	const uintptr_t m_page_directory;
 	const ProcessState m_state;
 	const Process* m_parent;
+	List<FileDescription*> file_descriptors;
 	//---------
 	static Process& create_new_process(const char* name, const char* path);
 	Process(const char* name, const char* path);

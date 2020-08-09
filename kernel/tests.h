@@ -2,7 +2,7 @@
 
 #include "Devices/Console/console.h"
 #include "Devices/Timer/pit.h"
-#include "Filesystem/FileDescriptor.h"
+#include "Filesystem/FileDescription.h"
 #include "Filesystem/VirtualFilesystem.h"
 #include "Filesystem/ustar/ustar.h"
 #include "Tasking/Loader/pe.h"
@@ -33,7 +33,7 @@ void test_semaphore(uintptr_t arg)
 	printf("Thread1:\n");
 	lock = new Semaphore(1);
 	lock->acquire();
-	Thread::create_thread(Thread::current->get_process(), test_semaphore_thread2, 0);
+	Thread::create_thread(Thread::current->parent_process(), test_semaphore_thread2, 0);
 	printf("Semaphore acquired by thread1\n");
 	Thread::sleep(3000);
 	printf("wakeup thread1\n");
@@ -67,7 +67,7 @@ void test_tar_filesystem(uintptr_t fs, size_t size)
 	VFS::mount_root(tar_fs->get_root_node());
 	auto fd = VFS::open("/Drivers/file1.exe", 0, 0);
 	if (fd.is_error()) {
-		printf("error opening the file %d\n", fd.error());
+		printf("error opening the file, error: %d\n", fd.error());
 		return;
 	}
 	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
