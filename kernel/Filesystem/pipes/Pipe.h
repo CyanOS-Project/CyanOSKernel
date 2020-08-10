@@ -8,6 +8,8 @@
 
 class Pipe : public FSNode
 {
+	enum class Direction { Reader, Writer };
+
   private:
 	const size_t BUFFER_SIZE = 1096;
 	char m_filename[MAX_FILE_NAME];
@@ -15,9 +17,11 @@ class Pipe : public FSNode
 	CircularBuffer<char> m_buffer;
 	Semaphore m_reader;
 	Semaphore m_writer;
+	WaitQueue m_wait_queue;
+	const Direction m_direction;
 
   public:
-	explicit Pipe(const char* name);
+	explicit Pipe(const char* name, Direction direction);
 	Pipe(const Pipe& other) = default;
 	~Pipe();
 	Result<void> read(void* buff, size_t offset, size_t size);
