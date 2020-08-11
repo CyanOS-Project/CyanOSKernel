@@ -55,6 +55,6 @@ class TarFS
   public:
 	TarFS(void* tar_address, size_t size);
 	~TarFS();
-	FSNode& get_root_node();
+	FSNode& root_node();
 	char* read_file(const char* path);
 };

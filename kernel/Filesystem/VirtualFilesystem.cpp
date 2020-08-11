@@ -16,16 +16,32 @@ void VFS::setup()
 	Mountpoint::setup();
 }
 
-Result<FileDescription&> VFS::open(const char* path, int mode, int flags)
+Result<FileDescription&> VFS::open(const char* path, OpenMode mode, OpenFlags flags)
 {
 	UNUSED(mode);
 	UNUSED(flags);
 	auto node = traverse_node(path);
-	if (node.is_error()) {
+	if ((node.error() == ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::OpenExisting)) {
+		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
+	} else if ((node.error() != ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::CreateNew)) {
+		return ResultError(ERROR_FILE_ALREADY_EXISTS);
+	} else {
 		return ResultError(node.error());
-		// TODO: if node not found create it, if CREATE flag is set
 	}
-	FileDescription& fd = m_file_description->emplace_back(node.value());
+
+	FSNode* open_node = &node.value();
+	if ((node.error() == ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::CreateNew)) {
+		// FIXME: we already went though parent! any optimization ?
+		auto parent_node = traverse_parent_node(path);
+		ASSERT(!parent_node.is_error());
+		auto new_node = parent_node.value().create(path, mode, flags);
+		if (new_node.is_error()) {
+			return ResultError(new_node.error());
+		}
+		open_node = &new_node.value();
+	}
+
+	FileDescription& fd = m_file_description->emplace_back(*open_node);
 	Thread::current->parent_process().file_descriptors.push_back(&fd);
 	return fd;
 }
@@ -93,7 +109,7 @@ Result<FSNode&> VFS::traverse_parent_node(const char* path)
 	PathParser parser(path);
 	size_t path_element_count = parser.path_element_count();
 	if (path_element_count == 0) {
-		return ResultError(ERROR_NODE_DOES_NOT_EXIST);
+		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 	}
 	return traverse_node_deep(parser, path_element_count - 1);
 }

@@ -43,17 +43,19 @@ Result<void> INode::remove()
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<void> INode::create(const char* name, void* info)
+Result<FSNode&> INode::create(const char* name, OpenMode mode, OpenFlags flags)
 {
 	UNUSED(name);
-	UNUSED(info);
+	UNUSED(mode);
+	UNUSED(flags);
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<void> INode::mkdir(const char* name, void* info)
+Result<void> INode::mkdir(const char* name, int flags, int access)
 {
 	UNUSED(name);
-	UNUSED(info);
+	UNUSED(flags);
+	UNUSED(access);
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
@@ -76,5 +78,5 @@ Result<FSNode&> INode::dir_lookup(const char* file_name)
 			return i;
 		}
 	}
-	return ResultError(ERROR_NODE_DOES_NOT_EXIST);
+	return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 }

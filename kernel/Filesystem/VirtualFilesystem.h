@@ -19,7 +19,7 @@ class VFS
 
   public:
 	static void setup();
-	static Result<FileDescription&> open(const char* path, int mode, int flags);
+	static Result<FileDescription&> open(const char* path, OpenMode mode, OpenFlags flags);
 	static Result<void> mount(const char* path, FSNode& m_root_node);
 	static Result<void> mount_root(FSNode& node);
 	static Result<void> unmount();

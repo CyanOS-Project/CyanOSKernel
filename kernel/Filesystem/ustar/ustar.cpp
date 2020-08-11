@@ -13,7 +13,7 @@ TarFS::~TarFS()
 {
 }
 
-FSNode& TarFS::get_root_node()
+FSNode& TarFS::root_node()
 {
 	return m_root;
 }

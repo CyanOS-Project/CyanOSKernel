@@ -24,8 +24,8 @@ class INode : public FSNode
 	Result<bool> can_read();
 	Result<bool> can_write();
 	Result<void> remove();
-	Result<void> create(const char* name, void* info);
-	Result<void> mkdir(const char* name, void* info);
+	Result<FSNode&> create(const char* name, OpenMode mode, OpenFlags flags);
+	Result<void> mkdir(const char* name, int flags, int access);
 	Result<void> link(FSNode& node);
 	Result<void> unlink(FSNode& node);
 	Result<FSNode&> dir_lookup(const char* file_name);

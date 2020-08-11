@@ -50,7 +50,7 @@ Process::~Process()
 
 Result<uintptr_t> Process::load_executable(const char* path)
 {
-	auto fd = VFS::open(path, 0, 0);
+	auto fd = VFS::open(path, OpenMode::Read, OpenFlags::OpenExisting);
 	if (fd.is_error()) {
 		printf("error opening the file, error: %d\n", fd.error());
 		return ResultError(fd.error());

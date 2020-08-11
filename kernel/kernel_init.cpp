@@ -9,6 +9,7 @@
 #include "Devices/DebugPort/DebugPort.h"
 #include "Devices/RTC/rtc.h"
 #include "Devices/Timer/pit.h"
+#include "Filesystem/pipes/Pipe.h"
 #include "Tasking/Process.h"
 #include "Tasking/Thread.h"
 #include "Tasking/scheduler.h"
@@ -46,11 +47,12 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	printf("Welcome to CyanOS.\n");
 	TarFS* tar_fs = new TarFS(reinterpret_cast<void*>(info->ramdisk.start), info->ramdisk.size);
 	VFS::setup();
-	VFS::mount_root(tar_fs->get_root_node());
+	VFS::mount_root(tar_fs->root_node());
+	VFS::mount("/fs", Pipe::root_node());
 	Process& proc = Process::create_new_process("test_process", "/Drivers/syscall.exe");
-	Thread::create_thread(proc, test_semaphore, 0);
+	Thread::create_thread(proc, test_pipe1, 0);
+	Thread::create_thread(proc, test_pipe1, 0);
 
-	// Process::create_new_process("test_process", "/Drivers/syscall.exe");
 	Thread::yield();
 	// **************** tests**************************
 

@@ -64,8 +64,8 @@ void test_tar_filesystem(uintptr_t fs, size_t size)
 {
 	printf("tar at %X\n", fs);
 	TarFS* tar_fs = new TarFS((void*)fs, size);
-	VFS::mount_root(tar_fs->get_root_node());
-	auto fd = VFS::open("/Drivers/file1.exe", 0, 0);
+	VFS::mount_root(tar_fs->root_node());
+	auto fd = VFS::open("/Drivers/file1.exe", OpenMode::Read, OpenFlags::OpenExisting);
 	if (fd.is_error()) {
 		printf("error opening the file, error: %d\n", fd.error());
 		return;
@@ -80,4 +80,24 @@ void test_tar_filesystem(uintptr_t fs, size_t size)
 		printf("error loading pe file %d\n", loader_result.error());
 	printf("file is loaded.\n");
 	Memory::free(buff, 0xc00, 0);
+}
+
+void test_pipe1(uintptr_t arg)
+{
+	UNUSED(arg);
+	auto fd = VFS::open("/fs/", OpenMode::Read, OpenFlags::OpenExisting);
+	if (fd.is_error()) {
+		printf("error opening the file, error: %d\n", fd.error());
+		return;
+	}
+	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
+	memset(buff, 0, 4096);
+	auto result = fd.value().read(buff, 0xc00);
+	if (result.is_error())
+		printf("error reading the file %d\n", result.error());
+}
+
+void test_pipe2(uintptr_t arg)
+{
+	UNUSED(arg);
 }
