@@ -1,10 +1,16 @@
+dist: focal
 language: cpp
 compiler:
 - g++
 
-before_install:
-- sudo apt-get update
-- sudo apt-get install gcc-10 make nasm python cmake grub2 xorriso
+addons:
+  apt:
+    update: true
+    packages:
+    - nasm
+    - grub2
+    - xorriso
+    - cmake
 
 script:
 - mkdir build && cd build
