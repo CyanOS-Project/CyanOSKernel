@@ -4,7 +4,7 @@ compiler:
 
 before_install:
 - sudo apt-get update
-- sudo apt-get install g++-multilib nasm python cmake grub2 xorriso
+- sudo apt-get install gcc10 make nasm python cmake grub2 xorriso
 
 script:
 - mkdir build && cd build
