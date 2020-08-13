@@ -58,22 +58,22 @@ template <typename T> class IntrusiveList
 	Iterator begin() const;
 	Iterator end() const;
 
-	inline T* first() const
+	 T* first() const
 	{
 		return m_head;
 	}
 
-	inline T* tail() const
+	 T* tail() const
 	{
 		return m_tail;
 	}
 
-	inline bool is_empty() const
+	 bool is_empty() const
 	{
 		return !m_count;
 	}
 
-	inline size_t size() const
+	 size_t size() const
 	{
 		return m_count;
 	}

@@ -42,14 +42,9 @@ class String
 	size_t rfind(const String& str, size_t pos = END) const;
 	size_t rfind(const char* s, size_t pos = END) const;
 	size_t rfind(char c, size_t pos = END) const;
-	inline const char* c_str() const
-	{
-		return m_data;
-	}
-	inline size_t length() const
-	{
-		return m_size;
-	}
+	const char* c_str() const;
+	size_t length() const;
+
 	static const size_t END;
 	static const size_t NOT_FOUND;
 };

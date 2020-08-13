@@ -107,3 +107,23 @@ void Thread::sleep(unsigned ms)
 	spinlock_release(&current->m_lock);
 	yield();
 }
+
+unsigned Thread::tid()
+{
+	return m_tid;
+}
+
+Process& Thread::parent_process()
+{
+	return m_parent;
+}
+
+ThreadState Thread::state()
+{
+	return m_state;
+}
+
+size_t Thread::number_of_ready_threads()
+{
+	return ready_threads->size();
+}

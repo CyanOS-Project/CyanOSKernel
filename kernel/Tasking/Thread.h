@@ -51,24 +51,13 @@ class Thread : public IntrusiveListNode<Thread>
 	static void sleep(unsigned ms);
 	static void yield();
 	static void setup();
-	unsigned tid()
-	{
-		return m_tid;
-	}
-	inline Process& parent_process()
-	{
-		return m_parent;
-	};
+	unsigned tid();
 
-	inline ThreadState state()
-	{
-		return m_state;
-	}
+	Process& parent_process();
 
-	inline static size_t number_of_ready_threads()
-	{
-		return ready_threads->size();
-	}
+	ThreadState state();
+
+	static size_t number_of_ready_threads();
 
 	template <typename Callback> static void for_each_sleeping(Callback callback)
 	{

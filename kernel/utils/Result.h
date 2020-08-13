@@ -48,17 +48,17 @@ template <typename T> class Result
 	{
 	}
 
-	inline bool is_error() const
+	 bool is_error() const
 	{
 		return m_error.m_error != 0;
 	}
 
-	inline unsigned error() const
+	 unsigned error() const
 	{
 		return m_error.m_error;
 	}
 
-	inline T& value()
+	 T& value()
 	{
 		ASSERT(!is_error())
 		return m_storage;
@@ -90,17 +90,17 @@ template <typename T> class Result<T&>
 
 	Result(T&& result) = delete;
 
-	inline bool is_error() const
+	bool is_error() const
 	{
 		return m_error.m_error != 0;
 	}
 
-	inline unsigned error() const
+	unsigned error() const
 	{
 		return m_error.m_error;
 	}
 
-	inline T& value()
+	T& value()
 	{
 		ASSERT(!is_error())
 		return *m_storage;
@@ -125,12 +125,12 @@ template <> class Result<void>
 	{
 	}
 
-	inline bool is_error() const
+	 bool is_error() const
 	{
 		return m_error.m_error != 0;
 	}
 
-	inline unsigned error() const
+	 unsigned error() const
 	{
 		return m_error.m_error;
 	}

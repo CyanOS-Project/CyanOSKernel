@@ -319,7 +319,17 @@ size_t String::rfind(char c, size_t pos) const
 	return rfind(str, pos);
 }
 
-inline void String::cleanup()
+const char* String::c_str() const
+{
+	return m_data;
+}
+
+size_t String::length() const
+{
+	return m_size;
+}
+
+void String::cleanup()
 {
 	delete[] m_data;
 	m_data = nullptr;
