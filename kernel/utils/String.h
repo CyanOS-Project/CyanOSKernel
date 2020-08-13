@@ -1,6 +1,7 @@
 #pragma once
 #include "types.h"
 
+class StringView;
 class String
 {
   private:
@@ -9,6 +10,7 @@ class String
 	void cleanup();
 
   public:
+	String(const StringView& str);
 	String(const char* str);
 	String(const char* str, size_t len);
 	String(String&& other);
@@ -31,8 +33,10 @@ class String
 	String& insert(size_t pos, const char* str);
 	String& insert(size_t pos, const char* str, size_t subpos, size_t sublen);
 
+	bool operator==(const StringView& other) const;
 	bool operator==(const String& other) const;
 	bool operator==(const char* other) const;
+	bool operator!=(const StringView& other) const;
 	bool operator!=(const String& other) const;
 	bool operator!=(const char* other) const;
 	String substr(size_t pos, size_t len) const;

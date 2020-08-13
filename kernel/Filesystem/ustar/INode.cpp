@@ -3,9 +3,12 @@
 #include "utils/ErrorCodes.h"
 #include "utils/stl.h"
 
-INode::INode(const char* name, size_t size, char* data) : FSNode(0, 0, size), m_data{data}
+INode::INode(const StringView& name, size_t size, char* data) :
+    FSNode(0, 0, size),
+    m_filename{name},
+    m_children{},
+    m_data{data}
 {
-	memcpy(m_filename, name, strlen(name) + 1);
 }
 
 INode::~INode()
@@ -42,7 +45,7 @@ Result<void> INode::remove()
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<FSNode&> INode::create(const char* name, OpenMode mode, OpenFlags flags)
+Result<FSNode&> INode::create(const StringView& name, OpenMode mode, OpenFlags flags)
 {
 	UNUSED(name);
 	UNUSED(mode);
@@ -50,7 +53,7 @@ Result<FSNode&> INode::create(const char* name, OpenMode mode, OpenFlags flags)
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<void> INode::mkdir(const char* name, int flags, int access)
+Result<void> INode::mkdir(const StringView& name, int flags, int access)
 {
 	UNUSED(name);
 	UNUSED(flags);
@@ -70,10 +73,10 @@ Result<void> INode::unlink(FSNode& node)
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<FSNode&> INode::dir_lookup(const char* file_name)
+Result<FSNode&> INode::dir_lookup(const StringView& file_name)
 {
 	for (auto& i : m_children) {
-		if (strcmp(file_name, i.m_filename) == 0) {
+		if (i.m_filename == file_name) {
 			return i;
 		}
 	}

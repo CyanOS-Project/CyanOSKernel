@@ -7,22 +7,20 @@ Pipe& Pipe::root_node()
 	return *new Pipe();
 }
 
-Pipe::Pipe(const char* name) :
+Pipe::Pipe(const StringView& name) :
     FSNode(0, 0, BUFFER_SIZE),
+    m_filename{name},
+    m_children{},
     m_buffer{BUFFER_SIZE},
-    m_reader{BUFFER_SIZE},
-    m_writer{BUFFER_SIZE}, // FIXME: initial value is BUFFER_SIZE not 0
     m_wait_queue{}
 // m_direction{direction}
 {
-	memcpy(m_filename, name, strlen(name) + 1);
 }
 
 Pipe::Pipe() :
-    FSNode(0, 0, 0),
+    FSNode(0, 0, 0), //
+    m_filename{""},
     m_buffer{1},
-    m_reader{1},
-    m_writer{1}, // FIXME: initial value is BUFFER_SIZE not 0
     m_wait_queue{}
 // m_direction{Direction::Reader}
 {
@@ -87,14 +85,14 @@ Result<void> Pipe::remove()
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<FSNode&> Pipe::create(const char* name, OpenMode mode, OpenFlags flags)
+Result<FSNode&> Pipe::create(const StringView& name, OpenMode mode, OpenFlags flags)
 {
 	UNUSED(mode);
 	UNUSED(flags);
 	return m_children.emplace_back(name);
 }
 
-Result<void> Pipe::mkdir(const char* name, int flags, int access)
+Result<void> Pipe::mkdir(const StringView& name, int flags, int access)
 {
 	UNUSED(name);
 	UNUSED(flags);
@@ -117,10 +115,10 @@ Result<void> Pipe::unlink(FSNode& node)
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<FSNode&> Pipe::dir_lookup(const char* file_name)
+Result<FSNode&> Pipe::dir_lookup(const StringView& file_name)
 {
 	for (auto& i : m_children) {
-		if (strcmp(file_name, i.m_filename) == 0) {
+		if (i.m_filename == file_name) {
 			return i;
 		}
 	}

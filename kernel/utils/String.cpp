@@ -8,9 +8,16 @@
 	#include "Lib/stdlib.h"
 	#include "utils/assert.h"
 #endif
+#include "StringView.h"
 
 const size_t String::END = -1;
 const size_t String::NOT_FOUND = -1;
+
+String::String(const StringView& str) : m_size{str.length()}, m_data{new char[m_size + 1]}
+{
+	ASSERT(m_data);
+	memcpy(m_data, str.m_data, m_size + 1);
+}
 
 String::String(const char* str) : m_size{strlen(str)}, m_data{new char[m_size + 1]}
 {
@@ -208,6 +215,15 @@ String& String::insert(size_t pos, const char* str, size_t subpos, size_t sublen
 	return *this;
 }
 
+bool String::operator==(const StringView& other) const
+{
+	if (m_size != other.m_size)
+		return false;
+	if (memcmp(m_data, other.m_data, m_size))
+		return false;
+	return true;
+}
+
 bool String::operator==(const String& other) const
 {
 	if (m_size != other.m_size)
@@ -220,6 +236,15 @@ bool String::operator==(const String& other) const
 bool String::operator==(const char* other) const
 {
 	if (strcmp(m_data, other))
+		return false;
+	return true;
+}
+
+bool String::operator!=(const StringView& other) const
+{
+	if (m_size == other.m_size)
+		return false;
+	if (!memcmp(m_data, other.m_data, m_size))
 		return false;
 	return true;
 }

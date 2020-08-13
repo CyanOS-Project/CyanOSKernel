@@ -1,17 +1,17 @@
 #pragma once
-
+#include "utils/StringView.h"
 #define SPLITER '/'
 class PathParser
 {
   private:
-	const char* m_path;
-	const unsigned m_len;
-	const char* get_next_element(const char* path);
+	const StringView m_path;
+	const size_t m_count;
+	size_t calc_count();
 
   public:
-	PathParser(const char* path);
+	explicit PathParser(const StringView& path);
 	~PathParser();
-	unsigned path_element_count();
-	int get_element(unsigned element_index, char* element, unsigned max_len);
+	size_t count();
+	StringView element(size_t index);
 	bool is_valid();
 };

@@ -29,10 +29,8 @@ Result<FileDescription&> VFS::open(const char* path, OpenMode mode, OpenFlags fl
 		// FIXME: we already went though parent! any optimization ?
 		auto parent_node = traverse_parent_node(path);
 		ASSERT(!parent_node.is_error());
-		char last_element[MAX_FILE_NAME];
 		PathParser parser(path);
-		parser.get_element(parser.path_element_count() - 1, last_element, MAX_FILE_NAME);
-		auto new_node = parent_node.value().create(last_element, mode, flags);
+		auto new_node = parent_node.value().create(parser.element(parser.count() - 1), mode, flags);
 		if (new_node.is_error()) {
 			return ResultError(new_node.error());
 		}
@@ -109,7 +107,7 @@ Result<void> VFS::remove_link()
 Result<FSNode&> VFS::traverse_parent_node(const char* path)
 {
 	PathParser parser(path);
-	size_t path_element_count = parser.path_element_count();
+	size_t path_element_count = parser.count();
 	if (path_element_count == 0) {
 		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 	}
@@ -119,7 +117,7 @@ Result<FSNode&> VFS::traverse_parent_node(const char* path)
 Result<FSNode&> VFS::traverse_node(const char* path)
 {
 	PathParser parser(path);
-	size_t path_element_count = parser.path_element_count();
+	size_t path_element_count = parser.count();
 	if (path_element_count == 0) {
 		return *m_root;
 	}
@@ -132,10 +130,8 @@ Result<FSNode&> VFS::traverse_node_deep(PathParser& parser, size_t depth)
 		return ResultError(ERROR_NO_ROOT_NODE);
 
 	FSNode* current = m_root;
-	char last_element[MAX_FILE_NAME];
 	for (size_t i = 0; i < depth; i++) {
-		parser.get_element(i, last_element, MAX_FILE_NAME);
-		auto next_node = current->dir_lookup(last_element);
+		auto next_node = current->dir_lookup(parser.element(i));
 		if (next_node.is_error())
 			return ResultError(next_node.error());
 		current = &Mountpoint::translate_mountpoint(next_node.value());

@@ -4,6 +4,8 @@
 #include "Tasking/semaphore.h"
 #include "utils/CircularBuffer.h"
 #include "utils/List.h"
+#include "utils/String.h"
+#include "utils/StringView.h"
 #include "utils/types.h"
 
 class Pipe : public FSNode
@@ -12,16 +14,14 @@ class Pipe : public FSNode
 
   private:
 	const static size_t BUFFER_SIZE = 1096;
-	char m_filename[MAX_FILE_NAME];
+	String m_filename;
 	List<Pipe> m_children;
 	CircularBuffer<char> m_buffer;
-	Semaphore m_reader;
-	Semaphore m_writer;
 	WaitQueue m_wait_queue;
 	// const Direction m_direction;
 
   public:
-	explicit Pipe(const char* name);
+	explicit Pipe(const StringView& name);
 	Pipe();
 	Pipe(const Pipe& other) = default;
 	~Pipe();
@@ -30,11 +30,11 @@ class Pipe : public FSNode
 	Result<bool> can_read() override;
 	Result<bool> can_write() override;
 	Result<void> remove() override;
-	Result<FSNode&> create(const char* name, OpenMode mode, OpenFlags flags) override;
-	Result<void> mkdir(const char* name, int flags, int access) override;
+	Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) override;
+	Result<void> mkdir(const StringView& name, int flags, int access) override;
 	Result<void> link(FSNode& node) override;
 	Result<void> unlink(FSNode& node) override;
-	Result<FSNode&> dir_lookup(const char* file_name) override;
+	Result<FSNode&> dir_lookup(const StringView& file_name) override;
 
 	static Pipe& root_node();
 };

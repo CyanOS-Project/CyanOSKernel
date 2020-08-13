@@ -1,5 +1,4 @@
 #include "PathParser.h"
-
 #ifdef __UNIT_TESTS
 	#include <assert.h>
 	#include <stdio.h>
@@ -10,54 +9,42 @@
 	#include "utils/assert.h"
 #endif
 
-PathParser::PathParser(const char* path) : m_path(path), m_len(strlen(path))
+PathParser::PathParser(const StringView& path) : m_path{path}, m_count{calc_count()}
 {
+	ASSERT(is_valid());
 }
 
 PathParser::~PathParser()
 {
 }
 
-unsigned PathParser::path_element_count()
+size_t PathParser::count()
 {
-	unsigned count = 0;
-	const char* current = m_path;
-	if (m_path[0] == SPLITER) // discard the first '/' if any.
-		++current;
-	size_t len = strlen(current);
-	if (len == 0)
-		return 0;
-
-	while (current < m_path + len) {
-		if (current[0] == SPLITER)
-			++count;
-		++current;
-	}
-	return count + 1;
+	return m_count;
 }
 
-int PathParser::get_element(unsigned element_index, char* element, unsigned max_len)
+StringView PathParser::element(size_t index)
 {
-	const char* current = m_path;
-	if (*current == SPLITER)
-		current++;
-
-	while (element_index) {
-		current = get_next_element(current);
-		element_index--;
+	ASSERT(index < count());
+	size_t pos = 0;
+	size_t cur = index;
+	while (cur--) {
+		pos = m_path.find(SPLITER, pos + 1);
 	}
-	size_t current_len = size_t(get_next_element(current)) - size_t(current) - 1;
-	if (max_len < current_len)
-		return 1;
+	size_t len = [&]() {
+		if (index == count() - 1) {
+			return m_path.length() - pos - 1;
+		} else {
+			return m_path.find(SPLITER, pos + 1) - pos - 1;
+		}
+	}();
 
-	memcpy(element, current, current_len);
-	element[current_len] = 0;
-	return 0;
+	return m_path.substr(pos + 1, len);
 }
 
 bool PathParser::is_valid()
 {
-	if (strlen(m_path) == 0)
+	if (m_path.length() == 0)
 		return false;
 
 	if (m_path[0] != SPLITER)
@@ -66,12 +53,14 @@ bool PathParser::is_valid()
 	return true;
 }
 
-const char* PathParser::get_next_element(const char* path)
+size_t PathParser::calc_count()
 {
-	while (path < m_path + m_len) {
-		if (path[0] == SPLITER)
-			return ++path;
-		path++;
-	}
-	return m_path + m_len + 1;
+	size_t count = 0;
+	size_t last_found = 0;
+
+	do {
+		last_found = m_path.find(SPLITER, last_found + 1);
+		++count;
+	} while (last_found != StringView::NOT_FOUND);
+	return count;
 }

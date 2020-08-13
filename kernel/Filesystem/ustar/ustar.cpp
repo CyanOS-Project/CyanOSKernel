@@ -19,7 +19,7 @@ FSNode& TarFS::root_node()
 	return m_root;
 }
 
-INode& TarFS::add_child_node(INode& parent, const char* name, const size_t size, char* data)
+INode& TarFS::add_child_node(INode& parent, const StringView& name, const size_t size, char* data)
 {
 	return parent.m_children.emplace_back(name, size, data);
 }
@@ -27,23 +27,17 @@ INode& TarFS::add_child_node(INode& parent, const char* name, const size_t size,
 void TarFS::parse_ustar(size_t size)
 {
 	TarHeader* tar_parser = m_tar_address;
-	char last_path_element[MAX_FILE_NAME];
-	//
 	Stack<INode*> directories(10);
 	directories.queue(&m_root);
 
 	while (uintptr_t(tar_parser) < (uintptr_t(m_tar_address) + size)) {
 		if (!tar_parser->name[0])
 			break;
+		const char* path = append_leading_slash(tar_parser->name);
+		PathParser parser(StringView(path, strlen(path) - 1));
 
-		remove_tailing_slash(tar_parser->name);
-		PathParser parser(tar_parser->name);
-		parser.get_element(parser.path_element_count() - 1, last_path_element, MAX_FILE_NAME);
-
-		if (parser.path_element_count() > 1) {
-			char parent_path[MAX_FILE_NAME];
-			parser.get_element(parser.path_element_count() - 2, parent_path, MAX_FILE_NAME);
-			while (strcmp(parent_path, directories.back()->m_filename) && directories.size() > 1) {
+		if (parser.count() > 1) {
+			while (directories.back()->m_filename == (parser.element(parser.count() - 2)) && (directories.size() > 1)) {
 				directories.dequeue();
 			}
 		} else {
@@ -52,8 +46,8 @@ void TarFS::parse_ustar(size_t size)
 			}
 		}
 
-		auto& new_node = add_child_node(*directories.back(), last_path_element, octal_to_decimal(tar_parser->size),
-		                                reinterpret_cast<char*>(tar_parser + 1));
+		auto& new_node = add_child_node(*directories.back(), parser.element(parser.count() - 1),
+		                                octal_to_decimal(tar_parser->size), reinterpret_cast<char*>(tar_parser + 1));
 		if (tar_parser->typeflag == USTARFileType::DIRECTORY) {
 			directories.queue(&new_node);
 		}
@@ -83,9 +77,10 @@ inline uintptr_t TarFS::align_to(uintptr_t size, unsigned alignment)
 		return size + alignment - (size % alignment);
 }
 
-void TarFS::remove_tailing_slash(char* path)
+const char* TarFS::append_leading_slash(const char* path)
 {
-	size_t last_index = strlen(path) - 1;
-	if (path[last_index] == SPLITER)
-		path[last_index] = 0;
+	char full_path[MAX_FILE_NAME];
+	strcpy(full_path + 1, path);
+	full_path[0] = '/';
+	return full_path;
 }

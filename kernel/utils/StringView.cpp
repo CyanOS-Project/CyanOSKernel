@@ -90,6 +90,8 @@ StringView StringView::substr(size_t pos, size_t len) const
 {
 	if (pos == END)
 		pos = m_size;
+	if (len == END)
+		len = m_size - pos;
 
 	ASSERT(pos + len <= m_size);
 	return StringView(m_data + pos, len);
