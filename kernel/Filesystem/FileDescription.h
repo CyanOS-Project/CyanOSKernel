@@ -23,7 +23,7 @@ class FileDescription
 	Result<void> open();
 	Result<void> close();
 	Result<void> read(void* buff, size_t size);
-	Result<void> write(void* buff, size_t size);
+	Result<void> write(const void* buff, size_t size);
 	Result<void> seek(int offset, SeekOrigin origin);
 	Result<FileInfo> fstat();
 	Result<void> ioctl();

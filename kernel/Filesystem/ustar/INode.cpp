@@ -3,9 +3,8 @@
 #include "utils/ErrorCodes.h"
 #include "utils/stl.h"
 
-INode::INode(const char* name, size_t size, char* data) : m_data(data)
+INode::INode(const char* name, size_t size, char* data) : FSNode(0, 0, size), m_data{data}
 {
-	FSNode::m_size = size;
 	memcpy(m_filename, name, strlen(name) + 1);
 }
 
@@ -20,7 +19,7 @@ Result<void> INode::read(void* buff, size_t offset, size_t size)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> INode::write(void* buff, size_t offset, size_t size)
+Result<void> INode::write(const void* buff, size_t offset, size_t size)
 {
 	UNUSED(buff);
 	UNUSED(offset);

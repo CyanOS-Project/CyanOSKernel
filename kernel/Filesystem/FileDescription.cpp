@@ -31,13 +31,13 @@ Result<void> FileDescription::read(void* buff, size_t size)
 	return m_node.read(buff, m_current_position, size);
 }
 
-Result<void> FileDescription::write(void* buff, size_t size)
+Result<void> FileDescription::write(const void* buff, size_t size)
 {
 	size_t offset = m_current_position + size;
 	if (offset > m_node.m_size) {
 		return ResultError(ERROR_EOF);
 	}
-	return m_node.read(buff, offset, size);
+	return m_node.write(buff, offset, size);
 }
 
 Result<void> FileDescription::seek(int offset, SeekOrigin origin)

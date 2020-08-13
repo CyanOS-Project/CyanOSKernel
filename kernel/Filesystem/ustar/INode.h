@@ -19,16 +19,16 @@ class INode : public FSNode
 	INode& operator=(INode&& other) = delete;
 	~INode();
 
-	Result<void> read(void* buff, size_t offset, size_t size);
-	Result<void> write(void* buff, size_t offset, size_t size);
-	Result<bool> can_read();
-	Result<bool> can_write();
-	Result<void> remove();
-	Result<FSNode&> create(const char* name, OpenMode mode, OpenFlags flags);
-	Result<void> mkdir(const char* name, int flags, int access);
-	Result<void> link(FSNode& node);
-	Result<void> unlink(FSNode& node);
-	Result<FSNode&> dir_lookup(const char* file_name);
+	Result<void> read(void* buff, size_t offset, size_t size) override;
+	Result<void> write(const void* buff, size_t offset, size_t size) override;
+	Result<bool> can_read() override;
+	Result<bool> can_write() override;
+	Result<void> remove() override;
+	Result<FSNode&> create(const char* name, OpenMode mode, OpenFlags flags) override;
+	Result<void> mkdir(const char* name, int flags, int access) override;
+	Result<void> link(FSNode& node) override;
+	Result<void> unlink(FSNode& node) override;
+	Result<FSNode&> dir_lookup(const char* file_name) override;
 
 	friend class TarFS;
 };

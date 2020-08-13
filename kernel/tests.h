@@ -85,19 +85,35 @@ void test_tar_filesystem(uintptr_t fs, size_t size)
 void test_pipe1(uintptr_t arg)
 {
 	UNUSED(arg);
-	auto fd = VFS::open("/fs/", OpenMode::Read, OpenFlags::OpenExisting);
+	auto fd = VFS::open("/fs/my_pipe", OpenMode::Read, OpenFlags::CreateNew);
 	if (fd.is_error()) {
 		printf("error opening the file, error: %d\n", fd.error());
+		HLT();
+
 		return;
 	}
 	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	memset(buff, 0, 4096);
-	auto result = fd.value().read(buff, 0xc00);
+	auto result = fd.value().read(buff, 12);
+	printf("got it, read\n");
+	printf("%s", buff);
 	if (result.is_error())
 		printf("error reading the file %d\n", result.error());
 }
 
 void test_pipe2(uintptr_t arg)
 {
-	UNUSED(arg);
+	Thread::sleep(1000);
+	auto fd = VFS::open("/fs/my_pipe", OpenMode::Write, OpenFlags::OpenExisting);
+	if (fd.is_error()) {
+		printf("error opening the file, error: %d\n", fd.error());
+		HLT();
+		return;
+	}
+	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
+	memset(buff, 0, 4096);
+	auto result = fd.value().write(static_cast<const void*>("Hello there"), 12);
+	printf("got it, write\n");
+	if (result.is_error())
+		printf("error writing the file %d\n", result.error());
 }

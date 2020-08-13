@@ -127,7 +127,7 @@ PageFrameBlock* Heap::get_last_page()
 		return nullptr;
 	}
 	volatile PageFrameBlock* current = malloc_mem;
-	while (malloc_mem->next) {
+	while (current->next) {
 		current = current->next;
 	}
 	return (PageFrameBlock*)current;

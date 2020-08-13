@@ -1,4 +1,5 @@
 #include "ustar.h"
+#include "utils/Stack.h"
 
 TarFS::TarFS(void* tar_address, size_t size) :
     m_tar_address(static_cast<TarHeader*>(tar_address)),
@@ -26,8 +27,11 @@ INode& TarFS::add_child_node(INode& parent, const char* name, const size_t size,
 void TarFS::parse_ustar(size_t size)
 {
 	TarHeader* tar_parser = m_tar_address;
-	INode* last_parent = &m_root;
 	char last_path_element[MAX_FILE_NAME];
+	//
+	Stack<INode*> directories(10);
+	directories.queue(&m_root);
+
 	while (uintptr_t(tar_parser) < (uintptr_t(m_tar_address) + size)) {
 		if (!tar_parser->name[0])
 			break;
@@ -35,10 +39,23 @@ void TarFS::parse_ustar(size_t size)
 		remove_tailing_slash(tar_parser->name);
 		PathParser parser(tar_parser->name);
 		parser.get_element(parser.path_element_count() - 1, last_path_element, MAX_FILE_NAME);
-		auto& new_node = add_child_node(*last_parent, last_path_element, octal_to_decimal(tar_parser->size),
+
+		if (parser.path_element_count() > 1) {
+			char parent_path[MAX_FILE_NAME];
+			parser.get_element(parser.path_element_count() - 2, parent_path, MAX_FILE_NAME);
+			while (strcmp(parent_path, directories.back()->m_filename) && directories.size() > 1) {
+				directories.dequeue();
+			}
+		} else {
+			while (directories.size() > 1) {
+				directories.dequeue();
+			}
+		}
+
+		auto& new_node = add_child_node(*directories.back(), last_path_element, octal_to_decimal(tar_parser->size),
 		                                reinterpret_cast<char*>(tar_parser + 1));
 		if (tar_parser->typeflag == USTARFileType::DIRECTORY) {
-			last_parent = &new_node; // FIXME: correct parent folders
+			directories.queue(&new_node);
 		}
 		const uintptr_t aligned_size = align_to(octal_to_decimal(tar_parser->size), TAR_ALIGNMENT);
 		tar_parser = (TarHeader*)(uintptr_t(tar_parser + 1) + aligned_size);

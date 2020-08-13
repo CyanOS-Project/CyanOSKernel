@@ -9,7 +9,7 @@ TEST(CircularBuffer_Test, Initialization)
 {
 	const int size = 10;
 	CircularBuffer<int> cb(size);
-	EXPECT_EQ(cb.max_size(), 10);
+	EXPECT_EQ(cb.capacity(), 10);
 	EXPECT_EQ(cb.size(), 0);
 	EXPECT_TRUE(cb.is_empty());
 	EXPECT_FALSE(cb.is_full());

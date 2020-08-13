@@ -21,24 +21,26 @@ Result<FileDescription&> VFS::open(const char* path, OpenMode mode, OpenFlags fl
 	UNUSED(mode);
 	UNUSED(flags);
 	auto node = traverse_node(path);
-	if ((node.error() == ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::OpenExisting)) {
-		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
-	} else if ((node.error() != ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::CreateNew)) {
-		return ResultError(ERROR_FILE_ALREADY_EXISTS);
-	} else {
-		return ResultError(node.error());
-	}
+	FSNode* open_node = nullptr;
 
-	FSNode* open_node = &node.value();
-	if ((node.error() == ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::CreateNew)) {
+	if ((node.error() != ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::CreateNew)) {
+		return ResultError(ERROR_FILE_ALREADY_EXISTS);
+	} else if ((node.error() == ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::CreateNew)) {
 		// FIXME: we already went though parent! any optimization ?
 		auto parent_node = traverse_parent_node(path);
 		ASSERT(!parent_node.is_error());
-		auto new_node = parent_node.value().create(path, mode, flags);
+		char last_element[MAX_FILE_NAME];
+		PathParser parser(path);
+		parser.get_element(parser.path_element_count() - 1, last_element, MAX_FILE_NAME);
+		auto new_node = parent_node.value().create(last_element, mode, flags);
 		if (new_node.is_error()) {
 			return ResultError(new_node.error());
 		}
 		open_node = &new_node.value();
+	} else if (node.is_error()) {
+		return ResultError(node.error());
+	} else {
+		open_node = &node.value();
 	}
 
 	FileDescription& fd = m_file_description->emplace_back(*open_node);
