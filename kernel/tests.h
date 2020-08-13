@@ -103,6 +103,7 @@ void test_pipe1(uintptr_t arg)
 
 void test_pipe2(uintptr_t arg)
 {
+	UNUSED(arg);
 	Thread::sleep(1000);
 	auto fd = VFS::open("/fs/my_pipe", OpenMode::Write, OpenFlags::OpenExisting);
 	if (fd.is_error()) {

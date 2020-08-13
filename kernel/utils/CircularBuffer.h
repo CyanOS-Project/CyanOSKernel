@@ -83,7 +83,7 @@ template <typename T> CircularBuffer<T>::~CircularBuffer()
 	for (size_t i = m_head; i < m_tail; i++) {
 		m_data[i].~T();
 	}
-	::operator delete(m_data, sizeof(T) * m_capacity);
+	operator delete(m_data);
 }
 
 template <typename T> bool CircularBuffer<T>::is_empty()

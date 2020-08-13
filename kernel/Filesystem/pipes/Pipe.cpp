@@ -89,6 +89,7 @@ Result<void> Pipe::remove()
 
 Result<FSNode&> Pipe::create(const char* name, OpenMode mode, OpenFlags flags)
 {
+	UNUSED(mode);
 	UNUSED(flags);
 	return m_children.emplace_back(name);
 }
