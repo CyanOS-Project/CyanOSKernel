@@ -3,7 +3,7 @@
 
 TarFS::TarFS(void* tar_address, size_t size) :
     m_tar_address(static_cast<TarHeader*>(tar_address)),
-    m_root("root", 0, nullptr)
+    m_root(".", FSNode::NodeType::Root, 0, nullptr)
 {
 	ASSERT(tar_address);
 	ASSERT(strncmp(m_tar_address->magic, "ustar", 5) == 0)
@@ -19,9 +19,16 @@ FSNode& TarFS::root_node()
 	return m_root;
 }
 
-INode& TarFS::add_child_node(INode& parent, const StringView& name, const size_t size, char* data)
+INode& TarFS::add_child_node(INode& parent, const StringView& name, char type, const size_t size, char* data)
 {
-	return parent.m_children.emplace_back(name, size, data);
+	FSNode::NodeType node_type;
+	if (type == USTARFileType::DIRECTORY) {
+		node_type = FSNode::NodeType::Folder;
+	} else {
+		node_type = FSNode::NodeType::File;
+	}
+
+	return parent.m_children.emplace_back(name, node_type, size, data);
 }
 
 void TarFS::parse_ustar(size_t size)
@@ -49,6 +56,7 @@ void TarFS::parse_ustar(size_t size)
 		auto& new_node = add_child_node(
 		    *directories.back(),                //
 		    parser.element(parser.count() - 1), //
+		    tar_parser->typeflag,               //
 		    octal_to_decimal(tar_parser->size), //
 		    tar_parser->typeflag != USTARFileType::DIRECTORY ? reinterpret_cast<char*>(tar_parser + 1) : nullptr);
 

@@ -16,10 +16,8 @@ void VFS::setup()
 	Mountpoint::setup();
 }
 
-Result<FileDescription&> VFS::open(const StringView& path, OpenMode mode, OpenFlags flags)
+Result<FSNode&> VFS::open_node(const StringView& path, OpenMode mode, OpenFlags flags)
 {
-	UNUSED(mode);
-	UNUSED(flags);
 	auto node = traverse_node(path);
 	FSNode* open_node = nullptr;
 
@@ -40,8 +38,20 @@ Result<FileDescription&> VFS::open(const StringView& path, OpenMode mode, OpenFl
 	} else {
 		open_node = &node.value();
 	}
+	if (open_node->m_type == FSNode::NodeType::Folder) {
+		return ResultError(ERROR_INVALID_OPERATION);
+	}
+	return *open_node;
+}
 
-	FileDescription& fd = m_file_description->emplace_back(*open_node);
+Result<FileDescription&> VFS::open(const StringView& path, OpenMode mode, OpenFlags flags)
+{
+	auto node = open_node(path, mode, flags);
+	if (node.error()) {
+		return ResultError(node.error());
+	}
+
+	FileDescription& fd = m_file_description->emplace_back(node.value());
 	Thread::current->parent_process().file_descriptors.push_back(&fd);
 	return fd;
 }

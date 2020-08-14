@@ -16,6 +16,7 @@ class VFS
 	static Result<FSNode&> traverse_parent_node(const StringView& path);
 	static Result<FSNode&> traverse_node(const StringView& path);
 	static Result<FSNode&> traverse_node_deep(PathParser& parser, size_t depth);
+	static Result<FSNode&> open_node(const StringView& path, OpenMode mode, OpenFlags flags);
 
   public:
 	static void setup();

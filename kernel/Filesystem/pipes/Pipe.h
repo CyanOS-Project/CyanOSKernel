@@ -18,11 +18,9 @@ class Pipe : public FSNode
 	List<Pipe> m_children;
 	CircularBuffer<char> m_buffer;
 	WaitQueue m_wait_queue;
-	// const Direction m_direction;
 
   public:
-	explicit Pipe(const StringView& name);
-	Pipe();
+	explicit Pipe(const StringView& name, FSNode::NodeType type);
 	Pipe(const Pipe& other) = default;
 	~Pipe();
 	Result<void> read(void* buff, size_t offset, size_t size) override;

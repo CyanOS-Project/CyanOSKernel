@@ -4,25 +4,15 @@
 
 Pipe& Pipe::root_node()
 {
-	return *new Pipe();
+	return *new Pipe(".", FSNode::NodeType::Root);
 }
 
-Pipe::Pipe(const StringView& name) :
-    FSNode(0, 0, BUFFER_SIZE),
+Pipe::Pipe(const StringView& name, FSNode::NodeType type) :
+    FSNode(0, 0, type, BUFFER_SIZE),
     m_filename{name},
     m_children{},
     m_buffer{BUFFER_SIZE},
     m_wait_queue{}
-// m_direction{direction}
-{
-}
-
-Pipe::Pipe() :
-    FSNode(0, 0, 0), //
-    m_filename{""},
-    m_buffer{1},
-    m_wait_queue{}
-// m_direction{Direction::Reader}
 {
 }
 
@@ -32,12 +22,7 @@ Pipe::~Pipe()
 
 Result<void> Pipe::read(void* buff, size_t offset, size_t size)
 {
-	// FIXME: check if type is not a folder
 	UNUSED(offset);
-
-	/*if (m_direction != Direction::Reader) {
-	    return ResultError(ERROR_INVALID_OPERATION);
-	}*/
 	if (m_buffer.size() < size) {
 		Thread::current->wait_on(m_wait_queue);
 	}
@@ -52,12 +37,8 @@ Result<void> Pipe::read(void* buff, size_t offset, size_t size)
 
 Result<void> Pipe::write(const void* buff, size_t offset, size_t size)
 {
-	// FIXME: check if type is not a folder
 	UNUSED(offset);
 
-	/*if (m_direction != Direction::Writer) {
-	    return ResultError(ERROR_INVALID_OPERATION);
-	}*/
 	if (m_buffer.available_size() < size) {
 		Thread::current->wait_on(m_wait_queue);
 	}
@@ -89,7 +70,7 @@ Result<FSNode&> Pipe::create(const StringView& name, OpenMode mode, OpenFlags fl
 {
 	UNUSED(mode);
 	UNUSED(flags);
-	return m_children.emplace_back(name);
+	return m_children.emplace_back(name, FSNode::NodeType::File);
 }
 
 Result<void> Pipe::mkdir(const StringView& name, int flags, int access)

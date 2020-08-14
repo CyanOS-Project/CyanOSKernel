@@ -47,7 +47,7 @@ class TarFS
 	TarHeader* m_tar_address;
 	INode m_root;
 	void parse_ustar(size_t size);
-	INode& add_child_node(INode& parent, const StringView& name, const size_t size, char* data);
+	INode& add_child_node(INode& parent, const StringView& name, char type, const size_t size, char* data);
 	String regulate_path(const char* path);
 	inline uintptr_t align_to(uintptr_t address, unsigned alignment);
 	size_t octal_to_decimal(const char* octal);

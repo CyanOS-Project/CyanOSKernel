@@ -3,8 +3,8 @@
 #include "utils/ErrorCodes.h"
 #include "utils/stl.h"
 
-INode::INode(const StringView& name, size_t size, char* data) :
-    FSNode(0, 0, size),
+INode::INode(const StringView& name, FSNode::NodeType type, size_t size, char* data) :
+    FSNode(0, 0, type, size),
     m_filename{name},
     m_children{},
     m_data{data}

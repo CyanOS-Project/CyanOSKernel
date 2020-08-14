@@ -24,6 +24,8 @@ Result<void> FileDescription::close()
 
 Result<void> FileDescription::read(void* buff, size_t size)
 {
+	// FIXME: check if type is not a folder
+
 	size_t reading_size = m_current_position + size;
 	if (reading_size > m_node.m_size) {
 		return ResultError(ERROR_EOF);
@@ -33,6 +35,8 @@ Result<void> FileDescription::read(void* buff, size_t size)
 
 Result<void> FileDescription::write(const void* buff, size_t size)
 {
+	// FIXME: check if type is not a folder
+
 	size_t offset = m_current_position + size;
 	if (offset > m_node.m_size) {
 		return ResultError(ERROR_EOF);
@@ -42,6 +46,8 @@ Result<void> FileDescription::write(const void* buff, size_t size)
 
 Result<void> FileDescription::seek(int offset, SeekOrigin origin)
 {
+	// FIXME: check if type is not a folder
+
 	switch (origin) {
 		case SeekOrigin::SET: {
 			if (offset < 0)
@@ -53,7 +59,6 @@ Result<void> FileDescription::seek(int offset, SeekOrigin origin)
 			break;
 		}
 		case SeekOrigin::CURRENT: {
-			// FIXME: check overflow
 			if (((offset > 0) && (size_t(offset) > (m_node.m_size - m_current_position))) ||
 			    ((offset < 0) && (size_t(-offset) > m_current_position)))
 				return ResultError(ERROR_EOF);
@@ -62,7 +67,6 @@ Result<void> FileDescription::seek(int offset, SeekOrigin origin)
 			break;
 		}
 		case SeekOrigin::END: {
-			// FIXME: check overflow
 			if (offset > 0)
 				return ResultError(ERROR_EOF);
 			if (size_t(-offset) > m_node.m_size)

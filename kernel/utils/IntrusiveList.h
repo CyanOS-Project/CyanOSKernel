@@ -58,22 +58,22 @@ template <typename T> class IntrusiveList
 	Iterator begin() const;
 	Iterator end() const;
 
-	 T* first() const
+	T* first() const
 	{
 		return m_head;
 	}
 
-	 T* tail() const
+	T* tail() const
 	{
 		return m_tail;
 	}
 
-	 bool is_empty() const
+	bool is_empty() const
 	{
 		return !m_count;
 	}
 
-	 size_t size() const
+	size_t size() const
 	{
 		return m_count;
 	}
@@ -173,7 +173,6 @@ template <typename T> T* IntrusiveList<T>::pop_front()
 
 template <typename T> T* IntrusiveList<T>::remove(T& node)
 {
-	// FIXME: check if in the list first
 	remove_node(node);
 	return &node;
 }

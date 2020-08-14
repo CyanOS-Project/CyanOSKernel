@@ -14,8 +14,7 @@ class INode : public FSNode
 	char* m_data;
 
   public:
-	explicit INode(const StringView& name, size_t size, char* data);
-	INode(const INode& other) = default;
+	explicit INode(const StringView& name, FSNode::NodeType type, size_t size, char* data);
 	INode& operator=(const INode& other) = delete;
 	INode& operator=(INode&& other) = delete;
 	~INode();
