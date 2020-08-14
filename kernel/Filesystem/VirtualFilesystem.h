@@ -13,14 +13,14 @@ class VFS
 	static FSNode* m_root;
 	static List<FileDescription>* m_file_description;
 
-	static Result<FSNode&> traverse_parent_node(const char* path);
-	static Result<FSNode&> traverse_node(const char* path);
+	static Result<FSNode&> traverse_parent_node(const StringView& path);
+	static Result<FSNode&> traverse_node(const StringView& path);
 	static Result<FSNode&> traverse_node_deep(PathParser& parser, size_t depth);
 
   public:
 	static void setup();
-	static Result<FileDescription&> open(const char* path, OpenMode mode, OpenFlags flags);
-	static Result<void> mount(const char* path, FSNode& m_root_node);
+	static Result<FileDescription&> open(const StringView& path, OpenMode mode, OpenFlags flags);
+	static Result<void> mount(const StringView& path, FSNode& m_root_node);
 	static Result<void> mount_root(FSNode& node);
 	static Result<void> unmount();
 	static Result<void> remove();

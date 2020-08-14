@@ -8,9 +8,14 @@
 	#include "Lib/stdlib.h"
 	#include "utils/assert.h"
 #endif
+#include "String.h"
 
 const size_t StringView::END = -1;
 const size_t StringView::NOT_FOUND = -1;
+
+StringView::StringView(const String& str) : m_size{str.length()}, m_data{str.c_str()}
+{
+}
 
 StringView::StringView(const char* str) : m_size{strlen(str)}, m_data{str}
 {

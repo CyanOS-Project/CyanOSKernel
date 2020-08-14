@@ -1,6 +1,8 @@
 #pragma once
 #include "types.h"
 
+class String;
+
 class StringView
 {
   private:
@@ -8,6 +10,7 @@ class StringView
 	const char* m_data = nullptr;
 
   public:
+	StringView(const String& str);
 	StringView(const char* str);
 	StringView(const char* str, size_t len);
 	StringView(const StringView& other);

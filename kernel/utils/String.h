@@ -51,4 +51,6 @@ class String
 
 	static const size_t END;
 	static const size_t NOT_FOUND;
+
+	friend class StringView;
 };

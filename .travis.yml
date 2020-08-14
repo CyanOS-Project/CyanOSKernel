@@ -11,6 +11,7 @@ addons:
     - grub2
     - xorriso
     - cmake
+    - mformat
 
 script:
 - mkdir build && cd build

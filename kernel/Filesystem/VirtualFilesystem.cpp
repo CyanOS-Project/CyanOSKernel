@@ -16,7 +16,7 @@ void VFS::setup()
 	Mountpoint::setup();
 }
 
-Result<FileDescription&> VFS::open(const char* path, OpenMode mode, OpenFlags flags)
+Result<FileDescription&> VFS::open(const StringView& path, OpenMode mode, OpenFlags flags)
 {
 	UNUSED(mode);
 	UNUSED(flags);
@@ -46,7 +46,7 @@ Result<FileDescription&> VFS::open(const char* path, OpenMode mode, OpenFlags fl
 	return fd;
 }
 
-Result<void> VFS::mount(const char* path, FSNode& m_root_node)
+Result<void> VFS::mount(const StringView& path, FSNode& m_root_node)
 {
 	auto node_result = traverse_node(path);
 	if (node_result.is_error())
@@ -104,7 +104,7 @@ Result<void> VFS::remove_link()
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<FSNode&> VFS::traverse_parent_node(const char* path)
+Result<FSNode&> VFS::traverse_parent_node(const StringView& path)
 {
 	PathParser parser(path);
 	size_t path_element_count = parser.count();
@@ -114,7 +114,7 @@ Result<FSNode&> VFS::traverse_parent_node(const char* path)
 	return traverse_node_deep(parser, path_element_count - 1);
 }
 
-Result<FSNode&> VFS::traverse_node(const char* path)
+Result<FSNode&> VFS::traverse_node(const StringView& path)
 {
 	PathParser parser(path);
 	size_t path_element_count = parser.count();

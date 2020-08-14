@@ -50,6 +50,9 @@ bool PathParser::is_valid()
 	if (m_path[0] != SPLITER)
 		return false;
 
+	if (m_path[m_path.length() - 1] == SPLITER)
+		return false;
+
 	return true;
 }
 
@@ -62,5 +65,6 @@ size_t PathParser::calc_count()
 		last_found = m_path.find(SPLITER, last_found + 1);
 		++count;
 	} while (last_found != StringView::NOT_FOUND);
+
 	return count;
 }

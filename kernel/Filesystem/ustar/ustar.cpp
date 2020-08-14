@@ -33,11 +33,11 @@ void TarFS::parse_ustar(size_t size)
 	while (uintptr_t(tar_parser) < (uintptr_t(m_tar_address) + size)) {
 		if (!tar_parser->name[0])
 			break;
-		const char* path = append_leading_slash(tar_parser->name);
-		PathParser parser(StringView(path, strlen(path) - 1));
+		String path = regulate_path(tar_parser->name);
+		PathParser parser = PathParser(StringView(path));
 
 		if (parser.count() > 1) {
-			while (directories.back()->m_filename == (parser.element(parser.count() - 2)) && (directories.size() > 1)) {
+			while (directories.back()->m_filename != (parser.element(parser.count() - 2)) && (directories.size() > 1)) {
 				directories.dequeue();
 			}
 		} else {
@@ -46,8 +46,12 @@ void TarFS::parse_ustar(size_t size)
 			}
 		}
 
-		auto& new_node = add_child_node(*directories.back(), parser.element(parser.count() - 1),
-		                                octal_to_decimal(tar_parser->size), reinterpret_cast<char*>(tar_parser + 1));
+		auto& new_node = add_child_node(
+		    *directories.back(),                //
+		    parser.element(parser.count() - 1), //
+		    octal_to_decimal(tar_parser->size), //
+		    tar_parser->typeflag != USTARFileType::DIRECTORY ? reinterpret_cast<char*>(tar_parser + 1) : nullptr);
+
 		if (tar_parser->typeflag == USTARFileType::DIRECTORY) {
 			directories.queue(&new_node);
 		}
@@ -77,10 +81,13 @@ inline uintptr_t TarFS::align_to(uintptr_t size, unsigned alignment)
 		return size + alignment - (size % alignment);
 }
 
-const char* TarFS::append_leading_slash(const char* path)
+String TarFS::regulate_path(const char* path)
 {
-	char full_path[MAX_FILE_NAME];
-	strcpy(full_path + 1, path);
-	full_path[0] = '/';
+	String full_path(path);
+	full_path.insert(0, "/");
+	if (full_path[full_path.length() - 1] == '/') {
+		full_path.pop_back();
+	}
+
 	return full_path;
 }

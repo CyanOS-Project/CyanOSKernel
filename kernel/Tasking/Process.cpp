@@ -15,7 +15,7 @@ void Process::setup()
 	processes = new List<Process>;
 }
 
-Process& Process::create_new_process(const char* name, const char* path)
+Process& Process::create_new_process(const StringView& name, const StringView& path)
 {
 	// FIXME:lock it here
 	auto& pcb = processes->emplace_back(name, path);
@@ -23,32 +23,22 @@ Process& Process::create_new_process(const char* name, const char* path)
 	return pcb;
 }
 
-Process::Process(const char* name, const char* path) :
+Process::Process(const StringView& name, const StringView& path) :
     m_pid{reserve_pid()},
+    m_name{name},
+    m_path{path},
     m_page_directory{Memory::create_new_virtual_space()},
     m_state{ProcessState::ACTIVE},
     m_parent{nullptr},
     file_descriptors{}
 {
-	size_t name_len = strlen(name) + 1;
-	size_t path_len = strlen(path) + 1;
-	// FIXME: memory leak
-	char* proc_name = new char[name_len];
-	char* proc_path = new char[path_len];
-	memcpy(proc_name, name, name_len);
-	memcpy(proc_path, path, path_len);
-	m_name = proc_name;
-	m_path = proc_path;
-	m_parent = nullptr;
 }
 
 Process::~Process()
 {
-	delete[] m_name;
-	delete[] m_path;
 }
 
-Result<uintptr_t> Process::load_executable(const char* path)
+Result<uintptr_t> Process::load_executable(const StringView& path)
 {
 	auto fd = VFS::open(path, OpenMode::Read, OpenFlags::OpenExisting);
 	if (fd.is_error()) {
