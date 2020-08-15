@@ -3,6 +3,7 @@
 #include "Arch/x86/isr.h"
 #include "Arch/x86/paging.h"
 #include "Arch/x86/panic.h"
+#include "Arch/x86/spinlock.h"
 #include "Devices/Console/console.h"
 #include "physical.h"
 #include "utils/assert.h"
@@ -20,6 +21,7 @@ enum MEMORY_TYPE {
 class Memory
 {
   private:
+	static Spinlock mem_lock;
 	static void page_fault_handler(ISRContextFrame* isr_info);
 	static uint32_t parse_flags(uint32_t mem_flags);
 	static void* _alloc_no_lock(uint32_t size, uint32_t flags);

@@ -1,20 +1,20 @@
 #include "spinlock.h"
 
-void spinlock_init(SpinLock* lock)
+void Spinlock::init()
 {
-	lock->value = 0;
+	m_value = 0;
 }
 
-void spinlock_acquire(SpinLock* lock)
+void Spinlock::acquire()
 {
-	lock->eflags = eflags_read();
+	m_eflags = eflags_read();
 	DISABLE_INTERRUPTS();
-	while (test_and_set(&lock->value) != 0)
-		;
+	while (test_and_set(&m_value) != 0) {
+	}
 }
 
-void spinlock_release(SpinLock* lock)
+void Spinlock::release()
 {
-	lock->value = 0;
-	eflags_write(lock->eflags);
+	m_value = 0;
+	eflags_write(m_eflags);
 }

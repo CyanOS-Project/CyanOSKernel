@@ -21,14 +21,17 @@ class Process
   private:
 	static Bitmap* pid_bitmap;
 	static List<Process>* processes;
+	static Spinlock global_lock;
 	static void initiate_process(uintptr_t pcb);
 
+	Spinlock m_lock;
 	unsigned reserve_pid();
 	Result<uintptr_t> load_executable(const StringView& path);
-	SpinLock lock;
 
   public:
-	//--PCB
+	static Process& create_new_process(const StringView& name, const StringView& path);
+	static void setup();
+
 	const unsigned m_pid;
 	const String m_name;
 	const String m_path;
@@ -36,9 +39,6 @@ class Process
 	const ProcessState m_state;
 	const Process* m_parent;
 	List<FileDescription*> file_descriptors;
-	//---------
-	static Process& create_new_process(const StringView& name, const StringView& path);
 	Process(const StringView& name, const StringView& path);
 	~Process();
-	static void setup();
 };

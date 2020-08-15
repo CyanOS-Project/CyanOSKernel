@@ -5,14 +5,15 @@
 #include "Devices/Timer/pit.h"
 #include "Filesystem/VirtualFilesystem.h"
 #include "Loader/pe.h"
+#include "ScopedLock.h"
 #include "SystemCall.h"
 #include "utils/assert.h"
 
-SpinLock Scheduler::scheduler_lock;
+Spinlock Scheduler::scheduler_lock;
 
 void Scheduler::setup()
 {
-	spinlock_init(&scheduler_lock);
+	scheduler_lock.init();
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
 	SystemCall::setup();
 	Process::setup();
@@ -23,7 +24,7 @@ void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
 {
 	// FIXME: schedule idle if there is no ready thread
 	// TODO: move all unnecessary stuff to a separate thread to be performed later.
-	spinlock_acquire(&scheduler_lock);
+	ScopedLock local_lock(scheduler_lock);
 	if (type == ScheduleType::TIMED)
 		wake_up_sleepers();
 
@@ -40,7 +41,6 @@ void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
 	}
 	Thread::current = &next_thread;
 	load_context(current_context, &next_thread);
-	spinlock_release(&scheduler_lock);
 }
 Thread& Scheduler::select_next_thread()
 {

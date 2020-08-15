@@ -7,9 +7,9 @@
 class Semaphore
 {
   private:
+	Spinlock m_spinlock;
 	unsigned m_max_count;
 	unsigned m_count;
-	SpinLock m_spinlock;
 	WaitQueue m_queue;
 
   public:

@@ -15,7 +15,7 @@ enum class ScheduleType {
 class Scheduler
 {
   private:
-	static SpinLock scheduler_lock;
+	static Spinlock scheduler_lock;
 	static void load_context(ISRContextFrame* current_context, const Thread* thread);
 	static void switch_page_directory(const uintptr_t page_directory);
 	static void save_context(const ISRContextFrame* current_context, Thread* thread);

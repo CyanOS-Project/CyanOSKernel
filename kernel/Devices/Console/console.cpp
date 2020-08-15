@@ -1,11 +1,12 @@
 #include "console.h"
+#include "Tasking/ScopedLock.h"
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
 volatile uint16_t* video_ram = 0;
 volatile int vPosition = 0, hPosition = 0;
 uint8_t charColor = 0x0F;
-SpinLock printf_lock;
+Spinlock printf_lock;
 
 void clearScreen()
 {
@@ -20,7 +21,7 @@ void clearScreen()
 
 void initiate_console()
 {
-	spinlock_init(&printf_lock);
+	printf_lock.init();
 	hPosition = 0;
 	vPosition = 0;
 	video_ram = (uint16_t*)Memory::map(VGATEXTMODE_BUFFER, 0x1000, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
@@ -32,7 +33,7 @@ void initiate_console()
 
 void printf(const char* s, ...)
 {
-	spinlock_acquire(&printf_lock);
+	ScopedLock local_lock(printf_lock);
 	unsigned char c;
 	va_list ap;
 	va_start(ap, s);
@@ -45,12 +46,11 @@ void printf(const char* s, ...)
 		} else
 			putChar(c);
 	}
-	spinlock_release(&printf_lock);
 }
 
 void displayMemory(const char* Address, unsigned Size)
 {
-	spinlock_acquire(&printf_lock);
+	ScopedLock local_lock(printf_lock);
 	for (size_t i = 0; i < Size; i++) {
 		if ((i % 8 == 0))
 			__printf("\n");
@@ -59,12 +59,11 @@ void displayMemory(const char* Address, unsigned Size)
 		__printf("%X ", Address[i]);
 	}
 	__printf("\n");
-	spinlock_release(&printf_lock);
 }
 
 void printStatus(const char* msg, bool Success)
 {
-	spinlock_acquire(&printf_lock);
+	ScopedLock local_lock(printf_lock);
 	__printf("[");
 	if (Success) {
 		setColor(VGAColor::VGA_COLOR_GREEN, VGAColor::VGA_COLOR_BLACK);
@@ -75,7 +74,6 @@ void printStatus(const char* msg, bool Success)
 	}
 	setColor(VGAColor::VGA_COLOR_WHITE, VGAColor::VGA_COLOR_BLACK);
 	__printf("] %s.\n", msg);
-	spinlock_release(&printf_lock);
 }
 
 void __printf(const char* s, ...)
