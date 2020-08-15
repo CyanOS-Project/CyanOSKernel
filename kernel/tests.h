@@ -12,15 +12,15 @@
 #include "utils/SharedPointer.h"
 #include "utils/UniquePointer.h"
 #include "utils/bitmap.h"
-Semaphore* lock;
+Semaphore* sem_lock;
 void test_semaphore_thread2(uintptr_t arg)
 {
 	UNUSED(arg);
 	printf("Thread2:\n");
-	lock->acquire();
+	sem_lock->acquire();
 	printf("Semaphore acquired by thread2\n");
 	Thread::sleep(1000);
-	lock->release();
+	sem_lock->release();
 	printf("Semaphore released by thread2\n");
 	while (1) {
 		HLT();
@@ -31,13 +31,13 @@ void test_semaphore(uintptr_t arg)
 {
 	UNUSED(arg);
 	printf("Thread1:\n");
-	lock = new Semaphore(1);
-	lock->acquire();
+	sem_lock = new Semaphore(1);
+	sem_lock->acquire();
 	Thread::create_thread(Thread::current->parent_process(), test_semaphore_thread2, 0);
 	printf("Semaphore acquired by thread1\n");
 	Thread::sleep(3000);
 	printf("wakeup thread1\n");
-	lock->release();
+	sem_lock->release();
 	printf("Semaphore released by thread1\n");
 	while (1) {
 		HLT();

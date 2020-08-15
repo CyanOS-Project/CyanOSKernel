@@ -6,7 +6,7 @@ static const size_t VGA_HEIGHT = 25;
 volatile uint16_t* video_ram = 0;
 volatile int vPosition = 0, hPosition = 0;
 uint8_t charColor = 0x0F;
-Spinlock printf_lock;
+Spinlock lock;
 
 void clearScreen()
 {
@@ -21,7 +21,7 @@ void clearScreen()
 
 void initiate_console()
 {
-	printf_lock.init();
+	lock.init();
 	hPosition = 0;
 	vPosition = 0;
 	video_ram = (uint16_t*)Memory::map(VGATEXTMODE_BUFFER, 0x1000, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
@@ -33,7 +33,7 @@ void initiate_console()
 
 void printf(const char* s, ...)
 {
-	ScopedLock local_lock(printf_lock);
+	ScopedLock local_lock(lock);
 	unsigned char c;
 	va_list ap;
 	va_start(ap, s);
@@ -50,7 +50,7 @@ void printf(const char* s, ...)
 
 void displayMemory(const char* Address, unsigned Size)
 {
-	ScopedLock local_lock(printf_lock);
+	ScopedLock local_lock(lock);
 	for (size_t i = 0; i < Size; i++) {
 		if ((i % 8 == 0))
 			__printf("\n");
@@ -63,7 +63,7 @@ void displayMemory(const char* Address, unsigned Size)
 
 void printStatus(const char* msg, bool Success)
 {
-	ScopedLock local_lock(printf_lock);
+	ScopedLock local_lock(lock);
 	__printf("[");
 	if (Success) {
 		setColor(VGAColor::VGA_COLOR_GREEN, VGAColor::VGA_COLOR_BLACK);

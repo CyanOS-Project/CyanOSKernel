@@ -9,11 +9,11 @@
 #include "SystemCall.h"
 #include "utils/assert.h"
 
-Spinlock Scheduler::scheduler_lock;
+Spinlock Scheduler::lock;
 
 void Scheduler::setup()
 {
-	scheduler_lock.init();
+	lock.init();
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
 	SystemCall::setup();
 	Process::setup();
@@ -24,7 +24,7 @@ void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
 {
 	// FIXME: schedule idle if there is no ready thread
 	// TODO: move all unnecessary stuff to a separate thread to be performed later.
-	ScopedLock local_lock(scheduler_lock);
+	ScopedLock local_lock(lock);
 	if (type == ScheduleType::TIMED)
 		wake_up_sleepers();
 

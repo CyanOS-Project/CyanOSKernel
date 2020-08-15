@@ -1,9 +1,12 @@
 #include "heap.h"
+#include "Tasking/ScopedLock.h"
 
 volatile PageFrameBlock* Heap::malloc_mem;
+Spinlock Heap::lock;
 
 void Heap::setup()
 {
+	lock.init();
 	malloc_mem = nullptr;
 	malloc_mem = create_new_page();
 }
@@ -12,8 +15,9 @@ void Heap::setup()
 void* Heap::kmalloc(unsigned size, unsigned flags)
 {
 	UNUSED(flags);
-	// FIXME: allocate normal memory if the size is greater than MAX_SIZE (there is a bug when less) and handle freeing
-	// too
+	ScopedLock local_lock(lock);
+	// FIXME: allocate normal memory if the size is greater than MAX_SIZE (there is a bug when less) and handle
+	// freeing too
 	if (!size)
 		return nullptr;
 
@@ -46,6 +50,7 @@ void Heap::kfree(void* addr)
 	if (!addr)
 		return;
 
+	ScopedLock local_lock(lock);
 	BlockHeader* current_block = (BlockHeader*)ADDR_TO_HEADER(addr);
 	unlink_block(current_block);
 }

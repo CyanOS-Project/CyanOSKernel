@@ -12,36 +12,9 @@ List<FileDescription>* VFS::m_file_description;
 
 void VFS::setup()
 {
+	// lock the VFS and nodes.
 	m_file_description = new List<FileDescription>;
 	Mountpoint::setup();
-}
-
-Result<FSNode&> VFS::open_node(const StringView& path, OpenMode mode, OpenFlags flags)
-{
-	auto node = traverse_node(path);
-	FSNode* open_node = nullptr;
-
-	if ((node.error() != ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::CreateNew)) {
-		return ResultError(ERROR_FILE_ALREADY_EXISTS);
-	} else if ((node.error() == ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::CreateNew)) {
-		// FIXME: we already went though parent! any optimization ?
-		auto parent_node = traverse_parent_node(path);
-		ASSERT(!parent_node.is_error());
-		PathParser parser(path);
-		auto new_node = parent_node.value().create(parser.element(parser.count() - 1), mode, flags);
-		if (new_node.is_error()) {
-			return ResultError(new_node.error());
-		}
-		open_node = &new_node.value();
-	} else if (node.is_error()) {
-		return ResultError(node.error());
-	} else {
-		open_node = &node.value();
-	}
-	if (open_node->m_type == FSNode::NodeType::Folder) {
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-	return *open_node;
 }
 
 Result<FileDescription&> VFS::open(const StringView& path, OpenMode mode, OpenFlags flags)
@@ -147,4 +120,32 @@ Result<FSNode&> VFS::traverse_node_deep(PathParser& parser, size_t depth)
 		current = &Mountpoint::translate_mountpoint(next_node.value());
 	}
 	return *current;
+}
+
+Result<FSNode&> VFS::open_node(const StringView& path, OpenMode mode, OpenFlags flags)
+{
+	auto node = traverse_node(path);
+	FSNode* open_node = nullptr;
+
+	if ((node.error() != ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::CreateNew)) {
+		return ResultError(ERROR_FILE_ALREADY_EXISTS);
+	} else if ((node.error() == ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::CreateNew)) {
+		// FIXME: we already went though parent! any optimization ?
+		auto parent_node = traverse_parent_node(path);
+		ASSERT(!parent_node.is_error());
+		PathParser parser(path);
+		auto new_node = parent_node.value().create(parser.element(parser.count() - 1), mode, flags);
+		if (new_node.is_error()) {
+			return ResultError(new_node.error());
+		}
+		open_node = &new_node.value();
+	} else if (node.is_error()) {
+		return ResultError(node.error());
+	} else {
+		open_node = &node.value();
+	}
+	if (open_node->m_type == FSNode::NodeType::Folder) {
+		return ResultError(ERROR_INVALID_OPERATION);
+	}
+	return *open_node;
 }

@@ -1,15 +1,12 @@
 #include "memory.h"
 #include "Tasking/ScopedLock.h"
 
-Spinlock Memory::mem_lock;
+Spinlock Memory::lock;
 void Memory::setup()
 {
-	mem_lock.init();
+	lock.init();
 	Paging::setup(get_kernel_pages());
 	PhysicalMemory::initialize();
-	// Reserve Low 1MB Pages.
-	// PhysicalMemory::set_used_pages(0, GET_FRAME(KERNEL_PHYSICAL_ADDRESS));
-	// Set kernel memory as used.
 	PhysicalMemory::set_used_pages(GET_FRAME(KERNEL_PHYSICAL_ADDRESS), get_kernel_pages());
 }
 
@@ -38,34 +35,34 @@ void Memory::page_fault_handler(ISRContextFrame* isr_info)
 
 void* Memory::alloc(uint32_t size, uint32_t flags)
 {
-	ScopedLock local_lock(mem_lock);
+	ScopedLock local_lock(lock);
 	void* vAdd = _alloc_no_lock(size, flags);
 	return vAdd;
 }
 
 void* Memory::alloc(void* virtual_address, uint32_t size, uint32_t flags)
 {
-	ScopedLock local_lock(mem_lock);
+	ScopedLock local_lock(lock);
 	void* vAdd = _alloc_no_lock(virtual_address, size, flags);
 	return vAdd;
 }
 
 void Memory::free(void* virtual_address, uint32_t size, uint32_t flags)
 {
-	ScopedLock local_lock(mem_lock);
+	ScopedLock local_lock(lock);
 	_free_no_lock(virtual_address, size, flags);
 }
 
 void* Memory::map(uintptr_t physical_address, uint32_t size, uint32_t flags)
 {
-	ScopedLock local_lock(mem_lock);
+	ScopedLock local_lock(lock);
 	void* vAdd = _map_no_lock(physical_address, size, flags);
 	return vAdd;
 }
 
 void Memory::unmap(void* virtual_address, uint32_t size, uint32_t flags)
 {
-	ScopedLock local_lock(mem_lock);
+	ScopedLock local_lock(lock);
 	_unmap_no_lock(virtual_address, size, flags);
 }
 
@@ -73,7 +70,7 @@ uintptr_t Memory::create_new_virtual_space()
 {
 
 	uintptr_t page_directory = (uintptr_t)alloc(sizeof(PAGE_DIRECTORY), MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
-	ScopedLock local_lock(mem_lock);
+	ScopedLock local_lock(lock);
 	Paging::map_kernel_pd_entries(page_directory);
 	Paging::unmap_pages(page_directory,
 	                    GET_PAGES(sizeof(PAGE_DIRECTORY))); // unmap pd from virtual memory but keep it in physical
@@ -83,14 +80,14 @@ uintptr_t Memory::create_new_virtual_space()
 
 unsigned Memory::virtual_memory_size()
 {
-	ScopedLock local_lock(mem_lock);
+	ScopedLock local_lock(lock);
 	ASSERT_NOT_REACHABLE();
 	return 0;
 }
 
 unsigned Memory::physical_memory_size()
 {
-	ScopedLock local_lock(mem_lock);
+	ScopedLock local_lock(lock);
 	return PhysicalMemory::get_physical_memory_size();
 }
 

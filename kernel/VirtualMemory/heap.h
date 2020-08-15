@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Arch/x86/spinlock.h"
 #include "Lib/stdlib.h"
 #include "VirtualMemory/memory.h"
 #include "utils/types.h"
@@ -14,15 +15,14 @@ struct BlockHeader {
 	unsigned size;
 	BlockHeader *next, *previous;
 };
-
 struct PageFrameBlock {
 	unsigned size;
 	PageFrameBlock *next, *previous;
 };
-
 class Heap
 {
   private:
+	static Spinlock lock;
 	static PageFrameBlock* create_new_page();
 	static PageFrameBlock* get_last_page();
 	static BlockHeader* initiate_first_block(PageFrameBlock* new_page);
