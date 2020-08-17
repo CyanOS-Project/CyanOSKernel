@@ -45,7 +45,6 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	Scheduler::setup();
 	PIC::setup();
 	PIT::setup();
-	Keyboard::setup();
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
 	TarFS* tar_fs = new TarFS(reinterpret_cast<void*>(info->ramdisk.start), info->ramdisk.size);

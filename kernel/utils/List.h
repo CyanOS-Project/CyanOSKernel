@@ -55,7 +55,8 @@ template <class T> class List
 	void pop_front();
 	void insert(const Iterator& node, const T& new_node);
 	void erase(const Iterator&);
-	template <class Predicate> void remove_if(Predicate predicate);
+	template <class Predicate> bool remove_if(Predicate predicate);
+	template <class Predicate> bool contains(Predicate predicate);
 	void clear();
 	void splice(List<T>& list, const Iterator& itr);
 	bool is_empty() const;
@@ -78,6 +79,7 @@ template <class T> List<T>::Iterator::Iterator(Node* t_node) : m_current{t_node}
 
 template <class T> typename List<T>::Iterator List<T>::Iterator::operator++(int arg)
 {
+	UNUSED(arg);
 	Iterator old{*this};
 	m_current = m_current->next;
 	return old;
@@ -220,15 +222,28 @@ template <class T> template <typename... U> T& List<T>::emplace_front(U&&... u)
 	return new_node->data;
 }
 
-template <class T> template <class Predicate> void List<T>::remove_if(Predicate predicate)
+template <class T> template <class Predicate> bool List<T>::remove_if(Predicate predicate)
 {
+	bool is_removed = false;
 	auto&& i = begin();
 	while (i != end()) {
 		auto iterator_copy = i++;
 		if (predicate(*iterator_copy)) {
 			erase(iterator_copy);
+			is_removed = true;
 		}
 	}
+	return is_removed;
+}
+
+template <class T> template <class Predicate> bool List<T>::contains(Predicate predicate)
+{
+	for (auto&& i : *this) {
+		if (predicate(i)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 template <class T> T& List<T>::push_back(const T& new_data)
