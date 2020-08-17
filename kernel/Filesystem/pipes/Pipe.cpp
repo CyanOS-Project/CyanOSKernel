@@ -14,6 +14,7 @@ Pipe::Pipe(const StringView& name, FSNode::NodeType type) :
     m_buffer{BUFFER_SIZE},
     m_wait_queue{}
 {
+	// FIXME: multiple writers, one reader.
 }
 
 Pipe::~Pipe()
@@ -53,12 +54,12 @@ Result<void> Pipe::write(const void* buff, size_t offset, size_t size)
 
 Result<bool> Pipe::can_read()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return m_buffer.is_empty();
 }
 
 Result<bool> Pipe::can_write()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return m_buffer.is_full();
 }
 
 Result<void> Pipe::remove()

@@ -29,7 +29,7 @@ extern "C" void __attribute__((cdecl)) interrupt_dispatcher(ISRContextFrame info
 
 void ISR::default_interrupt_handler(ISRContextFrame* info)
 {
-	if (info->irq_number < NUMBER_OF_IDT_ENTRIES) {
+	if (info->irq_number < 19) {
 		printf("Exception: ");
 		printf(exception_messages[info->irq_number]);
 		printf("\nContext Dump:\n");
@@ -37,7 +37,7 @@ void ISR::default_interrupt_handler(ISRContextFrame* info)
 	} else if (info->irq_number < NUMBER_OF_IDT_EXCEPTIONS) {
 		printf("Reserved Exception Number\n");
 	} else {
-		printf("Undefined IRQ Number (IRQ%d)\n", info->irq_number);
+		printf("Undefined IRQ Number (IRQ %d)\n", info->irq_number);
 	}
 	HLT();
 }

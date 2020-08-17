@@ -7,6 +7,7 @@
 #include "Arch/x86/pic.h"
 #include "Devices/Console/console.h"
 #include "Devices/DebugPort/DebugPort.h"
+#include "Devices/Keyboard/Keyboard.h"
 #include "Devices/RTC/rtc.h"
 #include "Devices/Timer/pit.h"
 #include "Filesystem/pipes/Pipe.h"
@@ -19,6 +20,7 @@
 #include "VirtualMemory/virtual.h"
 #include "tests.h"
 #include "utils/assert.h"
+
 void display_time()
 {
 	while (1) {
@@ -33,7 +35,7 @@ void display_time()
 
 extern "C" void kernel_init(BootloaderInfo* info)
 {
-	DebugPort::write("Welcome To CyanOS", DebugColor::Bright_Cyan);
+	DebugPort::write("Welcome To CyanOS\n", DebugColor::Bright_Cyan);
 	GDT::setup();
 	IDT::setup();
 	Memory::setup_stage2();
@@ -43,6 +45,7 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	Scheduler::setup();
 	PIC::setup();
 	PIT::setup();
+	Keyboard::setup();
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
 	TarFS* tar_fs = new TarFS(reinterpret_cast<void*>(info->ramdisk.start), info->ramdisk.size);

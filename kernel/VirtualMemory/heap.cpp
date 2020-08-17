@@ -57,7 +57,8 @@ void Heap::kfree(void* addr)
 
 PageFrameBlock* Heap::create_new_page()
 {
-	// FIXME: do some asserts to nullpointers
+	// FIXME: create page according to the allocation size.
+	// FIXME: do some asserts to nullpointers.
 	PageFrameBlock* new_page =
 	    (PageFrameBlock*)Memory::alloc(MALLOC_PAGE_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	new_page->size = MALLOC_PAGE_SIZE;

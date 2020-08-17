@@ -14,6 +14,7 @@ void Mountpoint::register_mountpoint(FSNode& old_fs_node, FSNode& new_fs_node)
 
 FSNode& Mountpoint::translate_mountpoint(FSNode& node)
 {
+	// FIXME: use hashmap for this.
 	for (auto&& i : *m_mountpoints) {
 		if (i.old_node == &node)
 			return *i.new_node;
