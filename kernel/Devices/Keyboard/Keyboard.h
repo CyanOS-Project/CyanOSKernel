@@ -4,16 +4,24 @@
 #include "Arch/x86/pic.h"
 #include "Devices/DebugPort/DebugPort.h"
 #include "Devices/DeviceNode.h"
+#include "utils/CircularBuffer.h"
 #include "utils/types.h"
 
 class Keyboard : public DeviceNode
 {
   public:
 	static void keyboard_driver_handler(ISRContextFrame*);
+	Result<void> receive(void* buffer, size_t count) override;
+	Result<void> send(void* buffer, size_t count) override;
+	Result<void> can_read() override;
+	Result<void> can_write() override;
+	Result<void> control() override;
+
 	Keyboard();
 	~Keyboard();
 
   private:
+	static CircularBuffer<char>* m_buffer;
 	static bool pressed_keys[3];
 	static const int KBD_DATA_PORT = 0x60;
 	static constexpr char asccode[58][2] = {

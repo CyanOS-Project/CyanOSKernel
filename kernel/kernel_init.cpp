@@ -52,8 +52,7 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	VFS::mount_root(tar_fs->root_node());
 	VFS::mount("/fs", Pipe::root_node());
 	Process& proc = Process::create_new_process("test_process", "/Drivers/syscall.exe");
-	Thread::create_thread(proc, test_pipe1, 0);
-	Thread::create_thread(proc, test_pipe2, 0);
+	Thread::create_thread(proc, test_keyboard, 0);
 
 	Thread::yield();
 	// **************** tests**************************
