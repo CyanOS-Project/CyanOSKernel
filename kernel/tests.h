@@ -125,18 +125,18 @@ void test_pipe2(uintptr_t arg)
 void test_keyboard(uintptr_t arg)
 {
 	UNUSED(arg);
-	auto fd = DeviceManager::open("keybaord", 0, 0);
+	auto fd = DeviceManager::open("keyboard", 0, 0);
 	if (fd.is_error()) {
 		printf("error opening the file, error: %d\n", fd.error());
 		HLT();
-
 		return;
 	}
-	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
-	memset(buff, 0, 4096);
-	auto result = fd.value().receive(buff, 12);
-	printf("got it, read\n");
-	printf("%s", buff);
-	if (result.is_error())
-		printf("error reading the file %d\n", result.error());
+	char buff[1];
+	while (true) {
+		auto result = fd.value().receive(buff, 1);
+		printf("got it, read\n");
+		DebugPort::write(buff, DebugColor::Bright_Red);
+		if (result.is_error())
+			printf("error reading the file %d\n", result.error());
+	}
 }

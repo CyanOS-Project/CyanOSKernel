@@ -30,11 +30,14 @@ template <class T> class List
 	  public:
 		Iterator(Node* t_head, size_t index);
 		explicit Iterator(Node* t_list);
+		Iterator(const Iterator& other);
+		void operator=(const List<T>::Iterator& other);
+		~Iterator() = default;
+
 		Iterator operator++(int);
 		Iterator& operator++();
 		bool operator!=(const List<T>::Iterator& other);
 		bool operator==(const List<T>::Iterator& other);
-		void operator=(const List<T>::Iterator& other);
 		T* operator->();
 		T& operator*();
 		friend List<T>;
@@ -43,6 +46,11 @@ template <class T> class List
   public:
 	List();
 	~List();
+	List(const List&) = delete;
+	List(List&&) = delete;
+	operator=(const List&) = delete;
+	operator=(List&&) = delete;
+
 	Iterator begin();
 	Iterator end();
 	template <typename... U> T& emplace_back(U&&... u);
@@ -71,6 +79,10 @@ template <class T> List<T>::Iterator::Iterator(Node* t_head, size_t index) : m_c
 	while (index--) {
 		m_current = m_current->next;
 	}
+}
+
+template <class T> List<T>::Iterator::Iterator(const Iterator& other) : m_current{other.m_current}
+{
 }
 
 template <class T> List<T>::Iterator::Iterator(Node* t_node) : m_current{t_node}

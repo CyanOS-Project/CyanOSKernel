@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Filesystem/FSNode.h"
-#include "Tasking/semaphore.h"
+#include "Tasking/WaitQueue.h"
 #include "utils/CircularBuffer.h"
 #include "utils/List.h"
 #include "utils/String.h"

@@ -5,6 +5,8 @@ List<DeviceNode*>* DeviceManager::m_devices;
 
 Result<DeviceDescription> DeviceManager::open(const StringView& path, int mode, int flags)
 {
+	UNUSED(mode);
+	UNUSED(flags);
 	auto dev_ret = get_device(path);
 	if (dev_ret.is_error()) {
 		return ResultError(dev_ret.error());

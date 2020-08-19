@@ -45,12 +45,14 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	Scheduler::setup();
 	PIC::setup();
 	PIT::setup();
-	printStatus("Setting up devices.", true);
-	printf("Welcome to CyanOS.\n");
 	TarFS* tar_fs = new TarFS(reinterpret_cast<void*>(info->ramdisk.start), info->ramdisk.size);
 	VFS::setup();
 	VFS::mount_root(tar_fs->root_node());
 	VFS::mount("/fs", Pipe::root_node());
+	DeviceManager::setup();
+	DeviceManager::add_device(new Keyboard());
+	printStatus("Setting up devices.", true);
+	printf("Welcome to CyanOS.\n");
 	Process& proc = Process::create_new_process("test_process", "/Drivers/syscall.exe");
 	Thread::create_thread(proc, test_keyboard, 0);
 
