@@ -24,6 +24,11 @@ Result<FileDescription&> VFS::open(const StringView& path, OpenMode mode, OpenFl
 		return ResultError(node.error());
 	}
 
+	auto open_ret = node.value().open(mode, flags);
+	if (open_ret.is_error()) {
+		return ResultError(open_ret.error());
+	}
+
 	FileDescription& fd = m_file_description->emplace_back(node.value());
 	Thread::current->parent_process().file_descriptors.push_back(&fd);
 	return fd;

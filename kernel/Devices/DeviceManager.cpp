@@ -11,6 +11,12 @@ Result<DeviceDescription> DeviceManager::open(const StringView& path, int mode, 
 	if (dev_ret.is_error()) {
 		return ResultError(dev_ret.error());
 	}
+
+	auto open_ret = dev_ret.value().open(mode, flags);
+	if (open_ret.is_error()) {
+		return ResultError(open_ret.error());
+	}
+
 	return DeviceDescription(dev_ret.value());
 }
 

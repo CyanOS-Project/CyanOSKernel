@@ -13,6 +13,8 @@ class DeviceNode
   public:
 	enum class Type { Keyboard, Mouse, Disk, Screen, Printer, USB, Other };
 
+	virtual Result<void> open(int mode, int flags) = 0;
+	virtual Result<void> close() = 0;
 	virtual Result<void> receive(void* buffer, size_t count) = 0;
 	virtual Result<void> send(void* buffer, size_t count) = 0;
 	virtual Result<bool> can_read() = 0;

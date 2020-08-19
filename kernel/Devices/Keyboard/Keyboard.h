@@ -12,6 +12,8 @@ class Keyboard : public DeviceNode
 {
   public:
 	static void keyboard_driver_handler(ISRContextFrame*);
+	Result<void> open(int mode, int flags) override;
+	Result<void> close() override;
 	Result<void> receive(void* buffer, size_t count) override;
 	Result<void> send(void* buffer, size_t count) override;
 	Result<bool> can_read() override;

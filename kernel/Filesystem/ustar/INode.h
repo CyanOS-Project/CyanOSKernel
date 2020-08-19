@@ -18,7 +18,8 @@ class INode : public FSNode
 	INode& operator=(const INode& other) = delete;
 	INode& operator=(INode&& other) = delete;
 	~INode();
-
+	Result<void> open(OpenMode mode, OpenFlags flags) override;
+	Result<void> close() override;
 	Result<void> read(void* buff, size_t offset, size_t size) override;
 	Result<void> write(const void* buff, size_t offset, size_t size) override;
 	Result<bool> can_read() override;

@@ -22,6 +22,19 @@ Keyboard::~Keyboard()
 {
 }
 
+Result<void> Keyboard::open(int mode, int flags)
+{
+	UNUSED(mode);
+	UNUSED(flags);
+
+	return ResultError(ERROR_SUCCESS);
+}
+
+Result<void> Keyboard::close()
+{
+	return ResultError(ERROR_SUCCESS);
+}
+
 Result<void> Keyboard::receive(void* buffer, size_t count)
 {
 	ScopedLock local_lock(m_lock);

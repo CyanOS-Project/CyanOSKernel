@@ -23,6 +23,19 @@ Pipe::~Pipe()
 {
 }
 
+Result<void> Pipe::open(OpenMode mode, OpenFlags flags)
+{
+	UNUSED(mode);
+	UNUSED(flags);
+
+	return ResultError(ERROR_SUCCESS);
+}
+
+Result<void> Pipe::close()
+{
+	return ResultError(ERROR_SUCCESS);
+}
+
 Result<void> Pipe::read(void* buff, size_t offset, size_t size)
 {
 	UNUSED(offset);

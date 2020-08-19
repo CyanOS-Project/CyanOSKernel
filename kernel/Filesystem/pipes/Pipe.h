@@ -24,6 +24,8 @@ class Pipe : public FSNode
 	explicit Pipe(const StringView& name, FSNode::NodeType type);
 	Pipe(const Pipe& other) = default;
 	~Pipe();
+	Result<void> open(OpenMode mode, OpenFlags flags) override;
+	Result<void> close() override;
 	Result<void> read(void* buff, size_t offset, size_t size) override;
 	Result<void> write(const void* buff, size_t offset, size_t size) override;
 	Result<bool> can_read() override;

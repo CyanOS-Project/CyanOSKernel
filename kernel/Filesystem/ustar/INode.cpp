@@ -15,6 +15,19 @@ INode::~INode()
 {
 }
 
+Result<void> INode::open(OpenMode mode, OpenFlags flags)
+{
+	UNUSED(mode);
+	UNUSED(flags);
+
+	return ResultError(ERROR_SUCCESS);
+}
+
+Result<void> INode::close()
+{
+	return ResultError(ERROR_SUCCESS);
+}
+
 Result<void> INode::read(void* buff, size_t offset, size_t size)
 {
 	ASSERT((offset + size) <= m_size);

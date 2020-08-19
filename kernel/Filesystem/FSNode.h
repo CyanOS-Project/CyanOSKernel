@@ -24,6 +24,8 @@ class FSNode
 	    m_type{type},
 	    m_size{size} {};
 	virtual Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) = 0;
+	virtual Result<void> open(OpenMode mode, OpenFlags flags) = 0;
+	virtual Result<void> close() = 0;
 	virtual Result<void> read(void* buff, size_t offset, size_t size) = 0;
 	virtual Result<void> write(const void* buff, size_t offset, size_t size) = 0;
 	virtual Result<bool> can_read() = 0;

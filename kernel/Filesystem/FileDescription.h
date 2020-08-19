@@ -16,16 +16,16 @@ class FileDescription
 	size_t m_current_position = 0;
 	int m_type = 0;
 	bool m_has_changed = false;
+	bool m_is_open = true;
 
   public:
 	FileDescription(FSNode& node);
 	~FileDescription();
-	Result<void> open();
-	Result<void> close();
 	Result<void> read(void* buff, size_t size);
 	Result<void> write(const void* buff, size_t size);
 	Result<void> seek(int offset, SeekOrigin origin);
 	Result<FileInfo> fstat();
 	Result<void> ioctl();
 	Result<void> mmap();
+	Result<void> close();
 };

@@ -88,6 +88,7 @@ void test_tar_filesystem(uintptr_t fs, size_t size)
 void test_pipe1(uintptr_t arg)
 {
 	UNUSED(arg);
+
 	auto fd = VFS::open("/fs/my_pipe", OpenMode::Read, OpenFlags::CreateNew);
 	if (fd.is_error()) {
 		printf("error opening the file, error: %d\n", fd.error());
