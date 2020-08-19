@@ -1,7 +1,9 @@
 #pragma once
 
+#include "Rule5.h"
 #include "stl.h"
 #include "types.h"
+
 #ifdef __UNIT_TESTS
 	#include <assert.h>
 	#define ASSERT(x) assert(x)
@@ -44,12 +46,10 @@ template <class T> class List
 	};
 
   public:
+	NON_COPYABLE(List);
+	NON_MOVABLE(List);
 	List();
 	~List();
-	List(const List&) = delete;
-	List(List&&) = delete;
-	operator=(const List&) = delete;
-	operator=(List&&) = delete;
 
 	Iterator begin();
 	Iterator end();
