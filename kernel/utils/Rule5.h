@@ -1,9 +1,9 @@
 #pragma once
 
 #define NON_COPYABLE(x)                                                                                                \
-	List(const List&) = delete;                                                                                        \
+	x(const x&) = delete;                                                                                              \
 	x& operator=(const x&) = delete;
 
 #define NON_MOVABLE(x)                                                                                                 \
-	List(List&&) = delete;                                                                                             \
+	x(x&&) = delete;                                                                                                   \
 	x& operator=(x&&) = delete;

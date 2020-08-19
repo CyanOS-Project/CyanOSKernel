@@ -13,11 +13,12 @@ class Pipe : public FSNode
 	enum class Direction { Reader, Writer };
 
   private:
-	const static size_t BUFFER_SIZE = 1096;
+	const static size_t BUFFER_SIZE = 1024;
 	String m_filename;
 	List<Pipe> m_children;
 	CircularBuffer<char> m_buffer;
 	WaitQueue m_wait_queue;
+	Spinlock m_lock;
 
   public:
 	explicit Pipe(const StringView& name, FSNode::NodeType type);

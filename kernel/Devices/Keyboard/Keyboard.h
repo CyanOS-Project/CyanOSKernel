@@ -14,15 +14,15 @@ class Keyboard : public DeviceNode
 	static void keyboard_driver_handler(ISRContextFrame*);
 	Result<void> receive(void* buffer, size_t count) override;
 	Result<void> send(void* buffer, size_t count) override;
-	Result<void> can_read() override;
-	Result<void> can_write() override;
+	Result<bool> can_read() override;
+	Result<bool> can_write() override;
 	Result<void> control() override;
 
 	Keyboard();
 	~Keyboard();
 
   private:
-	Spinlock lock;
+	Spinlock m_lock;
 	WaitQueue m_wait_queue;
 	CircularBuffer<char> m_buffer;
 	bool pressed_keys[3];

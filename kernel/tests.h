@@ -125,6 +125,7 @@ void test_pipe2(uintptr_t arg)
 void test_keyboard(uintptr_t arg)
 {
 	UNUSED(arg);
+
 	auto fd = DeviceManager::open("keyboard", 0, 0);
 	if (fd.is_error()) {
 		printf("error opening the file, error: %d\n", fd.error());

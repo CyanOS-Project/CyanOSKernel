@@ -1,12 +1,13 @@
 #include "Keyboard.h"
 #include "Arch/x86/asm.h"
+#include "Tasking/ScopedLock.h"
 #include "utils/ErrorCodes.h"
 
 Keyboard* Keyboard::current_instance = nullptr;
 
 Keyboard::Keyboard() :
     DeviceNode{"keyboard", DeviceNode::Type::Keyboard},
-    lock{},
+    m_lock{},
     m_wait_queue{},
     m_buffer{1024},
     pressed_keys{false, false, false}
@@ -23,9 +24,13 @@ Keyboard::~Keyboard()
 
 Result<void> Keyboard::receive(void* buffer, size_t count)
 {
+	ScopedLock local_lock(m_lock);
 	if (m_buffer.size() < count) {
+		local_lock.release();
 		Thread::current->wait_on(m_wait_queue);
+		local_lock.acquire();
 	}
+
 	char* _buf = static_cast<char*>(buffer);
 	for (size_t i = 0; i < count; i++) {
 		_buf[i] = m_buffer.dequeue();
@@ -42,12 +47,13 @@ Result<void> Keyboard::send(void* buffer, size_t count)
 	return ResultError(ERROR_INVALID_OPERATION);
 }
 
-Result<void> Keyboard::can_read()
+Result<bool> Keyboard::can_read()
 {
-	return ResultError(ERROR_INVALID_OPERATION);
+	ScopedLock local_lock(m_lock);
+	return m_buffer.is_empty();
 }
 
-Result<void> Keyboard::can_write()
+Result<bool> Keyboard::can_write()
 {
 	return ResultError(ERROR_INVALID_OPERATION);
 }
@@ -59,6 +65,7 @@ Result<void> Keyboard::control()
 
 void Keyboard::enqueue_keystoke(unsigned char data)
 {
+	ScopedLock local_lock(m_lock);
 	if (data == 0x2A) // SHIFT Pressed
 	{
 		pressed_keys[0] = 1;

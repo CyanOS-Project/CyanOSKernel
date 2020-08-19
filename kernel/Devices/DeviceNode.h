@@ -15,8 +15,8 @@ class DeviceNode
 
 	virtual Result<void> receive(void* buffer, size_t count) = 0;
 	virtual Result<void> send(void* buffer, size_t count) = 0;
-	virtual Result<void> can_read() = 0;
-	virtual Result<void> can_write() = 0;
+	virtual Result<bool> can_read() = 0;
+	virtual Result<bool> can_write() = 0;
 	virtual Result<void> control() = 0;
 	explicit DeviceNode(StringView device_name, Type device_type) : m_name{device_name}, m_type{device_type}
 	{
