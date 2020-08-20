@@ -12,6 +12,7 @@ class INode : public FSNode
 	String m_filename;
 	List<INode> m_children;
 	char* m_data;
+	Spinlock m_lock;
 
   public:
 	explicit INode(const StringView& name, FSNode::NodeType type, size_t size, char* data);

@@ -16,6 +16,7 @@ Pipe::Pipe(const StringView& name, FSNode::NodeType type) :
     m_wait_queue{},
     m_lock{}
 {
+	m_lock.init();
 	// FIXME: multiple writers, one reader.
 }
 
