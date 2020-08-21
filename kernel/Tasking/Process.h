@@ -2,6 +2,7 @@
 
 #include "Arch/x86/spinlock.h"
 #include "Filesystem/FileDescription.h"
+#include "Filesystem/FileDescriptor.h"
 #include "utils/List.h"
 #include "utils/Result.h"
 #include "utils/String.h"
@@ -25,6 +26,7 @@ class Process
 	static void initiate_process(uintptr_t pcb);
 
 	Spinlock m_lock;
+
 	unsigned reserve_pid();
 	Result<uintptr_t> load_executable(const StringView& path);
 
@@ -38,7 +40,8 @@ class Process
 	const uintptr_t m_page_directory;
 	const ProcessState m_state;
 	const Process* m_parent;
-	List<FileDescription*> file_descriptors;
+	FileDescriptor m_file_descriptors;
+
 	Process(const StringView& name, const StringView& path);
 	~Process();
 };

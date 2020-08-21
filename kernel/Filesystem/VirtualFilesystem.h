@@ -2,6 +2,7 @@
 
 #include "FSNode.h"
 #include "FileDescription.h"
+#include "FileDescriptor.h"
 #include "utils/List.h"
 #include "utils/PathParser.h"
 #include "utils/Result.h"
@@ -11,7 +12,7 @@ class VFS
 {
   private:
 	static FSNode* m_root;
-	static List<FileDescription>* m_file_description;
+	static Spinlock lock;
 
 	static Result<FSNode&> traverse_parent_node(const StringView& path);
 	static Result<FSNode&> traverse_node(const StringView& path);
@@ -20,7 +21,8 @@ class VFS
 
   public:
 	static void setup();
-	static Result<FileDescription&> open(const StringView& path, OpenMode mode, OpenFlags flags);
+	static Result<FileDescription&> open(const StringView& path, OpenMode mode, OpenFlags flags,
+	                                     unsigned* return_val = nullptr);
 	static Result<void> mount(const StringView& path, FSNode& m_root_node);
 	static Result<void> mount_root(FSNode& node);
 	static Result<void> unmount();

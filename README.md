@@ -9,7 +9,7 @@
 It's a x86 mono-kernel operating system, coded in C++ 17 and few lines of x86 Assembly.
 
 ## Why ?
-Why a new half working operating systems? you might ask, And answer is: because it's fun. This was my biggest project so far and I'm really learning new stuff on the way and enjoying every line i write (until I face a race condition bug, I would hate my life by then). I'm trying my best to work out a clean architecture for this project and maintaining a readable code base as far as i can (it might far from perfect right now).
+Why a new half working operating systems? you might ask, And the answer: because it's fun. This was my biggest project so far and I'm really learning a lot of new stuff on the way and enjoying every line i write (until I face a race condition bug, I would hate my life by then). I'm trying my best to work out a clean architecture for this project and maintaining a readable & scalable code base as far as i can (it might far from perfect right now).
 
 ## What can it do ?
 - Virtual Memory.

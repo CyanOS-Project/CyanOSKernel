@@ -1,31 +1,35 @@
 #pragma once
 #include "Arch/x86/context.h"
+#include "utils/Result.h"
 #include "utils/types.h"
 
-typedef int (*generic_syscall)(int arg0, int arg1, int arg2, int arg3, int arg4);
+typedef Result<int> (*generic_syscall)(int arg0, int arg1, int arg2, int arg3, int arg4);
 
 class SystemCall
 {
   private:
+	static generic_syscall systemcalls_routines[];
+	static unsigned syscalls_count;
+
+	static generic_syscall get_syscall_routine(unsigned syscall_num);
 	static void systemcall_handler(ISRContextFrame* frame);
 
   public:
-	static generic_syscall systemcalls_routines[];
 	static void setup();
 };
 
-int OpenFile(char* path, int mode, int flags);
-int ReadFile(void* buff, size_t size);
-int WriteFile(void* buff, size_t size);
-int CloseFile();
+Result<int> OpenFile(char* path, int mode, int flags);
+Result<int> ReadFile(int discriptor, void* buff, size_t size);
+Result<int> WriteFile(int discriptor, void* buff, size_t size);
+Result<int> CloseFile(int discriptor);
 
-int OpenDevice(char* path, int mode, int flags);
-int ReadDevice(void* buff, size_t size);
-int WriteDevice(void* buff, size_t size);
-int CloseDevice();
+Result<int> OpenDevice(char* path, int mode, int flags);
+Result<int> ReadDevice(int discriptor, void* buff, size_t size);
+Result<int> WriteDevice(int discriptor, void* buff, size_t size);
+Result<int> CloseDevice(int discriptor);
 
-int CreateThread(void* address, int arg);
-int CreateRemoteThread(int process, void* address, int arg);
-int CreateProcess(char* path, int flags);
-int Sleep(size_t size);
-int Yield();
+Result<int> CreateThread(void* address, int arg);
+Result<int> CreateRemoteThread(int process, void* address, int arg);
+Result<int> CreateProcess(char* name, char* path, int flags);
+Result<int> Sleep(size_t size);
+Result<int> Yield();

@@ -34,3 +34,53 @@ void Context::enter_usermode(uintptr_t address, uintptr_t stack)
 	             : "r"(uint16_t{UDS_SELECTOR}), "r"(uint32_t{stack}), "i"(uint32_t{EFLAGS_IF_ENABLE}),
 	               "r"(uint32_t{UCS_SELECTOR}), "r"(uint32_t{address}));
 }
+
+void Context::set_return_value(ISRContextFrame* frame, uint32_t value)
+{
+	frame->registers.eax = value;
+}
+
+void Context::set_return_arg1(ISRContextFrame* frame, uint32_t value)
+{
+	frame->registers.ecx = value;
+}
+
+void Context::set_return_arg2(ISRContextFrame* frame, uint32_t value)
+{
+	frame->registers.edx = value;
+}
+
+void Context::set_return_arg3(ISRContextFrame* frame, uint32_t value)
+{
+	frame->registers.ebx = value;
+}
+
+uint32_t Context::syscall_num(ISRContextFrame* frame)
+{
+	return frame->registers.eax;
+}
+
+uint32_t Context::syscall_param1(ISRContextFrame* frame)
+{
+	return frame->registers.ecx;
+}
+
+uint32_t Context::syscall_param2(ISRContextFrame* frame)
+{
+	return frame->registers.edx;
+}
+
+uint32_t Context::syscall_param3(ISRContextFrame* frame)
+{
+	return frame->registers.ebx;
+}
+
+uint32_t Context::syscall_param4(ISRContextFrame* frame)
+{
+	return frame->registers.esi;
+}
+
+uint32_t Context::syscall_param5(ISRContextFrame* frame)
+{
+	return frame->registers.edi;
+}

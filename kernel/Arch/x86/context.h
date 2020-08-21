@@ -1,9 +1,8 @@
 #pragma once
 
+#include "gdt.h"
 #include "isr.h"
 #include "utils/types.h"
-#include "gdt.h"
-
 
 class Context
 {
@@ -21,29 +20,15 @@ class Context
 	static void switch_task_stack(uint32_t task_stack_start);
 	static void enter_usermode(uintptr_t thread_address, uintptr_t thread_stack);
 
-	static inline uint32_t syscall_num(ISRContextFrame* frame)
-	{
-		return frame->registers.eax;
-	}
+	static void set_return_value(ISRContextFrame* frame, uint32_t value);
+	static void set_return_arg1(ISRContextFrame* frame, uint32_t value);
+	static void set_return_arg2(ISRContextFrame* frame, uint32_t value);
+	static void set_return_arg3(ISRContextFrame* frame, uint32_t value);
 
-	static inline uint32_t syscall_param1(ISRContextFrame* frame)
-	{
-		return frame->registers.ecx;
-	}
-	static inline uint32_t syscall_param2(ISRContextFrame* frame)
-	{
-		return frame->registers.edx;
-	}
-	static inline uint32_t syscall_param3(ISRContextFrame* frame)
-	{
-		return frame->registers.ebx;
-	}
-	static inline uint32_t syscall_param4(ISRContextFrame* frame)
-	{
-		return frame->registers.esi;
-	}
-	static inline uint32_t syscall_param5(ISRContextFrame* frame)
-	{
-		return frame->registers.edi;
-	}
+	static uint32_t syscall_num(ISRContextFrame* frame);
+	static uint32_t syscall_param1(ISRContextFrame* frame);
+	static uint32_t syscall_param2(ISRContextFrame* frame);
+	static uint32_t syscall_param3(ISRContextFrame* frame);
+	static uint32_t syscall_param4(ISRContextFrame* frame);
+	static uint32_t syscall_param5(ISRContextFrame* frame);
 };

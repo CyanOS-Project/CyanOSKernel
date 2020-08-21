@@ -1,6 +1,7 @@
 #include "VirtualFilesystem.h"
 #include "Arch/x86/panic.h"
 #include "Mountpoint.h"
+#include "Tasking/ScopedLock.h"
 #include "Tasking/Thread.h"
 #include "pipes/Pipe.h"
 #include "ustar/INode.h"
@@ -8,16 +9,17 @@
 #include "utils/assert.h"
 
 FSNode* VFS::m_root;
-List<FileDescription>* VFS::m_file_description;
+Spinlock VFS::lock;
 
 void VFS::setup()
 {
 	// lock the VFS and nodes.
-	m_file_description = new List<FileDescription>;
+	lock.init();
 	Mountpoint::setup();
 }
 
-Result<FileDescription&> VFS::open(const StringView& path, OpenMode mode, OpenFlags flags)
+Result<FileDescription&> VFS::open(const StringView& path, OpenMode mode, OpenFlags flags,
+                                   unsigned* return_file_descriptor)
 {
 	auto node = open_node(path, mode, flags);
 	if (node.error()) {
@@ -29,9 +31,12 @@ Result<FileDescription&> VFS::open(const StringView& path, OpenMode mode, OpenFl
 		return ResultError(open_ret.error());
 	}
 
-	FileDescription& fd = m_file_description->emplace_back(node.value());
-	Thread::current->parent_process().file_descriptors.push_back(&fd);
-	return fd;
+	unsigned fd = Thread::current->parent_process().m_file_descriptors.add_descriptor(node.value());
+	if (return_file_descriptor) {
+		*return_file_descriptor = fd;
+	}
+
+	return Thread::current->parent_process().m_file_descriptors.get_description(fd);
 }
 
 Result<void> VFS::mount(const StringView& path, FSNode& m_root_node)

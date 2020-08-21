@@ -71,7 +71,7 @@ template <class T> class List
 	size_t size() const;
 	T& head() const;
 	T& tail() const;
-	T& operator[](int index) const;
+	T& operator[](size_t index) const;
 };
 
 template <class T> List<T>::Iterator::Iterator(Node* t_head, size_t index) : m_current{t_head}
@@ -325,7 +325,7 @@ template <class T> T& List<T>::tail() const
 	return m_tail->data;
 }
 
-template <class T> T& List<T>::operator[](int index) const
+template <class T> T& List<T>::operator[](size_t index) const
 {
 	ASSERT(index < m_count);
 	Iterator itr(m_head, index);
