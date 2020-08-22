@@ -15,6 +15,7 @@ Why a new half working operating systems? you might ask, And the answer: because
 - Virtual Memory.
 - Heap Allocator.
 - Concurrency in terms of Threads & Processes.
+- Basic Windows PE loader
 - Task Synchronization (Spinlocks, Semaphores and Mutex)
 - Inter-process communication (using pipes)
 - Virtual File System.

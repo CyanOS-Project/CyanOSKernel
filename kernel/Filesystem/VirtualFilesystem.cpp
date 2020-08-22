@@ -18,8 +18,7 @@ void VFS::setup()
 	Mountpoint::setup();
 }
 
-Result<FileDescription&> VFS::open(const StringView& path, OpenMode mode, OpenFlags flags,
-                                   unsigned* return_file_descriptor)
+Result<UniquePointer<FileDescription>> VFS::open(const StringView& path, OpenMode mode, OpenFlags flags)
 {
 	auto node = open_node(path, mode, flags);
 	if (node.error()) {
@@ -31,12 +30,7 @@ Result<FileDescription&> VFS::open(const StringView& path, OpenMode mode, OpenFl
 		return ResultError(open_ret.error());
 	}
 
-	unsigned fd = Thread::current->parent_process().m_file_descriptors.add_descriptor(node.value());
-	if (return_file_descriptor) {
-		*return_file_descriptor = fd;
-	}
-
-	return Thread::current->parent_process().m_file_descriptors.get_description(fd);
+	return UniquePointer<FileDescription>::make_unique(node.value());
 }
 
 Result<void> VFS::mount(const StringView& path, FSNode& m_root_node)

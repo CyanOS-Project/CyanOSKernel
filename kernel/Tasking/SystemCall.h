@@ -19,14 +19,14 @@ class SystemCall
 };
 
 Result<int> OpenFile(char* path, int mode, int flags);
-Result<int> ReadFile(int discriptor, void* buff, size_t size);
-Result<int> WriteFile(int discriptor, void* buff, size_t size);
-Result<int> CloseFile(int discriptor);
+Result<int> ReadFile(unsigned descriptor, void* buff, size_t size);
+Result<int> WriteFile(unsigned descriptor, void* buff, size_t size);
+Result<int> CloseFile(unsigned descriptor);
 
 Result<int> OpenDevice(char* path, int mode, int flags);
-Result<int> ReadDevice(int discriptor, void* buff, size_t size);
-Result<int> WriteDevice(int discriptor, void* buff, size_t size);
-Result<int> CloseDevice(int discriptor);
+Result<int> ReadDevice(unsigned descriptor, void* buff, size_t size);
+Result<int> WriteDevice(unsigned descriptor, void* buff, size_t size);
+Result<int> CloseDevice(unsigned descriptor);
 
 Result<int> CreateThread(void* address, int arg);
 Result<int> CreateRemoteThread(int process, void* address, int arg);

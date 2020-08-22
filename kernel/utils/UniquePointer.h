@@ -13,7 +13,7 @@ template <typename T> class UniquePointer
 
 	explicit UniquePointer(T* ptr) : m_storage{ptr}
 	{
-		assert(m_storage);
+		ASSERT(m_storage);
 	}
 
 	UniquePointer(UniquePointer&& other) : m_storage{other.m_storage}

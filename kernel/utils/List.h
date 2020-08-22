@@ -222,7 +222,7 @@ template <class T> typename List<T>::Iterator List<T>::end()
 
 template <class T> template <typename... U> T& List<T>::emplace_back(U&&... u)
 {
-	Node* new_node = new Node{T{forward<U>(u)...}, nullptr, nullptr};
+	Node* new_node = new Node{T{forward<U>(u)...}, nullptr, nullptr}; // FIXME: remove T{}
 	append_node(*new_node, m_tail);
 	return new_node->data;
 }

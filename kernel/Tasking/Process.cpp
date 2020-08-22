@@ -52,11 +52,11 @@ Result<uintptr_t> Process::load_executable(const StringView& path)
 		printf("error opening the file, error: %d\n", fd.error());
 		return ResultError(fd.error());
 	}
-	auto file_info = fd.value().fstat();
+	auto file_info = fd.value()->fstat();
 	// FIXME: implement smart pointers and use it here.
 	char* buff = static_cast<char*>(Memory::alloc(file_info.value().size, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
 	memset(buff, 0, file_info.value().size);
-	auto result = fd.value().read(buff, file_info.value().size);
+	auto result = fd.value()->read(buff, file_info.value().size);
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}

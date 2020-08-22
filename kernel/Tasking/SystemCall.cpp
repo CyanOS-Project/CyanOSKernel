@@ -5,6 +5,7 @@
 #include "Filesystem/VirtualFilesystem.h"
 #include "Tasking/Process.h"
 #include "Tasking/Thread.h"
+#include "utils/stl.h"
 
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 
@@ -36,7 +37,11 @@ void SystemCall::systemcall_handler(ISRContextFrame* frame)
 	                   Context::syscall_param4(frame), Context::syscall_param5(frame));
 
 	Context::set_return_value(frame, ret.error());
-	Context::set_return_arg1(frame, ret.value());
+	if (ret.is_error()) {
+		Context::set_return_arg1(frame, 0);
+	} else {
+		Context::set_return_arg1(frame, ret.value());
+	}
 }
 
 generic_syscall SystemCall::systemcalls_routines[] = {reinterpret_cast<generic_syscall>(OpenFile),
@@ -59,22 +64,43 @@ unsigned SystemCall::syscalls_count = sizeof(systemcalls_routines) / sizeof(gene
 
 Result<int> OpenFile(char* path, int mode, int flags)
 {
-	VFS::open(path, static_cast<OpenMode>(mode), static_cast<OpenFlags>(flags));
+	auto file_description = VFS::open(path, static_cast<OpenMode>(mode), static_cast<OpenFlags>(flags));
+	if (file_description.is_error()) {
+		return ResultError(file_description.error());
+	}
+
+	unsigned fd = Thread::current->parent_process().m_file_descriptors.add_descriptor(move(file_description.value()));
+	return fd;
+}
+
+Result<int> ReadFile(unsigned descriptor, void* buff, size_t size)
+{
+	auto& file_disc = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
+	auto result = file_disc.read(buff, size);
+	if (result.is_error()) {
+		return ResultError(result.error());
+	}
 	return 0;
 }
 
-Result<int> ReadFile(int descriptor, void* buff, size_t size)
+Result<int> WriteFile(unsigned descriptor, void* buff, size_t size)
 {
+	auto& file_disc = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
+	auto result = file_disc.read(buff, size);
+	if (result.is_error()) {
+		return ResultError(result.error());
+	}
 	return 0;
 }
 
-Result<int> WriteFile(int descriptor, void* buff, size_t size)
+Result<int> CloseFile(unsigned descriptor)
 {
-	return 0;
-}
-
-Result<int> CloseFile(int descriptor)
-{
+	auto& file_disc = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
+	auto result = file_disc.close();
+	if (result.is_error()) {
+		return ResultError(result.error());
+	}
+	Thread::current->parent_process().m_file_descriptors.remove_descriptor(descriptor);
 	return 0;
 }
 
@@ -84,17 +110,17 @@ Result<int> OpenDevice(char* path, int mode, int flags)
 	return 0;
 }
 
-Result<int> ReadDevice(int descriptor, void* buff, size_t size)
+Result<int> ReadDevice(unsigned descriptor, void* buff, size_t size)
 {
 	return 0;
 }
 
-Result<int> WriteDevice(int descriptor, void* buff, size_t size)
+Result<int> WriteDevice(unsigned descriptor, void* buff, size_t size)
 {
 	return 0;
 }
 
-Result<int> CloseDevice(int descriptor)
+Result<int> CloseDevice(unsigned descriptor)
 {
 	return 0;
 }

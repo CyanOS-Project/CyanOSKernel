@@ -53,8 +53,10 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	DeviceManager::add_device(new Keyboard());
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
-	Process& proc = Process::create_new_process("test_process", "/Drivers/syscall.exe");
+	Process& proc = Process::create_new_process("test_process", "/Drivers/open_file.exe");
 	Thread::create_thread(proc, test_keyboard, 0);
+
+	// Process::create_new_process("test_process2", "/Drivers/nop_loop.exe");
 
 	Thread::yield();
 	// **************** tests**************************

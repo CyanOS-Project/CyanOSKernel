@@ -43,20 +43,18 @@ class Thread : public IntrusiveListNode<Thread>
   public:
 	static Thread* current;
 	static Thread& create_thread(Process& parent_process, thread_function address, uintptr_t argument);
+	static void sleep(unsigned ms);
+	static void yield();
+	static void setup();
 
-	~Thread();
 	void wake_up_from_queue();
 	void wake_up_from_sleep();
 	void wait_on(WaitQueue& queue);
 	void terminate();
-	static void sleep(unsigned ms);
-	static void yield();
-	static void setup();
+	~Thread();
 	unsigned tid();
-
-	Process& parent_process();
-
 	ThreadState state();
+	Process& parent_process();
 
 	static size_t number_of_ready_threads();
 

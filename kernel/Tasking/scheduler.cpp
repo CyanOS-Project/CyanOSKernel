@@ -42,6 +42,7 @@ void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
 	Thread::current = &next_thread;
 	load_context(current_context, &next_thread);
 }
+
 Thread& Scheduler::select_next_thread()
 {
 	static size_t rr_index = 0;
@@ -54,6 +55,7 @@ Thread& Scheduler::select_next_thread()
 		}
 		return IterationDecision::Continue;
 	});
+	ASSERT(Thread::number_of_ready_threads());
 	rr_index = (rr_index + 1) % Thread::number_of_ready_threads();
 	return *next_thread;
 }

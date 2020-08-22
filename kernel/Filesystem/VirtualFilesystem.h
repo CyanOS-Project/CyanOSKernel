@@ -6,6 +6,7 @@
 #include "utils/List.h"
 #include "utils/PathParser.h"
 #include "utils/Result.h"
+#include "utils/UniquePointer.h"
 #include "utils/types.h"
 
 class VFS
@@ -21,8 +22,7 @@ class VFS
 
   public:
 	static void setup();
-	static Result<FileDescription&> open(const StringView& path, OpenMode mode, OpenFlags flags,
-	                                     unsigned* return_val = nullptr);
+	static Result<UniquePointer<FileDescription>> open(const StringView& path, OpenMode mode, OpenFlags flags);
 	static Result<void> mount(const StringView& path, FSNode& m_root_node);
 	static Result<void> mount_root(FSNode& node);
 	static Result<void> unmount();

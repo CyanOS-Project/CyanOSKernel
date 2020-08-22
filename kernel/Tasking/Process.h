@@ -7,6 +7,7 @@
 #include "utils/Result.h"
 #include "utils/String.h"
 #include "utils/StringView.h"
+#include "utils/UniquePointer.h"
 #include "utils/bitmap.h"
 #include "utils/types.h"
 
@@ -27,6 +28,7 @@ class Process
 
 	Spinlock m_lock;
 
+	Process(const StringView& name, const StringView& path);
 	unsigned reserve_pid();
 	Result<uintptr_t> load_executable(const StringView& path);
 
@@ -41,7 +43,7 @@ class Process
 	const ProcessState m_state;
 	const Process* m_parent;
 	FileDescriptor m_file_descriptors;
-
-	Process(const StringView& name, const StringView& path);
 	~Process();
+
+	friend class List<Process>;
 };
