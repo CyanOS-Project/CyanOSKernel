@@ -19,7 +19,9 @@
 #include "VirtualMemory/memory.h"
 #include "VirtualMemory/virtual.h"
 #include "tests.h"
+#include "utils/UniquePointer.h"
 #include "utils/assert.h"
+#include "utils/stl.h"
 
 void display_time()
 {
@@ -50,7 +52,7 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	VFS::mount_root(tar_fs->root_node());
 	VFS::mount("/fs", Pipe::root_node());
 	DeviceManager::setup();
-	DeviceManager::add_device(new Keyboard());
+	DeviceManager::add_device(Keyboard::alloc());
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
 	Process& proc = Process::create_new_process("test_process", "/Drivers/open_file.exe");

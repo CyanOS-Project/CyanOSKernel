@@ -75,8 +75,8 @@ Result<int> OpenFile(char* path, int mode, int flags)
 
 Result<int> ReadFile(unsigned descriptor, void* buff, size_t size)
 {
-	auto& file_disc = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
-	auto result = file_disc.read(buff, size);
+	auto& description = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
+	auto result = description.read(buff, size);
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}
@@ -85,8 +85,8 @@ Result<int> ReadFile(unsigned descriptor, void* buff, size_t size)
 
 Result<int> WriteFile(unsigned descriptor, void* buff, size_t size)
 {
-	auto& file_disc = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
-	auto result = file_disc.read(buff, size);
+	auto& description = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
+	auto result = description.read(buff, size);
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}
@@ -95,8 +95,8 @@ Result<int> WriteFile(unsigned descriptor, void* buff, size_t size)
 
 Result<int> CloseFile(unsigned descriptor)
 {
-	auto& file_disc = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
-	auto result = file_disc.close();
+	auto& description = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
+	auto result = description.close();
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}
@@ -106,22 +106,43 @@ Result<int> CloseFile(unsigned descriptor)
 
 Result<int> OpenDevice(char* path, int mode, int flags)
 {
-	DeviceManager::open(path, mode, flags);
-	return 0;
+	auto description = DeviceManager::open(path, mode, flags);
+	if (description.is_error()) {
+		return ResultError(description.error());
+	}
+
+	unsigned fd = Thread::current->parent_process().m_device_descriptors.add_descriptor(move(description.value()));
+	return fd;
 }
 
 Result<int> ReadDevice(unsigned descriptor, void* buff, size_t size)
 {
+	auto& description = Thread::current->parent_process().m_device_descriptors.get_description(descriptor);
+	auto result = description.receive(buff, size);
+	if (result.is_error()) {
+		return ResultError(result.error());
+	}
 	return 0;
 }
 
 Result<int> WriteDevice(unsigned descriptor, void* buff, size_t size)
 {
+	auto& description = Thread::current->parent_process().m_device_descriptors.get_description(descriptor);
+	auto result = description.send(buff, size);
+	if (result.is_error()) {
+		return ResultError(result.error());
+	}
 	return 0;
 }
 
 Result<int> CloseDevice(unsigned descriptor)
 {
+	auto& description = Thread::current->parent_process().m_device_descriptors.get_description(descriptor);
+	auto result = description.close();
+	if (result.is_error()) {
+		return ResultError(result.error());
+	}
+	Thread::current->parent_process().m_device_descriptors.remove_descriptor(descriptor);
 	return 0;
 }
 

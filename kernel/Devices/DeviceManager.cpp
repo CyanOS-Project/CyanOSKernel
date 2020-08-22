@@ -1,9 +1,10 @@
 #include "DeviceManager.h"
 #include "utils/ErrorCodes.h"
+#include "utils/stl.h"
 
-List<DeviceNode*>* DeviceManager::m_devices;
+List<UniquePointer<DeviceNode>>* DeviceManager::m_devices;
 
-Result<DeviceDescription> DeviceManager::open(const StringView& path, int mode, int flags)
+Result<UniquePointer<DeviceDescription>> DeviceManager::open(const StringView& path, int mode, int flags)
 {
 	UNUSED(mode);
 	UNUSED(flags);
@@ -17,30 +18,30 @@ Result<DeviceDescription> DeviceManager::open(const StringView& path, int mode, 
 		return ResultError(open_ret.error());
 	}
 
-	return DeviceDescription(dev_ret.value());
+	return UniquePointer<DeviceDescription>::make_unique(dev_ret.value());
 }
 
 void DeviceManager::setup()
 {
-	m_devices = new List<DeviceNode*>;
+	m_devices = new List<UniquePointer<DeviceNode>>;
 }
 
-Result<void> DeviceManager::add_device(DeviceNode* node)
+Result<void> DeviceManager::add_device(UniquePointer<DeviceNode>&& node)
 {
-	if (m_devices->contains([&](DeviceNode* device) {
+	if (m_devices->contains([&](UniquePointer<DeviceNode>& device) {
 		    if (device->m_name == node->m_name)
 			    return true;
 		    return false;
 	    })) {
 		return ResultError(ERROR_DEVICE_ALREADY_EXISTS);
 	}
-	m_devices->push_back(node);
+	m_devices->emplace_back(move(node));
 	return ResultError(ERROR_SUCCESS);
 }
 
 Result<void> DeviceManager::remove_device(const StringView& device_name)
 {
-	if (!m_devices->remove_if([&](DeviceNode* device) {
+	if (!m_devices->remove_if([&](UniquePointer<DeviceNode>& device) {
 		    if (device->m_name == device_name)
 			    return true;
 		    return false;

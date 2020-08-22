@@ -9,10 +9,10 @@ class DeviceDescription
 {
   private:
 	DeviceNode& m_device;
-	DeviceDescription(DeviceNode& device);
 	bool m_is_open = true;
 
   public:
+	DeviceDescription(DeviceNode& device);
 	Result<void> receive(void* buffer, size_t count);
 	Result<void> send(void* buffer, size_t count);
 	Result<void> can_read();
@@ -20,6 +20,4 @@ class DeviceDescription
 	Result<void> control();
 	Result<void> close();
 	~DeviceDescription();
-
-	friend class DeviceManager;
 };

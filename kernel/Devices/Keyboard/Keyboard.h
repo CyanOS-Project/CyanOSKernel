@@ -6,12 +6,14 @@
 #include "Devices/DeviceNode.h"
 #include "Tasking/WaitQueue.h"
 #include "utils/CircularBuffer.h"
+#include "utils/UniquePointer.h"
 #include "utils/types.h"
 
 class Keyboard : public DeviceNode
 {
   public:
 	static void keyboard_driver_handler(ISRContextFrame*);
+	static UniquePointer<DeviceNode> alloc();
 	Result<void> open(int mode, int flags) override;
 	Result<void> close() override;
 	Result<void> receive(void* buffer, size_t count) override;

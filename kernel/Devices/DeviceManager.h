@@ -5,16 +5,17 @@
 #include "utils/IterationDecision.h"
 #include "utils/List.h"
 #include "utils/Result.h"
+#include "utils/UniquePointer.h"
 #include "utils/types.h"
 
 class DeviceManager
 {
   public:
 	static void setup();
-	static Result<void> add_device(DeviceNode* node);
+	static Result<void> add_device(UniquePointer<DeviceNode>&& node);
 	static Result<void> remove_device(const StringView& node);
 	static Result<DeviceNode&> get_device(const StringView& device_name);
-	static Result<DeviceDescription> open(const StringView& path, int mode, int flags);
+	static Result<UniquePointer<DeviceDescription>> open(const StringView& path, int mode, int flags);
 
 	template <typename Callback> static void for_each_device(Callback callback)
 	{
@@ -29,5 +30,5 @@ class DeviceManager
 	}
 
   private:
-	static List<DeviceNode*>* m_devices; // FIXME: Should contigious array.
+	static List<UniquePointer<DeviceNode>>* m_devices; // FIXME: Should contigious array.
 };

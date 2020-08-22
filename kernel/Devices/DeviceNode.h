@@ -23,7 +23,7 @@ class DeviceNode
 	explicit DeviceNode(StringView device_name, Type device_type) : m_name{device_name}, m_type{device_type}
 	{
 	}
-	~DeviceNode() = default;
+	virtual ~DeviceNode() = default;
 
   private:
 	String m_name;

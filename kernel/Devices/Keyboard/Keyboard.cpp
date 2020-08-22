@@ -5,6 +5,11 @@
 
 Keyboard* Keyboard::current_instance = nullptr;
 
+UniquePointer<DeviceNode> Keyboard::alloc()
+{
+	return UniquePointer<DeviceNode>(new Keyboard);
+}
+
 Keyboard::Keyboard() :
     DeviceNode{"keyboard", DeviceNode::Type::Keyboard},
     m_lock{},

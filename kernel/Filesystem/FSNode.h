@@ -23,6 +23,7 @@ class FSNode
 	    m_owner{owner},
 	    m_type{type},
 	    m_size{size} {};
+	virtual ~FSNode() = default;
 	virtual Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) = 0;
 	virtual Result<void> open(OpenMode mode, OpenFlags flags) = 0;
 	virtual Result<void> close() = 0;

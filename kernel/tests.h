@@ -135,7 +135,7 @@ void test_keyboard(uintptr_t arg)
 	}
 	char buff[1];
 	while (true) {
-		auto result = fd.value().receive(buff, 1);
+		auto result = fd.value()->receive(buff, 1);
 		printf("got it, read\n");
 		DebugPort::write(buff, DebugColor::Bright_Red);
 		if (result.is_error())
