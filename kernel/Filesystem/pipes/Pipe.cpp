@@ -9,8 +9,7 @@ Pipe& Pipe::root_node()
 }
 
 Pipe::Pipe(const StringView& name, FSNode::NodeType type) :
-    FSNode(0, 0, type, BUFFER_SIZE),
-    m_filename{name},
+    FSNode(name, 0, 0, type, BUFFER_SIZE),
     m_children{},
     m_buffer{BUFFER_SIZE},
     m_wait_queue{},
@@ -125,7 +124,7 @@ Result<void> Pipe::unlink(FSNode& node)
 Result<FSNode&> Pipe::dir_lookup(const StringView& file_name)
 {
 	for (auto& i : m_children) {
-		if (i.m_filename == file_name) {
+		if (i.m_name == file_name) {
 			return i;
 		}
 	}

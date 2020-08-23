@@ -5,13 +5,13 @@
 
 Keyboard* Keyboard::current_instance = nullptr;
 
-UniquePointer<DeviceNode> Keyboard::alloc()
+UniquePointer<FSNode> Keyboard::alloc()
 {
-	return UniquePointer<DeviceNode>(new Keyboard);
+	return UniquePointer<FSNode>(new Keyboard);
 }
 
 Keyboard::Keyboard() :
-    DeviceNode{"keyboard", DeviceNode::Type::Keyboard},
+    FSNode{"keyboard", 0, 0, NodeType::Device, 1024},
     m_lock{},
     m_wait_queue{},
     m_buffer{1024},
@@ -29,7 +29,12 @@ Keyboard::~Keyboard()
 {
 }
 
-Result<void> Keyboard::open(int mode, int flags)
+Result<FSNode&> Keyboard::create(const StringView& name, OpenMode mode, OpenFlags flags)
+{
+	return ResultError(ERROR_INVALID_OPERATION);
+}
+
+Result<void> Keyboard::open(OpenMode mode, OpenFlags flags)
 {
 	UNUSED(mode);
 	UNUSED(flags);
@@ -42,17 +47,17 @@ Result<void> Keyboard::close()
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Keyboard::receive(void* buffer, size_t count)
+Result<void> Keyboard::read(void* buff, size_t offset, size_t size)
 {
 	ScopedLock local_lock(m_lock);
-	if (m_buffer.size() < count) {
+	if (m_buffer.size() < size) {
 		local_lock.release();
 		Thread::current->wait_on(m_wait_queue);
 		local_lock.acquire();
 	}
 
-	char* _buf = static_cast<char*>(buffer);
-	for (size_t i = 0; i < count; i++) {
+	char* _buf = static_cast<char*>(buff);
+	for (size_t i = 0; i < size; i++) {
 		_buf[i] = m_buffer.dequeue();
 	}
 	m_wait_queue.wake_up_all();
@@ -60,10 +65,10 @@ Result<void> Keyboard::receive(void* buffer, size_t count)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Keyboard::send(void* buffer, size_t count)
+Result<void> Keyboard::write(const void* buff, size_t offset, size_t size)
 {
-	UNUSED(buffer);
-	UNUSED(count);
+	UNUSED(buff);
+	UNUSED(size);
 	return ResultError(ERROR_INVALID_OPERATION);
 }
 
@@ -78,7 +83,27 @@ Result<bool> Keyboard::can_write()
 	return ResultError(ERROR_INVALID_OPERATION);
 }
 
-Result<void> Keyboard::control()
+Result<void> Keyboard::remove()
+{
+	return ResultError(ERROR_INVALID_OPERATION);
+}
+
+Result<void> Keyboard::mkdir(const StringView& name, int flags, int access)
+{
+	return ResultError(ERROR_INVALID_OPERATION);
+}
+
+Result<void> Keyboard::link(FSNode& node)
+{
+	return ResultError(ERROR_INVALID_OPERATION);
+}
+
+Result<void> Keyboard::unlink(FSNode& node)
+{
+	return ResultError(ERROR_INVALID_OPERATION);
+}
+
+Result<FSNode&> Keyboard::dir_lookup(const StringView& file_name)
 {
 	return ResultError(ERROR_INVALID_OPERATION);
 }

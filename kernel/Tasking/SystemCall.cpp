@@ -1,7 +1,6 @@
 #include "SystemCall.h"
 #include "Arch/x86/isr.h"
 #include "Devices/Console/console.h"
-#include "Devices/DeviceManager.h"
 #include "Filesystem/VirtualFilesystem.h"
 #include "Tasking/Process.h"
 #include "Tasking/Thread.h"
@@ -49,11 +48,6 @@ generic_syscall SystemCall::systemcalls_routines[] = {reinterpret_cast<generic_s
                                                       reinterpret_cast<generic_syscall>(WriteFile),
                                                       reinterpret_cast<generic_syscall>(CloseFile),
 
-                                                      reinterpret_cast<generic_syscall>(OpenDevice),
-                                                      reinterpret_cast<generic_syscall>(ReadDevice),
-                                                      reinterpret_cast<generic_syscall>(WriteDevice),
-                                                      reinterpret_cast<generic_syscall>(CloseDevice),
-
                                                       reinterpret_cast<generic_syscall>(CreateThread),
                                                       reinterpret_cast<generic_syscall>(CreateRemoteThread), //
                                                       reinterpret_cast<generic_syscall>(CreateProcess),
@@ -75,6 +69,7 @@ Result<int> OpenFile(char* path, int mode, int flags)
 
 Result<int> ReadFile(unsigned descriptor, void* buff, size_t size)
 {
+	// FIXME: check if descriptor exists.
 	auto& description = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
 	auto result = description.read(buff, size);
 	if (result.is_error()) {
@@ -85,6 +80,7 @@ Result<int> ReadFile(unsigned descriptor, void* buff, size_t size)
 
 Result<int> WriteFile(unsigned descriptor, void* buff, size_t size)
 {
+	// FIXME: check if descriptor exists.
 	auto& description = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
 	auto result = description.read(buff, size);
 	if (result.is_error()) {
@@ -95,54 +91,9 @@ Result<int> WriteFile(unsigned descriptor, void* buff, size_t size)
 
 Result<int> CloseFile(unsigned descriptor)
 {
+	// FIXME: check if descriptor exists.
 	auto& description = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
-	auto result = description.close();
-	if (result.is_error()) {
-		return ResultError(result.error());
-	}
 	Thread::current->parent_process().m_file_descriptors.remove_descriptor(descriptor);
-	return 0;
-}
-
-Result<int> OpenDevice(char* path, int mode, int flags)
-{
-	auto description = DeviceManager::open(path, mode, flags);
-	if (description.is_error()) {
-		return ResultError(description.error());
-	}
-
-	unsigned fd = Thread::current->parent_process().m_device_descriptors.add_descriptor(move(description.value()));
-	return fd;
-}
-
-Result<int> ReadDevice(unsigned descriptor, void* buff, size_t size)
-{
-	auto& description = Thread::current->parent_process().m_device_descriptors.get_description(descriptor);
-	auto result = description.receive(buff, size);
-	if (result.is_error()) {
-		return ResultError(result.error());
-	}
-	return 0;
-}
-
-Result<int> WriteDevice(unsigned descriptor, void* buff, size_t size)
-{
-	auto& description = Thread::current->parent_process().m_device_descriptors.get_description(descriptor);
-	auto result = description.send(buff, size);
-	if (result.is_error()) {
-		return ResultError(result.error());
-	}
-	return 0;
-}
-
-Result<int> CloseDevice(unsigned descriptor)
-{
-	auto& description = Thread::current->parent_process().m_device_descriptors.get_description(descriptor);
-	auto result = description.close();
-	if (result.is_error()) {
-		return ResultError(result.error());
-	}
-	Thread::current->parent_process().m_device_descriptors.remove_descriptor(descriptor);
 	return 0;
 }
 

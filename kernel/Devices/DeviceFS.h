@@ -1,28 +1,20 @@
 #pragma once
 
 #include "Filesystem/FSNode.h"
-#include "Tasking/WaitQueue.h"
-#include "utils/CircularBuffer.h"
 #include "utils/List.h"
-#include "utils/String.h"
-#include "utils/StringView.h"
+#include "utils/UniquePointer.h"
 #include "utils/types.h"
 
-class Pipe : public FSNode
+class DeviceFS : public FSNode
 {
-	enum class Direction { Reader, Writer };
-
-  private:
-	const static size_t BUFFER_SIZE = 1024;
-	List<Pipe> m_children;
-	CircularBuffer<char> m_buffer;
-	WaitQueue m_wait_queue;
-	Spinlock m_lock;
-
   public:
-	explicit Pipe(const StringView& name, FSNode::NodeType type);
-	Pipe(const Pipe& other) = default;
-	~Pipe();
+	static DeviceFS& alloc();
+	static void init();
+	static Result<void> add_device(UniquePointer<FSNode>&& device);
+
+	DeviceFS();
+	~DeviceFS();
+	Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) override;
 	Result<void> open(OpenMode mode, OpenFlags flags) override;
 	Result<void> close() override;
 	Result<void> read(void* buff, size_t offset, size_t size) override;
@@ -30,11 +22,11 @@ class Pipe : public FSNode
 	Result<bool> can_read() override;
 	Result<bool> can_write() override;
 	Result<void> remove() override;
-	Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) override;
 	Result<void> mkdir(const StringView& name, int flags, int access) override;
 	Result<void> link(FSNode& node) override;
 	Result<void> unlink(FSNode& node) override;
 	Result<FSNode&> dir_lookup(const StringView& file_name) override;
 
-	static Pipe& root_node();
+  private:
+	static List<UniquePointer<FSNode>>* children;
 };

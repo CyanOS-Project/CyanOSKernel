@@ -9,22 +9,11 @@ FileDescription::FileDescription(FSNode& node) : m_node(node)
 
 FileDescription::~FileDescription()
 {
-	if (m_is_open) {
-		close();
-	}
-}
-
-Result<void> FileDescription::close()
-{
-	ASSERT(m_is_open);
-	m_is_open = false;
-	return m_node.close();
+	m_node.close();
 }
 
 Result<void> FileDescription::read(void* buff, size_t size)
 {
-	ASSERT(m_is_open);
-
 	size_t reading_size = m_current_position + size;
 	if (reading_size > m_node.m_size) {
 		return ResultError(ERROR_EOF);
@@ -34,8 +23,6 @@ Result<void> FileDescription::read(void* buff, size_t size)
 
 Result<void> FileDescription::write(const void* buff, size_t size)
 {
-	ASSERT(m_is_open);
-
 	size_t offset = m_current_position + size;
 	if (offset > m_node.m_size) {
 		return ResultError(ERROR_EOF);
@@ -45,8 +32,6 @@ Result<void> FileDescription::write(const void* buff, size_t size)
 
 Result<void> FileDescription::seek(int offset, SeekOrigin origin)
 {
-	ASSERT(m_is_open);
-
 	switch (origin) {
 		case SeekOrigin::SET: {
 			if (offset < 0)
@@ -82,21 +67,15 @@ Result<void> FileDescription::seek(int offset, SeekOrigin origin)
 
 Result<FileInfo> FileDescription::fstat()
 {
-	ASSERT(m_is_open);
-
 	return FileInfo{m_node.m_size};
 }
 
 Result<void> FileDescription::ioctl()
 {
-	ASSERT(m_is_open);
-
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
 Result<void> FileDescription::mmap()
 {
-	ASSERT(m_is_open);
-
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }

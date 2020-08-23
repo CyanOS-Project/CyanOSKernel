@@ -1,8 +1,6 @@
 #pragma once
 
 #include "Arch/x86/spinlock.h"
-#include "Devices/DeviceDescription.h"
-#include "Filesystem/FileDescription.h"
 #include "Filesystem/FileDescriptor.h"
 #include "utils/List.h"
 #include "utils/Result.h"
@@ -44,7 +42,6 @@ class Process
 	const ProcessState m_state;
 	const Process* m_parent;
 	Descriptor<FileDescription> m_file_descriptors;
-	Descriptor<DeviceDescription> m_device_descriptors;
 	~Process();
 
 	friend class List<Process>;

@@ -44,7 +44,7 @@ void TarFS::parse_ustar(size_t size)
 		PathParser parser = PathParser(StringView(path));
 
 		if (parser.count() > 1) {
-			while (directories.back()->m_filename != (parser.element(parser.count() - 2)) && (directories.size() > 1)) {
+			while (directories.back()->m_name != (parser.element(parser.count() - 2)) && (directories.size() > 1)) {
 				directories.dequeue();
 			}
 		} else {

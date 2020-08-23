@@ -16,7 +16,6 @@ class FileDescription
 	size_t m_current_position = 0;
 	int m_type = 0;
 	bool m_has_changed = false;
-	bool m_is_open = true;
 
   public:
 	FileDescription(FSNode& node);
@@ -27,5 +26,4 @@ class FileDescription
 	Result<FileInfo> fstat();
 	Result<void> ioctl();
 	Result<void> mmap();
-	Result<void> close();
 };

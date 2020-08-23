@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Arch/x86/spinlock.h"
-#include "Devices/DeviceDescription.h"
 #include "Filesystem/FileDescription.h"
 #include "Tasking/ScopedLock.h"
 #include "utils/List.h"

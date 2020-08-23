@@ -5,8 +5,7 @@
 #include "utils/stl.h"
 
 INode::INode(const StringView& name, FSNode::NodeType type, size_t size, char* data) :
-    FSNode(0, 0, type, size),
-    m_filename{name},
+    FSNode(name, 0, 0, type, size),
     m_children{},
     m_data{data},
     m_lock{}
@@ -97,7 +96,7 @@ Result<FSNode&> INode::dir_lookup(const StringView& file_name)
 {
 	ScopedLock local_lock(m_lock);
 	for (auto& i : m_children) {
-		if (i.m_filename == file_name) {
+		if (i.m_name == file_name) {
 			return i;
 		}
 	}

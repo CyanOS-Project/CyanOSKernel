@@ -9,7 +9,6 @@
 class INode : public FSNode
 {
   private:
-	String m_filename;
 	List<INode> m_children;
 	char* m_data;
 	Spinlock m_lock;

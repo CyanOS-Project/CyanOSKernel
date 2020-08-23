@@ -1,6 +1,7 @@
 #pragma once
 
 #include "utils/Result.h"
+#include "utils/String.h"
 #include "utils/StringView.h"
 #include "utils/types.h"
 
@@ -11,14 +12,17 @@ class VirtualFileSystem;
 class FSNode
 {
   protected:
-	enum class NodeType { Root, Folder, File, Link };
+	enum class NodeType { Root, Folder, File, Link, Device };
 
   public:
+	String m_name;
 	int m_permission;
 	int m_owner;
 	NodeType m_type;
 	size_t m_size;
-	FSNode(int permission, int owner, NodeType type, size_t size) :
+
+	FSNode(const StringView& name, int permission, int owner, NodeType type, size_t size) :
+	    m_name{name},
 	    m_permission{permission},
 	    m_owner{owner},
 	    m_type{type},

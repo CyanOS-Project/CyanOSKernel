@@ -7,6 +7,7 @@
 #include "Arch/x86/pic.h"
 #include "Devices/Console/console.h"
 #include "Devices/DebugPort/DebugPort.h"
+#include "Devices/DeviceFS.h"
 #include "Devices/Keyboard/Keyboard.h"
 #include "Devices/RTC/rtc.h"
 #include "Devices/Timer/pit.h"
@@ -48,11 +49,14 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	PIC::setup();
 	PIT::setup();
 	TarFS* tar_fs = new TarFS(reinterpret_cast<void*>(info->ramdisk.start), info->ramdisk.size);
+	// file systems
 	VFS::setup();
 	VFS::mount_root(tar_fs->root_node());
 	VFS::mount("/fs", Pipe::root_node());
-	DeviceManager::setup();
-	DeviceManager::add_device(Keyboard::alloc());
+	DeviceFS::init();
+	DeviceFS::add_device(Keyboard::alloc());
+	VFS::mount("/Devices", DeviceFS::alloc());
+
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
 	Process& proc = Process::create_new_process("test_process", "/Drivers/open_file.exe");

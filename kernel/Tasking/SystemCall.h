@@ -23,11 +23,6 @@ Result<int> ReadFile(unsigned descriptor, void* buff, size_t size);
 Result<int> WriteFile(unsigned descriptor, void* buff, size_t size);
 Result<int> CloseFile(unsigned descriptor);
 
-Result<int> OpenDevice(char* path, int mode, int flags);
-Result<int> ReadDevice(unsigned descriptor, void* buff, size_t size);
-Result<int> WriteDevice(unsigned descriptor, void* buff, size_t size);
-Result<int> CloseDevice(unsigned descriptor);
-
 Result<int> CreateThread(void* address, int arg);
 Result<int> CreateRemoteThread(int process, void* address, int arg);
 Result<int> CreateProcess(char* name, char* path, int flags);

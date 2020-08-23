@@ -2,7 +2,6 @@
 
 #include "Devices/Console/console.h"
 #include "Devices/DebugPort/DebugPort.h"
-#include "Devices/DeviceManager.h"
 #include "Devices/Timer/pit.h"
 #include "Filesystem/FileDescription.h"
 #include "Filesystem/VirtualFilesystem.h"
@@ -127,7 +126,7 @@ void test_keyboard(uintptr_t arg)
 {
 	UNUSED(arg);
 
-	auto fd = DeviceManager::open("keyboard", 0, 0);
+	auto fd = VFS::open("/Devices/keyboard", OpenMode::ReadWrite, OpenFlags::OpenExisting);
 	if (fd.is_error()) {
 		printf("error opening the file, error: %d\n", fd.error());
 		HLT();
@@ -135,7 +134,7 @@ void test_keyboard(uintptr_t arg)
 	}
 	char buff[1];
 	while (true) {
-		auto result = fd.value()->receive(buff, 1);
+		auto result = fd.value()->read(buff, 1);
 		printf("got it, read\n");
 		DebugPort::write(buff, DebugColor::Bright_Red);
 		if (result.is_error())
