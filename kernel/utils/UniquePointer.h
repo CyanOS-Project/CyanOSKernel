@@ -70,7 +70,7 @@ template <typename T> class UniquePointer
 		return tmp;
 	}
 
-	T* get()
+	T* ptr()
 	{
 		return m_storage;
 	}

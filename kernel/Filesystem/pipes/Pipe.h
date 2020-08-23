@@ -6,6 +6,7 @@
 #include "utils/List.h"
 #include "utils/String.h"
 #include "utils/StringView.h"
+#include "utils/UniquePointer.h"
 #include "utils/types.h"
 
 class Pipe : public FSNode
@@ -20,6 +21,8 @@ class Pipe : public FSNode
 	Spinlock m_lock;
 
   public:
+	static UniquePointer<FSNode> alloc();
+
 	explicit Pipe(const StringView& name, FSNode::NodeType type);
 	Pipe(const Pipe& other) = default;
 	~Pipe();

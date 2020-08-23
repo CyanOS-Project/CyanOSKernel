@@ -1,21 +1,18 @@
 #include "VirtualFilesystem.h"
 #include "Arch/x86/panic.h"
-#include "Mountpoint.h"
 #include "Tasking/ScopedLock.h"
 #include "Tasking/Thread.h"
-#include "pipes/Pipe.h"
-#include "ustar/INode.h"
 #include "utils/ErrorCodes.h"
 #include "utils/assert.h"
 
-FSNode* VFS::m_root;
+List<UniquePointer<FSNode>>* VFS::fs_roots;
 Spinlock VFS::lock;
 
 void VFS::setup()
 {
 	// lock the VFS and nodes.
+	fs_roots = new List<UniquePointer<FSNode>>;
 	lock.init();
-	Mountpoint::setup();
 }
 
 Result<UniquePointer<FileDescription>> VFS::open(const StringView& path, OpenMode mode, OpenFlags flags)
@@ -33,21 +30,16 @@ Result<UniquePointer<FileDescription>> VFS::open(const StringView& path, OpenMod
 	return UniquePointer<FileDescription>::make_unique(node.value());
 }
 
-Result<void> VFS::mount(const StringView& path, FSNode& m_root_node)
+Result<void> VFS::mount(UniquePointer<FSNode>&& new_fs_root)
 {
-	auto node_result = traverse_node(path);
-	if (node_result.is_error())
-		return ResultError(node_result.error());
-
-	Mountpoint::register_mountpoint(node_result.value(), m_root_node);
-	return ResultError(ERROR_SUCCESS);
-}
-
-Result<void> VFS::mount_root(FSNode& node)
-{
-	if (m_root)
-		return ResultError(ERROR_MOUNTPOINT_EXISTS);
-	m_root = &node;
+	if (fs_roots->contains([&](UniquePointer<FSNode>& node) {
+		    if (node->m_name == new_fs_root->m_name)
+			    return true;
+		    return false;
+	    })) {
+		return ResultError(ERROR_FS_ALREADY_EXISTS);
+	}
+	fs_roots->push_back(move(new_fs_root));
 	return ResultError(ERROR_SUCCESS);
 }
 
@@ -105,23 +97,26 @@ Result<FSNode&> VFS::traverse_node(const StringView& path)
 {
 	PathParser parser(path);
 	size_t path_element_count = parser.count();
-	if (path_element_count == 0) {
-		return *m_root;
-	}
+	if (path_element_count == 0)
+		ResultError(ERROR_FILE_DOES_NOT_EXIST);
+
 	return traverse_node_deep(parser, path_element_count);
 }
 
 Result<FSNode&> VFS::traverse_node_deep(PathParser& parser, size_t depth)
 {
-	if (!m_root)
+	if (fs_roots->size() == 0)
 		return ResultError(ERROR_NO_ROOT_NODE);
 
-	FSNode* current = m_root;
-	for (size_t i = 0; i < depth; i++) {
+	FSNode* current = get_root_node(parser.element(0));
+	if (!current)
+		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
+
+	for (size_t i = 1; i < depth; i++) {
 		auto next_node = current->dir_lookup(parser.element(i));
 		if (next_node.is_error())
 			return ResultError(next_node.error());
-		current = &Mountpoint::translate_mountpoint(next_node.value());
+		current = &next_node.value();
 	}
 	return *current;
 }
@@ -152,4 +147,14 @@ Result<FSNode&> VFS::open_node(const StringView& path, OpenMode mode, OpenFlags 
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
 	return *open_node;
+}
+
+FSNode* VFS::get_root_node(const StringView& root_name)
+{
+	for (auto&& i : *fs_roots) {
+		if (i->m_name == root_name) {
+			return i.ptr();
+		}
+	}
+	return nullptr;
 }

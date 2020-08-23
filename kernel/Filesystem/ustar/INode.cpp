@@ -6,9 +6,9 @@
 
 INode::INode(const StringView& name, FSNode::NodeType type, size_t size, char* data) :
     FSNode(name, 0, 0, type, size),
-    m_children{},
     m_data{data},
-    m_lock{}
+    m_lock{},
+    m_children{}
 {
 	m_lock.init();
 }

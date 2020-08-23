@@ -5,13 +5,10 @@
 #include "Devices/Timer/pit.h"
 #include "Filesystem/FileDescription.h"
 #include "Filesystem/VirtualFilesystem.h"
-#include "Filesystem/ustar/ustar.h"
 #include "Tasking/Loader/pe.h"
 #include "Tasking/scheduler.h"
 #include "Tasking/semaphore.h"
 #include "utils/PathParser.h"
-#include "utils/SharedPointer.h"
-#include "utils/UniquePointer.h"
 #include "utils/bitmap.h"
 
 Semaphore* sem_lock;
@@ -64,24 +61,24 @@ void test_threading(uintptr_t arg)
 
 void test_tar_filesystem(uintptr_t fs, size_t size)
 {
-	printf("tar at %X\n", fs);
+	/*printf("tar at %X\n", fs);
 	TarFS* tar_fs = new TarFS((void*)fs, size);
 	VFS::mount_root(tar_fs->root_node());
 	auto fd = VFS::open("/Drivers/file1.exe", OpenMode::Read, OpenFlags::OpenExisting);
 	if (fd.is_error()) {
-		printf("error opening the file, error: %d\n", fd.error());
-		return;
+	    printf("error opening the file, error: %d\n", fd.error());
+	    return;
 	}
 	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	memset(buff, 0, 4096);
 	auto result = fd.value()->read(buff, 0xc00);
 	if (result.is_error())
-		printf("error reading the file %d\n", result.error());
+	    printf("error reading the file %d\n", result.error());
 	auto loader_result = PELoader::load(buff, 0xc00);
 	if (loader_result.is_error())
-		printf("error loading pe file %d\n", loader_result.error());
+	    printf("error loading pe file %d\n", loader_result.error());
 	printf("file is loaded.\n");
-	Memory::free(buff, 0xc00, 0);
+	Memory::free(buff, 0xc00, 0);*/
 }
 
 void test_pipe1(uintptr_t arg)

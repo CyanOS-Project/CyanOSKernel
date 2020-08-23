@@ -1,6 +1,5 @@
 #include "FileDescription.h"
-#include "Filesystem/pipes/Pipe.h"
-#include "Filesystem/ustar/INode.h"
+#include "FSNode.h"
 #include "utils/ErrorCodes.h"
 
 FileDescription::FileDescription(FSNode& node) : m_node(node)

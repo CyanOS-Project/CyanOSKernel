@@ -1,9 +1,17 @@
 #include "ustar.h"
+#include "Tasking/ScopedLock.h"
+#include "utils/ErrorCodes.h"
 #include "utils/Stack.h"
+#include "utils/stl.h"
+
+UniquePointer<FSNode> TarFS::alloc(void* tar_address, size_t size)
+{
+	return UniquePointer<FSNode>(new TarFS(tar_address, size));
+}
 
 TarFS::TarFS(void* tar_address, size_t size) :
-    m_tar_address(static_cast<TarHeader*>(tar_address)),
-    m_root(".", FSNode::NodeType::Root, 0, nullptr)
+    INode{"Tar", NodeType::Root, 0, nullptr},
+    m_tar_address(static_cast<TarHeader*>(tar_address))
 {
 	ASSERT(tar_address);
 	ASSERT(strncmp(m_tar_address->magic, "ustar", 5) == 0)
@@ -12,11 +20,6 @@ TarFS::TarFS(void* tar_address, size_t size) :
 
 TarFS::~TarFS()
 {
-}
-
-FSNode& TarFS::root_node()
-{
-	return m_root;
 }
 
 INode& TarFS::add_child_node(INode& parent, const StringView& name, char type, const size_t size, char* data)
@@ -35,7 +38,7 @@ void TarFS::parse_ustar(size_t size)
 {
 	TarHeader* tar_parser = m_tar_address;
 	Stack<INode*> directories(10);
-	directories.queue(&m_root);
+	directories.queue(this);
 
 	while (uintptr_t(tar_parser) < (uintptr_t(m_tar_address) + size)) {
 		if (!tar_parser->name[0])
@@ -98,4 +101,88 @@ String TarFS::regulate_path(const char* path)
 	}
 
 	return full_path;
+}
+
+Result<FSNode&> TarFS::create(const StringView& name, OpenMode mode, OpenFlags flags)
+{
+	UNUSED(name);
+	UNUSED(mode);
+	UNUSED(flags);
+	return ResultError(ERROR_INVALID_OPERATION);
+}
+
+Result<void> TarFS::open(OpenMode mode, OpenFlags flags)
+{
+	UNUSED(mode);
+	UNUSED(flags);
+
+	return ResultError(ERROR_SUCCESS);
+}
+
+Result<void> TarFS::close()
+{
+	return ResultError(ERROR_SUCCESS);
+}
+
+Result<void> TarFS::read(void* buff, size_t offset, size_t size)
+{
+	UNUSED(buff);
+	UNUSED(offset);
+	UNUSED(size);
+
+	return ResultError(ERROR_SUCCESS);
+}
+
+Result<void> TarFS::write(const void* buff, size_t offset, size_t size)
+{
+	UNUSED(buff);
+	UNUSED(offset);
+	UNUSED(size);
+	return ResultError(ERROR_INVALID_OPERATION);
+}
+
+Result<bool> TarFS::can_read()
+{
+	return ResultError(ERROR_INVALID_OPERATION);
+}
+
+Result<bool> TarFS::can_write()
+{
+	return ResultError(ERROR_INVALID_OPERATION);
+}
+
+Result<void> TarFS::remove()
+{
+	return ResultError(ERROR_INVALID_OPERATION);
+}
+
+Result<void> TarFS::mkdir(const StringView& name, int flags, int access)
+{
+	UNUSED(name);
+	UNUSED(flags);
+	UNUSED(access);
+	return ResultError(ERROR_INVALID_OPERATION);
+}
+
+Result<void> TarFS::link(FSNode& node)
+{
+	UNUSED(node);
+	return ResultError(ERROR_INVALID_OPERATION);
+}
+
+Result<void> TarFS::unlink(FSNode& node)
+{
+	UNUSED(node);
+	return ResultError(ERROR_INVALID_OPERATION);
+}
+
+Result<FSNode&> TarFS::dir_lookup(const StringView& file_name)
+{
+	ScopedLock local_lock(m_lock);
+	for (auto& i : m_children) {
+		if (i.m_name == file_name) {
+			return i;
+		}
+	}
+	return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 }

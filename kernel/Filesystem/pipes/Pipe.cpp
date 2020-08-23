@@ -3,9 +3,9 @@
 #include "utils/ErrorCodes.h"
 #include "utils/PathParser.h"
 
-Pipe& Pipe::root_node()
+UniquePointer<FSNode> Pipe::alloc()
 {
-	return *new Pipe(".", FSNode::NodeType::Root);
+	return UniquePointer<FSNode>(new Pipe("Pipes", FSNode::NodeType::Root));
 }
 
 Pipe::Pipe(const StringView& name, FSNode::NodeType type) :

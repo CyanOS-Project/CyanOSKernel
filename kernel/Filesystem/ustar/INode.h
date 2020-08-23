@@ -9,9 +9,9 @@
 class INode : public FSNode
 {
   private:
-	List<INode> m_children;
 	char* m_data;
 	Spinlock m_lock;
+	List<INode> m_children;
 
   public:
 	explicit INode(const StringView& name, FSNode::NodeType type, size_t size, char* data);

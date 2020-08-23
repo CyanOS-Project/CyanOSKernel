@@ -12,19 +12,19 @@
 class VFS
 {
   private:
-	static FSNode* m_root;
+	static List<UniquePointer<FSNode>>* fs_roots;
 	static Spinlock lock;
 
 	static Result<FSNode&> traverse_parent_node(const StringView& path);
 	static Result<FSNode&> traverse_node(const StringView& path);
 	static Result<FSNode&> traverse_node_deep(PathParser& parser, size_t depth);
 	static Result<FSNode&> open_node(const StringView& path, OpenMode mode, OpenFlags flags);
+	static FSNode* get_root_node(const StringView& root_name);
 
   public:
 	static void setup();
 	static Result<UniquePointer<FileDescription>> open(const StringView& path, OpenMode mode, OpenFlags flags);
-	static Result<void> mount(const StringView& path, FSNode& m_root_node);
-	static Result<void> mount_root(FSNode& node);
+	static Result<void> mount(UniquePointer<FSNode>&& fs_root);
 	static Result<void> unmount();
 	static Result<void> remove();
 	static Result<void> make_directory();

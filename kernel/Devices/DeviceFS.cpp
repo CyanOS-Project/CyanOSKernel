@@ -10,9 +10,9 @@ void DeviceFS::init()
 	children = new List<UniquePointer<FSNode>>;
 }
 
-DeviceFS& DeviceFS::alloc()
+UniquePointer<FSNode> DeviceFS::alloc()
 {
-	return *new DeviceFS;
+	return UniquePointer<FSNode>(new DeviceFS);
 }
 
 DeviceFS::DeviceFS() : FSNode{"Devices", 0, 0, NodeType::Root, 0}

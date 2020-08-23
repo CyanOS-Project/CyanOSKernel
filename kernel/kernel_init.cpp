@@ -12,6 +12,7 @@
 #include "Devices/RTC/rtc.h"
 #include "Devices/Timer/pit.h"
 #include "Filesystem/pipes/Pipe.h"
+#include "Filesystem/ustar/ustar.h"
 #include "Tasking/Process.h"
 #include "Tasking/Thread.h"
 #include "Tasking/scheduler.h"
@@ -48,18 +49,18 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	Scheduler::setup();
 	PIC::setup();
 	PIT::setup();
-	TarFS* tar_fs = new TarFS(reinterpret_cast<void*>(info->ramdisk.start), info->ramdisk.size);
 	// file systems
 	VFS::setup();
-	VFS::mount_root(tar_fs->root_node());
-	VFS::mount("/fs", Pipe::root_node());
+	VFS::mount(TarFS::alloc(reinterpret_cast<void*>(info->ramdisk.start), info->ramdisk.size));
+	VFS::mount(Pipe::alloc());
+	VFS::mount(DeviceFS::alloc());
+
 	DeviceFS::init();
 	DeviceFS::add_device(Keyboard::alloc());
-	VFS::mount("/Devices", DeviceFS::alloc());
 
 	printStatus("Setting up devices.", true);
 	printf("Welcome to CyanOS.\n");
-	Process& proc = Process::create_new_process("test_process", "/Drivers/open_file.exe");
+	Process& proc = Process::create_new_process("test_process", "/Tar/Drivers/open_file.exe");
 	Thread::create_thread(proc, test_keyboard, 0);
 
 	// Process::create_new_process("test_process2", "/Drivers/nop_loop.exe");
