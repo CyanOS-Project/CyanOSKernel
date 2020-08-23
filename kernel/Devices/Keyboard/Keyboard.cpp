@@ -29,11 +29,6 @@ Keyboard::~Keyboard()
 {
 }
 
-Result<FSNode&> Keyboard::create(const StringView& name, OpenMode mode, OpenFlags flags)
-{
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
 Result<void> Keyboard::open(OpenMode mode, OpenFlags flags)
 {
 	UNUSED(mode);
@@ -65,47 +60,10 @@ Result<void> Keyboard::read(void* buff, size_t offset, size_t size)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Keyboard::write(const void* buff, size_t offset, size_t size)
-{
-	UNUSED(buff);
-	UNUSED(size);
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
 Result<bool> Keyboard::can_read()
 {
 	ScopedLock local_lock(m_lock);
 	return m_buffer.is_empty();
-}
-
-Result<bool> Keyboard::can_write()
-{
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> Keyboard::remove()
-{
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> Keyboard::mkdir(const StringView& name, int flags, int access)
-{
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> Keyboard::link(FSNode& node)
-{
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> Keyboard::unlink(FSNode& node)
-{
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<FSNode&> Keyboard::dir_lookup(const StringView& file_name)
-{
-	return ResultError(ERROR_INVALID_OPERATION);
 }
 
 void Keyboard::enqueue_keystoke(unsigned char data)

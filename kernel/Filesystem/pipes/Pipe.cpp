@@ -3,13 +3,8 @@
 #include "utils/ErrorCodes.h"
 #include "utils/PathParser.h"
 
-UniquePointer<FSNode> Pipe::alloc()
-{
-	return UniquePointer<FSNode>(new Pipe("Pipes", FSNode::NodeType::Root));
-}
-
-Pipe::Pipe(const StringView& name, FSNode::NodeType type) :
-    FSNode(name, 0, 0, type, BUFFER_SIZE),
+Pipe::Pipe(const StringView& name) :
+    FSNode(name, 0, 0, NodeType::Pipe, BUFFER_SIZE),
     m_children{},
     m_buffer{BUFFER_SIZE},
     m_wait_queue{},
@@ -27,7 +22,6 @@ Result<void> Pipe::open(OpenMode mode, OpenFlags flags)
 {
 	UNUSED(mode);
 	UNUSED(flags);
-
 	return ResultError(ERROR_SUCCESS);
 }
 
@@ -88,45 +82,5 @@ Result<bool> Pipe::can_write()
 
 Result<void> Pipe::remove()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
-}
-
-Result<FSNode&> Pipe::create(const StringView& name, OpenMode mode, OpenFlags flags)
-{
-	UNUSED(mode);
-	UNUSED(flags);
-	return m_children.emplace_back(name, FSNode::NodeType::File);
-}
-
-Result<void> Pipe::mkdir(const StringView& name, int flags, int access)
-{
-	UNUSED(name);
-	UNUSED(flags);
-	UNUSED(access);
-	PANIC("mkdir not implemented");
-	return ResultError(ERROR_INVALID_PARAMETERS);
-}
-
-Result<void> Pipe::link(FSNode& node)
-{
-	UNUSED(node);
-	PANIC("link not implemented");
-	return ResultError(ERROR_INVALID_PARAMETERS);
-}
-
-Result<void> Pipe::unlink(FSNode& node)
-{
-	UNUSED(node);
-	PANIC("unlink not implemented");
-	return ResultError(ERROR_INVALID_PARAMETERS);
-}
-
-Result<FSNode&> Pipe::dir_lookup(const StringView& file_name)
-{
-	for (auto& i : m_children) {
-		if (i.m_name == file_name) {
-			return i;
-		}
-	}
-	return ResultError(ERROR_FILE_DOES_NOT_EXIST);
+	return ResultError(ERROR_INVALID_OPERATION);
 }

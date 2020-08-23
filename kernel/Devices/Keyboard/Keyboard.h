@@ -17,18 +17,10 @@ class Keyboard : public FSNode
 
 	Keyboard();
 	~Keyboard();
-	Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) override;
 	Result<void> open(OpenMode mode, OpenFlags flags) override;
 	Result<void> close() override;
 	Result<void> read(void* buff, size_t offset, size_t size) override;
-	Result<void> write(const void* buff, size_t offset, size_t size) override;
 	Result<bool> can_read() override;
-	Result<bool> can_write() override;
-	Result<void> remove() override;
-	Result<void> mkdir(const StringView& name, int flags, int access) override;
-	Result<void> link(FSNode& node) override;
-	Result<void> unlink(FSNode& node) override;
-	Result<FSNode&> dir_lookup(const StringView& file_name) override;
 
   private:
 	Spinlock m_lock;

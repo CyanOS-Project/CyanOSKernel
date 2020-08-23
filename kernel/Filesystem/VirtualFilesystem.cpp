@@ -143,7 +143,7 @@ Result<FSNode&> VFS::open_node(const StringView& path, OpenMode mode, OpenFlags 
 	} else {
 		open_node = &node.value();
 	}
-	if (open_node->m_type == FSNode::NodeType::Folder) {
+	if (open_node->m_type == NodeType::Folder) {
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
 	return *open_node;

@@ -21,10 +21,7 @@ class Pipe : public FSNode
 	Spinlock m_lock;
 
   public:
-	static UniquePointer<FSNode> alloc();
-
-	explicit Pipe(const StringView& name, FSNode::NodeType type);
-	Pipe(const Pipe& other) = default;
+	explicit Pipe(const StringView& name);
 	~Pipe();
 	Result<void> open(OpenMode mode, OpenFlags flags) override;
 	Result<void> close() override;
@@ -33,11 +30,4 @@ class Pipe : public FSNode
 	Result<bool> can_read() override;
 	Result<bool> can_write() override;
 	Result<void> remove() override;
-	Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) override;
-	Result<void> mkdir(const StringView& name, int flags, int access) override;
-	Result<void> link(FSNode& node) override;
-	Result<void> unlink(FSNode& node) override;
-	Result<FSNode&> dir_lookup(const StringView& file_name) override;
-
-	static Pipe& root_node();
 };

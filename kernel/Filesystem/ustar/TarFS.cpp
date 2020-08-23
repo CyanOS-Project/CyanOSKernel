@@ -1,4 +1,4 @@
-#include "ustar.h"
+#include "TarFS.h"
 #include "Tasking/ScopedLock.h"
 #include "utils/ErrorCodes.h"
 #include "utils/Stack.h"
@@ -24,11 +24,11 @@ TarFS::~TarFS()
 
 INode& TarFS::add_child_node(INode& parent, const StringView& name, char type, const size_t size, char* data)
 {
-	FSNode::NodeType node_type;
+	NodeType node_type;
 	if (type == USTARFileType::DIRECTORY) {
-		node_type = FSNode::NodeType::Folder;
+		node_type = NodeType::Folder;
 	} else {
-		node_type = FSNode::NodeType::File;
+		node_type = NodeType::File;
 	}
 
 	return parent.m_children.emplace_back(name, node_type, size, data);
@@ -101,79 +101,6 @@ String TarFS::regulate_path(const char* path)
 	}
 
 	return full_path;
-}
-
-Result<FSNode&> TarFS::create(const StringView& name, OpenMode mode, OpenFlags flags)
-{
-	UNUSED(name);
-	UNUSED(mode);
-	UNUSED(flags);
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> TarFS::open(OpenMode mode, OpenFlags flags)
-{
-	UNUSED(mode);
-	UNUSED(flags);
-
-	return ResultError(ERROR_SUCCESS);
-}
-
-Result<void> TarFS::close()
-{
-	return ResultError(ERROR_SUCCESS);
-}
-
-Result<void> TarFS::read(void* buff, size_t offset, size_t size)
-{
-	UNUSED(buff);
-	UNUSED(offset);
-	UNUSED(size);
-
-	return ResultError(ERROR_SUCCESS);
-}
-
-Result<void> TarFS::write(const void* buff, size_t offset, size_t size)
-{
-	UNUSED(buff);
-	UNUSED(offset);
-	UNUSED(size);
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<bool> TarFS::can_read()
-{
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<bool> TarFS::can_write()
-{
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> TarFS::remove()
-{
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> TarFS::mkdir(const StringView& name, int flags, int access)
-{
-	UNUSED(name);
-	UNUSED(flags);
-	UNUSED(access);
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> TarFS::link(FSNode& node)
-{
-	UNUSED(node);
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> TarFS::unlink(FSNode& node)
-{
-	UNUSED(node);
-	return ResultError(ERROR_INVALID_OPERATION);
 }
 
 Result<FSNode&> TarFS::dir_lookup(const StringView& file_name)

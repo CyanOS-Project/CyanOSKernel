@@ -11,8 +11,8 @@
 #include "Devices/Keyboard/Keyboard.h"
 #include "Devices/RTC/rtc.h"
 #include "Devices/Timer/pit.h"
-#include "Filesystem/pipes/Pipe.h"
-#include "Filesystem/ustar/ustar.h"
+#include "Filesystem/pipes/PipeFS.h"
+#include "Filesystem/ustar/TarFS.h"
 #include "Tasking/Process.h"
 #include "Tasking/Thread.h"
 #include "Tasking/scheduler.h"
@@ -52,7 +52,7 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	// file systems
 	VFS::setup();
 	VFS::mount(TarFS::alloc(reinterpret_cast<void*>(info->ramdisk.start), info->ramdisk.size));
-	VFS::mount(Pipe::alloc());
+	VFS::mount(PipeFS::alloc());
 	VFS::mount(DeviceFS::alloc());
 
 	DeviceFS::init();
