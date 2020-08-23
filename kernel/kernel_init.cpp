@@ -30,22 +30,27 @@ void display_time()
 	while (1) {
 		DATE_TIME date;
 		RTC::get_time(&date);
-		printf("Time is %d:%d:%d  %d-%d-20%d\n", date.year, date.minutes, date.seconds, date.day_of_month, date.month,
-		       date.year);
+		// printf("Time is %d:%d:%d  %d-%d-20%d\n", date.year, date.minutes, date.seconds, date.day_of_month,
+		// date.month,
+		//      date.year);
 		// Scheduler::sleep(500);
-		removeLine();
+		// removeLine();
 	}
 }
 
 extern "C" void kernel_init(BootloaderInfo* info)
 {
 	DebugPort::write("Welcome To CyanOS\n", DebugColor::Bright_Cyan);
+	dbg() << "this is debug"
+	      << "this is other one\n";
+	warning() << "this is a warning\n";
+	error() << "this an error\n";
 	GDT::setup();
 	IDT::setup();
 	Memory::setup_stage2();
 	Heap::setup();
-	initiate_console();
-	printStatus("Setting up core components.", true);
+	// initiate_console();
+	// printStatus("Setting up core components.", true);
 	Scheduler::setup();
 	PIC::setup();
 	PIT::setup();
@@ -57,11 +62,12 @@ extern "C" void kernel_init(BootloaderInfo* info)
 
 	DeviceFS::init();
 	DeviceFS::add_device(Keyboard::alloc());
+	DeviceFS::add_device(Console::alloc());
 
-	printStatus("Setting up devices.", true);
-	printf("Welcome to CyanOS.\n");
+	// printStatus("Setting up devices.", true);
+	// printf("Welcome to CyanOS.\n");
 	Process& proc = Process::create_new_process("test_process", "/Tar/Drivers/open_file.exe");
-	Thread::create_thread(proc, test_keyboard, 0);
+	Thread::create_thread(proc, test_console, 0);
 
 	// Process::create_new_process("test_process2", "/Drivers/nop_loop.exe");
 
@@ -71,7 +77,7 @@ extern "C" void kernel_init(BootloaderInfo* info)
 	test_tar_filesystem(info->ramdisk.start, info->ramdisk.size);
 
 	// **************** end tests *********************
-	printf("Going Idle State.\n");
+	// printf("Going Idle State.\n");
 	while (1) {
 		HLT();
 	}

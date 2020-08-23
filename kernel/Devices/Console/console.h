@@ -1,10 +1,8 @@
 #pragma once
 #include "Arch/x86/spinlock.h"
-#include "Lib/stdlib.h"
-#include "VirtualMemory/memory.h"
-#include "kernel_map.h"
+#include "Filesystem/FSNode.h"
+#include "utils/UniquePointer.h"
 #include "utils/types.h"
-#include <stdarg.h>
 
 #define VGATEXTMODE_BUFFER 0x000B8000
 
@@ -29,24 +27,31 @@ typedef enum {
 	VGA_COLOR_WHITE = 15,
 } VGAColor;
 
-void setMode(TerminalMode Mode);
-void setColor(VGAColor color, VGAColor backcolor);
-void printf(const char* s, ...);
-void __printf(const char* s, ...);
-void putChar(char str);
-void clearScreen();
-void initiate_console();
-void displayMemory(const char* Address, unsigned Size);
-void printStatus(const char* msg, bool Success);
-void removeLine();
-void pageUp();
-void formatEscapeCharacters(unsigned char c, const char* s, int cur_arg);
-void formatString(char* arg);
-void formatPointer(int arg, int size);
-void formatHex(int arg, int size, unsigned char c);
-void formatUnsigned(int arg, int size);
-void formatDecimal(int arg, int size);
-void updateCursor();
-void insertNewLine();
-void insertCharacter(char str);
-void insertBackSpace();
+class Console : public FSNode
+{
+  public:
+	static UniquePointer<FSNode> alloc();
+
+	Console();
+	~Console();
+	Result<void> open(OpenMode mode, OpenFlags flags) override;
+	Result<void> close() override;
+	Result<void> write(const void* buff, size_t offset, size_t size) override;
+	Result<bool> can_write() override;
+
+  private:
+	void setMode(TerminalMode Mode);
+	void setColor(VGAColor color, VGAColor backcolor);
+	void putChar(const char str);
+	void clearScreen();
+	void initiate_console();
+	void printStatus(const char* msg, bool Success);
+	void removeLine();
+	void pageUp();
+	void updateCursor();
+	void insertNewLine();
+	void insertCharacter(char str);
+	void insertBackSpace();
+	uint8_t vga_entry_color(VGAColor fg, VGAColor bg);
+	uint16_t vga_entry(unsigned char uc, uint8_t color);
+};

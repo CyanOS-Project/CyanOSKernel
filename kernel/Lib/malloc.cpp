@@ -43,5 +43,6 @@ void operator delete(void* p, size_t)
 
 extern "C" void __cxa_pure_virtual()
 {
-	PANIC("Virtual function has no implementation!");
+	PANIC();
+	// PANIC("Virtual function has no implementation!");
 }

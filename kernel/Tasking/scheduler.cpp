@@ -7,6 +7,7 @@
 #include "Loader/pe.h"
 #include "ScopedLock.h"
 #include "SystemCall.h"
+#include "VirtualMemory/memory.h"
 #include "utils/assert.h"
 
 Spinlock Scheduler::lock;

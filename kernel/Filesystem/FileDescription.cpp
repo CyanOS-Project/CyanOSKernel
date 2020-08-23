@@ -23,7 +23,7 @@ Result<void> FileDescription::read(void* buff, size_t size)
 Result<void> FileDescription::write(const void* buff, size_t size)
 {
 	size_t offset = m_current_position + size;
-	if (offset > m_node.m_size) {
+	if (offset > m_node.m_size && m_node.m_size != 0) {
 		return ResultError(ERROR_EOF);
 	}
 	return m_node.write(buff, offset, size);

@@ -1,6 +1,5 @@
 #include "physical.h"
 
-
 volatile uint8_t PhysicalMemory::physical_memory_tracer[MAX_PHYSICAL_4K_PAGES / 8];
 volatile unsigned PhysicalMemory::physical_memory_size;
 
@@ -84,7 +83,7 @@ uintptr_t PhysicalMemory::find_pages(uintptr_t start_page, size_t count)
 			}
 		}
 	}
-	PANIC("No physical memory available!");
+	// PANIC("No physical memory available!");
 	ASSERT_NOT_REACHABLE();
 	return uintptr_t(nullptr);
 }

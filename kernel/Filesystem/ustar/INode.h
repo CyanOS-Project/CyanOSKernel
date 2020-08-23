@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Arch/x86/spinlock.h"
 #include "Filesystem/FSNode.h"
 #include "utils/List.h"
 #include "utils/Result.h"

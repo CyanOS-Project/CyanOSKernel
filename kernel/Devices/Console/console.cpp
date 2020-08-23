@@ -1,5 +1,10 @@
 #include "console.h"
+#include "Arch/x86/panic.h"
+#include "Lib/stdlib.h"
 #include "Tasking/ScopedLock.h"
+#include "VirtualMemory/memory.h"
+#include "kernel_map.h"
+#include <stdarg.h>
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -8,7 +13,50 @@ volatile int vPosition = 0, hPosition = 0;
 uint8_t charColor = 0x0F;
 Spinlock lock;
 
-void clearScreen()
+UniquePointer<FSNode> Console::alloc()
+{
+	return UniquePointer<FSNode>(new Console);
+}
+
+Console::Console() : FSNode("console", 0, 0, NodeType::Root, 0)
+{
+	initiate_console();
+}
+
+Console::~Console()
+{
+	// FIXME: unmap memory of text VGA.
+}
+
+Result<void> Console::open(OpenMode mode, OpenFlags flags)
+{
+	UNUSED(mode);
+	UNUSED(flags);
+	return ResultError(ERROR_SUCCESS);
+}
+
+Result<void> Console::close()
+{
+	return ResultError(ERROR_SUCCESS);
+}
+
+Result<void> Console::write(const void* buff, size_t offset, size_t size)
+{
+	UNUSED(offset);
+
+	const char* _buff = reinterpret_cast<const char*>(buff);
+	for (size_t i = 0; i < size; i++) {
+		putChar(_buff[i]);
+	}
+	return ResultError(ERROR_SUCCESS);
+}
+
+Result<bool> Console::can_write()
+{
+	return true;
+}
+
+void Console::clearScreen()
 {
 	for (size_t i = 0; i < VGA_WIDTH; i++) {
 		for (size_t i2 = 0; i2 < VGA_HEIGHT; i2++) {
@@ -19,96 +67,35 @@ void clearScreen()
 	vPosition = 0;
 }
 
-void initiate_console()
+void Console::initiate_console()
 {
 	lock.init();
 	hPosition = 0;
 	vPosition = 0;
 	video_ram = (uint16_t*)Memory::map(VGATEXTMODE_BUFFER, 0x1000, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
 	if (!video_ram)
-		PANIC("Cannot map text mode memory");
+		PANIC();
 
 	clearScreen();
 }
 
-void printf(const char* s, ...)
-{
-	ScopedLock local_lock(lock);
-	unsigned char c;
-	va_list ap;
-	va_start(ap, s);
-	while ((c = *s++)) {
-		if (c == 0)
-			break;
-		else if (c == '%') {
-			formatEscapeCharacters(c, s, va_arg(ap, int));
-			s++;
-		} else
-			putChar(c);
-	}
-}
-
-void displayMemory(const char* Address, unsigned Size)
-{
-	ScopedLock local_lock(lock);
-	for (size_t i = 0; i < Size; i++) {
-		if ((i % 8 == 0))
-			__printf("\n");
-		else if (i % 4 == 0)
-			__printf("          ");
-		__printf("%X ", Address[i]);
-	}
-	__printf("\n");
-}
-
-void printStatus(const char* msg, bool Success)
-{
-	ScopedLock local_lock(lock);
-	__printf("[");
-	if (Success) {
-		setColor(VGAColor::VGA_COLOR_GREEN, VGAColor::VGA_COLOR_BLACK);
-		__printf("  OK  ");
-	} else {
-		setColor(VGAColor::VGA_COLOR_RED, VGAColor::VGA_COLOR_BLACK);
-		__printf(" FAIL ");
-	}
-	setColor(VGAColor::VGA_COLOR_WHITE, VGAColor::VGA_COLOR_BLACK);
-	__printf("] %s.\n", msg);
-}
-
-void __printf(const char* s, ...)
-{
-	unsigned char c;
-	va_list ap;
-	va_start(ap, s);
-	while ((c = *s++)) {
-		if (c == 0)
-			break;
-		else if (c == '%') {
-			formatEscapeCharacters(c, s, va_arg(ap, int));
-			s++;
-		} else
-			putChar(c);
-	}
-}
-
-void setMode(TerminalMode Mode)
+void Console::setMode(TerminalMode Mode)
 {
 	UNUSED(Mode);
 	video_ram = (uint16_t*)VGATEXTMODE_BUFFER;
 }
 
-inline uint8_t vga_entry_color(VGAColor fg, VGAColor bg)
+uint8_t Console::vga_entry_color(VGAColor fg, VGAColor bg)
 {
 	return fg | bg << 4;
 }
 
-inline uint16_t vga_entry(unsigned char uc, uint8_t color)
+uint16_t Console::vga_entry(unsigned char uc, uint8_t color)
 {
 	return (uint16_t)uc | (uint16_t)color << 8;
 }
 
-void pageUp()
+void Console::pageUp()
 {
 	for (size_t i = 0; i < VGA_HEIGHT - 1; i++) {
 		memcpy((void*)(video_ram + VGA_WIDTH * i), (void*)(video_ram + VGA_WIDTH * (i + 1)), VGA_WIDTH * sizeof(short));
@@ -116,12 +103,12 @@ void pageUp()
 	memset((char*)(video_ram + VGA_WIDTH * (VGA_HEIGHT - 1)), 0, VGA_WIDTH * sizeof(short));
 }
 
-void setColor(VGAColor color, VGAColor backcolor)
+void Console::setColor(VGAColor color, VGAColor backcolor)
 {
 	charColor = vga_entry_color(color, backcolor);
 }
 
-void removeLine()
+void Console::removeLine()
 {
 	do {
 		if (hPosition != VGA_WIDTH) // Update Cursor
@@ -138,7 +125,7 @@ void removeLine()
 	video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
 }
 
-void putChar(char str)
+void Console::putChar(const char str)
 {
 	if (vPosition == VGA_HEIGHT) {
 		pageUp();
@@ -157,12 +144,12 @@ void putChar(char str)
 	updateCursor();
 }
 
-void updateCursor()
+void Console::updateCursor()
 {
 	video_ram[hPosition + vPosition * VGA_WIDTH] = vga_entry(0, vga_entry_color(VGA_COLOR_BLACK, VGA_COLOR_WHITE));
 }
 
-void insertNewLine()
+void Console::insertNewLine()
 {
 	if (hPosition != VGA_WIDTH) // Update Cursor
 		video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
@@ -170,14 +157,14 @@ void insertNewLine()
 	vPosition++;
 }
 
-void insertCharacter(char str)
+void Console::insertCharacter(char str)
 {
 	video_ram[hPosition + vPosition * VGA_WIDTH] = vga_entry(str, charColor);
 	hPosition = (hPosition + 1) % VGA_WIDTH;
 	vPosition = (vPosition + (hPosition == 0));
 }
 
-void insertBackSpace()
+void Console::insertBackSpace()
 {
 	if (hPosition != VGA_WIDTH) // Update Cursor
 		video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
@@ -192,93 +179,4 @@ void insertBackSpace()
 		}
 	} while (video_ram[hPosition + vPosition * VGA_WIDTH] == 0);
 	video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
-}
-
-void formatEscapeCharacters(unsigned char c, const char* s, int cur_arg)
-{
-	int size = 0;
-	c = *s++;
-	if (c >= '0' && c <= '9') {
-		size = c - '0';
-		c = *s++;
-	}
-	if (c == 'd') {
-		formatDecimal(cur_arg, size);
-	} else if (c == 'u') {
-		formatUnsigned(cur_arg, size);
-	} else if (c == 'x' || c == 'X') {
-		formatHex(cur_arg, size, c);
-	} else if (c == 'p') {
-		formatPointer(cur_arg, size);
-	} else if (c == 's') {
-		formatString((char*)cur_arg);
-	}
-}
-
-void formatString(char* arg)
-{
-	__printf(arg);
-}
-
-void formatPointer(int arg, int size)
-{
-	char buf[16];
-	itoa(buf, arg, 16);
-	size = 8;
-
-	int buflen = strlen(buf);
-	int i, j;
-	if (buflen < size)
-		for (i = size, j = buflen; i >= 0; i--, j--)
-			buf[i] = (j >= 0) ? buf[j] : '0';
-	__printf("0x%s", buf);
-}
-
-void formatHex(int arg, int size, unsigned char c)
-{
-	char buf[16];
-	itoa(buf, arg, 16);
-
-	int buflen = strlen(buf);
-	int i, j;
-	if (buflen < size)
-		for (i = size, j = buflen; i >= 0; i--, j--)
-			buf[i] = (j >= 0) ? buf[j] : '0';
-	if (c == 'X')
-		toupper(buf);
-	__printf("0x%s", buf);
-}
-
-void formatUnsigned(int arg, int size)
-{
-	char buf[16];
-	itoa(buf, arg, 10);
-
-	int buflen = strlen(buf);
-	int i, j;
-	if (buflen < size)
-		for (i = size, j = buflen; i >= 0; i--, j--)
-			buf[i] = (j >= 0) ? buf[j] : '0';
-	__printf(buf);
-}
-
-void formatDecimal(int arg, int size)
-{
-	char buf[16];
-	int neg = 0;
-	if (arg < 0) {
-		arg = 0 - arg;
-		neg++;
-	} else
-		arg = arg;
-	itoa(buf, arg, 10);
-	int buflen = strlen(buf);
-	int i, j;
-	if (buflen < size)
-		for (i = size, j = buflen; i >= 0; i--, j--)
-			buf[i] = (j >= 0) ? buf[j] : '0';
-	if (neg)
-		__printf("-%s", buf);
-	else
-		__printf(buf);
 }

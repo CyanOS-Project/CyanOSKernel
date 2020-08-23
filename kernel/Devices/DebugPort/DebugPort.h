@@ -1,5 +1,7 @@
 #pragma once
+#include "utils/StringView.h"
 #include "utils/types.h"
+
 enum class DebugColor {
 	Black = 30,
 	Red = 31,
@@ -28,4 +30,34 @@ class DebugPort
 	static void write(const char* data, DebugColor color = DebugColor::Black);
 	static void put(const char* data, size_t size);
 	static void put(const char data);
+};
+
+class dbg
+{
+  public:
+	dbg& operator<<(const char* str)
+	{
+		DebugPort::write(str, DebugColor::Green);
+		return *this;
+	}
+};
+
+class warning
+{
+  public:
+	warning& operator<<(const char* str)
+	{
+		DebugPort::write(str, DebugColor::Yellow);
+		return *this;
+	}
+};
+
+class error
+{
+  public:
+	error& operator<<(const char* str)
+	{
+		DebugPort::write(str, DebugColor::Red);
+		return *this;
+	}
 };
