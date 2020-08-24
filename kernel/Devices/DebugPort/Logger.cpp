@@ -1,6 +1,5 @@
 #include "Logger.h"
 #include "Lib/stdlib.h"
-#include <cstdarg>
 
 Logger::Logger(DebugColor color) : m_color{color}
 {
