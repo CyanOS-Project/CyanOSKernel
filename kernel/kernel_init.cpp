@@ -7,6 +7,7 @@
 #include "Arch/x86/pic.h"
 #include "Devices/Console/console.h"
 #include "Devices/DebugPort/DebugPort.h"
+#include "Devices/DebugPort/Logger.h"
 #include "Devices/DeviceFS.h"
 #include "Devices/Keyboard/Keyboard.h"
 #include "Devices/RTC/rtc.h"
@@ -38,46 +39,38 @@ void display_time()
 	}
 }
 
-extern "C" void kernel_init(BootloaderInfo* info)
+extern "C" void kernel_init(BootloaderInfo* boot_info)
 {
-	DebugPort::write("Welcome To CyanOS\n", DebugColor::Bright_Cyan);
-	dbg() << "this is debug"
-	      << "this is other one\n";
-	warning() << "this is a warning\n";
-	error() << "this an error\n";
+	Logger(DebugColor::Bright_Cyan) << "Welcome To CyanOS.\n";
+
+	info() << "Setting up core components... ";
 	GDT::setup();
 	IDT::setup();
 	Memory::setup_stage2();
 	Heap::setup();
-	// initiate_console();
-	// printStatus("Setting up core components.", true);
 	Scheduler::setup();
 	PIC::setup();
 	PIT::setup();
-	// file systems
+	info() << "Done!\n";
+
+	info() << "Setting up file systems... ";
 	VFS::setup();
-	VFS::mount(TarFS::alloc(reinterpret_cast<void*>(info->ramdisk.start), info->ramdisk.size));
+	VFS::mount(TarFS::alloc(reinterpret_cast<void*>(boot_info->ramdisk.start), boot_info->ramdisk.size));
 	VFS::mount(PipeFS::alloc());
 	VFS::mount(DeviceFS::alloc());
+	info() << "Done!\n";
 
-	DeviceFS::init();
+	info() << "Setting up devices... ";
 	DeviceFS::add_device(Keyboard::alloc());
 	DeviceFS::add_device(Console::alloc());
+	info() << "Done!\n";
 
-	// printStatus("Setting up devices.", true);
-	// printf("Welcome to CyanOS.\n");
+	info() << "Starting the first process.\n";
 	Process& proc = Process::create_new_process("test_process", "/Tar/Drivers/open_file.exe");
 	Thread::create_thread(proc, test_console, 0);
-
-	// Process::create_new_process("test_process2", "/Drivers/nop_loop.exe");
+	Thread::create_thread(proc, test_keyboard, 0);
 
 	Thread::yield();
-	// **************** tests**************************
-
-	test_tar_filesystem(info->ramdisk.start, info->ramdisk.size);
-
-	// **************** end tests *********************
-	// printf("Going Idle State.\n");
 	while (1) {
 		HLT();
 	}

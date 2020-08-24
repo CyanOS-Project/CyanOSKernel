@@ -80,6 +80,7 @@ void Process::initiate_process(uintptr_t __pcb)
 	Process* pcb = reinterpret_cast<Process*>(__pcb);
 	auto&& executable_entrypoint = pcb->load_executable(pcb->m_path);
 	if (executable_entrypoint.is_error()) {
+		warning() << "couldn't load the process, error: " << executable_entrypoint.error() << "\n";
 		return; // Remove thread
 	}
 	// return ResultError(execable_entrypoint.error());

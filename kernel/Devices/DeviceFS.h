@@ -9,7 +9,6 @@ class DeviceFS : public FSNode
 {
   public:
 	static UniquePointer<FSNode> alloc();
-	static void init();
 	static Result<void> add_device(UniquePointer<FSNode>&& device);
 
 	DeviceFS();

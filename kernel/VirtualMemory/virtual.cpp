@@ -19,7 +19,7 @@ uintptr_t VirtualMemory::find_pages(uint32_t start_address, uint32_t end_address
 		vAdd += PAGE_SIZE;
 	}
 
-	// PANIC("No virtual memory available!");
+	PANIC("No virtual memory available!");
 	ASSERT_NOT_REACHABLE();
 	return uintptr_t(nullptr);
 }

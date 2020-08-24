@@ -1,7 +1,6 @@
 #pragma once
 
+#include "Devices/DebugPort/Logger.h"
 #include "asm.h"
 
-#define PANIC() HLT();
-
-// printf("PANIC: %s in %s:%d\n", str, __FILE__, __LINE__);
+#define PANIC(str) error() << "PANIC: " << str << " " << __FILE__ << ":" << __LINE__ << "\n"

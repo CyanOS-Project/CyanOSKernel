@@ -3,12 +3,7 @@
 #include "utils/ErrorCodes.h"
 #include "utils/stl.h"
 
-List<UniquePointer<FSNode>>* DeviceFS::children;
-
-void DeviceFS::init()
-{
-	children = new List<UniquePointer<FSNode>>;
-}
+List<UniquePointer<FSNode>>* DeviceFS::children = nullptr;
 
 UniquePointer<FSNode> DeviceFS::alloc()
 {
@@ -17,6 +12,8 @@ UniquePointer<FSNode> DeviceFS::alloc()
 
 DeviceFS::DeviceFS() : FSNode{"Devices", 0, 0, NodeType::Root, 0}
 {
+	ASSERT(children == 0);
+	children = new List<UniquePointer<FSNode>>;
 }
 
 DeviceFS::~DeviceFS()

@@ -9,4 +9,4 @@ struct BootloaderInfo {
 	Module ramdisk;
 };
 
-extern "C" void kernel_init(BootloaderInfo* info);
+extern "C" void kernel_init(BootloaderInfo* boot_info);

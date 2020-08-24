@@ -12,6 +12,6 @@
 	#define ASSERT(x)                                                                                                  \
 		if (!(x)) {                                                                                                    \
 		}
-	#define ASSERT_NOT_REACHABLE() PANIC()
+	#define ASSERT_NOT_REACHABLE() PANIC("Not Reachable Line")
 
 #endif

@@ -1,7 +1,6 @@
 #pragma once
 
-#include "Devices/Console/console.h"
-#include "Devices/DebugPort/DebugPort.h"
+#include "Devices/DebugPort/Logger.h"
 #include "Devices/Timer/pit.h"
 #include "Filesystem/FileDescription.h"
 #include "Filesystem/VirtualFilesystem.h"
@@ -59,35 +58,13 @@ void test_threading(uintptr_t arg)
     }
 }*/
 
-void test_tar_filesystem(uintptr_t fs, size_t size)
-{
-	/*//printf("tar at %X\n", fs);
-	TarFS* tar_fs = new TarFS((void*)fs, size);
-	VFS::mount_root(tar_fs->root_node());
-	auto fd = VFS::open("/Drivers/file1.exe", OpenMode::Read, OpenFlags::OpenExisting);
-	if (fd.is_error()) {
-	    //printf("error opening the file, error: %d\n", fd.error());
-	    return;
-	}
-	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
-	memset(buff, 0, 4096);
-	auto result = fd.value()->read(buff, 0xc00);
-	if (result.is_error())
-	    //printf("error reading the file %d\n", result.error());
-	auto loader_result = PELoader::load(buff, 0xc00);
-	if (loader_result.is_error())
-	    //printf("error loading pe file %d\n", loader_result.error());
-	//printf("file is loaded.\n");
-	Memory::free(buff, 0xc00, 0);*/
-}
-
 void test_pipe1(uintptr_t arg)
 {
 	UNUSED(arg);
 
-	auto fd = VFS::open("/fs/my_pipe", OpenMode::Read, OpenFlags::CreateNew);
+	auto fd = VFS::open("/fs/my_pipe2", OpenMode::Read, OpenFlags::CreateNew);
 	if (fd.is_error()) {
-		// printf("error opening the file, error: %d\n", fd.error());
+		warning() << "error opening the file, error: " << fd.error() << '\n';
 		HLT();
 
 		return;
@@ -95,10 +72,10 @@ void test_pipe1(uintptr_t arg)
 	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	memset(buff, 0, 4096);
 	auto result = fd.value()->read(buff, 12);
-	// printf("got it, read\n");
-	// printf("%s", buff);
-	// if (result.is_error())
-	// printf("error reading the file %d\n", result.error());
+	dbg() << "got it, read\n";
+	dbg() << buff << '\n';
+	if (result.is_error())
+		warning() << "error reading the file " << result.error() << '\n';
 }
 
 void test_pipe2(uintptr_t arg)
@@ -107,16 +84,17 @@ void test_pipe2(uintptr_t arg)
 	Thread::sleep(1000);
 	auto fd = VFS::open("/fs/my_pipe", OpenMode::Write, OpenFlags::OpenExisting);
 	if (fd.is_error()) {
-		// printf("error opening the file, error: %d\n", fd.error());
+		warning() << "error opening the file, error: " << fd.error() << '\n';
 		HLT();
 		return;
 	}
 	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	memset(buff, 0, 4096);
 	auto result = fd.value()->write(static_cast<const void*>("Hello there"), 12);
-	// printf("got it, write\n");
-	// if (result.is_error())
-	// printf("error writing the file %d\n", result.error());
+	dbg() << "got it, write\n";
+	dbg() << buff << '\n';
+	if (result.is_error())
+		warning() << "error writing the file " << result.error() << '\n';
 }
 
 void test_keyboard(uintptr_t arg)
@@ -125,17 +103,14 @@ void test_keyboard(uintptr_t arg)
 
 	auto fd = VFS::open("/Devices/keyboard", OpenMode::ReadWrite, OpenFlags::OpenExisting);
 	if (fd.is_error()) {
-		// printf("error opening the file, error: %d\n", fd.error());
+		warning() << "error opening the file, error: " << fd.error() << '\n';
 		HLT();
 		return;
 	}
 	char buff[1];
 	while (true) {
 		auto result = fd.value()->read(buff, 1);
-		// printf("got it, read\n");
-		DebugPort::write(buff, DebugColor::Bright_Red);
-		// if (result.is_error())
-		// printf("error reading the file %d\n", result.error());
+		DebugPort::write(buff, DebugColor::Cyan);
 	}
 }
 

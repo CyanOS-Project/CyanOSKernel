@@ -52,7 +52,6 @@ void* PELoader::load_pe_sections(const char* file, const IMAGE_NT_HEADERS32* nt_
 	                                          nt_header->OptionalHeader.SectionAlignment, MEMORY_TYPE::WRITABLE);
 	if (!start_of_executable)
 		return nullptr;
-	// PANIC("Loading Executable Image: invalid memory region");
 
 	memset(start_of_executable, 0, section_alignment);
 	memcpy(start_of_executable, file, nt_header->OptionalHeader.SizeOfHeaders);
@@ -68,7 +67,6 @@ void* PELoader::load_pe_sections(const char* file, const IMAGE_NT_HEADERS32* nt_
 		current_section_address = Memory::alloc(current_section_address, section_vir_size, MEMORY_TYPE::WRITABLE);
 		if (!current_section_address)
 			return nullptr;
-		// PANIC("Loading Executable Image: invalid memory region");
 
 		memcpy(current_section_address, file + section_rd, section_raw_size);
 	}

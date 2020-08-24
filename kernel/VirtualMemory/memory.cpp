@@ -25,11 +25,11 @@ void Memory::page_fault_handler(ISRContextFrame* isr_info)
 	// printf("Page= %X EIP=%X\t CS=%X\t ESP=%X \t\n", get_faulted_page(), isr_info->eip, isr_info->cs,
 	// isr_info->registers.esp);
 	if (!PF_PRESENT(isr_info->error_code)) {
-		// PANIC("Page fault due accessing non-present page.");
+		PANIC("Page fault due accessing non-present page.");
 	} else if (PF_US(isr_info->error_code)) {
-		// PANIC("Page fault due accessing kernel page from user mode.");
+		PANIC("Page fault due accessing kernel page from user mode.");
 	} else if (PF_WR(isr_info->error_code)) {
-		// PANIC("Page fault due writing to read only page.");
+		PANIC("Page fault due writing to read only page.");
 	}
 }
 

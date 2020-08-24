@@ -45,7 +45,6 @@ class Console : public FSNode
 	void putChar(const char str);
 	void clearScreen();
 	void initiate_console();
-	void printStatus(const char* msg, bool Success);
 	void removeLine();
 	void pageUp();
 	void updateCursor();

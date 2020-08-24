@@ -83,7 +83,7 @@ uintptr_t PhysicalMemory::find_pages(uintptr_t start_page, size_t count)
 			}
 		}
 	}
-	// PANIC("No physical memory available!");
+	PANIC("No physical memory available!");
 	ASSERT_NOT_REACHABLE();
 	return uintptr_t(nullptr);
 }
