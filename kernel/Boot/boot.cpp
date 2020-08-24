@@ -1,5 +1,6 @@
 
 #include "boot.h"
+#include "Devices/DebugPort/Logger.h"
 
 extern uint32_t KERNEL_END;
 extern uint32_t KERNEL_START;
@@ -74,10 +75,10 @@ BootloaderInfo parse_mbi(uintptr_t multiboot_info)
 			case MULTIBOOT_TAG_TYPE_MMAP: {
 				multiboot_tag_mmap* tag2 = (multiboot_tag_mmap*)current_tag;
 				size_t i = 0;
+				// info() << "Memory Map:\n";
 				while (tag2->entries[i].type != 0) {
-					/*printf("addr :%x\n", tag2->entries[i].addr);
-					printf("len :%x\n", tag2->entries[i].len);
-					printf("type :%s\n", mmap_entry_type_text[tag2->entries[i].type]);*/
+					// info() << "Addr: " << Hex(tag2->entries[i].addr) << " Size: " << tag2->entries[i].len
+					//       << " Type: " << mmap_entry_type_text[tag2->entries[i].type] << "\n";
 					i++;
 				}
 				break;

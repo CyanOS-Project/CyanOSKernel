@@ -22,7 +22,7 @@ class Process
   private:
 	static Bitmap* pid_bitmap;
 	static List<Process>* processes;
-	static Spinlock global_lock;
+	static StaticSpinlock global_lock;
 	static void initiate_process(uintptr_t pcb);
 
 	Spinlock m_lock;

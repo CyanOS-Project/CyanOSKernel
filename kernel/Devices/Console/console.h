@@ -1,6 +1,6 @@
 #pragma once
-#include "Arch/x86/spinlock.h"
 #include "Filesystem/FSNode.h"
+#include "Tasking/SpinLock.h"
 #include "utils/UniquePointer.h"
 #include "utils/types.h"
 
@@ -40,17 +40,24 @@ class Console : public FSNode
 	Result<bool> can_write() override;
 
   private:
-	void setMode(TerminalMode Mode);
-	void setColor(VGAColor color, VGAColor backcolor);
-	void putChar(const char str);
+	Spinlock m_lock;
+	volatile uint16_t* m_video_ram = 0;
+	int m_vPosition = 0, m_hPosition = 0;
+	uint8_t m_charColor = 0x0F;
+	static const size_t VGA_WIDTH = 80;
+	static const size_t VGA_HEIGHT = 25;
+
+	void set_mode(TerminalMode Mode);
+	void set_color(VGAColor color, VGAColor backcolor);
+	void put_char(const char str);
 	void clearScreen();
 	void initiate_console();
-	void removeLine();
-	void pageUp();
-	void updateCursor();
-	void insertNewLine();
-	void insertCharacter(char str);
-	void insertBackSpace();
+	void remove_line();
+	void page_up();
+	void update_cursor();
+	void insert_new_line();
+	void insert_character(char str);
+	void insert_back_space();
 	uint8_t vga_entry_color(VGAColor fg, VGAColor bg);
 	uint16_t vga_entry(unsigned char uc, uint8_t color);
 };

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Arch/x86/spinlock.h"
 #include "DebugPort.h"
 #include "utils/String.h"
 #include "utils/StringView.h"
@@ -19,6 +18,7 @@ class Logger
 	Logger& operator<<(const String& str);
 	Logger& operator<<(int num);
 	Logger& operator<<(unsigned num);
+	Logger& operator<<(uint64_t num);
 	Logger& operator<<(Hex num);
 	Logger& operator<<(void* ptr);
 };

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Arch/x86/spinlock.h"
 #include "Filesystem/FileDescription.h"
 #include "Tasking/ScopedLock.h"
+#include "Tasking/SpinLock.h"
 #include "utils/List.h"
 #include "utils/UniquePointer.h"
 #include "utils/stl.h"

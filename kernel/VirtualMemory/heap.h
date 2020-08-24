@@ -22,7 +22,7 @@ struct PageFrameBlock {
 class Heap
 {
   private:
-	static Spinlock lock;
+	static StaticSpinlock lock;
 	static PageFrameBlock* create_new_page();
 	static PageFrameBlock* get_last_page();
 	static BlockHeader* initiate_first_block(PageFrameBlock* new_page);

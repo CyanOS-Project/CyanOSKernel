@@ -4,14 +4,6 @@
 #include "Tasking/ScopedLock.h"
 #include "VirtualMemory/memory.h"
 #include "kernel_map.h"
-#include <stdarg.h>
-
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
-volatile uint16_t* video_ram = 0;
-volatile int vPosition = 0, hPosition = 0;
-uint8_t charColor = 0x0F;
-Spinlock lock;
 
 UniquePointer<FSNode> Console::alloc()
 {
@@ -46,7 +38,7 @@ Result<void> Console::write(const void* buff, size_t offset, size_t size)
 
 	const char* _buff = reinterpret_cast<const char*>(buff);
 	for (size_t i = 0; i < size; i++) {
-		putChar(_buff[i]);
+		put_char(_buff[i]);
 	}
 	return ResultError(ERROR_SUCCESS);
 }
@@ -60,29 +52,28 @@ void Console::clearScreen()
 {
 	for (size_t i = 0; i < VGA_WIDTH; i++) {
 		for (size_t i2 = 0; i2 < VGA_HEIGHT; i2++) {
-			video_ram[i + i2 * VGA_WIDTH] = 0;
+			m_video_ram[i + i2 * VGA_WIDTH] = 0;
 		}
 	}
-	hPosition = 0;
-	vPosition = 0;
+	m_hPosition = 0;
+	m_vPosition = 0;
 }
 
 void Console::initiate_console()
 {
-	lock.init();
-	hPosition = 0;
-	vPosition = 0;
-	video_ram = (uint16_t*)Memory::map(VGATEXTMODE_BUFFER, 0x1000, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
-	if (!video_ram)
+	m_hPosition = 0;
+	m_vPosition = 0;
+	m_video_ram = (uint16_t*)Memory::map(VGATEXTMODE_BUFFER, 0x1000, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
+	if (!m_video_ram)
 		PANIC("Cannot map text mode memory");
 
 	clearScreen();
 }
 
-void Console::setMode(TerminalMode Mode)
+void Console::set_mode(TerminalMode Mode)
 {
 	UNUSED(Mode);
-	video_ram = (uint16_t*)VGATEXTMODE_BUFFER;
+	m_video_ram = (uint16_t*)VGATEXTMODE_BUFFER;
 }
 
 uint8_t Console::vga_entry_color(VGAColor fg, VGAColor bg)
@@ -95,88 +86,90 @@ uint16_t Console::vga_entry(unsigned char uc, uint8_t color)
 	return (uint16_t)uc | (uint16_t)color << 8;
 }
 
-void Console::pageUp()
+void Console::page_up()
 {
 	for (size_t i = 0; i < VGA_HEIGHT - 1; i++) {
-		memcpy((void*)(video_ram + VGA_WIDTH * i), (void*)(video_ram + VGA_WIDTH * (i + 1)), VGA_WIDTH * sizeof(short));
+		memcpy((void*)(m_video_ram + VGA_WIDTH * i), (void*)(m_video_ram + VGA_WIDTH * (i + 1)),
+		       VGA_WIDTH * sizeof(short));
 	}
-	memset((char*)(video_ram + VGA_WIDTH * (VGA_HEIGHT - 1)), 0, VGA_WIDTH * sizeof(short));
+	memset((char*)(m_video_ram + VGA_WIDTH * (VGA_HEIGHT - 1)), 0, VGA_WIDTH * sizeof(short));
 }
 
-void Console::setColor(VGAColor color, VGAColor backcolor)
+void Console::set_color(VGAColor color, VGAColor backcolor)
 {
-	charColor = vga_entry_color(color, backcolor);
+	m_charColor = vga_entry_color(color, backcolor);
 }
 
-void Console::removeLine()
+void Console::remove_line()
 {
 	do {
-		if (hPosition != VGA_WIDTH) // Update Cursor
-			video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
-		if (hPosition > 0) {
-			hPosition--;
-		} else if (hPosition == 0 && vPosition > 0) {
-			vPosition--;
-			hPosition = VGA_WIDTH - 1;
+		if (m_hPosition != VGA_WIDTH) // Update Cursor
+			m_video_ram[m_hPosition + m_vPosition * VGA_WIDTH] = 0;
+		if (m_hPosition > 0) {
+			m_hPosition--;
+		} else if (m_hPosition == 0 && m_vPosition > 0) {
+			m_vPosition--;
+			m_hPosition = VGA_WIDTH - 1;
 		} else {
 			break;
 		}
-	} while (video_ram[hPosition + vPosition * VGA_WIDTH] == 0 || hPosition != 0);
-	video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
+	} while (m_video_ram[m_hPosition + m_vPosition * VGA_WIDTH] == 0 || m_hPosition != 0);
+	m_video_ram[m_hPosition + m_vPosition * VGA_WIDTH] = 0;
 }
 
-void Console::putChar(const char str)
+void Console::put_char(const char str)
 {
-	if (vPosition == VGA_HEIGHT) {
-		pageUp();
-		vPosition--;
+	if (m_vPosition == VGA_HEIGHT) {
+		page_up();
+		m_vPosition--;
 	}
 	if (str == '\n') {
-		insertNewLine();
+		insert_new_line();
 	} else if (str == '\b') {
-		insertBackSpace();
+		insert_back_space();
 	} else if (str == '\t') {
 		for (size_t i = 0; i < 4; i++)
-			insertCharacter(' ');
+			insert_character(' ');
 	} else {
-		insertCharacter(str);
+		insert_character(str);
 	}
-	updateCursor();
+	update_cursor();
 }
 
-void Console::updateCursor()
+void Console::update_cursor()
 {
-	video_ram[hPosition + vPosition * VGA_WIDTH] = vga_entry(0, vga_entry_color(VGA_COLOR_BLACK, VGA_COLOR_WHITE));
+	m_video_ram[m_hPosition + m_vPosition * VGA_WIDTH] =
+	    vga_entry(0, vga_entry_color(VGA_COLOR_BLACK, VGA_COLOR_WHITE));
 }
 
-void Console::insertNewLine()
+void Console::insert_new_line()
 {
-	if (hPosition != VGA_WIDTH) // Update Cursor
-		video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
-	hPosition = 0;
-	vPosition++;
+	if (m_hPosition != VGA_WIDTH) // Update Cursor
+		m_video_ram[m_hPosition + m_vPosition * VGA_WIDTH] = 0;
+	m_hPosition = 0;
+	m_vPosition++;
 }
 
-void Console::insertCharacter(char str)
+void Console::insert_character(char str)
 {
-	video_ram[hPosition + vPosition * VGA_WIDTH] = vga_entry(str, charColor);
-	hPosition = (hPosition + 1) % VGA_WIDTH;
-	vPosition = (vPosition + (hPosition == 0));
+	m_video_ram[m_hPosition + m_vPosition * VGA_WIDTH] = vga_entry(str, m_charColor);
+	m_hPosition = (m_hPosition + 1) % VGA_WIDTH;
+	m_vPosition = (m_vPosition + (m_hPosition == 0));
 }
 
-void Console::insertBackSpace()
+void Console::insert_back_space()
 {
-	if (hPosition != VGA_WIDTH) // Update Cursor
-		video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
+	if (m_hPosition != VGA_WIDTH) // Update Cursor
+		m_video_ram[m_hPosition + m_vPosition * VGA_WIDTH] = 0;
 	do {
-		if (hPosition > 0) {
-			hPosition--;
-		} else if (hPosition == 0 && vPosition > 0) {
-			vPosition--;
-			hPosition = VGA_WIDTH - 1;
+		if (m_hPosition > 0) {
+			m_hPosition--;
+		} else if (m_hPosition == 0 && m_vPosition > 0) {
+			m_vPosition--;
+			m_hPosition = VGA_WIDTH - 1;
 		} else {
 			break;
 		}
-	} while (video_ram[hPosition + vPosition * VGA_WIDTH] == 0);
-	video_ram[hPosition + vPosition * VGA_WIDTH] = 0;
+	} while (m_video_ram[m_hPosition + m_vPosition * VGA_WIDTH] == 0);
+	m_video_ram[m_hPosition + m_vPosition * VGA_WIDTH] = 0;
 }

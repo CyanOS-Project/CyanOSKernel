@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Arch/x86/spinlock.h"
 #include "WaitQueue.h"
 #include "utils/types.h"
 

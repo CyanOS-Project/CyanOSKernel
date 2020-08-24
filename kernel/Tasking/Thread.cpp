@@ -10,7 +10,7 @@ IntrusiveList<Thread>* Thread::ready_threads = nullptr;
 IntrusiveList<Thread>* Thread::sleeping_threads = nullptr;
 Thread* Thread::current = nullptr;
 Bitmap* Thread::m_tid_bitmap;
-Spinlock Thread::global_lock;
+StaticSpinlock Thread::global_lock;
 
 void Thread::setup()
 {

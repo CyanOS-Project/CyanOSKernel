@@ -1,11 +1,11 @@
-#include "spinlock.h"
+#include "Spinlock.h"
 
-void Spinlock::init()
+void StaticSpinlock::init()
 {
 	m_value = 0;
 }
 
-void Spinlock::acquire()
+void StaticSpinlock::acquire()
 {
 	m_eflags = eflags_read();
 	DISABLE_INTERRUPTS();
@@ -13,7 +13,7 @@ void Spinlock::acquire()
 	}
 }
 
-void Spinlock::release()
+void StaticSpinlock::release()
 {
 	m_value = 0;
 	eflags_write(m_eflags);

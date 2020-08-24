@@ -10,7 +10,7 @@
 #include "VirtualMemory/memory.h"
 #include "utils/assert.h"
 
-Spinlock Scheduler::lock;
+StaticSpinlock Scheduler::lock;
 
 void Scheduler::setup()
 {

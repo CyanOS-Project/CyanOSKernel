@@ -1,6 +1,7 @@
 #include "Keyboard.h"
 #include "Arch/x86/asm.h"
 #include "Tasking/ScopedLock.h"
+#include "Tasking/SpinLock.h"
 #include "utils/ErrorCodes.h"
 
 Keyboard* Keyboard::current_instance = nullptr;
@@ -44,6 +45,8 @@ Result<void> Keyboard::close()
 
 Result<void> Keyboard::read(void* buff, size_t offset, size_t size)
 {
+	UNUSED(offset);
+
 	ScopedLock local_lock(m_lock);
 	if (m_buffer.size() < size) {
 		local_lock.release();

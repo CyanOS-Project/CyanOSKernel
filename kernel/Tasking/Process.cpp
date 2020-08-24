@@ -9,7 +9,7 @@
 
 List<Process>* Process::processes;
 Bitmap* Process::pid_bitmap;
-Spinlock Process::global_lock;
+StaticSpinlock Process::global_lock;
 
 void Process::setup()
 {

@@ -2,7 +2,7 @@
 #include "Tasking/ScopedLock.h"
 
 volatile PageFrameBlock* Heap::malloc_mem;
-Spinlock Heap::lock;
+StaticSpinlock Heap::lock;
 
 void Heap::setup()
 {

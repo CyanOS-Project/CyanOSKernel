@@ -3,7 +3,7 @@
 #include "asm.h"
 #include "utils/types.h"
 
-class Spinlock
+class StaticSpinlock
 {
   private:
 	uint32_t m_value;
@@ -13,6 +13,6 @@ class Spinlock
 	void init();
 	void acquire();
 	void release();
-	Spinlock() = default;
-	~Spinlock() = default;
+	StaticSpinlock() = default;
+	~StaticSpinlock() = default;
 };

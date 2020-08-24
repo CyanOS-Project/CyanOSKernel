@@ -17,9 +17,21 @@ Logger& Logger::operator<<(const String& str)
 	return *this;
 }
 
+Logger& Logger::operator<<(uint64_t num)
+{
+	char buf[5];
+	itoa(buf, num & 0xFFFFFFFF, 16);
+	toupper(buf);
+	DebugPort::write(buf, m_color);
+	itoa(buf, num & 0xFFFFFFFF00000000, 16);
+	toupper(buf);
+	DebugPort::write(buf, m_color);
+	return *this;
+}
+
 Logger& Logger::operator<<(int num)
 {
-	char buf[16];
+	char buf[11];
 	if (num < 0) {
 		num = 0 - num;
 		DebugPort::write("-", m_color);
@@ -33,7 +45,7 @@ Logger& Logger::operator<<(int num)
 
 Logger& Logger::operator<<(unsigned num)
 {
-	char buf[16];
+	char buf[11];
 	itoa(buf, num, 10);
 	toupper(buf);
 	DebugPort::write(buf, m_color);
@@ -42,7 +54,7 @@ Logger& Logger::operator<<(unsigned num)
 
 Logger& Logger::operator<<(Hex num)
 {
-	char buf[16];
+	char buf[5];
 	itoa(buf, num.m_data, 16);
 	toupper(buf);
 	DebugPort::write("0x", m_color);
@@ -52,7 +64,7 @@ Logger& Logger::operator<<(Hex num)
 
 Logger& Logger::operator<<(void* ptr)
 {
-	char buf[16];
+	char buf[5];
 	itoa(buf, (int)ptr, 16);
 	toupper(buf);
 	DebugPort::write("0x", m_color);

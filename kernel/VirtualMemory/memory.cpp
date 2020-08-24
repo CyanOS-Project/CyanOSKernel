@@ -1,7 +1,7 @@
 #include "memory.h"
 #include "Tasking/ScopedLock.h"
 
-Spinlock Memory::lock;
+StaticSpinlock Memory::lock;
 void Memory::setup()
 {
 	lock.init();

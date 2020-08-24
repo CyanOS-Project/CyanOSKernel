@@ -26,7 +26,7 @@ class Thread : public IntrusiveListNode<Thread>
 	static Bitmap* m_tid_bitmap;
 	static IntrusiveList<Thread>* ready_threads;
 	static IntrusiveList<Thread>* sleeping_threads;
-	static Spinlock global_lock;
+	static StaticSpinlock global_lock;
 
 	Spinlock m_lock;
 	const unsigned m_tid;
