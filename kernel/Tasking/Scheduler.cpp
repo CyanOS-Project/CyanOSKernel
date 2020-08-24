@@ -1,4 +1,4 @@
-#include "scheduler.h"
+#include "Scheduler.h"
 #include "Arch/x86/Asm.h"
 #include "Arch/x86/Isr.h"
 #include "Devices/Timer/Pit.h"
