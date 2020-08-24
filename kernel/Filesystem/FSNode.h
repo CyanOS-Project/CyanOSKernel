@@ -1,10 +1,10 @@
 #pragma once
 
-#include "utils/ErrorCodes.h"
-#include "utils/Result.h"
-#include "utils/String.h"
-#include "utils/StringView.h"
-#include "utils/types.h"
+#include "Utils/ErrorCodes.h"
+#include "Utils/Result.h"
+#include "Utils/String.h"
+#include "Utils/StringView.h"
+#include "Utils/Types.h"
 
 #define MAX_FILE_NAME 64
 enum class OpenFlags { CreateNew, OpenExisting };

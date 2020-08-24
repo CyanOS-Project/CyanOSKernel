@@ -2,7 +2,7 @@
 	#undef __STRICT_ANSI__
 #endif
 
-#include "utils/PathParser.h"
+#include "Utils/PathParser.h"
 #include <gtest/gtest.h>
 
 #define MAX_PATH_ELEMENT 256

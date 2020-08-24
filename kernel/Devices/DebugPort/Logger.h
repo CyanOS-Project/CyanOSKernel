@@ -1,9 +1,9 @@
 #pragma once
 
 #include "DebugPort.h"
-#include "utils/String.h"
-#include "utils/StringView.h"
-#include "utils/types.h"
+#include "Utils/String.h"
+#include "Utils/StringView.h"
+#include "Utils/Types.h"
 
 class Hex;
 
@@ -35,27 +35,24 @@ class dbg : public Logger
 class info : public Logger
 {
   public:
-	info()
+	info() : Logger{DebugColor::Bright_Blue}
 	{
-		m_color = DebugColor::Bright_Blue;
 	}
 };
 
-class warning : public Logger
+class warn : public Logger
 {
   public:
-	warning()
+	warn() : Logger{DebugColor::Yellow}
 	{
-		m_color = DebugColor::Yellow;
 	}
 };
 
-class error : public Logger
+class err : public Logger
 {
   public:
-	error()
+	err() : Logger{DebugColor::Red}
 	{
-		m_color = DebugColor::Red;
 	}
 };
 

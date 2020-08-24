@@ -2,12 +2,12 @@
 
 #include "Filesystem/FSNode.h"
 #include "Tasking/WaitQueue.h"
-#include "utils/CircularBuffer.h"
-#include "utils/List.h"
-#include "utils/String.h"
-#include "utils/StringView.h"
-#include "utils/UniquePointer.h"
-#include "utils/types.h"
+#include "Utils/CircularBuffer.h"
+#include "Utils/List.h"
+#include "Utils/String.h"
+#include "Utils/StringView.h"
+#include "Utils/UniquePointer.h"
+#include "Utils/Types.h"
 
 class Pipe : public FSNode
 {

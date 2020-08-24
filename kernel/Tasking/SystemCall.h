@@ -1,7 +1,7 @@
 #pragma once
-#include "Arch/x86/context.h"
-#include "utils/Result.h"
-#include "utils/types.h"
+#include "Arch/x86/Context.h"
+#include "Utils/Result.h"
+#include "Utils/Types.h"
 
 typedef Result<int> (*generic_syscall)(int arg0, int arg1, int arg2, int arg3, int arg4);
 

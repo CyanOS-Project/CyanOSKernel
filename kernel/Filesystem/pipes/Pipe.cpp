@@ -1,7 +1,7 @@
 #include "Pipe.h"
 #include "Tasking/ScopedLock.h"
-#include "utils/ErrorCodes.h"
-#include "utils/PathParser.h"
+#include "Utils/ErrorCodes.h"
+#include "Utils/PathParser.h"
 
 Pipe::Pipe(const StringView& name) :
     FSNode(name, 0, 0, NodeType::Pipe, BUFFER_SIZE),

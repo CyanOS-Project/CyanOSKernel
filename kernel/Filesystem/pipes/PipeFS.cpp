@@ -1,7 +1,7 @@
 #include "PipeFS.h"
 #include "Tasking/ScopedLock.h"
-#include "utils/ErrorCodes.h"
-#include "utils/PathParser.h"
+#include "Utils/ErrorCodes.h"
+#include "Utils/PathParser.h"
 
 UniquePointer<FSNode> PipeFS::alloc()
 {

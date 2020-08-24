@@ -1,8 +1,8 @@
 #pragma once
 
 #include "FSNode.h"
-#include "utils/Result.h"
-#include "utils/types.h"
+#include "Utils/Result.h"
+#include "Utils/Types.h"
 
 enum class SeekOrigin { SET, CURRENT, END };
 struct FileInfo {

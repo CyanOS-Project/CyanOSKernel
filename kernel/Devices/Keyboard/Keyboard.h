@@ -1,13 +1,13 @@
 #pragma once
 
-#include "Arch/x86/isr.h"
-#include "Arch/x86/pic.h"
+#include "Arch/x86/Isr.h"
+#include "Arch/x86/Pic.h"
 #include "Devices/DebugPort/DebugPort.h"
 #include "Filesystem/FSNode.h"
 #include "Tasking/WaitQueue.h"
-#include "utils/CircularBuffer.h"
-#include "utils/UniquePointer.h"
-#include "utils/types.h"
+#include "Utils/CircularBuffer.h"
+#include "Utils/Types.h"
+#include "Utils/UniquePointer.h"
 
 class Keyboard : public FSNode
 {

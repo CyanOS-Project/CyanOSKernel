@@ -1,7 +1,7 @@
 #ifdef __STRICT_ANSI__
 	#undef __STRICT_ANSI__
 #endif
-#include "utils/List.h"
+#include "Utils/List.h"
 #include <gtest/gtest.h>
 
 struct TestStruct {

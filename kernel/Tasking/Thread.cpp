@@ -1,10 +1,10 @@
 #include "Thread.h"
-#include "Arch/x86/context.h"
-#include "Devices/Timer/pit.h"
+#include "Arch/x86/Context.h"
+#include "Devices/Timer/Pit.h"
 #include "ScopedLock.h"
-#include "VirtualMemory/memory.h"
+#include "Utils/Assert.h"
+#include "VirtualMemory/Memory.h"
 #include "WaitQueue.h"
-#include "utils/assert.h"
 
 IntrusiveList<Thread>* Thread::ready_threads = nullptr;
 IntrusiveList<Thread>* Thread::sleeping_threads = nullptr;

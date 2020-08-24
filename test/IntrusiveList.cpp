@@ -2,7 +2,7 @@
 	#undef __STRICT_ANSI__
 #endif
 
-#include "utils/IntrusiveList.h"
+#include "Utils/IntrusiveList.h"
 #include <gtest/gtest.h>
 
 struct TestStruct : public IntrusiveListNode<TestStruct> {

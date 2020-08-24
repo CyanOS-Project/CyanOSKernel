@@ -1,8 +1,8 @@
 #include "Keyboard.h"
-#include "Arch/x86/asm.h"
+#include "Arch/x86/Asm.h"
 #include "Tasking/ScopedLock.h"
 #include "Tasking/SpinLock.h"
-#include "utils/ErrorCodes.h"
+#include "Utils/ErrorCodes.h"
 
 Keyboard* Keyboard::current_instance = nullptr;
 

@@ -3,11 +3,11 @@
 #include "FSNode.h"
 #include "FileDescription.h"
 #include "FileDescriptor.h"
-#include "utils/List.h"
-#include "utils/PathParser.h"
-#include "utils/Result.h"
-#include "utils/UniquePointer.h"
-#include "utils/types.h"
+#include "Utils/List.h"
+#include "Utils/PathParser.h"
+#include "Utils/Result.h"
+#include "Utils/Types.h"
+#include "Utils/UniquePointer.h"
 
 class VFS
 {

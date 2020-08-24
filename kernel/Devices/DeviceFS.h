@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Filesystem/FSNode.h"
-#include "utils/List.h"
-#include "utils/UniquePointer.h"
-#include "utils/types.h"
+#include "Utils/List.h"
+#include "Utils/UniquePointer.h"
+#include "Utils/Types.h"
 
 class DeviceFS : public FSNode
 {

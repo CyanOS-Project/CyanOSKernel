@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Arch/x86/spinlock.h"
+#include "Arch/x86/Spinlock.h"
 
 class Spinlock : public StaticSpinlock
 {

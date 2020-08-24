@@ -1,11 +1,11 @@
 #include "Process.h"
-#include "Arch/x86/context.h"
+#include "Arch/x86/Context.h"
 #include "Filesystem/VirtualFilesystem.h"
-#include "Loader/pe.h"
+#include "Loader/PE.h"
 #include "ScopedLock.h"
 #include "Thread.h"
-#include "VirtualMemory/memory.h"
-#include "utils/assert.h"
+#include "Utils/Assert.h"
+#include "VirtualMemory/Memory.h"
 
 List<Process>* Process::processes;
 Bitmap* Process::pid_bitmap;
@@ -80,7 +80,7 @@ void Process::initiate_process(uintptr_t __pcb)
 	Process* pcb = reinterpret_cast<Process*>(__pcb);
 	auto&& executable_entrypoint = pcb->load_executable(pcb->m_path);
 	if (executable_entrypoint.is_error()) {
-		warning() << "couldn't load the process, error: " << executable_entrypoint.error() << "\n";
+		warn() << "couldn't load the process, error: " << executable_entrypoint.error() << "\n";
 		return; // Remove thread
 	}
 	// return ResultError(execable_entrypoint.error());

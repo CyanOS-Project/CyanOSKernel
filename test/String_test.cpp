@@ -4,7 +4,7 @@
 #define UNIT_TESTING
 #define ASSERT(x) (void)ASSERT_TRUE(false)
 
-#include "utils/String.h"
+#include "Utils/String.h"
 #include <gtest/gtest.h>
 
 TEST(String_Test, Construction)

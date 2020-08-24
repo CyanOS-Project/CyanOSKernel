@@ -1,6 +1,6 @@
 #include "DebugPort.h"
-#include "Arch/x86/asm.h"
-#include "Lib/stdlib.h"
+#include "Arch/x86/Asm.h"
+#include "Lib/Stdlib.h"
 
 void DebugPort::write(const char* data, size_t size, DebugColor color)
 {

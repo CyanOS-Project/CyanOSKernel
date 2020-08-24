@@ -2,7 +2,7 @@
 	#undef __STRICT_ANSI__
 #endif
 
-#include "utils/CircularList.h"
+#include "Utils/CircularList.h"
 #include <gtest/gtest.h>
 
 struct TestStruct {

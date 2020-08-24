@@ -2,10 +2,10 @@
 
 #include "Filesystem/FSNode.h"
 #include "Tasking/SpinLock.h"
-#include "utils/List.h"
-#include "utils/Result.h"
-#include "utils/String.h"
-#include "utils/types.h"
+#include "Utils/List.h"
+#include "Utils/Result.h"
+#include "Utils/String.h"
+#include "Utils/Types.h"
 
 class INode : public FSNode
 {

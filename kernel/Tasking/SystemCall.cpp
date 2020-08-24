@@ -1,10 +1,9 @@
 #include "SystemCall.h"
-#include "Arch/x86/isr.h"
-#include "Devices/Console/console.h"
+#include "Arch/x86/Isr.h"
 #include "Filesystem/VirtualFilesystem.h"
 #include "Tasking/Process.h"
 #include "Tasking/Thread.h"
-#include "utils/stl.h"
+#include "Utils/Stl.h"
 
 #pragma GCC diagnostic ignored "-Wcast-function-type"
 

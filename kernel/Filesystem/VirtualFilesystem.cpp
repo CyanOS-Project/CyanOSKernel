@@ -1,9 +1,9 @@
 #include "VirtualFilesystem.h"
-#include "Arch/x86/panic.h"
+#include "Arch/x86/Panic.h"
 #include "Tasking/ScopedLock.h"
 #include "Tasking/Thread.h"
-#include "utils/ErrorCodes.h"
-#include "utils/assert.h"
+#include "Utils/Assert.h"
+#include "Utils/ErrorCodes.h"
 
 List<UniquePointer<FSNode>>* VFS::fs_roots;
 Spinlock VFS::lock;

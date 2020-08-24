@@ -1,8 +1,8 @@
 #include "TarFS.h"
 #include "Tasking/ScopedLock.h"
-#include "utils/ErrorCodes.h"
-#include "utils/Stack.h"
-#include "utils/stl.h"
+#include "Utils/ErrorCodes.h"
+#include "Utils/Stack.h"
+#include "Utils/Stl.h"
 
 UniquePointer<FSNode> TarFS::alloc(void* tar_address, size_t size)
 {
@@ -14,7 +14,7 @@ TarFS::TarFS(void* tar_address, size_t size) :
     m_tar_address(static_cast<TarHeader*>(tar_address))
 {
 	ASSERT(tar_address);
-	ASSERT(strncmp(m_tar_address->magic, "ustar", 5) == 0)
+	ASSERT(strncmp(m_tar_address->magic, "ustar", 5) == 0);
 	parse_ustar(size);
 }
 
