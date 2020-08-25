@@ -13,9 +13,8 @@ class Keyboard : public FSNode
 {
   public:
 	static void keyboard_driver_handler(ISRContextFrame*);
-	static UniquePointer<FSNode> alloc();
+	static UniquePointer<FSNode> alloc(const StringView& name);
 
-	Keyboard();
 	~Keyboard();
 	Result<void> open(OpenMode mode, OpenFlags flags) override;
 	Result<void> close() override;
@@ -36,6 +35,8 @@ class Keyboard : public FSNode
 	    {'x', 'X'}, {'c', 'C'},   {'v', 'V'}, {'b', 'B'}, {'n', 'N'}, {'m', 'M'}, {',', '<'}, {'.', '>'},  {'/', '?'},
 	    {0, 0},     {0, 0},       {0, 0},     {' ', ' '},
 	};
+
+	explicit Keyboard(const StringView& name);
 	void enqueue_keystoke(unsigned char data);
 
 	static Keyboard* current_instance;

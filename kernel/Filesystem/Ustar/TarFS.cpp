@@ -4,13 +4,13 @@
 #include "Utils/Stack.h"
 #include "Utils/Stl.h"
 
-UniquePointer<FSNode> TarFS::alloc(void* tar_address, size_t size)
+UniquePointer<FSNode> TarFS::alloc(const StringView& name, void* tar_address, size_t size)
 {
-	return UniquePointer<FSNode>(new TarFS(tar_address, size));
+	return UniquePointer<FSNode>(new TarFS(name, tar_address, size));
 }
 
-TarFS::TarFS(void* tar_address, size_t size) :
-    INode{"Tar", NodeType::Root, 0, nullptr},
+TarFS::TarFS(const StringView& name, void* tar_address, size_t size) :
+    INode{name, NodeType::Root, 0, nullptr},
     m_tar_address(static_cast<TarHeader*>(tar_address))
 {
 	ASSERT(tar_address);

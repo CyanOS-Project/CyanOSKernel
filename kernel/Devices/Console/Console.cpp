@@ -5,12 +5,12 @@
 #include "Tasking/ScopedLock.h"
 #include "VirtualMemory/Memory.h"
 
-UniquePointer<FSNode> Console::alloc()
+UniquePointer<FSNode> Console::alloc(const StringView& name)
 {
-	return UniquePointer<FSNode>(new Console);
+	return UniquePointer<FSNode>(new Console(name));
 }
 
-Console::Console() : FSNode("console", 0, 0, NodeType::Root, 0)
+Console::Console(const StringView& name) : FSNode(name, 0, 0, NodeType::Root, 0)
 {
 	initiate_console();
 }

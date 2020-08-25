@@ -1,8 +1,20 @@
 #include "Logger.h"
 #include "Lib/Stdlib.h"
 
+StaticSpinlock Logger::lock;
+
+void Logger::init()
+{
+	lock.init();
+}
+
 Logger::Logger(DebugColor color) : m_color{color}
 {
+	lock.acquire();
+}
+Logger::~Logger()
+{
+	lock.release();
 }
 
 Logger& Logger::operator<<(const char* str)
@@ -14,6 +26,12 @@ Logger& Logger::operator<<(const char* str)
 Logger& Logger::operator<<(const String& str)
 {
 	DebugPort::write(str.c_str(), m_color);
+	return *this;
+}
+
+Logger& Logger::operator<<(const char str)
+{
+	DebugPort::write(&str, m_color);
 	return *this;
 }
 

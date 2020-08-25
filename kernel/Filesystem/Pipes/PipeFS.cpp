@@ -3,13 +3,13 @@
 #include "Utils/ErrorCodes.h"
 #include "Utils/PathParser.h"
 
-UniquePointer<FSNode> PipeFS::alloc()
+UniquePointer<FSNode> PipeFS::alloc(const StringView& name)
 {
-	return UniquePointer<FSNode>(new PipeFS());
+	return UniquePointer<FSNode>(new PipeFS(name));
 }
 
-PipeFS::PipeFS() :
-    FSNode("Pipes", 0, 0, NodeType::Root, 0), //
+PipeFS::PipeFS(const StringView& name) :
+    FSNode(name, 0, 0, NodeType::Root, 0), //
     m_children{},
     m_lock{}
 {

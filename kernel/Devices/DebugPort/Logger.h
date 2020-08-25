@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Arch/x86/Spinlock.h"
 #include "DebugPort.h"
 #include "Utils/String.h"
 #include "Utils/StringView.h"
@@ -9,13 +10,19 @@ class Hex;
 
 class Logger
 {
+  private:
+	static StaticSpinlock lock;
+
   protected:
 	DebugColor m_color;
 
   public:
+	static void init();
 	Logger(DebugColor color = DebugColor::White);
+	~Logger();
 	Logger& operator<<(const char* str);
 	Logger& operator<<(const String& str);
+	Logger& operator<<(const char str);
 	Logger& operator<<(int num);
 	Logger& operator<<(unsigned num);
 	Logger& operator<<(uint64_t num);
@@ -26,9 +33,8 @@ class Logger
 class dbg : public Logger
 {
   public:
-	dbg()
+	dbg() : Logger{DebugColor::Green}
 	{
-		m_color = DebugColor::Green;
 	}
 };
 

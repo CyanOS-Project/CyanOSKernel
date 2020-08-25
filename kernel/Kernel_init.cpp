@@ -40,6 +40,7 @@ void display_time()
 
 extern "C" void kernel_init(BootloaderInfo* boot_info)
 {
+	Logger::init();
 	Logger(DebugColor::Bright_Cyan) << "Welcome To CyanOS.\n";
 
 	info() << "Setting up core components... ";
@@ -54,14 +55,14 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 
 	info() << "Setting up file systems... ";
 	VFS::setup();
-	VFS::mount(TarFS::alloc(reinterpret_cast<void*>(boot_info->ramdisk.start), boot_info->ramdisk.size));
-	VFS::mount(PipeFS::alloc());
-	VFS::mount(DeviceFS::alloc());
+	VFS::mount(TarFS::alloc("Tar", reinterpret_cast<void*>(boot_info->ramdisk.start), boot_info->ramdisk.size));
+	VFS::mount(PipeFS::alloc("Pipes"));
+	VFS::mount(DeviceFS::alloc("Devices"));
 	info() << "Done!\n";
 
 	info() << "Setting up devices... ";
-	DeviceFS::add_device(Keyboard::alloc());
-	DeviceFS::add_device(Console::alloc());
+	DeviceFS::add_device(Keyboard::alloc("keyboard"));
+	DeviceFS::add_device(Console::alloc("console"));
 	info() << "Done!\n";
 
 	info() << "Starting the first process.\n";

@@ -5,12 +5,12 @@
 
 List<UniquePointer<FSNode>>* DeviceFS::children = nullptr;
 
-UniquePointer<FSNode> DeviceFS::alloc()
+UniquePointer<FSNode> DeviceFS::alloc(const StringView& name)
 {
-	return UniquePointer<FSNode>(new DeviceFS);
+	return UniquePointer<FSNode>(new DeviceFS(name));
 }
 
-DeviceFS::DeviceFS() : FSNode{"Devices", 0, 0, NodeType::Root, 0}
+DeviceFS::DeviceFS(const StringView& name) : FSNode{name, 0, 0, NodeType::Root, 0}
 {
 	ASSERT(children == 0);
 	children = new List<UniquePointer<FSNode>>;
@@ -18,79 +18,6 @@ DeviceFS::DeviceFS() : FSNode{"Devices", 0, 0, NodeType::Root, 0}
 
 DeviceFS::~DeviceFS()
 {
-}
-
-Result<FSNode&> DeviceFS::create(const StringView& name, OpenMode mode, OpenFlags flags)
-{
-	UNUSED(name);
-	UNUSED(mode);
-	UNUSED(flags);
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> DeviceFS::open(OpenMode mode, OpenFlags flags)
-{
-	UNUSED(mode);
-	UNUSED(flags);
-
-	return ResultError(ERROR_SUCCESS);
-}
-
-Result<void> DeviceFS::close()
-{
-	return ResultError(ERROR_SUCCESS);
-}
-
-Result<void> DeviceFS::read(void* buff, size_t offset, size_t size)
-{
-	UNUSED(buff);
-	UNUSED(offset);
-	UNUSED(size);
-
-	return ResultError(ERROR_SUCCESS);
-}
-
-Result<void> DeviceFS::write(const void* buff, size_t offset, size_t size)
-{
-	UNUSED(buff);
-	UNUSED(offset);
-	UNUSED(size);
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<bool> DeviceFS::can_read()
-{
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<bool> DeviceFS::can_write()
-{
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> DeviceFS::remove()
-{
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> DeviceFS::mkdir(const StringView& name, int flags, int access)
-{
-	UNUSED(name);
-	UNUSED(flags);
-	UNUSED(access);
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> DeviceFS::link(FSNode& node)
-{
-	UNUSED(node);
-	return ResultError(ERROR_INVALID_OPERATION);
-}
-
-Result<void> DeviceFS::unlink(FSNode& node)
-{
-	UNUSED(node);
-	return ResultError(ERROR_INVALID_OPERATION);
 }
 
 Result<FSNode&> DeviceFS::dir_lookup(const StringView& file_name)
@@ -115,4 +42,10 @@ Result<void> DeviceFS::add_device(UniquePointer<FSNode>&& new_device)
 
 	children->push_back(move(new_device));
 	return ResultError(ERROR_SUCCESS);
+}
+
+Result<void> DeviceFS::remove_device(const StringView& name)
+{
+	UNUSED(name);
+	return ResultError(ERROR_INVALID_OPERATION);
 }

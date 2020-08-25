@@ -104,7 +104,7 @@ void test_keyboard(uintptr_t arg)
 
 	auto fd = VFS::open("/Devices/keyboard", OpenMode::ReadWrite, OpenFlags::OpenExisting);
 	if (fd.is_error()) {
-		warn() << "error opening the file, error: " << fd.error() << '\n';
+		warn() << "error opening the file, error: " << fd.error() << "\n";
 		HLT();
 		return;
 	}
@@ -121,7 +121,7 @@ void test_console(uintptr_t arg)
 
 	auto fd = VFS::open("/Devices/console", OpenMode::Write, OpenFlags::OpenExisting);
 	if (fd.is_error()) {
-		// printf("error opening the file, error: %d\n", fd.error());
+		warn() << "error opening the file, error: " << fd.error() << "\n";
 		HLT();
 		return;
 	}

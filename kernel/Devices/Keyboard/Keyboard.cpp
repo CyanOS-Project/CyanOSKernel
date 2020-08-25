@@ -6,13 +6,13 @@
 
 Keyboard* Keyboard::current_instance = nullptr;
 
-UniquePointer<FSNode> Keyboard::alloc()
+UniquePointer<FSNode> Keyboard::alloc(const StringView& name)
 {
-	return UniquePointer<FSNode>(new Keyboard);
+	return UniquePointer<FSNode>(new Keyboard(name));
 }
 
-Keyboard::Keyboard() :
-    FSNode{"keyboard", 0, 0, NodeType::Device, 1024},
+Keyboard::Keyboard(const StringView& name) :
+    FSNode{name, 0, 0, NodeType::Device, 1024},
     m_lock{},
     m_wait_queue{},
     m_buffer{1024},

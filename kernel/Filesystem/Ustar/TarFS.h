@@ -44,19 +44,19 @@ struct TarHeader {                 /* byte offset */
 
 class TarFS : public INode
 {
+  public:
+	static UniquePointer<FSNode> alloc(const StringView& name, void* tar_address, size_t size);
+
+	Result<FSNode&> dir_lookup(const StringView& file_name) override;
+	~TarFS() override;
+
   private:
 	TarHeader* m_tar_address;
 
-	TarFS(void* tar_address, size_t size);
+	explicit TarFS(const StringView& name, void* tar_address, size_t size);
 	INode& add_child_node(INode& parent, const StringView& name, char type, const size_t size, char* data);
 	String regulate_path(const char* path);
 	size_t octal_to_decimal(const char* octal);
 	inline uintptr_t align_to(uintptr_t address, unsigned alignment);
 	void parse_ustar(size_t size);
-
-  public:
-	static UniquePointer<FSNode> alloc(void* tar_address, size_t size);
-
-	Result<FSNode&> dir_lookup(const StringView& file_name) override;
-	~TarFS() override;
 };
