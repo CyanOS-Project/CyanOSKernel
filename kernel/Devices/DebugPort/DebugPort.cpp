@@ -11,7 +11,6 @@ void DebugPort::write(const char* data, size_t size, DebugColor color)
 	put('m');
 	put(data, size);
 	put("\x1B[0m", 4);
-	// put('\n');
 }
 void DebugPort::write(const char* data, DebugColor color)
 {
@@ -22,7 +21,6 @@ void DebugPort::write(const char* data, DebugColor color)
 	put('m');
 	put(data, strlen(data));
 	put("\x1B[0m", 4);
-	// put('\n');
 }
 
 void DebugPort::put(const char* data, size_t size)

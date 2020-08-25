@@ -14,6 +14,7 @@ Logger::Logger(DebugColor color) : m_color{color}
 }
 Logger::~Logger()
 {
+	DebugPort::write("\n", m_color);
 	lock.release();
 }
 

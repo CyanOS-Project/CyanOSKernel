@@ -48,7 +48,7 @@ Result<uintptr_t> Process::load_executable(const StringView& path)
 	ScopedLock local_lock(m_lock);
 	auto fd = VFS::open(path, OpenMode::Read, OpenFlags::OpenExisting);
 	if (fd.is_error()) {
-		// printf("error opening the file, error: %d\n", fd.error());
+		warn() << "error opening the executable file, error: " << fd.error();
 		return ResultError(fd.error());
 	}
 	auto file_info = fd.value()->fstat();

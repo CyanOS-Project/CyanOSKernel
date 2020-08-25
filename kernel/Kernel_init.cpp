@@ -41,7 +41,7 @@ void display_time()
 extern "C" void kernel_init(BootloaderInfo* boot_info)
 {
 	Logger::init();
-	Logger(DebugColor::Bright_Cyan) << "Welcome To CyanOS.\n";
+	Logger(DebugColor::Bright_Cyan) << "Welcome To CyanOS.";
 
 	info() << "Setting up core components... ";
 	GDT::setup();
@@ -51,24 +51,25 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	Scheduler::setup();
 	PIC::setup();
 	PIT::setup();
-	info() << "Done!\n";
+	info() << "\bDone!";
 
 	info() << "Setting up file systems... ";
 	VFS::setup();
 	VFS::mount(TarFS::alloc("Tar", reinterpret_cast<void*>(boot_info->ramdisk.start), boot_info->ramdisk.size));
 	VFS::mount(PipeFS::alloc("Pipes"));
 	VFS::mount(DeviceFS::alloc("Devices"));
-	info() << "Done!\n";
+	info() << "\bDone!";
 
 	info() << "Setting up devices... ";
 	DeviceFS::add_device(Keyboard::alloc("keyboard"));
 	DeviceFS::add_device(Console::alloc("console"));
-	info() << "Done!\n";
+	info() << "\bDone!";
 
-	info() << "Starting the first process.\n";
+	info() << "Starting the first process.";
 	Process& proc = Process::create_new_process("test_process", "/Tar/Drivers/open_file.exe");
 	Thread::create_thread(proc, test_console, 0);
 	Thread::create_thread(proc, test_keyboard, 0);
+	Thread::create_thread(proc, test_keyboard2, 0);
 
 	Thread::yield();
 	while (1) {

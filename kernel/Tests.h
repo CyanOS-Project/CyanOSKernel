@@ -65,7 +65,7 @@ void test_pipe1(uintptr_t arg)
 
 	auto fd = VFS::open("/fs/my_pipe2", OpenMode::Read, OpenFlags::CreateNew);
 	if (fd.is_error()) {
-		warn() << "error opening the file, error: " << fd.error() << '\n';
+		warn() << "error opening the file, error: " << fd.error();
 		HLT();
 
 		return;
@@ -73,10 +73,10 @@ void test_pipe1(uintptr_t arg)
 	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	memset(buff, 0, 4096);
 	auto result = fd.value()->read(buff, 12);
-	dbg() << "got it, read\n";
-	dbg() << buff << '\n';
+	dbg() << "got it, read";
+	dbg() << buff;
 	if (result.is_error())
-		warn() << "error reading the file " << result.error() << '\n';
+		warn() << "error reading the file " << result.error();
 }
 
 void test_pipe2(uintptr_t arg)
@@ -85,17 +85,17 @@ void test_pipe2(uintptr_t arg)
 	Thread::sleep(1000);
 	auto fd = VFS::open("/fs/my_pipe", OpenMode::Write, OpenFlags::OpenExisting);
 	if (fd.is_error()) {
-		warn() << "error opening the file, error: " << fd.error() << '\n';
+		warn() << "error opening the file, error: " << fd.error();
 		HLT();
 		return;
 	}
 	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
 	memset(buff, 0, 4096);
 	auto result = fd.value()->write(static_cast<const void*>("Hello there"), 12);
-	dbg() << "got it, write\n";
-	dbg() << buff << '\n';
+	dbg() << "got it, write";
+	dbg() << buff;
 	if (result.is_error())
-		warn() << "error writing the file " << result.error() << '\n';
+		warn() << "error writing the file " << result.error();
 }
 
 void test_keyboard(uintptr_t arg)
@@ -104,14 +104,31 @@ void test_keyboard(uintptr_t arg)
 
 	auto fd = VFS::open("/Devices/keyboard", OpenMode::ReadWrite, OpenFlags::OpenExisting);
 	if (fd.is_error()) {
-		warn() << "error opening the file, error: " << fd.error() << "\n";
+		warn() << "error opening the file, error: " << fd.error();
 		HLT();
 		return;
 	}
 	char buff[1];
 	while (true) {
 		auto result = fd.value()->read(buff, 1);
-		DebugPort::write(buff, DebugColor::Cyan);
+		Logger(DebugColor::Cyan) << buff;
+	}
+}
+
+void test_keyboard2(uintptr_t arg)
+{
+	UNUSED(arg);
+
+	auto fd = VFS::open("/Devices/keyboard", OpenMode::ReadWrite, OpenFlags::OpenExisting);
+	if (fd.is_error()) {
+		warn() << "error opening the file, error: " << fd.error();
+		HLT();
+		return;
+	}
+	char buff[1];
+	while (true) {
+		auto result = fd.value()->read(buff, 1);
+		Logger(DebugColor::Red) << buff;
 	}
 }
 
@@ -121,7 +138,7 @@ void test_console(uintptr_t arg)
 
 	auto fd = VFS::open("/Devices/console", OpenMode::Write, OpenFlags::OpenExisting);
 	if (fd.is_error()) {
-		warn() << "error opening the file, error: " << fd.error() << "\n";
+		warn() << "error opening the file, error: " << fd.error();
 		HLT();
 		return;
 	}

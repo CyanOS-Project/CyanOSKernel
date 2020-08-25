@@ -18,5 +18,6 @@ class WaitQueue
 	~WaitQueue();
 
   private:
+	Spinlock m_lock;
 	IntrusiveList<Thread> m_threads;
 };

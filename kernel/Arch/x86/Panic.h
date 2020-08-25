@@ -5,6 +5,6 @@
 
 #define PANIC(str)                                                                                                     \
 	do {                                                                                                               \
-		err() << "PANIC: " << str << " " << __FILE__ << ":" << __LINE__ << "\n";                                       \
+		err() << "PANIC: " << str << " " << __FILE__ << ":" << __LINE__;                                               \
 		HLT();                                                                                                         \
 	} while (0)

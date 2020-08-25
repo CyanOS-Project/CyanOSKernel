@@ -1,6 +1,6 @@
 #include "WaitQueue.h"
 
-WaitQueue::WaitQueue()
+WaitQueue::WaitQueue() : m_lock{}, m_threads{}
 {
 }
 

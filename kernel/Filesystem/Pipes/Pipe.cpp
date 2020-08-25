@@ -35,7 +35,7 @@ Result<void> Pipe::read(void* buff, size_t offset, size_t size)
 	UNUSED(offset);
 
 	ScopedLock local_lock(m_lock);
-	if (m_buffer.size() < size) {
+	while (m_buffer.size() < size) {
 		local_lock.release();
 		Thread::current->wait_on(m_wait_queue);
 		local_lock.acquire();

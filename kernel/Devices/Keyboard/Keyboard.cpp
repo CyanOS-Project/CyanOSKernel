@@ -48,7 +48,7 @@ Result<void> Keyboard::read(void* buff, size_t offset, size_t size)
 	UNUSED(offset);
 
 	ScopedLock local_lock(m_lock);
-	if (m_buffer.size() < size) {
+	while (m_buffer.size() < size) {
 		local_lock.release();
 		Thread::current->wait_on(m_wait_queue);
 		local_lock.acquire();
@@ -58,7 +58,6 @@ Result<void> Keyboard::read(void* buff, size_t offset, size_t size)
 	for (size_t i = 0; i < size; i++) {
 		_buf[i] = m_buffer.dequeue();
 	}
-	m_wait_queue.wake_up_all();
 
 	return ResultError(ERROR_SUCCESS);
 }
