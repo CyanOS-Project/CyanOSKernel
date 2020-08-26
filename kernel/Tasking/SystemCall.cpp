@@ -91,18 +91,23 @@ Result<int> WriteFile(unsigned descriptor, void* buff, size_t size)
 Result<int> CloseFile(unsigned descriptor)
 {
 	// FIXME: check if descriptor exists.
-	auto& description = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
 	Thread::current->parent_process().m_file_descriptors.remove_descriptor(descriptor);
+	// Destructing the description will call close on FSNode.
 	return 0;
 }
 
 Result<int> CreateThread(void* address, int arg)
 {
+	UNUSED(address);
+	UNUSED(arg);
 	return 0;
 }
 
 Result<int> CreateRemoteThread(int process, void* address, int arg)
 {
+	UNUSED(process);
+	UNUSED(address);
+	UNUSED(arg);
 	return 0;
 }
 

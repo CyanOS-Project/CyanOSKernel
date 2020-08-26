@@ -27,7 +27,7 @@ Result<UniquePointer<FileDescription>> VFS::open(const StringView& path, OpenMod
 		return ResultError(open_ret.error());
 	}
 
-	return UniquePointer<FileDescription>::make_unique(node.value());
+	return UniquePointer<FileDescription>::make_unique(node.value(), mode);
 }
 
 Result<void> VFS::mount(UniquePointer<FSNode>&& new_fs_root)

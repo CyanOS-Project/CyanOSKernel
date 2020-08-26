@@ -17,7 +17,7 @@ class Keyboard : public FSNode
 
 	~Keyboard();
 	Result<void> open(OpenMode mode, OpenFlags flags) override;
-	Result<void> close() override;
+	Result<void> close(OpenMode mode) override;
 	Result<void> read(void* buff, size_t offset, size_t size) override;
 	Result<bool> can_read() override;
 

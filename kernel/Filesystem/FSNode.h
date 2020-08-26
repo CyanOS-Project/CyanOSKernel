@@ -43,8 +43,9 @@ class FSNode
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
 
-	virtual Result<void> close()
+	virtual Result<void> close(OpenMode mode)
 	{
+		UNUSED(mode);
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
 

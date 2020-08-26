@@ -27,8 +27,9 @@ Result<void> Console::open(OpenMode mode, OpenFlags flags)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Console::close()
+Result<void> Console::close(OpenMode mode)
 {
+	UNUSED(mode);
 	return ResultError(ERROR_SUCCESS);
 }
 

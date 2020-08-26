@@ -8,7 +8,9 @@ Pipe::Pipe(const StringView& name) :
     m_children{},
     m_buffer{BUFFER_SIZE},
     m_wait_queue{},
-    m_lock{}
+    m_lock{},
+    m_readers{0},
+    m_writers{0}
 {
 	m_lock.init();
 	// FIXME: multiple writers, one reader.
@@ -20,13 +22,35 @@ Pipe::~Pipe()
 
 Result<void> Pipe::open(OpenMode mode, OpenFlags flags)
 {
-	UNUSED(mode);
 	UNUSED(flags);
+	if (m_readers != 0) {
+		return ResultError(ERROR_INVALID_PARAMETERS);
+	}
+
+	if (mode == OpenMode::Read) {
+		m_readers++;
+	} else if (mode == OpenMode::Write) {
+		m_writers++;
+	} else {
+		return ResultError(ERROR_INVALID_PARAMETERS);
+	}
+
+	UNUSED(mode);
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Pipe::close()
+Result<void> Pipe::close(OpenMode mode)
 {
+	if (mode == OpenMode::Read) {
+		ASSERT(m_readers);
+		m_readers--;
+	} else if (mode == OpenMode::Read) {
+		ASSERT(m_writers);
+		m_writers--;
+	} else {
+		ASSERT_NOT_REACHABLE();
+	}
+
 	return ResultError(ERROR_SUCCESS);
 }
 

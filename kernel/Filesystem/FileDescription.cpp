@@ -2,13 +2,13 @@
 #include "FSNode.h"
 #include "Utils/ErrorCodes.h"
 
-FileDescription::FileDescription(FSNode& node) : m_node(node)
+FileDescription::FileDescription(FSNode& node, OpenMode mode) : m_node(node), m_type{node.m_type}, m_mode{mode}
 {
 }
 
 FileDescription::~FileDescription()
 {
-	m_node.close();
+	m_node.close(m_mode);
 }
 
 Result<void> FileDescription::read(void* buff, size_t size)

@@ -34,7 +34,7 @@ class Console : public FSNode
 
 	~Console();
 	Result<void> open(OpenMode mode, OpenFlags flags) override;
-	Result<void> close() override;
+	Result<void> close(OpenMode mode) override;
 	Result<void> write(const void* buff, size_t offset, size_t size) override;
 	Result<bool> can_write() override;
 

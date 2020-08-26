@@ -6,8 +6,8 @@
 #include "Utils/List.h"
 #include "Utils/String.h"
 #include "Utils/StringView.h"
-#include "Utils/UniquePointer.h"
 #include "Utils/Types.h"
+#include "Utils/UniquePointer.h"
 
 class Pipe : public FSNode
 {
@@ -19,12 +19,14 @@ class Pipe : public FSNode
 	CircularBuffer<char> m_buffer;
 	WaitQueue m_wait_queue;
 	Spinlock m_lock;
+	size_t m_readers;
+	size_t m_writers;
 
   public:
 	explicit Pipe(const StringView& name);
 	~Pipe();
 	Result<void> open(OpenMode mode, OpenFlags flags) override;
-	Result<void> close() override;
+	Result<void> close(OpenMode mode) override;
 	Result<void> read(void* buff, size_t offset, size_t size) override;
 	Result<void> write(const void* buff, size_t offset, size_t size) override;
 	Result<bool> can_read() override;

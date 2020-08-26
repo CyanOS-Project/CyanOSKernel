@@ -38,8 +38,9 @@ Result<void> Keyboard::open(OpenMode mode, OpenFlags flags)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Keyboard::close()
+Result<void> Keyboard::close(OpenMode mode)
 {
+	UNUSED(mode);
 	return ResultError(ERROR_SUCCESS);
 }
 

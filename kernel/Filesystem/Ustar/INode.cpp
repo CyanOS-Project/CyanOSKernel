@@ -26,8 +26,9 @@ Result<void> INode::open(OpenMode mode, OpenFlags flags)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> INode::close()
+Result<void> INode::close(OpenMode mode)
 {
+	UNUSED(mode);
 	ScopedLock local_lock(m_lock);
 	return ResultError(ERROR_SUCCESS);
 }
