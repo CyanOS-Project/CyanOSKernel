@@ -13,12 +13,13 @@ class FileDescription
 {
   private:
 	FSNode& m_node;
-	NodeType m_type;
-	OpenMode m_mode;
 	size_t m_current_position = 0;
 	bool m_has_changed = false;
 
   public:
+	const NodeType m_type;
+	const OpenMode m_mode;
+
 	FileDescription(FSNode& node, OpenMode mode);
 	~FileDescription();
 	Result<void> read(void* buff, size_t size);

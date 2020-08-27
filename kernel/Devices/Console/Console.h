@@ -33,10 +33,10 @@ class Console : public FSNode
 	static UniquePointer<FSNode> alloc(const StringView& name);
 
 	~Console();
-	Result<void> open(OpenMode mode, OpenFlags flags) override;
-	Result<void> close(OpenMode mode) override;
-	Result<void> write(const void* buff, size_t offset, size_t size) override;
-	Result<bool> can_write() override;
+	Result<void> open(FileDescription&) override;
+	Result<void> close(FileDescription&) override;
+	Result<void> write(FileDescription&, const void* buff, size_t offset, size_t size) override;
+	Result<bool> can_write(FileDescription&) override;
 
   private:
 	Spinlock m_lock;

@@ -16,10 +16,10 @@ class Keyboard : public FSNode
 	static UniquePointer<FSNode> alloc(const StringView& name);
 
 	~Keyboard();
-	Result<void> open(OpenMode mode, OpenFlags flags) override;
-	Result<void> close(OpenMode mode) override;
-	Result<void> read(void* buff, size_t offset, size_t size) override;
-	Result<bool> can_read() override;
+	Result<void> open(FileDescription&) override;
+	Result<void> close(FileDescription&) override;
+	Result<void> read(FileDescription&, void* buff, size_t offset, size_t size) override;
+	Result<bool> can_read(FileDescription&) override;
 
   private:
 	Spinlock m_lock;

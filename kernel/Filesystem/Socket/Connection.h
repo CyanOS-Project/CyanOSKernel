@@ -9,27 +9,25 @@
 #include "Utils/Types.h"
 #include "Utils/UniquePointer.h"
 
-class Pipe : public FSNode
+class Connection : public FSNode
 {
-	enum class Direction { Reader, Writer };
 
   private:
 	const static size_t BUFFER_SIZE = 1024;
-	List<Pipe> m_children;
-	CircularBuffer<char> m_buffer;
-	WaitQueue m_wait_queue;
-	Spinlock m_lock;
-	size_t m_readers;
-	size_t m_writers;
+	CircularBuffer<char> m_server_buffer, m_client_buffer;
+	WaitQueue m_server_wait_queue, m_client_wait_queue;
+	Spinlock m_server_lock, m_client_lock;
+	bool is_accepted = false;
 
   public:
-	explicit Pipe(const StringView& name);
-	~Pipe();
+	explicit Connection(const StringView& name);
+	~Connection();
 	Result<void> open(FileDescription&) override;
-	Result<void> close(FileDescription&) override;
 	Result<void> read(FileDescription&, void* buff, size_t offset, size_t size) override;
 	Result<void> write(FileDescription&, const void* buff, size_t offset, size_t size) override;
 	Result<bool> can_read(FileDescription&) override;
 	Result<bool> can_write(FileDescription&) override;
-	Result<void> remove() override;
+	Result<void> close(FileDescription&) override;
+
+	friend class Socket;
 };

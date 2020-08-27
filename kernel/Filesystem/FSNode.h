@@ -9,9 +9,10 @@
 #define MAX_FILE_NAME 64
 enum class OpenFlags { CreateNew, OpenExisting };
 enum class OpenMode { Read, Write, ReadWrite };
-enum class NodeType { Root, Folder, File, Pipe, Link, Device };
+enum class NodeType { Root, Folder, File, Pipe, Link, Device, Socket, Connection };
 
 class VirtualFileSystem;
+class FileDescription;
 
 class FSNode
 {
@@ -35,21 +36,17 @@ class FSNode
 	{
 	}
 
-	virtual Result<void> open(OpenMode mode, OpenFlags flags)
+	virtual Result<void> open(FileDescription&)
 	{
-		UNUSED(mode);
-		UNUSED(flags);
-
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
 
-	virtual Result<void> close(OpenMode mode)
+	virtual Result<void> close(FileDescription&)
 	{
-		UNUSED(mode);
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
 
-	virtual Result<void> read(void* buff, size_t offset, size_t size)
+	virtual Result<void> read(FileDescription&, void* buff, size_t offset, size_t size)
 	{
 		UNUSED(buff);
 		UNUSED(offset);
@@ -57,7 +54,7 @@ class FSNode
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
 
-	virtual Result<void> write(const void* buff, size_t offset, size_t size)
+	virtual Result<void> write(FileDescription&, const void* buff, size_t offset, size_t size)
 	{
 		UNUSED(buff);
 		UNUSED(offset);
@@ -65,12 +62,12 @@ class FSNode
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
 
-	virtual Result<bool> can_read()
+	virtual Result<bool> can_read(FileDescription&)
 	{
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
 
-	virtual Result<bool> can_write()
+	virtual Result<bool> can_write(FileDescription&)
 	{
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
@@ -111,6 +108,20 @@ class FSNode
 	virtual Result<FSNode&> dir_lookup(const StringView& file_name)
 	{
 		UNUSED(file_name);
+		return ResultError(ERROR_INVALID_OPERATION);
+	}
+
+	virtual Result<FSNode&> connect()
+	{
+		return ResultError(ERROR_INVALID_OPERATION);
+	}
+
+	virtual Result<FSNode&> accept()
+	{
+		return ResultError(ERROR_INVALID_OPERATION);
+	}
+	virtual Result<bool> can_accept()
+	{
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
 

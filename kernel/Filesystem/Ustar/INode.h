@@ -19,10 +19,10 @@ class INode : public FSNode
 	INode& operator=(const INode& other) = delete;
 	INode& operator=(INode&& other) = delete;
 	~INode();
-	Result<void> open(OpenMode mode, OpenFlags flags) override;
-	Result<void> close(OpenMode mode) override;
-	Result<void> read(void* buff, size_t offset, size_t size) override;
-	Result<bool> can_read() override;
+	Result<void> open(FileDescription&) override;
+	Result<void> close(FileDescription&) override;
+	Result<void> read(FileDescription&, void* buff, size_t offset, size_t size) override;
+	Result<bool> can_read(FileDescription&) override;
 	Result<FSNode&> dir_lookup(const StringView& file_name) override;
 
 	friend class TarFS;

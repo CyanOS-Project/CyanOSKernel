@@ -20,31 +20,29 @@ Pipe::~Pipe()
 {
 }
 
-Result<void> Pipe::open(OpenMode mode, OpenFlags flags)
+Result<void> Pipe::open(FileDescription& disc)
 {
-	UNUSED(flags);
-	if (m_readers != 0) {
-		return ResultError(ERROR_INVALID_PARAMETERS);
-	}
+	/*if (m_readers != 0) {
+	    return ResultError(ERROR_INVALID_PARAMETERS);
+	}*/
 
-	if (mode == OpenMode::Read) {
+	if (disc.m_mode == OpenMode::Read) {
 		m_readers++;
-	} else if (mode == OpenMode::Write) {
+	} else if (disc.m_mode == OpenMode::Write) {
 		m_writers++;
 	} else {
 		return ResultError(ERROR_INVALID_PARAMETERS);
 	}
 
-	UNUSED(mode);
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Pipe::close(OpenMode mode)
+Result<void> Pipe::close(FileDescription& disc)
 {
-	if (mode == OpenMode::Read) {
+	if (disc.m_mode == OpenMode::Read) {
 		ASSERT(m_readers);
 		m_readers--;
-	} else if (mode == OpenMode::Read) {
+	} else if (disc.m_mode == OpenMode::Read) {
 		ASSERT(m_writers);
 		m_writers--;
 	} else {
@@ -54,7 +52,7 @@ Result<void> Pipe::close(OpenMode mode)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Pipe::read(void* buff, size_t offset, size_t size)
+Result<void> Pipe::read(FileDescription&, void* buff, size_t offset, size_t size)
 {
 	UNUSED(offset);
 
@@ -74,7 +72,7 @@ Result<void> Pipe::read(void* buff, size_t offset, size_t size)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Pipe::write(const void* buff, size_t offset, size_t size)
+Result<void> Pipe::write(FileDescription&, const void* buff, size_t offset, size_t size)
 {
 	UNUSED(offset);
 
@@ -94,12 +92,12 @@ Result<void> Pipe::write(const void* buff, size_t offset, size_t size)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<bool> Pipe::can_read()
+Result<bool> Pipe::can_read(FileDescription&)
 {
 	return m_buffer.is_empty();
 }
 
-Result<bool> Pipe::can_write()
+Result<bool> Pipe::can_write(FileDescription&)
 {
 	return m_buffer.is_full();
 }

@@ -1,11 +1,14 @@
 #pragma once
 
 #include "Assert.h"
+#include "Rule5.h"
 #include "Stl.h"
 
 template <typename T> class UniquePointer
 {
   public:
+	NON_COPYABLE(UniquePointer);
+
 	template <class... Args> static UniquePointer<T> make_unique(Args&&... args)
 	{
 		return UniquePointer(new T{forward<Args>(args)...});
@@ -30,8 +33,6 @@ template <typename T> class UniquePointer
 		return *this;
 	}
 
-	UniquePointer(const UniquePointer& other) = delete;
-	UniquePointer& operator=(const UniquePointer& other) = delete;
 	~UniquePointer()
 	{
 		destroy();

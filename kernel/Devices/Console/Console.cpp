@@ -20,20 +20,17 @@ Console::~Console()
 	// FIXME: unmap memory of text VGA.
 }
 
-Result<void> Console::open(OpenMode mode, OpenFlags flags)
+Result<void> Console::open(FileDescription&)
 {
-	UNUSED(mode);
-	UNUSED(flags);
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Console::close(OpenMode mode)
+Result<void> Console::close(FileDescription&)
 {
-	UNUSED(mode);
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Console::write(const void* buff, size_t offset, size_t size)
+Result<void> Console::write(FileDescription&, const void* buff, size_t offset, size_t size)
 {
 	UNUSED(offset);
 
@@ -44,7 +41,7 @@ Result<void> Console::write(const void* buff, size_t offset, size_t size)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<bool> Console::can_write()
+Result<bool> Console::can_write(FileDescription&)
 {
 	return true;
 }

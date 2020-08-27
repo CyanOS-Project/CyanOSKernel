@@ -17,23 +17,19 @@ INode::~INode()
 {
 }
 
-Result<void> INode::open(OpenMode mode, OpenFlags flags)
+Result<void> INode::open(FileDescription&)
 {
-	UNUSED(mode);
-	UNUSED(flags);
-
 	ScopedLock local_lock(m_lock);
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> INode::close(OpenMode mode)
+Result<void> INode::close(FileDescription&)
 {
-	UNUSED(mode);
 	ScopedLock local_lock(m_lock);
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> INode::read(void* buff, size_t offset, size_t size)
+Result<void> INode::read(FileDescription&, void* buff, size_t offset, size_t size)
 {
 	ScopedLock local_lock(m_lock);
 	ASSERT((offset + size) <= m_size);
@@ -41,7 +37,7 @@ Result<void> INode::read(void* buff, size_t offset, size_t size)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<bool> INode::can_read()
+Result<bool> INode::can_read(FileDescription&)
 {
 	return true;
 }

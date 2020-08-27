@@ -22,12 +22,14 @@ Result<UniquePointer<FileDescription>> VFS::open(const StringView& path, OpenMod
 		return ResultError(node.error());
 	}
 
-	auto open_ret = node.value().open(mode, flags);
+	auto description = UniquePointer<FileDescription>::make_unique(node.value(), mode);
+
+	auto open_ret = node.value().open(*description);
 	if (open_ret.is_error()) {
 		return ResultError(open_ret.error());
 	}
 
-	return UniquePointer<FileDescription>::make_unique(node.value(), mode);
+	return description;
 }
 
 Result<void> VFS::mount(UniquePointer<FSNode>&& new_fs_root)

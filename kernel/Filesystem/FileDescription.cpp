@@ -8,7 +8,7 @@ FileDescription::FileDescription(FSNode& node, OpenMode mode) : m_node(node), m_
 
 FileDescription::~FileDescription()
 {
-	m_node.close(m_mode);
+	m_node.close(*this);
 }
 
 Result<void> FileDescription::read(void* buff, size_t size)
@@ -17,7 +17,7 @@ Result<void> FileDescription::read(void* buff, size_t size)
 	if (reading_size > m_node.m_size) {
 		return ResultError(ERROR_EOF);
 	}
-	return m_node.read(buff, m_current_position, size);
+	return m_node.read(*this, buff, m_current_position, size);
 }
 
 Result<void> FileDescription::write(const void* buff, size_t size)
@@ -26,7 +26,7 @@ Result<void> FileDescription::write(const void* buff, size_t size)
 	if (offset > m_node.m_size && m_node.m_size != 0) {
 		return ResultError(ERROR_EOF);
 	}
-	return m_node.write(buff, offset, size);
+	return m_node.write(*this, buff, offset, size);
 }
 
 Result<void> FileDescription::seek(int offset, SeekOrigin origin)

@@ -30,21 +30,17 @@ Keyboard::~Keyboard()
 {
 }
 
-Result<void> Keyboard::open(OpenMode mode, OpenFlags flags)
+Result<void> Keyboard::open(FileDescription&)
 {
-	UNUSED(mode);
-	UNUSED(flags);
-
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Keyboard::close(OpenMode mode)
+Result<void> Keyboard::close(FileDescription&)
 {
-	UNUSED(mode);
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Keyboard::read(void* buff, size_t offset, size_t size)
+Result<void> Keyboard::read(FileDescription&, void* buff, size_t offset, size_t size)
 {
 	UNUSED(offset);
 
@@ -63,7 +59,7 @@ Result<void> Keyboard::read(void* buff, size_t offset, size_t size)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<bool> Keyboard::can_read()
+Result<bool> Keyboard::can_read(FileDescription&)
 {
 	ScopedLock local_lock(m_lock);
 	return m_buffer.is_empty();
