@@ -128,9 +128,9 @@ Result<FSNode&> VFS::open_node(const StringView& path, OpenMode mode, OpenFlags 
 	auto node = traverse_node(path);
 	FSNode* open_node = nullptr;
 
-	if ((node.error() != ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::CreateNew)) {
+	if ((node.error() != ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::OF_CREATE_NEW)) {
 		return ResultError(ERROR_FILE_ALREADY_EXISTS);
-	} else if ((node.error() == ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::CreateNew)) {
+	} else if ((node.error() == ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::OF_CREATE_NEW)) {
 		// FIXME: we already went though parent! any optimization ?
 		auto parent_node = traverse_parent_node(path);
 		ASSERT(!parent_node.is_error());

@@ -3,6 +3,7 @@
 #include "FSNode.h"
 #include "Utils/Result.h"
 #include "Utils/Types.h"
+#include "Utils/UniquePointer.h"
 
 enum class SeekOrigin { SET, CURRENT, END };
 struct FileInfo {
@@ -24,6 +25,8 @@ class FileDescription
 	~FileDescription();
 	Result<void> read(void* buff, size_t size);
 	Result<void> write(const void* buff, size_t size);
+	Result<UniquePointer<FileDescription>> connect();
+	Result<UniquePointer<FileDescription>> accept();
 	Result<void> seek(int offset, SeekOrigin origin);
 	Result<FileInfo> fstat();
 	Result<void> ioctl();

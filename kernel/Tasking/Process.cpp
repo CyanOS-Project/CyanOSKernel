@@ -46,7 +46,7 @@ Process::~Process()
 Result<uintptr_t> Process::load_executable(const StringView& path)
 {
 	ScopedLock local_lock(m_lock);
-	auto fd = VFS::open(path, OpenMode::Read, OpenFlags::OpenExisting);
+	auto fd = VFS::open(path, OpenMode::OM_READ, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the executable file, error: " << fd.error();
 		return ResultError(fd.error());

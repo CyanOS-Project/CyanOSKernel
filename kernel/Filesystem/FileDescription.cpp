@@ -14,7 +14,7 @@ FileDescription::~FileDescription()
 Result<void> FileDescription::read(void* buff, size_t size)
 {
 	size_t reading_size = m_current_position + size;
-	if (reading_size > m_node.m_size) {
+	if (reading_size > m_node.m_size && m_node.m_size != 0) {
 		return ResultError(ERROR_EOF);
 	}
 	return m_node.read(*this, buff, m_current_position, size);
@@ -27,6 +27,24 @@ Result<void> FileDescription::write(const void* buff, size_t size)
 		return ResultError(ERROR_EOF);
 	}
 	return m_node.write(*this, buff, offset, size);
+}
+
+Result<UniquePointer<FileDescription>> FileDescription::connect()
+{
+	auto connection_desc = m_node.connect();
+	if (connection_desc.is_error())
+		ResultError(connection_desc.error());
+
+	return UniquePointer<FileDescription>::make_unique(connection_desc.value(), OpenMode::OM_CLIENT);
+}
+
+Result<UniquePointer<FileDescription>> FileDescription::accept()
+{
+	auto connection_desc = m_node.accept();
+	if (connection_desc.is_error())
+		ResultError(connection_desc.error());
+
+	return UniquePointer<FileDescription>::make_unique(connection_desc.value(), OpenMode::OM_SERVER);
 }
 
 Result<void> FileDescription::seek(int offset, SeekOrigin origin)

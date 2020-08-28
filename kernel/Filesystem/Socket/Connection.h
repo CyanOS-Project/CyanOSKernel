@@ -17,7 +17,6 @@ class Connection : public FSNode
 	CircularBuffer<char> m_server_buffer, m_client_buffer;
 	WaitQueue m_server_wait_queue, m_client_wait_queue;
 	Spinlock m_server_lock, m_client_lock;
-	bool is_accepted = false;
 
   public:
 	explicit Connection(const StringView& name);

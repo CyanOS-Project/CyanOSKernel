@@ -12,11 +12,19 @@
 
 class Socket : public FSNode
 {
-
   private:
-	List<Connection> m_pending_connections;
+	struct NewPendingConnection {
+		bool is_accepted;
+		Connection* connection;
+		NewPendingConnection() : is_accepted{false}, connection{nullptr}
+		{
+		}
+	};
+
+	List<NewPendingConnection> m_pending_connections;
 	List<Connection> m_connections;
-	WaitQueue m_wait_queue;
+	WaitQueue m_server_wait_queue;
+	WaitQueue m_connections_wait_queue;
 	Spinlock m_lock;
 
   public:

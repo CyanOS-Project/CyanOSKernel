@@ -13,6 +13,7 @@
 #include "Devices/RTC/Rtc.h"
 #include "Devices/Timer/Pit.h"
 #include "Filesystem/Pipes/PipeFS.h"
+#include "Filesystem/Socket/SocketFS.h"
 #include "Filesystem/Ustar/TarFS.h"
 #include "Tasking/Process.h"
 #include "Tasking/Scheduler.h"
@@ -58,6 +59,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	VFS::mount(TarFS::alloc("Tar", reinterpret_cast<void*>(boot_info->ramdisk.start), boot_info->ramdisk.size));
 	VFS::mount(PipeFS::alloc("Pipes"));
 	VFS::mount(DeviceFS::alloc("Devices"));
+	VFS::mount(SocketFS::alloc("Sockets"));
 	info() << "\bDone!";
 
 	info() << "Setting up devices... ";
@@ -67,9 +69,8 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 
 	info() << "Starting the first process.";
 	Process& proc = Process::create_new_process("test_process", "/Tar/Drivers/open_file.exe");
-	Thread::create_thread(proc, test_console, 0);
-	Thread::create_thread(proc, test_keyboard, 0);
-	Thread::create_thread(proc, test_keyboard2, 0);
+	Thread::create_thread(proc, test_server, 0);
+	Thread::create_thread(proc, test_client, 0);
 
 	Thread::yield();
 	while (1) {

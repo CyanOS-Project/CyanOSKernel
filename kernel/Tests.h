@@ -63,7 +63,7 @@ void test_pipe1(uintptr_t arg)
 {
 	UNUSED(arg);
 
-	auto fd = VFS::open("/fs/my_pipe2", OpenMode::Read, OpenFlags::CreateNew);
+	auto fd = VFS::open("/fs/my_pipe2", OpenMode::OM_READ, OpenFlags::OF_CREATE_NEW);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();
@@ -83,7 +83,7 @@ void test_pipe2(uintptr_t arg)
 {
 	UNUSED(arg);
 	Thread::sleep(1000);
-	auto fd = VFS::open("/fs/my_pipe", OpenMode::Write, OpenFlags::OpenExisting);
+	auto fd = VFS::open("/fs/my_pipe", OpenMode::OM_WRITE, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();
@@ -102,7 +102,7 @@ void test_keyboard(uintptr_t arg)
 {
 	UNUSED(arg);
 
-	auto fd = VFS::open("/Devices/keyboard", OpenMode::ReadWrite, OpenFlags::OpenExisting);
+	auto fd = VFS::open("/Devices/keyboard", OpenMode::OM_WRITE, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();
@@ -119,7 +119,7 @@ void test_keyboard2(uintptr_t arg)
 {
 	UNUSED(arg);
 
-	auto fd = VFS::open("/Devices/keyboard", OpenMode::ReadWrite, OpenFlags::OpenExisting);
+	auto fd = VFS::open("/Devices/keyboard", OpenMode::OM_WRITE, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();
@@ -136,11 +136,61 @@ void test_console(uintptr_t arg)
 {
 	UNUSED(arg);
 
-	auto fd = VFS::open("/Devices/console", OpenMode::Write, OpenFlags::OpenExisting);
+	auto fd = VFS::open("/Devices/console", OpenMode::OM_WRITE, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();
 		return;
 	}
 	auto result = fd.value()->write("Hello there", 12);
+}
+
+void test_server(uintptr_t arg)
+{
+	UNUSED(arg);
+
+	auto fd = VFS::open("/Sockets/test", OpenMode::OM_SERVER, OpenFlags::OF_CREATE_NEW);
+	if (fd.is_error()) {
+		warn() << "error opening the file, error: " << fd.error();
+		HLT();
+		return;
+	}
+
+	auto connection_fd = fd.value()->accept();
+	if (connection_fd.is_error()) {
+		warn() << "error accepting the connection, error: " << fd.error();
+		HLT();
+		return;
+	}
+
+	auto result = connection_fd.value()->write("I'm the server", 15);
+
+	char buff[0x20];
+	auto result2 = connection_fd.value()->read(buff, 15);
+	dbg() << "I'm the server, message from server : " << buff;
+}
+
+void test_client(uintptr_t arg)
+{
+	UNUSED(arg);
+	Thread::current->sleep(100);
+	auto fd = VFS::open("/Sockets/test", OpenMode::OM_CLIENT, OpenFlags::OF_OPEN_EXISTING);
+	if (fd.is_error()) {
+		warn() << "error opening the file, error: " << fd.error();
+		HLT();
+		return;
+	}
+
+	auto connection_fd = fd.value()->connect();
+	if (connection_fd.is_error()) {
+		warn() << "error accepting the connection, error: " << fd.error();
+		HLT();
+		return;
+	}
+
+	auto result = connection_fd.value()->write("I'm the client", 15);
+
+	char buff[0x20];
+	auto result2 = connection_fd.value()->read(buff, 15);
+	dbg() << "I'm the client, message from server : " << buff;
 }

@@ -7,8 +7,17 @@
 #include "Utils/Types.h"
 
 #define MAX_FILE_NAME 64
-enum class OpenFlags { CreateNew, OpenExisting };
-enum class OpenMode { Read, Write, ReadWrite };
+
+enum OpenFlags {
+	OF_OPEN_EXISTING = 1 << 0,
+	OF_CREATE_NEW = 1 << 1,
+};
+enum OpenMode {
+	OM_READ = 1 << 0,
+	OM_WRITE = 1 << 1,
+	OM_SERVER = 1 << 2,
+	OM_CLIENT = 1 << 3,
+};
 enum class NodeType { Root, Folder, File, Pipe, Link, Device, Socket, Connection };
 
 class VirtualFileSystem;

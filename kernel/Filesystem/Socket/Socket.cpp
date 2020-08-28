@@ -3,7 +3,8 @@
 Socket::Socket(const StringView& name) :
     FSNode{name, 0, 0, NodeType::Socket, 0},
     m_connections{},
-    m_wait_queue{},
+    m_server_wait_queue{},
+    m_connections_wait_queue{},
     m_lock{}
 {
 }
@@ -25,21 +26,34 @@ Result<bool> Socket::can_accept()
 Result<FSNode&> Socket::accept()
 {
 	ScopedLock local_lock(m_lock);
+
 	while (!m_pending_connections.size()) {
 		m_lock.release();
-		Thread::current->wait_on(m_wait_queue);
+		Thread::current->wait_on(m_server_wait_queue);
 		m_lock.acquire();
 	}
-	// FIXME: move connection from m_pending_connections to m_connections
-	return m_connections.tail();
+	Connection& new_connection = m_connections.emplace_back("");
+	m_pending_connections.head().is_accepted = true;
+	m_pending_connections.head().connection = &new_connection;
+	m_connections_wait_queue.wake_up();
+
+	return new_connection;
 }
 
 Result<FSNode&> Socket::connect()
 {
-	FSNode& connection_node = m_pending_connections.emplace_back("");
-	m_wait_queue.wake_up_all();
-	// FIXME: wait until connection_node is accepted.
-	return connection_node;
+	ScopedLock local_lock(m_lock);
+
+	NewPendingConnection& pending_connection = m_pending_connections.emplace_back();
+	m_server_wait_queue.wake_up();
+	while (pending_connection.is_accepted == false) {
+		m_lock.release();
+		Thread::current->wait_on(m_connections_wait_queue);
+		m_lock.acquire();
+	}
+
+	ASSERT(pending_connection.connection);
+	return *pending_connection.connection;
 }
 
 Result<void> Socket::close(FileDescription&)

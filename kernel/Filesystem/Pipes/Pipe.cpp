@@ -26,9 +26,9 @@ Result<void> Pipe::open(FileDescription& disc)
 	    return ResultError(ERROR_INVALID_PARAMETERS);
 	}*/
 
-	if (disc.m_mode == OpenMode::Read) {
+	if (disc.m_mode == OpenMode::OM_READ) {
 		m_readers++;
-	} else if (disc.m_mode == OpenMode::Write) {
+	} else if (disc.m_mode == OpenMode::OM_WRITE) {
 		m_writers++;
 	} else {
 		return ResultError(ERROR_INVALID_PARAMETERS);
@@ -39,10 +39,10 @@ Result<void> Pipe::open(FileDescription& disc)
 
 Result<void> Pipe::close(FileDescription& disc)
 {
-	if (disc.m_mode == OpenMode::Read) {
+	if (disc.m_mode == OpenMode::OM_READ) {
 		ASSERT(m_readers);
 		m_readers--;
-	} else if (disc.m_mode == OpenMode::Read) {
+	} else if (disc.m_mode == OpenMode::OM_WRITE) {
 		ASSERT(m_writers);
 		m_writers--;
 	} else {
