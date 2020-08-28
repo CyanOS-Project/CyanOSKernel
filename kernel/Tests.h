@@ -167,7 +167,7 @@ void test_server(uintptr_t arg)
 
 	char buff[0x20];
 	auto result2 = connection_fd.value()->read(buff, 15);
-	dbg() << "I'm the server, message from server : " << buff;
+	Logger(DebugColor::Bright_Magenta) << "I'm the server, message from server : " << buff;
 }
 
 void test_client(uintptr_t arg)
@@ -192,5 +192,5 @@ void test_client(uintptr_t arg)
 
 	char buff[0x20];
 	auto result2 = connection_fd.value()->read(buff, 15);
-	dbg() << "I'm the client, message from server : " << buff;
+	Logger(DebugColor::Bright_Magenta) << "I'm the client, message from server : " << buff;
 }
