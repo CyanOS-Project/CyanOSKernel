@@ -1,7 +1,7 @@
 #include "DeviceFS.h"
 #include "Tasking/ScopedLock.h"
+#include "Utils/Algorithms.h"
 #include "Utils/ErrorCodes.h"
-#include "Utils/Stl.h"
 
 List<UniquePointer<FSNode>>* DeviceFS::children = nullptr;
 

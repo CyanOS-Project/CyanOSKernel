@@ -1,6 +1,6 @@
 #pragma once
+#include "Algorithms.h"
 #include "Assert.h"
-#include "Stl.h"
 class ResultError
 {
   public:

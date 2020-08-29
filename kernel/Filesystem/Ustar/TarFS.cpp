@@ -1,8 +1,8 @@
 #include "TarFS.h"
 #include "Tasking/ScopedLock.h"
+#include "Utils/Algorithms.h"
 #include "Utils/ErrorCodes.h"
 #include "Utils/Stack.h"
-#include "Utils/Stl.h"
 
 UniquePointer<FSNode> TarFS::alloc(const StringView& name, void* tar_address, size_t size)
 {
@@ -66,7 +66,7 @@ void TarFS::parse_ustar(size_t size)
 		if (tar_parser->typeflag == USTARFileType::DIRECTORY) {
 			directories.queue(&new_node);
 		}
-		const uintptr_t aligned_size = align_to(octal_to_decimal(tar_parser->size), TAR_ALIGNMENT);
+		const uintptr_t aligned_size = align_to(octal_to_decimal(tar_parser->size), TAR_ALIGNMENT, false);
 		tar_parser = (TarHeader*)(uintptr_t(tar_parser + 1) + aligned_size);
 	}
 }
@@ -80,16 +80,6 @@ size_t TarFS::octal_to_decimal(const char* octal)
 		current_multiplier *= 8;
 	}
 	return size;
-}
-
-inline uintptr_t TarFS::align_to(uintptr_t size, unsigned alignment)
-{
-	if (!size)
-		return 0;
-	else if ((size % alignment) == 0)
-		return size;
-	else
-		return size + alignment - (size % alignment);
 }
 
 String TarFS::regulate_path(const char* path)

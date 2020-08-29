@@ -3,10 +3,10 @@
 #include "Filesystem/FileDescription.h"
 #include "Tasking/ScopedLock.h"
 #include "Tasking/SpinLock.h"
+#include "Utils/Algorithms.h"
 #include "Utils/List.h"
 #include "Utils/Types.h"
 #include "Utils/UniquePointer.h"
-#include "Utils/Stl.h"
 
 template <class T> class Descriptor
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Stl.h"
+#include "Algorithms.h"
 #include "Types.h"
 #ifdef __UNIT_TESTS
 	#include <assert.h>

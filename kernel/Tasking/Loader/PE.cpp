@@ -1,5 +1,6 @@
 #include "PE.h"
 #include "Lib/Stdlib.h"
+#include "Utils/Algorithms.h"
 #include "Utils/ErrorCodes.h"
 #include "VirtualMemory/Memory.h"
 
@@ -71,14 +72,4 @@ void* PELoader::load_pe_sections(const char* file, const IMAGE_NT_HEADERS32* nt_
 		memcpy(current_section_address, file + section_rd, section_raw_size);
 	}
 	return start_of_executable;
-}
-
-inline uintptr_t PELoader::align_to(uintptr_t size, size_t alignment)
-{
-	if (size == 0)
-		return alignment;
-	else if ((size % alignment) == 0)
-		return size;
-	else
-		return size + alignment - (size % alignment);
 }

@@ -57,6 +57,5 @@ class TarFS : public INode
 	INode& add_child_node(INode& parent, const StringView& name, char type, const size_t size, char* data);
 	String regulate_path(const char* path);
 	size_t octal_to_decimal(const char* octal);
-	inline uintptr_t align_to(uintptr_t address, unsigned alignment);
 	void parse_ustar(size_t size);
 };

@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Algorithms.h"
 #include "Rule5.h"
-#include "Stl.h"
 #include "Types.h"
 
 #ifdef __UNIT_TESTS

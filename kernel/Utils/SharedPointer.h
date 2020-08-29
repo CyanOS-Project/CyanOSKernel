@@ -1,7 +1,7 @@
 #pragma once
 
+#include "Algorithms.h"
 #include "Assert.h"
-#include "Stl.h"
 #include "Types.h"
 
 template <typename T> class SharedPointer

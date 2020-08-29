@@ -1,6 +1,7 @@
 
 #include "Boot.h"
 #include "Devices/DebugPort/Logger.h"
+#include "Utils/Algorithms.h"
 
 extern uint32_t KERNEL_END;
 extern uint32_t KERNEL_START;
@@ -84,17 +85,8 @@ BootloaderInfo parse_mbi(uintptr_t multiboot_info)
 				break;
 			}
 		}
-		current_tag = (multiboot_tag*)(uintptr_t(current_tag) + align_to(current_tag->size, MULTIBOOT_INFO_ALIGN));
+		current_tag = reinterpret_cast<multiboot_tag*>(uintptr_t(current_tag) +
+		                                               align_to(current_tag->size, MULTIBOOT_INFO_ALIGN));
 	}
 	return bootloader_info_local;
-}
-
-inline uintptr_t align_to(uintptr_t size, unsigned alignment)
-{
-	if (size == 0)
-		return alignment;
-	else if ((size % alignment) == 0)
-		return size;
-	else
-		return size + alignment - (size % alignment);
 }

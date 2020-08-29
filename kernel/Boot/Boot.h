@@ -22,4 +22,3 @@ typedef struct __attribute__((__packed__)) {
 extern uint32_t kernel_boot_stage1;
 extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_info);
 BootloaderInfo parse_mbi(uintptr_t multiboot_info);
-uintptr_t align_to(uintptr_t size, unsigned alignment);
