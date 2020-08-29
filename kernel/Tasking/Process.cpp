@@ -52,7 +52,7 @@ Result<uintptr_t> Process::load_executable(const StringView& path)
 		return ResultError(fd.error());
 	}
 	auto file_info = fd.value()->fstat();
-	// FIXME: implement smart pointers and use it here.
+	// FIXME: fix malloc to use more than 4096 bytes and use UniquePointer here.
 	char* buff = static_cast<char*>(Memory::alloc(file_info.value().size, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
 	memset(buff, 0, file_info.value().size);
 	auto result = fd.value()->read(buff, file_info.value().size);

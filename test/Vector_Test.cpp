@@ -127,3 +127,29 @@ TEST(Vector_Test, Splicing)
 	EXPECT_FALSE(list1.is_empty());
 	EXPECT_FALSE(list2.is_empty());
 }
+
+TEST(Vector_Test, Capacity)
+{
+
+	Vector<TestStruct> list(4, 5);
+	EXPECT_EQ(list.capacity(), 4);
+	EXPECT_EQ(list.size(), 0);
+
+	list.emplace_back(1, 1);
+	list.emplace_back(1, 1);
+	list.emplace_back(1, 1);
+	EXPECT_EQ(list.capacity(), 4);
+	EXPECT_EQ(list.size(), 3);
+
+	list.emplace_back(1, 1);
+	EXPECT_EQ(list.capacity(), 4);
+	EXPECT_EQ(list.size(), 4);
+
+	list.emplace_back(1, 1);
+	EXPECT_EQ(list.capacity(), 9);
+	EXPECT_EQ(list.size(), 5);
+
+	list.erase(list.begin() + 1);
+	EXPECT_EQ(list.capacity(), 9);
+	EXPECT_EQ(list.size(), 4);
+}

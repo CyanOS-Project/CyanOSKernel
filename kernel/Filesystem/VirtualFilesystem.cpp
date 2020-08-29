@@ -17,7 +17,7 @@ void VFS::setup()
 
 Result<UniquePointer<FileDescription>> VFS::open(const StringView& path, OpenMode mode, OpenFlags flags)
 {
-	auto node = open_node(path, mode, flags);
+	auto node = get_node(path, mode, flags);
 	if (node.error()) {
 		return ResultError(node.error());
 	}
@@ -85,27 +85,60 @@ Result<void> VFS::remove_link()
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<FSNode&> VFS::traverse_parent_node(const StringView& path)
+Result<FSNode&> VFS::get_node(const StringView& path, OpenMode mode, OpenFlags flags)
+{
+	if (flags == OpenFlags::OF_CREATE_NEW) {
+		return create_new_node(path, mode, flags);
+	} else if (flags == OpenFlags::OF_OPEN_EXISTING) {
+		return open_existing_node(path);
+	} else {
+		return ResultError(ERROR_INVALID_PARAMETERS);
+	}
+}
+
+Result<FSNode&> VFS::create_new_node(const StringView& path, OpenMode mode, OpenFlags flags)
 {
 	PathParser parser(path);
-	size_t path_element_count = parser.count();
-	if (path_element_count == 0) {
+
+	auto parent_node = traverse_parent_node(parser);
+	if (parent_node.error()) {
+		return ResultError(parent_node.error());
+	}
+
+	return parent_node.value().create(parser.element(parser.count() - 1), mode, flags);
+}
+
+Result<FSNode&> VFS::open_existing_node(const StringView& path)
+{
+	PathParser parser(path);
+
+	auto node = traverse_node(parser);
+	if (node.error()) {
+		return ResultError(node.error());
+	}
+
+	return node.value();
+}
+
+Result<FSNode&> VFS::traverse_parent_node(const PathParser& parser)
+{
+	size_t path_elements_count = parser.count();
+	if (path_elements_count == 0) {
 		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 	}
-	return traverse_node_deep(parser, path_element_count - 1);
+	return traverse_node_deep(parser, path_elements_count - 1);
 }
 
-Result<FSNode&> VFS::traverse_node(const StringView& path)
+Result<FSNode&> VFS::traverse_node(const PathParser& parser)
 {
-	PathParser parser(path);
-	size_t path_element_count = parser.count();
-	if (path_element_count == 0)
-		ResultError(ERROR_FILE_DOES_NOT_EXIST);
+	size_t path_elements_count = parser.count();
+	if (path_elements_count == 0)
+		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 
-	return traverse_node_deep(parser, path_element_count);
+	return traverse_node_deep(parser, path_elements_count);
 }
 
-Result<FSNode&> VFS::traverse_node_deep(PathParser& parser, size_t depth)
+Result<FSNode&> VFS::traverse_node_deep(const PathParser& parser, size_t depth)
 {
 	if (fs_roots->size() == 0)
 		return ResultError(ERROR_NO_ROOT_NODE);
@@ -121,34 +154,6 @@ Result<FSNode&> VFS::traverse_node_deep(PathParser& parser, size_t depth)
 		current = &next_node.value();
 	}
 	return *current;
-}
-
-Result<FSNode&> VFS::open_node(const StringView& path, OpenMode mode, OpenFlags flags)
-{
-	auto node = traverse_node(path);
-	FSNode* open_node = nullptr;
-
-	if ((node.error() != ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::OF_CREATE_NEW)) {
-		return ResultError(ERROR_FILE_ALREADY_EXISTS);
-	} else if ((node.error() == ERROR_FILE_DOES_NOT_EXIST) && (flags == OpenFlags::OF_CREATE_NEW)) {
-		// FIXME: we already went though parent! any optimization ?
-		auto parent_node = traverse_parent_node(path);
-		ASSERT(!parent_node.is_error());
-		PathParser parser(path);
-		auto new_node = parent_node.value().create(parser.element(parser.count() - 1), mode, flags);
-		if (new_node.is_error()) {
-			return ResultError(new_node.error());
-		}
-		open_node = &new_node.value();
-	} else if (node.is_error()) {
-		return ResultError(node.error());
-	} else {
-		open_node = &node.value();
-	}
-	if (open_node->m_type == NodeType::Folder) {
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-	return *open_node;
 }
 
 FSNode* VFS::get_root_node(const StringView& root_name)

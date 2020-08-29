@@ -18,12 +18,17 @@ PathParser::~PathParser()
 {
 }
 
-size_t PathParser::count()
+size_t PathParser::count() const
 {
 	return m_count;
 }
 
-StringView PathParser::element(size_t index)
+StringView PathParser::last_element() const
+{
+	return element(m_count);
+}
+
+StringView PathParser::element(size_t index) const
 {
 	ASSERT(index < count());
 	size_t pos = 0;
@@ -42,7 +47,7 @@ StringView PathParser::element(size_t index)
 	return m_path.substr(pos + 1, len);
 }
 
-bool PathParser::is_valid()
+bool PathParser::is_valid() const
 {
 	if (m_path.length() == 0)
 		return false;

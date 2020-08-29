@@ -15,10 +15,14 @@ class VFS
 	static List<UniquePointer<FSNode>>* fs_roots;
 	static Spinlock lock;
 
-	static Result<FSNode&> traverse_parent_node(const StringView& path);
-	static Result<FSNode&> traverse_node(const StringView& path);
-	static Result<FSNode&> traverse_node_deep(PathParser& parser, size_t depth);
-	static Result<FSNode&> open_node(const StringView& path, OpenMode mode, OpenFlags flags);
+	static Result<FSNode&> traverse_parent_node(const PathParser& parser);
+	static Result<FSNode&> traverse_node(const PathParser& parser);
+	static Result<FSNode&> traverse_node_deep(const PathParser& parser, size_t depth);
+
+	static Result<FSNode&> get_node(const StringView& path, OpenMode mode, OpenFlags flags);
+	static Result<FSNode&> create_new_node(const StringView& path, OpenMode mode, OpenFlags flags);
+	static Result<FSNode&> open_existing_node(const StringView& path);
+
 	static FSNode* get_root_node(const StringView& root_name);
 
   public:

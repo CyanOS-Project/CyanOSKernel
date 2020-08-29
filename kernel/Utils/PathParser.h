@@ -11,7 +11,8 @@ class PathParser
   public:
 	explicit PathParser(const StringView& path);
 	~PathParser();
-	size_t count();
-	StringView element(size_t index);
-	bool is_valid();
+	size_t count() const;
+	StringView element(size_t index) const;
+	StringView last_element() const;
+	bool is_valid() const;
 };
