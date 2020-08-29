@@ -18,6 +18,9 @@ SocketFS::~SocketFS()
 
 Result<FSNode&> SocketFS::create(const StringView& name, OpenMode mode, OpenFlags flags)
 {
+	UNUSED(mode);
+	UNUSED(flags);
+
 	if (m_children.contains([&](Socket& socket) {
 		    if (socket.m_name == name)
 			    return true;

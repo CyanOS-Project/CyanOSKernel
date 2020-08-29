@@ -18,6 +18,11 @@ class Connection : public FSNode
 	WaitQueue m_server_wait_queue, m_client_wait_queue;
 	Spinlock m_server_lock, m_client_lock;
 
+	void read_client_buffer(void* buff, size_t size);
+	void read_server_buffer(void* buff, size_t size);
+	void write_client_buffer(const void* buff, size_t size);
+	void write_server_buffer(const void* buff, size_t size);
+
   public:
 	explicit Connection(const StringView& name);
 	~Connection();
