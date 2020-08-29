@@ -6,7 +6,8 @@
 
 #ifdef __UNIT_TESTS
 	#include <assert.h>
-	#define ASSERT(x) assert(x)
+	#define ASSERT(x)               assert(x)
+	#define ASSERT_NOT_REACHABLE(x) assert(false)
 #else
 	#include "Assert.h"
 #endif
@@ -33,14 +34,18 @@ template <class T> class Vector
 
 		Iterator operator++(int);
 		Iterator& operator++();
+		Iterator operator+(int);
+		Iterator operator-(int);
 		bool operator!=(const Vector<T>::Iterator& other);
 		bool operator==(const Vector<T>::Iterator& other);
 		T* operator->();
 		T& operator*();
+
 		friend Vector<T>;
 	};
 
 	void realloc(size_t new_size);
+	void realloc(size_t new_size, size_t skip);
 
   public:
 	NON_COPYABLE(Vector);
@@ -94,6 +99,16 @@ template <class T> typename Vector<T>::Iterator Vector<T>::Iterator::operator++(
 	return old;
 }
 
+template <class T> typename Vector<T>::Iterator Vector<T>::Iterator::operator+(int arg)
+{
+	return Iterator{m_storage, m_current + arg};
+}
+
+template <class T> typename Vector<T>::Iterator Vector<T>::Iterator::operator-(int arg)
+{
+	return Iterator{m_storage, m_current - arg};
+}
+
 template <class T> typename Vector<T>::Iterator& Vector<T>::Iterator::operator++()
 {
 	m_current++;
@@ -143,17 +158,48 @@ template <class T> Vector<T>::~Vector()
 template <class T> void Vector<T>::realloc(size_t size)
 {
 	if (!m_storage) {
-		m_storage = new char[size * sizeof(T)];
-	} else {
-		// FIXME: what if shrinking?
-		ASSERT(m_capacity > m_count);
-		T* new_storage = new char[size * sizeof(T)];
+		m_storage = reinterpret_cast<T*>(new char[size * sizeof(T)]);
+	} else if (size > m_capacity) {
+		T* new_storage = reinterpret_cast<T*>(new char[size * sizeof(T)]);
 		for (size_t i = 0; i < m_count; i++) {
 			new_storage[i] = move(m_storage[i]);
 		}
-		operator delete(m_storage, m_capacity * sizeof(T));
+
+		delete[] m_storage;
+
 		m_storage = new_storage;
+	} else if (size < m_capacity) {
+		// FIXME:shrink ?
+		ASSERT_NOT_REACHABLE();
+	} else {
 	}
+	m_capacity = size;
+}
+
+template <class T> void Vector<T>::reserve(size_t size)
+{
+	ASSERT(size > m_capacity);
+	realloc(size);
+}
+
+// realloc and moves all old storage to the new one but make space for one element at index skip_index.
+template <class T> void Vector<T>::realloc(size_t size, size_t skip_index)
+{
+	ASSERT(size > m_capacity);
+	ASSERT(skip_index < m_capacity);
+
+	T* new_storage = reinterpret_cast<T*>(new char[size * sizeof(T)]);
+	for (size_t i = 0; i < skip_index; i++) {
+		new_storage[i] = move(m_storage[i]);
+	}
+
+	for (size_t i = skip_index; i < m_count; i++) {
+		new_storage[i + 1] = move(m_storage[i]);
+	}
+
+	delete m_storage;
+
+	m_storage = new_storage;
 	m_capacity = size;
 }
 
@@ -162,12 +208,14 @@ template <class T> void Vector<T>::clear()
 	for (size_t i = 0; i < m_count; i++) {
 		m_storage[i].~T();
 	}
+	// FIXME: shrink ?
 	m_count = 0;
 }
 
 template <class T> void Vector<T>::splice(Vector<T>& list, const Iterator& itr)
 {
-	list.push_back(move(*itr));
+	list.push_back(m_storage[itr.m_current]);
+	erase(itr);
 }
 
 template <class T> typename Vector<T>::Iterator Vector<T>::begin()
@@ -177,13 +225,13 @@ template <class T> typename Vector<T>::Iterator Vector<T>::begin()
 
 template <class T> typename Vector<T>::Iterator Vector<T>::end()
 {
-	return Iterator(m_count);
+	return Iterator(m_storage, m_count);
 }
 
 template <class T> template <typename... U> T& Vector<T>::emplace_back(U&&... u)
 {
 	if (m_capacity == m_count) {
-		realloc(m_capacity + 1);
+		realloc(m_capacity + m_allocation_steps);
 	}
 	new (&m_storage[m_count]) T{forward<U>(u)...};
 	m_count++;
@@ -192,11 +240,10 @@ template <class T> template <typename... U> T& Vector<T>::emplace_back(U&&... u)
 
 template <class T> template <typename... U> T& Vector<T>::emplace_front(U&&... u)
 {
-	// FIXME: add to front;
 	if (m_capacity == m_count) {
-		realloc(m_capacity + 1);
+		realloc(m_capacity + m_allocation_steps, 0);
 	}
-	new (&m_storage[m_count]) T{forward<U>(u)...};
+	new (&m_storage[0]) T{forward<U>(u)...};
 	m_count++;
 	return m_storage[m_count - 1];
 }
@@ -204,7 +251,7 @@ template <class T> template <typename... U> T& Vector<T>::emplace_front(U&&... u
 template <class T> T& Vector<T>::push_back(const T& new_data)
 {
 	if (m_capacity == m_count) {
-		realloc(m_capacity + 1);
+		realloc(m_capacity + m_allocation_steps);
 	}
 	m_storage[m_count] = new_data;
 	m_count++;
@@ -213,11 +260,10 @@ template <class T> T& Vector<T>::push_back(const T& new_data)
 
 template <class T> T& Vector<T>::push_front(const T& new_data)
 {
-	// FIXME: front
 	if (m_capacity == m_count) {
-		realloc(m_capacity + 1);
+		realloc(m_capacity + m_allocation_steps, 0);
 	}
-	m_storage[m_count] = new_data;
+	m_storage[0] = new_data;
 	m_count++;
 	return m_storage[m_count - 1];
 }
@@ -225,7 +271,7 @@ template <class T> T& Vector<T>::push_front(const T& new_data)
 template <class T> T& Vector<T>::push_back(T&& new_data)
 {
 	if (m_capacity == m_count) {
-		realloc(m_capacity + 1);
+		realloc(m_capacity + m_allocation_steps);
 	}
 	m_storage[m_count] = move(new_data);
 	m_count++;
@@ -234,11 +280,10 @@ template <class T> T& Vector<T>::push_back(T&& new_data)
 
 template <class T> T& Vector<T>::push_front(T&& new_data)
 {
-	// FIXME: front
 	if (m_capacity == m_count) {
-		realloc(m_capacity + 1);
+		realloc(m_capacity + m_allocation_steps, 0);
 	}
-	m_storage[m_count] = move(new_data);
+	m_storage[0] = move(new_data);
 	m_count++;
 	return m_storage[m_count - 1];
 }
@@ -269,24 +314,32 @@ template <class T> template <class Predicate> bool Vector<T>::contains(Predicate
 
 template <class T> void Vector<T>::pop_back()
 {
-	// TODO:
+	erase(m_count);
 }
 
 template <class T> void Vector<T>::pop_front()
 {
-	// TODO:
+	erase(0);
 }
 
 template <class T> void Vector<T>::insert(const Iterator& pos, const T& new_data)
 {
 	ASSERT(m_storage);
-	// TODO:
+	if (m_count == m_capacity) {
+		realloc(m_capacity + m_allocation_steps, pos.m_current);
+	}
+	m_storage[pos.m_current] = new_data;
+	m_count++;
 }
 
 template <class T> void Vector<T>::erase(const Iterator& itr)
 {
 	ASSERT(m_storage);
-	// TODO:
+	for (size_t i = itr.m_current; i < m_count - 1; i++) {
+		m_storage[i] = move(m_storage[i + 1]);
+	}
+	m_storage[m_count - 1].~T();
+	m_count--;
 }
 
 template <class T> T& Vector<T>::head() const
@@ -316,4 +369,9 @@ template <class T> bool Vector<T>::is_empty() const
 template <class T> size_t Vector<T>::size() const
 {
 	return m_count;
+}
+
+template <class T> size_t Vector<T>::capacity() const
+{
+	return m_capacity;
 }
