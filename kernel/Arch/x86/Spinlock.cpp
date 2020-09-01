@@ -7,14 +7,16 @@ void StaticSpinlock::init()
 
 void StaticSpinlock::acquire()
 {
-	m_eflags = eflags_read();
+	uint32_t temp_eflags = eflags_read();
 	DISABLE_INTERRUPTS();
 	while (test_and_set(&m_value) != 0) {
 	}
+	m_eflags = temp_eflags;
 }
 
 void StaticSpinlock::release()
 {
+	uint32_t temp_eflags = m_eflags;
 	m_value = 0;
-	eflags_write(m_eflags);
+	eflags_write(temp_eflags);
 }
