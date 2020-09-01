@@ -16,6 +16,7 @@ void StaticSpinlock::acquire()
 
 void StaticSpinlock::release()
 {
+	uint32_t temp_eflags = m_eflags;
 	m_value = 0;
-	eflags_write(m_eflags);
+	eflags_write(temp_eflags);
 }
