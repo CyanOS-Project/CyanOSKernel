@@ -24,6 +24,7 @@ SpacesInCStyleCastParentheses: false
 BreakConstructorInitializers: AfterColon 
 ConstructorInitializerAllOnOneLineOrOnePerLine: true
 AllowAllConstructorInitializersOnNextLine: false
+AllowShortFunctionsOnASingleLine: Inline
 BreakBeforeBraces: Linux
 IndentWidth: 4
 ColumnLimit: 120

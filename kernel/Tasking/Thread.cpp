@@ -44,9 +44,7 @@ Thread::Thread(Process& parent_process, thread_function address, uintptr_t argum
 	m_state = ThreadState::RUNNABLE;
 }
 
-Thread::~Thread()
-{
-}
+Thread::~Thread() {}
 
 void Thread::wake_up_from_queue()
 {
@@ -63,15 +61,11 @@ void Thread::wake_up_from_sleep()
 	m_state = ThreadState::RUNNABLE;
 }
 
-void Thread::wait_on(WaitQueue& queue)
+void Thread::block()
 {
-	{
-		ScopedLock local_lock(m_lock);
-		ready_threads->remove(*this);
-		queue.enqueue(*this);
-		m_state = ThreadState::BLOCKED_QUEUE;
-	}
-	yield();
+	ScopedLock local_lock(m_lock);
+	ready_threads->remove(*this);
+	m_state = ThreadState::BLOCKED_QUEUE;
 }
 
 void Thread::yield()

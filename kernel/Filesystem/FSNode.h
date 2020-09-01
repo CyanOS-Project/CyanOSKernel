@@ -9,14 +9,14 @@
 #define MAX_FILE_NAME 64
 
 enum OpenFlags {
-	OF_OPEN_EXISTING = 1 << 0,
-	OF_CREATE_NEW = 1 << 1,
+	OF_OPEN_EXISTING = MASKABLE_PRAM(0),
+	OF_CREATE_NEW = MASKABLE_PRAM(1),
 };
 enum OpenMode {
-	OM_READ = 1 << 0,
-	OM_WRITE = 1 << 1,
-	OM_SERVER = 1 << 2,
-	OM_CLIENT = 1 << 3,
+	OM_READ = 1 << MASKABLE_PRAM(0),
+	OM_WRITE = 1 << MASKABLE_PRAM(1),
+	OM_SERVER = 1 << MASKABLE_PRAM(2),
+	OM_CLIENT = 1 << MASKABLE_PRAM(3),
 };
 enum class NodeType { Root, Folder, File, Pipe, Link, Device, Socket, Connection };
 
@@ -41,98 +41,39 @@ class FSNode
 	{
 	}
 
-	virtual ~FSNode()
-	{
-	}
-
-	virtual Result<void> open(FileDescription&)
-	{
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-
-	virtual Result<void> close(FileDescription&)
-	{
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-
-	virtual Result<void> read(FileDescription&, void* buff, size_t offset, size_t size)
-	{
-		UNUSED(buff);
-		UNUSED(offset);
-		UNUSED(size);
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-
-	virtual Result<void> write(FileDescription&, const void* buff, size_t offset, size_t size)
-	{
-		UNUSED(buff);
-		UNUSED(offset);
-		UNUSED(size);
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-
-	virtual Result<bool> can_read(FileDescription&)
+	virtual ~FSNode() {}
+	virtual Result<void> open(UNUSEDARG FileDescription&) { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual Result<void> close(UNUSEDARG FileDescription&) { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual Result<bool> can_read(UNUSEDARG FileDescription&) { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual Result<bool> can_write(UNUSEDARG FileDescription&) { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual Result<void> remove() { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual Result<void> link(UNUSEDARG FSNode& node) { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual Result<void> unlink(UNUSEDARG FSNode& node) { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual Result<FSNode&> connect() { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual Result<bool> is_connected() { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual Result<FSNode&> accept() { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual Result<bool> can_accept() { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual Result<void> read(UNUSEDARG FileDescription&, UNUSEDARG void* buff, UNUSEDARG size_t offset,
+	                          UNUSEDARG size_t size)
 	{
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
-
-	virtual Result<bool> can_write(FileDescription&)
+	virtual Result<void> write(UNUSEDARG FileDescription&, UNUSEDARG const void* buff, UNUSEDARG size_t offset,
+	                           UNUSEDARG size_t size)
 	{
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
-
-	virtual Result<void> remove()
+	virtual Result<FSNode&> dir_lookup(UNUSEDARG const StringView& file_name)
 	{
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
-
-	virtual Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags)
-	{
-		UNUSED(name);
-		UNUSED(mode);
-		UNUSED(flags);
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-
-	virtual Result<void> mkdir(const StringView& name, int flags, int access)
-	{
-		UNUSED(name);
-		UNUSED(flags);
-		UNUSED(access);
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-
-	virtual Result<void> link(FSNode& node)
-	{
-		UNUSED(node);
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-
-	virtual Result<void> unlink(FSNode& node)
-	{
-		UNUSED(node);
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-
-	virtual Result<FSNode&> dir_lookup(const StringView& file_name)
-	{
-		UNUSED(file_name);
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-
-	virtual Result<FSNode&> connect()
+	virtual Result<FSNode&> create(UNUSEDARG const StringView& name, UNUSEDARG OpenMode mode, UNUSEDARG OpenFlags flags)
 	{
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
-
-	virtual Result<FSNode&> accept()
+	virtual Result<void> mkdir(UNUSEDARG const StringView& name, UNUSEDARG int flags, UNUSEDARG int access)
 	{
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
-	virtual Result<bool> can_accept()
-	{
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-
 	friend class VFS;
 };

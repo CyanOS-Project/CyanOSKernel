@@ -9,9 +9,7 @@ Socket::Socket(const StringView& name) :
 {
 }
 
-Socket::~Socket()
-{
-}
+Socket::~Socket() {}
 
 Result<void> Socket::open(FileDescription&)
 {
@@ -29,7 +27,7 @@ Result<FSNode&> Socket::accept()
 
 	while (!m_pending_connections.size()) {
 		m_lock.release();
-		Thread::current->wait_on(m_server_wait_queue);
+		m_server_wait_queue.wait_on_event();
 		m_lock.acquire();
 	}
 	Connection& new_connection = m_connections.emplace_back("");
@@ -48,7 +46,7 @@ Result<FSNode&> Socket::connect()
 	m_server_wait_queue.wake_up();
 	while (pending_connection.is_accepted == false) {
 		m_lock.release();
-		Thread::current->wait_on(m_connections_wait_queue);
+		m_connections_wait_queue.wait_on_event();
 		m_lock.acquire();
 	}
 

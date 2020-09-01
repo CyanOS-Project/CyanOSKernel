@@ -1,7 +1,7 @@
 #pragma once
 #include "Types.h"
 
-// Credits: some of these function are parially copied from cppreference.com.
+// Credits: some of these function are partially copied from cppreference.com.
 
 /*
 TODO: algorithm functions:

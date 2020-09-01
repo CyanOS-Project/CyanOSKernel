@@ -26,9 +26,7 @@ Keyboard::Keyboard(const StringView& name) :
 	ISR::register_isr_handler(keyboard_driver_handler, PIC_KEYBOARD + PIC1_IDT_OFFSET);
 }
 
-Keyboard::~Keyboard()
-{
-}
+Keyboard::~Keyboard() {}
 
 Result<void> Keyboard::open(FileDescription&)
 {
@@ -47,7 +45,7 @@ Result<void> Keyboard::read(FileDescription&, void* buff, size_t offset, size_t 
 	ScopedLock local_lock(m_lock);
 	while (m_buffer.size() < size) {
 		local_lock.release();
-		Thread::current->wait_on(m_wait_queue);
+		m_wait_queue.wait_on_event();
 		local_lock.acquire();
 	}
 

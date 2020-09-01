@@ -11,9 +11,7 @@ Connection::Connection(const StringView& name) :
 {
 }
 
-Connection::~Connection()
-{
-}
+Connection::~Connection() {}
 
 Result<void> Connection::open(FileDescription&)
 {
@@ -83,7 +81,7 @@ void Connection::read_server_buffer(void* buff, size_t size)
 
 	while (m_server_buffer.size() < size) {
 		local_lock.release();
-		Thread::current->wait_on(m_server_wait_queue);
+		m_server_wait_queue.wait_on_event();
 		local_lock.acquire();
 	}
 
@@ -101,7 +99,7 @@ void Connection::read_client_buffer(void* buff, size_t size)
 
 	while (m_client_buffer.size() < size) {
 		local_lock.release();
-		Thread::current->wait_on(m_client_wait_queue);
+		m_client_wait_queue.wait_on_event();
 		local_lock.acquire();
 	}
 
@@ -119,7 +117,7 @@ void Connection::write_client_buffer(const void* buff, size_t size)
 
 	if (m_server_buffer.available_size() < size) {
 		local_lock.release();
-		Thread::current->wait_on(m_server_wait_queue);
+		m_server_wait_queue.wait_on_event();
 		local_lock.acquire();
 	}
 
@@ -137,7 +135,7 @@ void Connection::write_server_buffer(const void* buff, size_t size)
 
 	if (m_client_buffer.available_size() < size) {
 		local_lock.release();
-		Thread::current->wait_on(m_client_wait_queue);
+		m_client_wait_queue.wait_on_event();
 		local_lock.acquire();
 	}
 

@@ -6,7 +6,7 @@ class WaitQueue
 {
   public:
 	WaitQueue();
-	void enqueue(Thread& thread);
+	void wait_on_event();
 	void wake_up();
 	void wake_up(size_t num);
 	void wake_up_all();

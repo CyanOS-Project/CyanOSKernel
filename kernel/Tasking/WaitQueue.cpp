@@ -1,16 +1,14 @@
 #include "WaitQueue.h"
 
-WaitQueue::WaitQueue() : m_lock{}, m_threads{}
-{
-}
+WaitQueue::WaitQueue() : m_lock{}, m_threads{} {}
 
-WaitQueue::~WaitQueue()
-{
-}
+WaitQueue::~WaitQueue() {}
 
-void WaitQueue::enqueue(Thread& thread)
+void WaitQueue::wait_on_event()
 {
-	m_threads.push_back(thread);
+	Thread::current->block();
+	m_threads.push_back(*Thread::current);
+	Thread::yield();
 }
 
 void WaitQueue::wake_up()

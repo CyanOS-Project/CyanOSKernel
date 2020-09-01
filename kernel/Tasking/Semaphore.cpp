@@ -9,9 +9,7 @@ Semaphore::Semaphore(size_t t_max_count, size_t t_initial_value) :
 	m_spinlock.init();
 }
 
-Semaphore::~Semaphore()
-{
-}
+Semaphore::~Semaphore() {}
 
 void Semaphore::acquire()
 {
@@ -22,7 +20,7 @@ void Semaphore::acquire()
 		m_spinlock.release();
 	} else {
 		m_spinlock.release();
-		Thread::current->wait_on(m_queue);
+		m_queue.wait_on_event();
 		acquire();
 	}
 }
