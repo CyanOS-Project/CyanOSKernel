@@ -7,8 +7,7 @@ class WaitQueue
   public:
 	WaitQueue();
 	void wait_on_event();
-	void wake_up();
-	void wake_up(size_t num);
+	void wake_up(size_t num = 1);
 	void wake_up_all();
 
 	WaitQueue(WaitQueue&&) = delete;
@@ -20,4 +19,5 @@ class WaitQueue
   private:
 	Spinlock m_lock;
 	IntrusiveList<Thread> m_threads;
+	void wake_up_one();
 };

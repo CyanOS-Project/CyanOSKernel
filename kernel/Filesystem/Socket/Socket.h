@@ -16,9 +16,7 @@ class Socket : public FSNode
 	struct NewPendingConnection {
 		bool is_accepted;
 		Connection* connection;
-		NewPendingConnection() : is_accepted{false}, connection{nullptr}
-		{
-		}
+		NewPendingConnection() : is_accepted{false}, connection{nullptr} {}
 	};
 
 	List<NewPendingConnection> m_pending_connections;
