@@ -45,7 +45,10 @@ Result<void> Keyboard::read(FileDescription&, void* buff, size_t offset, size_t 
 	ScopedLock local_lock(m_lock);
 	while (m_buffer.size() < size) {
 		local_lock.release();
-		m_wait_queue.wait_on_event();
+		m_wait_queue.wait_on_event([&]() {
+			ScopedLock local_lock(m_lock);
+			return m_buffer.size() < size;
+		});
 		local_lock.acquire();
 	}
 
@@ -60,7 +63,7 @@ Result<void> Keyboard::read(FileDescription&, void* buff, size_t offset, size_t 
 Result<bool> Keyboard::can_read(FileDescription&)
 {
 	ScopedLock local_lock(m_lock);
-	return m_buffer.is_empty();
+	return !m_buffer.is_empty();
 }
 
 void Keyboard::enqueue_keystoke(unsigned char data)

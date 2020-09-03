@@ -81,7 +81,10 @@ void Connection::read_server_buffer(void* buff, size_t size)
 
 	while (m_server_buffer.size() < size) {
 		local_lock.release();
-		m_server_wait_queue.wait_on_event();
+		m_server_wait_queue.wait_on_event([&]() {
+			ScopedLock local_lock(m_server_lock);
+			return m_server_buffer.size() < size;
+		});
 		local_lock.acquire();
 	}
 
@@ -99,7 +102,10 @@ void Connection::read_client_buffer(void* buff, size_t size)
 
 	while (m_client_buffer.size() < size) {
 		local_lock.release();
-		m_client_wait_queue.wait_on_event();
+		m_client_wait_queue.wait_on_event([&]() {
+			ScopedLock local_lock(m_client_lock);
+			return m_client_buffer.size() < size;
+		});
 		local_lock.acquire();
 	}
 
@@ -115,9 +121,12 @@ void Connection::write_client_buffer(const void* buff, size_t size)
 {
 	ScopedLock local_lock(m_server_lock);
 
-	if (m_server_buffer.available_size() < size) {
+	while (m_server_buffer.available_size() < size) {
 		local_lock.release();
-		m_server_wait_queue.wait_on_event();
+		m_server_wait_queue.wait_on_event([&]() {
+			ScopedLock local_lock(m_server_lock);
+			return m_server_buffer.available_size() < size;
+		});
 		local_lock.acquire();
 	}
 
@@ -133,9 +142,12 @@ void Connection::write_server_buffer(const void* buff, size_t size)
 {
 	ScopedLock local_lock(m_client_lock);
 
-	if (m_client_buffer.available_size() < size) {
+	while (m_client_buffer.available_size() < size) {
 		local_lock.release();
-		m_client_wait_queue.wait_on_event();
+		m_client_wait_queue.wait_on_event([&]() {
+			ScopedLock local_lock(m_client_lock);
+			return m_client_buffer.available_size() < size;
+		});
 		local_lock.acquire();
 	}
 

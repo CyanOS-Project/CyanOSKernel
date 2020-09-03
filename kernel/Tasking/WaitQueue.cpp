@@ -5,18 +5,6 @@ WaitQueue::WaitQueue() : m_lock{}, m_threads{} {}
 
 WaitQueue::~WaitQueue() {}
 
-void WaitQueue::wait_on_event()
-{
-	ScopedLock local_lock(m_lock);
-
-	Thread::current->block();
-	m_threads.push_back(*Thread::current);
-
-	local_lock.release();
-
-	Thread::yield();
-}
-
 void WaitQueue::wake_up(size_t num)
 {
 	ScopedLock local_lock(m_lock);

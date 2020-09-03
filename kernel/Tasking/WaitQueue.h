@@ -6,7 +6,17 @@ class WaitQueue
 {
   public:
 	WaitQueue();
-	void wait_on_event();
+	template <typename T> void wait_on_event(T checker)
+	{
+		ScopedLock local_lock(m_lock);
+		if (checker()) {
+			Thread::current->block();
+			m_threads.push_back(*Thread::current);
+			local_lock.release();
+			Thread::yield();
+		}
+	}
+
 	void wake_up(size_t num = 1);
 	void wake_up_all();
 
