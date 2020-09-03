@@ -27,9 +27,9 @@ class Pipe : public FSNode
 	~Pipe();
 	Result<void> open(FileDescription&) override;
 	Result<void> close(FileDescription&) override;
-	Result<void> read(FileDescription&, void* buff, size_t offset, size_t size) override;
-	Result<void> write(FileDescription&, const void* buff, size_t offset, size_t size) override;
-	Result<bool> can_read(FileDescription&) override;
-	Result<bool> can_write(FileDescription&) override;
+	Result<size_t> read(FileDescription&, void* buff, size_t offset, size_t size) override;
+	Result<size_t> write(FileDescription&, const void* buff, size_t offset, size_t size) override;
+	bool can_read(FileDescription&) override;
+	bool can_write(FileDescription&) override;
 	Result<void> remove() override;
 };

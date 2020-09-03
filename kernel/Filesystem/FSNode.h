@@ -44,22 +44,22 @@ class FSNode
 	virtual ~FSNode() {}
 	virtual Result<void> open(UNUSEDARG FileDescription&) { return ResultError(ERROR_INVALID_OPERATION); }
 	virtual Result<void> close(UNUSEDARG FileDescription&) { return ResultError(ERROR_INVALID_OPERATION); }
-	virtual Result<bool> can_read(UNUSEDARG FileDescription&) { return ResultError(ERROR_INVALID_OPERATION); }
-	virtual Result<bool> can_write(UNUSEDARG FileDescription&) { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual bool can_read(UNUSEDARG FileDescription&) { return false; }
+	virtual bool can_write(UNUSEDARG FileDescription&) { return false; }
+	virtual bool can_accept() { return false; }
+	virtual bool is_connected() { return false; }
 	virtual Result<void> remove() { return ResultError(ERROR_INVALID_OPERATION); }
 	virtual Result<void> link(UNUSEDARG FSNode& node) { return ResultError(ERROR_INVALID_OPERATION); }
 	virtual Result<void> unlink(UNUSEDARG FSNode& node) { return ResultError(ERROR_INVALID_OPERATION); }
 	virtual Result<FSNode&> connect() { return ResultError(ERROR_INVALID_OPERATION); }
-	virtual Result<bool> is_connected() { return ResultError(ERROR_INVALID_OPERATION); }
 	virtual Result<FSNode&> accept() { return ResultError(ERROR_INVALID_OPERATION); }
-	virtual Result<bool> can_accept() { return ResultError(ERROR_INVALID_OPERATION); }
-	virtual Result<void> read(UNUSEDARG FileDescription&, UNUSEDARG void* buff, UNUSEDARG size_t offset,
-	                          UNUSEDARG size_t size)
+	virtual Result<size_t> read(UNUSEDARG FileDescription&, UNUSEDARG void* buff, UNUSEDARG size_t offset,
+	                            UNUSEDARG size_t size)
 	{
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
-	virtual Result<void> write(UNUSEDARG FileDescription&, UNUSEDARG const void* buff, UNUSEDARG size_t offset,
-	                           UNUSEDARG size_t size)
+	virtual Result<size_t> write(UNUSEDARG FileDescription&, UNUSEDARG const void* buff, UNUSEDARG size_t offset,
+	                             UNUSEDARG size_t size)
 	{
 		return ResultError(ERROR_INVALID_OPERATION);
 	}

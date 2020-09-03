@@ -24,7 +24,7 @@ template <typename T> T& max(const T& a, const T& b)
 	}
 }
 
-template <typename T> T& min(const T& a, const T& b)
+template <typename T> const T& min(const T& a, const T& b)
 {
 	if (a > b) {
 		return b;

@@ -18,19 +18,19 @@ class Connection : public FSNode
 	WaitQueue m_server_wait_queue, m_client_wait_queue;
 	Spinlock m_server_lock, m_client_lock;
 
-	void read_client_buffer(void* buff, size_t size);
-	void read_server_buffer(void* buff, size_t size);
-	void write_client_buffer(const void* buff, size_t size);
-	void write_server_buffer(const void* buff, size_t size);
+	size_t read_client_buffer(FileDescription&, void* buff, size_t size);
+	size_t read_server_buffer(FileDescription&, void* buff, size_t size);
+	size_t write_client_buffer(FileDescription&, const void* buff, size_t size);
+	size_t write_server_buffer(FileDescription&, const void* buff, size_t size);
 
   public:
 	explicit Connection(const StringView& name);
 	~Connection();
 	Result<void> open(FileDescription&) override;
-	Result<void> read(FileDescription&, void* buff, size_t offset, size_t size) override;
-	Result<void> write(FileDescription&, const void* buff, size_t offset, size_t size) override;
-	Result<bool> can_read(FileDescription&) override;
-	Result<bool> can_write(FileDescription&) override;
+	Result<size_t> read(FileDescription&, void* buff, size_t offset, size_t size) override;
+	Result<size_t> write(FileDescription&, const void* buff, size_t offset, size_t size) override;
+	bool can_read(FileDescription&) override;
+	bool can_write(FileDescription&) override;
 	Result<void> close(FileDescription&) override;
 
 	friend class Socket;

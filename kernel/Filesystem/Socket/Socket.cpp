@@ -16,9 +16,9 @@ Result<void> Socket::open(FileDescription&)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<bool> Socket::can_accept()
+bool Socket::can_accept()
 {
-	return ResultError(ERROR_INVALID_OPERATION);
+	return false;
 }
 
 Result<FSNode&> Socket::accept()
@@ -27,10 +27,7 @@ Result<FSNode&> Socket::accept()
 
 	while (!m_pending_connections.size()) {
 		local_lock.release();
-		m_server_wait_queue.wait_on_event([&]() {
-			ScopedLock local_lock(m_lock);
-			return !m_pending_connections.size();
-		});
+		m_server_wait_queue.wait_on_event([&]() { return !m_pending_connections.size(); });
 		local_lock.acquire();
 	}
 	Connection& new_connection = m_connections.emplace_back("");

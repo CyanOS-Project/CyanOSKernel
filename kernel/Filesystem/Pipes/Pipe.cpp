@@ -50,60 +50,60 @@ Result<void> Pipe::close(FileDescription& disc)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Pipe::read(FileDescription&, void* buff, size_t offset, size_t size)
+Result<size_t> Pipe::read(FileDescription& desc, void* buff, size_t offset, size_t size)
 {
 	UNUSED(offset);
 
 	ScopedLock local_lock(m_lock);
-	while (m_buffer.size() < size) {
+	while (!can_read(desc)) {
 		local_lock.release();
-		m_wait_queue.wait_on_event([&]() {
-			ScopedLock local_lock(m_lock);
-			return m_buffer.size() < size;
-		});
+		m_wait_queue.wait_on_event([&]() { return !can_read(desc); });
 		local_lock.acquire();
 	}
 
+	size_t size_to_read = min(size, m_buffer.size());
+
 	char* _buf = static_cast<char*>(buff);
-	for (size_t i = 0; i < size; i++) {
+	for (size_t i = 0; i < size_to_read; i++) {
 		_buf[i] = m_buffer.dequeue();
 	}
 
 	m_wait_queue.wake_up();
-	return ResultError(ERROR_SUCCESS);
+
+	return size_to_read;
 }
 
-Result<void> Pipe::write(FileDescription&, const void* buff, size_t offset, size_t size)
+Result<size_t> Pipe::write(FileDescription& desc, const void* buff, size_t offset, size_t size)
 {
 	UNUSED(offset);
 
 	ScopedLock local_lock(m_lock);
-	if (m_buffer.available_size() < size) {
+	if (!can_write(desc)) {
 		local_lock.release();
-		m_wait_queue.wait_on_event([&]() {
-			ScopedLock local_lock(m_lock);
-			return m_buffer.available_size() < size;
-		});
+		m_wait_queue.wait_on_event([&]() { return !can_write(desc); });
 		local_lock.acquire();
 	}
 
+	size_t size_to_write = min(size, m_buffer.available_size());
+
 	const char* _buf = static_cast<const char*>(buff);
-	for (size_t i = 0; i < size; i++) {
+	for (size_t i = 0; i < size_to_write; i++) {
 		m_buffer.queue(_buf[i]);
 	}
 
 	m_wait_queue.wake_up();
-	return ResultError(ERROR_SUCCESS);
+
+	return size_to_write;
 }
 
-Result<bool> Pipe::can_read(FileDescription&)
+bool Pipe::can_read(FileDescription&)
 {
-	return m_buffer.is_empty();
+	return !m_buffer.is_empty();
 }
 
-Result<bool> Pipe::can_write(FileDescription&)
+bool Pipe::can_write(FileDescription&)
 {
-	return m_buffer.is_full();
+	return !m_buffer.is_full();
 }
 
 Result<void> Pipe::remove()

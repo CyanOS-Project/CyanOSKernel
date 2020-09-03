@@ -23,8 +23,8 @@ class FileDescription
 
 	FileDescription(FSNode& node, OpenMode mode);
 	~FileDescription();
-	Result<void> read(void* buff, size_t size);
-	Result<void> write(const void* buff, size_t size);
+	Result<size_t> read(void* buff, size_t size);
+	Result<size_t> write(const void* buff, size_t size);
 	Result<UniquePointer<FileDescription>> connect();
 	Result<UniquePointer<FileDescription>> accept();
 	Result<void> seek(int offset, SeekOrigin origin);

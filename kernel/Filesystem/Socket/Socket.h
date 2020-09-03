@@ -29,7 +29,7 @@ class Socket : public FSNode
 	explicit Socket(const StringView& name);
 	~Socket();
 	Result<void> open(FileDescription&) override;
-	Result<bool> can_accept() override;
+	bool can_accept() override;
 	Result<FSNode&> accept() override;
 	Result<FSNode&> connect() override;
 	Result<void> close(FileDescription&) override;
