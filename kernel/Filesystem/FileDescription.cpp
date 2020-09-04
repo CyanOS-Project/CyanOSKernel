@@ -2,16 +2,14 @@
 #include "FSNode.h"
 #include "Utils/ErrorCodes.h"
 
-FileDescription::FileDescription(FSNode& node, OpenMode mode) : m_node(node), m_type{node.m_type}, m_mode{mode}
-{
-}
+FileDescription::FileDescription(FSNode& node, OpenMode mode) : m_node(node), m_type{node.m_type}, m_mode{mode} {}
 
 FileDescription::~FileDescription()
 {
 	m_node.close(*this);
 }
 
-Result<void> FileDescription::read(void* buff, size_t size)
+Result<size_t> FileDescription::read(void* buff, size_t size)
 {
 	size_t reading_size = m_current_position + size;
 	if (reading_size > m_node.m_size && m_node.m_size != 0) {
@@ -20,7 +18,7 @@ Result<void> FileDescription::read(void* buff, size_t size)
 	return m_node.read(*this, buff, m_current_position, size);
 }
 
-Result<void> FileDescription::write(const void* buff, size_t size)
+Result<size_t> FileDescription::write(const void* buff, size_t size)
 {
 	size_t offset = m_current_position + size;
 	if (offset > m_node.m_size && m_node.m_size != 0) {

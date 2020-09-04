@@ -49,7 +49,7 @@ class Thread : public IntrusiveListNode<Thread>
 
 	void wake_up_from_queue();
 	void wake_up_from_sleep();
-	void wait_on(WaitQueue& queue);
+	void block();
 	void terminate();
 	~Thread();
 	unsigned tid();

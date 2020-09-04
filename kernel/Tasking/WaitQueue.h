@@ -6,9 +6,23 @@ class WaitQueue
 {
   public:
 	WaitQueue();
-	void enqueue(Thread& thread);
-	void wake_up();
-	void wake_up(size_t num);
+	void wait();
+	template <typename T, typename L> void wait_on_event(T checker, ScopedLock<L>& checker_lock)
+	{
+		ScopedLock queue_lock(m_lock);
+
+		while (checker()) {
+			Thread::current->block();
+			m_threads.push_back(*Thread::current);
+			queue_lock.release();
+			checker_lock.release();
+			Thread::yield();
+			checker_lock.acquire();
+			queue_lock.acquire();
+		}
+	}
+
+	void wake_up(size_t num = 1);
 	void wake_up_all();
 
 	WaitQueue(WaitQueue&&) = delete;
@@ -20,4 +34,5 @@ class WaitQueue
   private:
 	Spinlock m_lock;
 	IntrusiveList<Thread> m_threads;
+	void wake_up_one();
 };

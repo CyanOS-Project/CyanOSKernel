@@ -1,7 +1,7 @@
 #pragma once
 #include "Types.h"
 
-// Credits: some of these function are parially copied from cppreference.com.
+// Credits: some of these function are partially copied from cppreference.com.
 
 /*
 TODO: algorithm functions:
@@ -24,7 +24,7 @@ template <typename T> T& max(const T& a, const T& b)
 	}
 }
 
-template <typename T> T& min(const T& a, const T& b)
+template <typename T> const T& min(const T& a, const T& b)
 {
 	if (a > b) {
 		return b;

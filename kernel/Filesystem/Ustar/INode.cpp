@@ -13,9 +13,7 @@ INode::INode(const StringView& name, NodeType type, size_t size, char* data) :
 	m_lock.init();
 }
 
-INode::~INode()
-{
-}
+INode::~INode() {}
 
 Result<void> INode::open(FileDescription&)
 {
@@ -29,15 +27,18 @@ Result<void> INode::close(FileDescription&)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> INode::read(FileDescription&, void* buff, size_t offset, size_t size)
+Result<size_t> INode::read(FileDescription&, void* buff, size_t offset, size_t size)
 {
 	ScopedLock local_lock(m_lock);
-	ASSERT((offset + size) <= m_size);
+
+	size_t size_to_read = min(size, m_size - offset);
+
 	memcpy(buff, m_data + offset, size);
-	return ResultError(ERROR_SUCCESS);
+
+	return size_to_read;
 }
 
-Result<bool> INode::can_read(FileDescription&)
+bool INode::can_read(FileDescription&)
 {
 	return true;
 }

@@ -30,7 +30,7 @@ Result<void> Console::close(FileDescription&)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Console::write(FileDescription&, const void* buff, size_t offset, size_t size)
+Result<size_t> Console::write(FileDescription&, const void* buff, size_t offset, size_t size)
 {
 	UNUSED(offset);
 
@@ -38,10 +38,10 @@ Result<void> Console::write(FileDescription&, const void* buff, size_t offset, s
 	for (size_t i = 0; i < size; i++) {
 		put_char(_buff[i]);
 	}
-	return ResultError(ERROR_SUCCESS);
+	return size;
 }
 
-Result<bool> Console::can_write(FileDescription&)
+bool Console::can_write(FileDescription&)
 {
 	return true;
 }

@@ -21,8 +21,8 @@ class INode : public FSNode
 	~INode();
 	Result<void> open(FileDescription&) override;
 	Result<void> close(FileDescription&) override;
-	Result<void> read(FileDescription&, void* buff, size_t offset, size_t size) override;
-	Result<bool> can_read(FileDescription&) override;
+	Result<size_t> read(FileDescription&, void* buff, size_t offset, size_t size) override;
+	bool can_read(FileDescription&) override;
 	Result<FSNode&> dir_lookup(const StringView& file_name) override;
 
 	friend class TarFS;

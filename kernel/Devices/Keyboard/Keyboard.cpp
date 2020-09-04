@@ -2,6 +2,7 @@
 #include "Arch/x86/Asm.h"
 #include "Tasking/ScopedLock.h"
 #include "Tasking/SpinLock.h"
+#include "Utils/Algorithms.h"
 #include "Utils/ErrorCodes.h"
 
 Keyboard* Keyboard::current_instance = nullptr;
@@ -26,9 +27,7 @@ Keyboard::Keyboard(const StringView& name) :
 	ISR::register_isr_handler(keyboard_driver_handler, PIC_KEYBOARD + PIC1_IDT_OFFSET);
 }
 
-Keyboard::~Keyboard()
-{
-}
+Keyboard::~Keyboard() {}
 
 Result<void> Keyboard::open(FileDescription&)
 {
@@ -40,29 +39,27 @@ Result<void> Keyboard::close(FileDescription&)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> Keyboard::read(FileDescription&, void* buff, size_t offset, size_t size)
+Result<size_t> Keyboard::read(FileDescription& desc, void* buff, size_t offset, size_t size)
 {
 	UNUSED(offset);
 
 	ScopedLock local_lock(m_lock);
-	while (m_buffer.size() < size) {
-		local_lock.release();
-		Thread::current->wait_on(m_wait_queue);
-		local_lock.acquire();
-	}
+
+	m_wait_queue.wait_on_event([&]() { return !can_read(desc); }, local_lock);
+
+	size_t size_to_read = min(size, m_buffer.size());
 
 	char* _buf = static_cast<char*>(buff);
-	for (size_t i = 0; i < size; i++) {
+	for (size_t i = 0; i < size_to_read; i++) {
 		_buf[i] = m_buffer.dequeue();
 	}
 
-	return ResultError(ERROR_SUCCESS);
+	return size_to_read;
 }
 
-Result<bool> Keyboard::can_read(FileDescription&)
+bool Keyboard::can_read(FileDescription&)
 {
-	ScopedLock local_lock(m_lock);
-	return m_buffer.is_empty();
+	return !m_buffer.is_empty();
 }
 
 void Keyboard::enqueue_keystoke(unsigned char data)
