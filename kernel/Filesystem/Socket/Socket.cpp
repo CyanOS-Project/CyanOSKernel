@@ -25,11 +25,8 @@ Result<FSNode&> Socket::accept()
 {
 	ScopedLock local_lock(m_lock);
 
-	while (!m_pending_connections.size()) {
-		local_lock.release();
-		m_server_wait_queue.wait_on_event([&]() { return !m_pending_connections.size(); });
-		local_lock.acquire();
-	}
+	m_server_wait_queue.wait_on_event([&]() { return !m_pending_connections.size(); }, local_lock);
+
 	Connection& new_connection = m_connections.emplace_back("");
 	m_pending_connections.head().is_accepted = true;
 	m_pending_connections.head().connection = &new_connection;
@@ -45,14 +42,8 @@ Result<FSNode&> Socket::connect()
 	NewPendingConnection& pending_connection = m_pending_connections.emplace_back();
 	m_server_wait_queue.wake_up();
 
-	while (pending_connection.is_accepted == false) {
-		local_lock.release();
-		m_connections_wait_queue.wait_on_event([&]() {
-			ScopedLock local_lock(m_lock);
-			return pending_connection.is_accepted == false;
-		});
-		local_lock.acquire();
-	}
+	m_connections_wait_queue.wait_on_event([&]() { return pending_connection.is_accepted == false; }, local_lock);
+
 	ASSERT(pending_connection.connection);
 	return *pending_connection.connection;
 }

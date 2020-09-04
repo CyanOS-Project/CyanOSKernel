@@ -20,7 +20,7 @@ void Semaphore::acquire()
 		m_lock.release();
 	} else {
 		m_lock.release();
-		m_queue.wait_on_event([&]() { return true; });
+		m_queue.wait();
 		acquire();
 	}
 }

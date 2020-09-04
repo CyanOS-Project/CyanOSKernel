@@ -79,11 +79,7 @@ size_t Connection::read_server_buffer(FileDescription& desc, void* buff, size_t 
 {
 	ScopedLock local_lock(m_server_lock);
 
-	while (!can_read(desc)) {
-		local_lock.release();
-		m_server_wait_queue.wait_on_event([&]() { return !can_read(desc); });
-		local_lock.acquire();
-	}
+	m_server_wait_queue.wait_on_event([&]() { return !can_read(desc); }, local_lock);
 
 	size_t size_to_read = min(size, m_server_buffer.size());
 
@@ -101,11 +97,7 @@ size_t Connection::read_client_buffer(FileDescription& desc, void* buff, size_t 
 {
 	ScopedLock local_lock(m_client_lock);
 
-	while (!can_read(desc)) {
-		local_lock.release();
-		m_client_wait_queue.wait_on_event([&]() { return !can_read(desc); });
-		local_lock.acquire();
-	}
+	m_client_wait_queue.wait_on_event([&]() { return !can_read(desc); }, local_lock);
 
 	size_t size_to_read = min(size, m_client_buffer.size());
 
@@ -123,11 +115,7 @@ size_t Connection::write_client_buffer(FileDescription& desc, const void* buff, 
 {
 	ScopedLock local_lock(m_server_lock);
 
-	while (!can_write(desc)) {
-		local_lock.release();
-		m_server_wait_queue.wait_on_event([&]() { return !can_write(desc); });
-		local_lock.acquire();
-	}
+	m_server_wait_queue.wait_on_event([&]() { return !can_write(desc); }, local_lock);
 
 	size_t size_to_write = min(size, m_server_buffer.available_size());
 
@@ -145,11 +133,7 @@ size_t Connection::write_server_buffer(FileDescription& desc, const void* buff, 
 {
 	ScopedLock local_lock(m_client_lock);
 
-	while (!can_write(desc)) {
-		local_lock.release();
-		m_client_wait_queue.wait_on_event([&]() { return !can_write(desc); });
-		local_lock.acquire();
-	}
+	m_client_wait_queue.wait_on_event([&]() { return !can_write(desc); }, local_lock);
 
 	size_t size_to_write = min(size, m_client_buffer.available_size());
 

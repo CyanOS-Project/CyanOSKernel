@@ -6,14 +6,19 @@ class WaitQueue
 {
   public:
 	WaitQueue();
-	template <typename T> void wait_on_event(T checker)
+	void wait();
+	template <typename T, typename L> void wait_on_event(T checker, ScopedLock<L>& checker_lock)
 	{
-		ScopedLock local_lock(m_lock);
-		if (checker()) {
+		ScopedLock queue_lock(m_lock);
+
+		while (checker()) {
 			Thread::current->block();
 			m_threads.push_back(*Thread::current);
-			local_lock.release();
+			queue_lock.release();
+			checker_lock.release();
 			Thread::yield();
+			checker_lock.acquire();
+			queue_lock.acquire();
 		}
 	}
 

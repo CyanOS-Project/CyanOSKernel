@@ -44,11 +44,8 @@ Result<size_t> Keyboard::read(FileDescription& desc, void* buff, size_t offset, 
 	UNUSED(offset);
 
 	ScopedLock local_lock(m_lock);
-	while (!can_read(desc)) {
-		local_lock.release();
-		m_wait_queue.wait_on_event([&]() { return !can_read(desc); });
-		local_lock.acquire();
-	}
+
+	m_wait_queue.wait_on_event([&]() { return !can_read(desc); }, local_lock);
 
 	size_t size_to_read = min(size, m_buffer.size());
 
