@@ -2,7 +2,7 @@
 
 #include "FSNode.h"
 #include "FileDescription.h"
-#include "FileDescriptor.h"
+#include "Tasking/SpinLock.h"
 #include "Utils/List.h"
 #include "Utils/PathParser.h"
 #include "Utils/Result.h"

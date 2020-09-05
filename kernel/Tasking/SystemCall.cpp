@@ -62,14 +62,16 @@ Result<int> OpenFile(char* path, int mode, int flags)
 		return ResultError(file_description.error());
 	}
 
-	unsigned fd = Thread::current->parent_process().m_file_descriptors.add_descriptor(move(file_description.value()));
+	Handle fd = Thread::current->parent_process().handles.add_file_description(move(file_description.value()));
 	return fd;
 }
 
-Result<int> ReadFile(unsigned descriptor, void* buff, size_t size)
+Result<int> ReadFile(Handle handle, void* buff, size_t size)
 {
-	// FIXME: check if descriptor exists.
-	auto& description = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
+	if (Thread::current->parent_process().handles.check_handle(handle) == false)
+		return ResultError(ERROR_INVALID_HANDLE);
+
+	auto& description = Thread::current->parent_process().handles.get_file_description(handle);
 	auto result = description.read(buff, size);
 	if (result.is_error()) {
 		return ResultError(result.error());
@@ -77,10 +79,12 @@ Result<int> ReadFile(unsigned descriptor, void* buff, size_t size)
 	return 0;
 }
 
-Result<int> WriteFile(unsigned descriptor, void* buff, size_t size)
+Result<int> WriteFile(Handle handle, void* buff, size_t size)
 {
-	// FIXME: check if descriptor exists.
-	auto& description = Thread::current->parent_process().m_file_descriptors.get_description(descriptor);
+	if (Thread::current->parent_process().handles.check_handle(handle) == false)
+		return ResultError(ERROR_INVALID_HANDLE);
+
+	auto& description = Thread::current->parent_process().handles.get_file_description(handle);
 	auto result = description.read(buff, size);
 	if (result.is_error()) {
 		return ResultError(result.error());
@@ -88,10 +92,12 @@ Result<int> WriteFile(unsigned descriptor, void* buff, size_t size)
 	return 0;
 }
 
-Result<int> CloseFile(unsigned descriptor)
+Result<int> CloseFile(Handle handle)
 {
-	// FIXME: check if descriptor exists.
-	Thread::current->parent_process().m_file_descriptors.remove_descriptor(descriptor);
+	if (Thread::current->parent_process().handles.check_handle(handle) == false)
+		return ResultError(ERROR_INVALID_HANDLE);
+
+	Thread::current->parent_process().handles.remove_handle(handle);
 	// Destructing the description will call close on FSNode.
 	return 0;
 }

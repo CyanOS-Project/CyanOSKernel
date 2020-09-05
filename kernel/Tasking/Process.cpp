@@ -34,14 +34,12 @@ Process::Process(const StringView& name, const StringView& path) :
     m_page_directory{Memory::create_new_virtual_space()},
     m_state{ProcessState::ACTIVE},
     m_parent{nullptr},
-    m_file_descriptors{}
+    handles{}
 {
 	m_lock.init();
 }
 
-Process::~Process()
-{
-}
+Process::~Process() {}
 
 Result<uintptr_t> Process::load_executable(const StringView& path)
 {

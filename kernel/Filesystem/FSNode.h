@@ -75,5 +75,6 @@ class FSNode
 	{
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
+	virtual Result<void> dir_query(UNUSEDARG size_t index) { return ResultError(ERROR_INVALID_OPERATION); }
 	friend class VFS;
 };

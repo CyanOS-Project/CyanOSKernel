@@ -16,7 +16,9 @@ class WaitQueue
 			m_threads.push_back(*Thread::current);
 			queue_lock.release();
 			checker_lock.release();
+
 			Thread::yield();
+
 			checker_lock.acquire();
 			queue_lock.acquire();
 		}

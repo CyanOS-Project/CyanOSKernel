@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Arch/x86/Spinlock.h"
-#include "Filesystem/FileDescriptor.h"
+#include "Filesystem/HandlesManager.h"
 #include "Utils/Bitmap.h"
 #include "Utils/List.h"
 #include "Utils/Result.h"
@@ -41,7 +41,7 @@ class Process
 	const uintptr_t m_page_directory;
 	const ProcessState m_state;
 	const Process* m_parent;
-	Descriptor<FileDescription> m_file_descriptors;
+	HandlesManager handles;
 	~Process();
 
 	friend class List<Process>;
