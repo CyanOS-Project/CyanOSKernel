@@ -54,6 +54,7 @@ Result<FSNode&> DeviceFS::dir_lookup(const StringView& file_name)
 
 Result<StringView> DeviceFS::dir_query(size_t index)
 {
+	UNUSED(index);
 	// ScopedLock local_lock(m_lock);
 	/*if (index >= children->size())
 	    return ResultError(ERROR_INVALID_PARAMETERS);

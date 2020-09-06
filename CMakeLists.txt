@@ -19,6 +19,8 @@ file(MAKE_DIRECTORY ${BINS_DIRECTORY} ${DRVS_DIRECTORY} ${USER_DIRECTORY})
 #set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*")
 
 add_subdirectory("kernel")
+add_subdirectory("userspace")
+add_subdirectory("libsystem")
 
 
 add_custom_command(

@@ -199,7 +199,7 @@ void test_ls(uintptr_t arg)
 {
 	UNUSED(arg);
 
-	auto fd = VFS::open("/Tar/Drivers", OpenMode::OM_READ, OpenFlags::OF_OPEN_EXISTING);
+	auto fd = VFS::open("/Tar/UserBinary", OpenMode::OM_READ, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();
