@@ -17,9 +17,7 @@ PipeFS::PipeFS(const StringView& name) :
 	m_lock.init();
 }
 
-PipeFS::~PipeFS()
-{
-}
+PipeFS::~PipeFS() {}
 
 Result<FSNode&> PipeFS::create(const StringView& name, OpenMode mode, OpenFlags flags)
 {
@@ -36,4 +34,18 @@ Result<FSNode&> PipeFS::dir_lookup(const StringView& file_name)
 		}
 	}
 	return ResultError(ERROR_FILE_DOES_NOT_EXIST);
+}
+
+Result<StringView> PipeFS::dir_query(size_t index)
+{
+	ScopedLock local_lock(m_lock);
+	if (index >= m_children.size())
+		return ResultError(ERROR_INVALID_PARAMETERS);
+
+	// FIXME: it's not efficeint way to iterate them all again;
+	auto itr = m_children.begin();
+	while (index--) {
+		itr++;
+	}
+	return StringView(itr->m_name);
 }

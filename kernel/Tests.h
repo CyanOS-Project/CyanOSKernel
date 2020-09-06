@@ -194,3 +194,25 @@ void test_client(uintptr_t arg)
 	auto result2 = connection_fd.value()->read(buff, 15);
 	Logger(DebugColor::Bright_Magenta) << "I'm the client, message from server : " << buff;
 }
+
+void test_ls(uintptr_t arg)
+{
+	UNUSED(arg);
+
+	auto fd = VFS::open("/Tar/Drivers", OpenMode::OM_READ, OpenFlags::OF_OPEN_EXISTING);
+	if (fd.is_error()) {
+		warn() << "error opening the file, error: " << fd.error();
+		HLT();
+		return;
+	}
+	DirectoryInfo dir;
+	memset(&dir, 0, sizeof(DirectoryInfo));
+
+	Result<void> result = fd.value()->dir_query(&dir);
+	if (result.is_error())
+		err() << result.error();
+	while (!result.is_error()) {
+		dbg() << dir.file_name;
+		result = fd.value()->dir_query(&dir);
+	}
+}

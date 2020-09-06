@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Filesystem/FSNode.h"
+#include "Tasking/SpinLock.h"
 #include "Utils/List.h"
 #include "Utils/Types.h"
 #include "Utils/UniquePointer.h"
@@ -14,8 +15,10 @@ class DeviceFS : public FSNode
 
 	~DeviceFS();
 	Result<FSNode&> dir_lookup(const StringView& file_name) override;
+	Result<StringView> dir_query(size_t index) override;
 
   private:
+	// static Spinlock m_lock;
 	static List<UniquePointer<FSNode>>* children;
 	explicit DeviceFS(const StringView& name);
 };

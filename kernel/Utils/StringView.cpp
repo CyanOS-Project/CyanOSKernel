@@ -13,9 +13,7 @@
 const size_t StringView::END = -1;
 const size_t StringView::NOT_FOUND = -1;
 
-StringView::StringView(const String& str) : m_size{str.length()}, m_data{str.c_str()}
-{
-}
+StringView::StringView(const String& str) : m_size{str.length()}, m_data{str.c_str()} {}
 
 StringView::StringView(const char* str) : m_size{strlen(str)}, m_data{str}
 {
@@ -27,9 +25,7 @@ StringView::StringView(const char* str, size_t len) : m_size{len}, m_data{str}
 	ASSERT(m_data);
 }
 
-StringView::StringView(const StringView& other) : m_size{other.m_size}, m_data{other.m_data}
-{
-}
+StringView::StringView(const StringView& other) : m_size{other.m_size}, m_data{other.m_data} {}
 
 StringView& StringView::operator=(const StringView& other)
 {
@@ -46,9 +42,7 @@ StringView& StringView::operator=(const char* str)
 	return *this;
 }
 
-StringView::~StringView()
-{
-}
+StringView::~StringView() {}
 
 char StringView::operator[](size_t off) const
 {
@@ -170,4 +164,9 @@ size_t StringView::rfind(char c, size_t pos) const
 	str[0] = c;
 	str[1] = 0;
 	return rfind(str, pos);
+}
+
+const char* StringView::c_str() const
+{
+	return m_data;
 }

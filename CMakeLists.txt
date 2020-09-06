@@ -13,7 +13,7 @@ SET(ROOT_DIRECTORY "CyanOS_root")
 SET(OUTPUT_ISO "CyanOS.iso")
 SET(QEMU qemu-system-i386)
 SET(QEMU_FLAGS -serial stdio  -serial file:CON -no-reboot -no-shutdown -m 128 -d cpu_reset -boot d -cdrom)
-SET(QEMU_FLAGS_DEBUG -serial stdio  -serial file:CON -S -gdb tcp::5555)
+SET(QEMU_FLAGS_DEBUG -serial stdio  -serial file:CON -S -gdb tcp::99999)
 file(MAKE_DIRECTORY ${BINS_DIRECTORY} ${DRVS_DIRECTORY} ${USER_DIRECTORY})
 
 #set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*")

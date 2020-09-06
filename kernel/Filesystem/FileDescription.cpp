@@ -1,5 +1,6 @@
 #include "FileDescription.h"
 #include "FSNode.h"
+#include "Lib/Stdlib.h"
 #include "Utils/ErrorCodes.h"
 
 FileDescription::FileDescription(FSNode& node, OpenMode mode) : m_node(node), m_type{node.m_type}, m_mode{mode} {}
@@ -77,6 +78,19 @@ Result<void> FileDescription::seek(int offset, SeekOrigin origin)
 		default:
 			break;
 	}
+	return ResultError(ERROR_SUCCESS);
+}
+
+Result<void> FileDescription::dir_query(DirectoryInfo* info)
+{
+	auto file_name = m_node.dir_query(m_current_position);
+	if (file_name.is_error())
+		return ResultError(file_name.error());
+
+	memcpy(info->file_name, file_name.value().c_str(), file_name.value().length());
+	info->file_name[file_name.value().length()] = 0;
+	m_current_position++;
+
 	return ResultError(ERROR_SUCCESS);
 }
 

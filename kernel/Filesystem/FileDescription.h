@@ -10,6 +10,10 @@ struct FileInfo {
 	size_t size;
 };
 
+struct DirectoryInfo {
+	char file_name[MAX_FILE_NAME];
+};
+
 class FileDescription
 {
   private:
@@ -31,4 +35,5 @@ class FileDescription
 	Result<FileInfo> fstat();
 	Result<void> ioctl();
 	Result<void> mmap();
+	Result<void> dir_query(DirectoryInfo* info);
 };

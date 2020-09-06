@@ -1,7 +1,5 @@
 #include "SystemCall.h"
 #include "Arch/x86/Isr.h"
-#include "Filesystem/VirtualFilesystem.h"
-#include "Tasking/Process.h"
 #include "Tasking/Thread.h"
 #include "Utils/Algorithms.h"
 
@@ -45,6 +43,7 @@ void SystemCall::systemcall_handler(ISRContextFrame* frame)
 generic_syscall SystemCall::systemcalls_routines[] = {reinterpret_cast<generic_syscall>(OpenFile),
                                                       reinterpret_cast<generic_syscall>(ReadFile),
                                                       reinterpret_cast<generic_syscall>(WriteFile),
+                                                      reinterpret_cast<generic_syscall>(CloseFile),
                                                       reinterpret_cast<generic_syscall>(CloseFile),
 
                                                       reinterpret_cast<generic_syscall>(CreateThread),
@@ -99,6 +98,19 @@ Result<int> CloseFile(Handle handle)
 
 	Thread::current->parent_process().handles.remove_handle(handle);
 	// Destructing the description will call close on FSNode.
+	return 0;
+}
+
+Result<int> QueryDirectory(Handle handle, DirectoryInfo* info)
+{
+	if (Thread::current->parent_process().handles.check_handle(handle) == false)
+		return ResultError(ERROR_INVALID_HANDLE);
+
+	auto& description = Thread::current->parent_process().handles.get_file_description(handle);
+	auto result = description.dir_query(info);
+	if (result.is_error()) {
+		return ResultError(result.error());
+	}
 	return 0;
 }
 

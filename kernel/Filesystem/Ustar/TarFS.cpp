@@ -18,9 +18,7 @@ TarFS::TarFS(const StringView& name, void* tar_address, size_t size) :
 	parse_ustar(size);
 }
 
-TarFS::~TarFS()
-{
-}
+TarFS::~TarFS() {}
 
 INode& TarFS::add_child_node(INode& parent, const StringView& name, char type, const size_t size, char* data)
 {
@@ -93,6 +91,11 @@ String TarFS::regulate_path(const char* path)
 	return full_path;
 }
 
+Result<void> TarFS::open(UNUSEDARG FileDescription&)
+{
+	return ResultError(ERROR_SUCCESS);
+}
+
 Result<FSNode&> TarFS::dir_lookup(const StringView& file_name)
 {
 	ScopedLock local_lock(m_lock);
@@ -102,4 +105,18 @@ Result<FSNode&> TarFS::dir_lookup(const StringView& file_name)
 		}
 	}
 	return ResultError(ERROR_FILE_DOES_NOT_EXIST);
+}
+
+Result<StringView> TarFS::dir_query(size_t index)
+{
+	ScopedLock local_lock(m_lock);
+	if (index >= m_children.size())
+		return ResultError(ERROR_INVALID_PARAMETERS);
+
+	// FIXME: it's not efficeint way to iterate them all again;
+	auto itr = m_children.begin();
+	while (index--) {
+		itr++;
+	}
+	return StringView(itr->m_name);
 }

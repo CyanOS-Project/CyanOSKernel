@@ -1,5 +1,7 @@
 #pragma once
 #include "Arch/x86/Context.h"
+#include "Filesystem/VirtualFilesystem.h"
+#include "Tasking/Process.h"
 #include "Utils/Result.h"
 #include "Utils/Types.h"
 
@@ -19,9 +21,10 @@ class SystemCall
 };
 
 Result<int> OpenFile(char* path, int mode, int flags);
-Result<int> ReadFile(unsigned descriptor, void* buff, size_t size);
-Result<int> WriteFile(unsigned descriptor, void* buff, size_t size);
-Result<int> CloseFile(unsigned descriptor);
+Result<int> ReadFile(Handle handle, void* buff, size_t size);
+Result<int> WriteFile(Handle handle, void* buff, size_t size);
+Result<int> CloseFile(Handle handle);
+Result<int> QueryDirectory(Handle handle, DirectoryInfo* info);
 
 Result<int> CreateThread(void* address, int arg);
 Result<int> CreateRemoteThread(int process, void* address, int arg);
