@@ -68,7 +68,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	info() << "\bDone!";
 
 	info() << "Starting the first process.";
-	Process& proc = Process::create_new_process("test_process", "/Tar/Drivers/open_file.exe");
+	Process& proc = Process::create_new_process("test_process", "/Tar/UserBinary/Shell.exe");
 	// Thread::create_thread(proc, test_server, 0);
 	// Thread::create_thread(proc, test_client, 0);
 	Thread::create_thread(proc, test_ls, 0);

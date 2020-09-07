@@ -75,7 +75,7 @@ Result<int> ReadFile(Handle handle, void* buff, size_t size)
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}
-	return 0;
+	return result.value();
 }
 
 Result<int> WriteFile(Handle handle, void* buff, size_t size)
@@ -84,11 +84,11 @@ Result<int> WriteFile(Handle handle, void* buff, size_t size)
 		return ResultError(ERROR_INVALID_HANDLE);
 
 	auto& description = Thread::current->parent_process().handles.get_file_description(handle);
-	auto result = description.read(buff, size);
+	auto result = description.write(buff, size);
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}
-	return 0;
+	return result.value();
 }
 
 Result<int> CloseFile(Handle handle)

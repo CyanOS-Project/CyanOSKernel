@@ -83,6 +83,6 @@ void Process::initiate_process(uintptr_t __pcb)
 	}
 	// return ResultError(execable_entrypoint.error());
 	void* thread_user_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE);
-	Context::enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE);
+	Context::enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE - 4);
 	ASSERT_NOT_REACHABLE();
 }

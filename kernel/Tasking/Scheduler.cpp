@@ -45,6 +45,7 @@ void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
 
 Thread& Scheduler::select_next_thread()
 {
+	// HACK: fix this silly way of choosing new process.
 	static size_t rr_index = 0;
 	Thread* next_thread = nullptr;
 	size_t threads_index = 0;

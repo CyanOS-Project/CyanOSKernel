@@ -24,13 +24,19 @@ void Memory::page_fault_handler(ISRContextFrame* isr_info)
 {
 	// printf("Page= %X EIP=%X\t CS=%X\t ESP=%X \t\n", get_faulted_page(), isr_info->eip, isr_info->cs,
 	// isr_info->registers.esp);
+	err() << "--------------------";
+	err() << "Page Fault:";
+	err() << "Addr: " << Hex(get_faulted_page());
 	if (!PF_PRESENT(isr_info->error_code)) {
-		PANIC("Page fault due accessing non-present page.");
-	} else if (PF_US(isr_info->error_code)) {
-		PANIC("Page fault due accessing kernel page from user mode.");
-	} else if (PF_WR(isr_info->error_code)) {
-		PANIC("Page fault due writing to read only page.");
+		err() << "accessing non-present page";
 	}
+	if (PF_US(isr_info->error_code)) {
+		err() << "accessing kernel page from user mode";
+	}
+	if (PF_WR(isr_info->error_code)) {
+		err() << "writing to read only page";
+	}
+	PANIC("Page fault.");
 }
 
 void* Memory::alloc(uint32_t size, uint32_t flags)
