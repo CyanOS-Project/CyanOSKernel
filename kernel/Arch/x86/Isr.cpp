@@ -3,8 +3,6 @@
 
 static isr_function interrupt_dispatcher_vector[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(4)));
 
-extern "C" uintptr_t isr_vector[];
-
 void ISR::initiate_isr_dispatcher_vector()
 {
 	for (size_t i = 0; i < NUMBER_OF_IDT_ENTRIES; i++) {

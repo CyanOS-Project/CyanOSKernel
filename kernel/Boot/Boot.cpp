@@ -3,8 +3,6 @@
 #include "Devices/DebugPort/Logger.h"
 #include "Utils/Algorithms.h"
 
-extern uint32_t KERNEL_END;
-extern uint32_t KERNEL_START;
 BootloaderInfo bootloader_info;
 __attribute__((section(".multiboot2"))) const volatile Mutiboot2_Header my_multiboot2_header = {
     .header = {.magic = MULTIBOOT2_HEADER_MAGIC,

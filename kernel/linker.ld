@@ -1,9 +1,9 @@
-
+OUTPUT_FORMAT("pe-i386")
 
 SECTIONS
 {
 	. = 0xC0100000;
-	PROVIDE(KERNEL_START = .);
+	_KERNEL_START = .;
 	.multiboot2	ALIGN(4K) :
 	{ 
 		*(.multiboot2)
@@ -25,5 +25,5 @@ SECTIONS
 	{
 		*(.bss)
 	}
-	PROVIDE(KERNEL_END = .);
+	_KERNEL_END = .;
 }

@@ -36,7 +36,7 @@ For Windows users, you can build and run the system on WSL1/WSL2 (Windows Subsys
 git clone --recursive https://github.com/AymenSekhri/CyanOS.git
 cd ./CyanOS
 mkdir build && cd build
-cmake ..
+cmake -G "Unix Makefiles"..
 make && make test
 ```
 And you can boot up the OS in Qemu using:

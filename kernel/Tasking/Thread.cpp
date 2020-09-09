@@ -70,7 +70,7 @@ void Thread::block()
 
 void Thread::yield()
 {
-	asm volatile("int 0x81");
+	asm volatile("int $0x81");
 }
 
 void Thread::idle(_UNUSED_PARAM(uintptr_t))

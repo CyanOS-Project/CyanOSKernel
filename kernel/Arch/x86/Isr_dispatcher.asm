@@ -1,5 +1,5 @@
 section .text
-extern interrupt_dispatcher
+extern _interrupt_dispatcher
 %macro ISR_ENTRY 1     
 dd isr%1
 %endmacro
@@ -16,7 +16,7 @@ dd isr%1
 	mov fs, ax
 	mov gs, ax
 	push esp
-	call interrupt_dispatcher
+	call _interrupt_dispatcher
 	pop esp
 	pop gs
 	pop fs
@@ -302,9 +302,9 @@ ISR_NOERRCODE 255
 
 
 
-global  isr_vector
+global  _isr_vector
 ALIGN 4
-isr_vector:
+_isr_vector:
 ISR_ENTRY 0
 ISR_ENTRY 1
 ISR_ENTRY 2

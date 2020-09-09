@@ -3,6 +3,15 @@ set(CMAKE_ASM_NASM_OBJECT_FORMAT win32)
 enable_language(ASM_NASM)
 project(CyanOS VERSION 0.1.0)
 
+SET(CMAKE_ASM_COMPILER clang)
+SET(CMAKE_C_COMPILER clang)
+SET(CMAKE_CXX_COMPILER clang)
+SET(CMAKE_LINKER clang)
+
+SET(CMAKE_ASM_FLAGS "--target=i686-unknown-windows")
+SET(CMAKE_C_FLAGS "--target=i686-unknown-windows -ffreestanding")
+SET(CMAKE_CXX_FLAGS "--target=i686-unknown-windows -ffreestanding -fno-exceptions -fno-rtti --std=c++17 -Wall")
+set(CMAKE_EXE_LINKER_FLAGS "--target=i686-unknown-windows -nostdlib")#-Wl,-T${CMAKE_SOURCE_DIR}/src/linker.ld
 
 SET(OUTPUT_FILE "kernel")
 SET(OUTPUT_IMAGE ${CMAKE_CURRENT_BINARY_DIR}/${OUTPUT_FILE}.img)
@@ -20,13 +29,14 @@ file(MAKE_DIRECTORY ${BINS_DIRECTORY} ${DRVS_DIRECTORY} ${USER_DIRECTORY})
 
 add_subdirectory("kernel")
 add_subdirectory("userspace")
-add_subdirectory("libsystem")
+#add_subdirectory("libsystem")
 
 
 
 add_custom_command(
         OUTPUT  ${OUTPUT_ISO}
-        MAIN_DEPENDENCY  ${OUTPUT_FILE}
+        MAIN_DEPENDENCY  kernel
+        DEPENDS userspace libsystem
         COMMAND python ../utils/make_bootable_iso.py ${OUTPUT_IMAGE} ${BINS_DIRECTORY} ${ROOT_DIRECTORY} ${OUTPUT_ISO}
         COMMENT "Creating ISO file..."
 )
@@ -44,8 +54,8 @@ add_custom_target(run
 )
 
 enable_testing()
-add_subdirectory("googletest")
-add_subdirectory("test")
+#add_subdirectory("googletest")
+#add_subdirectory("test")
 include(CTest)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

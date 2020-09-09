@@ -75,7 +75,7 @@ template <typename T> Stack<T>::~Stack()
 	for (size_t i = 0; i < m_head; i++) {
 		m_data[i].~T();
 	}
-	::operator delete(m_data, sizeof(T) * m_capacity);
+	operator delete(m_data);
 }
 
 template <typename T> bool Stack<T>::is_empty()

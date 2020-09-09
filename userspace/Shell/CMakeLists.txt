@@ -2,15 +2,19 @@ include_directories("." "../../")
 
 #set(CMAKE_CXX_STANDARD 17)
 SET(OUTPUT_FILE "Shell")
-SET(GCC_COVERAGE_COMPILE_FLAGS "-m32 -masm=intel -Wall -Wextra --std=c++17 -Og -MMD -fno-pie -ffreestanding -fno-rtti -fno-exceptions -fno-leading-underscore -Werror=return-type")
-SET(GCC_COVERAGE_LINK_FLAGS    "--entry='main' -m32 -nostdlib")
-SET(CMAKE_CXX_FLAGS  ${CMAKE_CXX_FLAGS} ${GCC_COVERAGE_COMPILE_FLAGS})
-SET(CMAKE_EXE_LINKER_FLAGS  ${CMAKE_EXE_LINKER_FLAGS} ${GCC_COVERAGE_LINK_FLAGS})
+SET(CMAKE_EXE_LINKER_FLAGS  "--target=i686-unknown-windows -nostdlib -Wl,-entry:main -fuse-ld=lld-link")
 
+message("--------------------------Flags Shell--------------------------------")
+message(${CMAKE_CXX_COMPILER})
+message(${CMAKE_CXX_FLAGS})
+message(${CMAKE_LINKER})
+message(${CMAKE_EXE_LINKER_FLAGS})
+message(${CMAKE_EXE_LINKER_FLAGS_INIT})
+message("--------------------------Flags--------------------------------")
 
-file(GLOB_RECURSE SOURCES "*.c" "*.cpp" "*.asm")
+file(GLOB SOURCES CONFIGURE_DEPENDS "*.c" "*.cpp" "*.asm")
 add_executable(${OUTPUT_FILE} ${SOURCES})
-target_link_libraries(${OUTPUT_FILE} "libsystem")
+#target_link_libraries(${OUTPUT_FILE} "libsystem")
 
 add_custom_command(
     TARGET ${OUTPUT_FILE}
@@ -18,3 +22,4 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE_NAME:${OUTPUT_FILE}> ${USER_DIRECTORY}
     COMMENT "copying to UserBinary directory ..."
 )
+

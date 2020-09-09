@@ -1,4 +1,4 @@
-extern kernel_boot_stage2
+extern _kernel_boot_stage2
 KERNEL_BASE equ 0xC0000000
 
 ; Stack
@@ -10,11 +10,11 @@ __stack_top:
 ;stack_top equ (__stack_top - KERNEL_BASE)
 ; bootstrap stage 1
 section .bootstrap
-global kernel_boot_stage1
-kernel_boot_stage1:
+global _kernel_boot_stage1
+_kernel_boot_stage1:
 mov ecx, __stack_top
 sub ecx, KERNEL_BASE
 mov esp, ecx
 push ebx
 push eax
-call kernel_boot_stage2
+call _kernel_boot_stage2

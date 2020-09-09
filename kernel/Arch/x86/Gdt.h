@@ -92,11 +92,12 @@ struct TSS_ENTRY {
 };
 #pragma pack()
 
+extern "C" void load_segments(uint16_t code_segment, uint16_t data_segment);
+
 class GDT
 {
   private:
 	static void fill_gdt(uint32_t base, uint16_t limit);
-	static void load_segments(uint16_t code_segment, uint16_t data_segment);
 	static void load_gdt();
 	static void fill_gdt_entry(uint32_t gdt_entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags);
 	static void load_tss(uint16_t tss);

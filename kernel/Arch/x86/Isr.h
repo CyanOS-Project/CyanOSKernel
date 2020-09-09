@@ -63,7 +63,6 @@ enum IRQ_NUMBER {
 
 typedef void (*isr_function)(ISRContextFrame*);
 extern "C" uintptr_t isr_vector[];
-
 class ISR
 {
   private:
