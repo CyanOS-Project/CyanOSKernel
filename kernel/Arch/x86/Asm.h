@@ -2,11 +2,11 @@
 #include "Utils/Types.h"
 
 #define JMP(x)               asm("JMP *%0" : : "r"(kernel_init) :)
-#define CALL(x, arg)         asm volatile("pushl %0;call *(%1);" : : "r"(arg), "r"(x));
+#define CALL(x, arg)         asm volatile("pushl %0;call *%1;" : : "r"(arg), "r"(x));
 #define HLT()                asm("HLT")
 #define DISABLE_INTERRUPTS() asm("CLI")
 #define ENABLE_INTERRUPTS()  asm("STI")
-#define SET_STACK(x)         asm("MOVL %%ESP,%0; SUB %%esp,0x10" : : "r"(x) :) // PUSH for the debuggers to work properly.
+#define SET_STACK(x)         asm("MOVL %0, %%ESP; SUB $0x10, %%esp" : : "r"(x) :) // PUSH for the debuggers to work properly.
 
 static inline uint32_t get_faulted_page()
 {

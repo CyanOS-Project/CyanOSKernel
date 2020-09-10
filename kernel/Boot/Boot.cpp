@@ -32,7 +32,6 @@ extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_inf
 
 	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
 		HLT();
-
 	BootloaderInfo bootloader_info_local = parse_mbi((uintptr_t)boot_info);
 	Memory::setup();
 	// maping ramdisk to virtual memory
@@ -43,6 +42,7 @@ extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_inf
 	memcpy(&bootloader_info, &bootloader_info_local, sizeof(BootloaderInfo));
 	// Set new stack for high memory kernel.
 	uintptr_t new_stack = uintptr_t(Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
+
 	SET_STACK(new_stack + STACK_SIZE);
 	CALL(kernel_init, &bootloader_info)
 	ASSERT_NOT_REACHABLE();
