@@ -15,6 +15,6 @@ addons:
 
 script:
 - mkdir build && cd build
-- cmake ..
+- cmake .. -G "Unix Makefiles"
 - make
 - make test
