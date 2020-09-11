@@ -5,31 +5,55 @@ set(CMAKE_ASM_NASM_OBJECT_FORMAT win32)
 enable_language(ASM_NASM)
 project(CyanOS VERSION 0.1.0)
 
-SET(OUTPUT_FILE "kernel.bin")
-SET(OUTPUT_IMAGE "${CMAKE_CURRENT_BINARY_DIR}/kernel.img")
-SET(BINS_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/apps")
-SET(DRVS_DIRECTORY "${BINS_DIRECTORY}/Drivers")
-SET(USER_DIRECTORY "${BINS_DIRECTORY}/UserBinary")
+SET(KERNEL_EXE "kernel.bin")
+SET(KERNEL_IMAGE "${CMAKE_CURRENT_BINARY_DIR}/kernel.img")
+SET(BINS_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
+SET(DRIVERS_BIN_DIRECTORY "${BINS_DIRECTORY}/Drivers")
+SET(USER_BIN_DIRECTORY "${BINS_DIRECTORY}/UserBinary")
 SET(ROOT_DIRECTORY "CyanOS_root")
 SET(OUTPUT_ISO "CyanOS.iso")
 SET(QEMU qemu-system-i386)
 SET(QEMU_FLAGS -serial stdio  -serial file:CON -no-reboot -no-shutdown -m 128 -d cpu_reset -boot d -cdrom)
 SET(QEMU_FLAGS_DEBUG -serial stdio  -serial file:CON -S -gdb tcp::99999)
-file(MAKE_DIRECTORY ${BINS_DIRECTORY} ${DRVS_DIRECTORY} ${USER_DIRECTORY})
+file(MAKE_DIRECTORY ${BINS_DIRECTORY} ${DRIVERS_BIN_DIRECTORY} ${USER_BIN_DIRECTORY})
+set_property(GLOBAL PROPERTY generated_bins)
 
-#set(CMAKE_CXX_CLANG_TIDY "clang-tidy;-checks=*")
+
+function(add_generated_bin element)
+    get_property(tmp GLOBAL PROPERTY generated_bins)
+    set(tmp "${element};${tmp}")
+    set_property(GLOBAL PROPERTY generated_bins "${tmp}")
+endfunction(add_generated_bin)
+
+macro(generate_user_bin bin_name bin_libs)
+    include_directories("." "../../libraries")
+    file(GLOB SOURCES CONFIGURE_DEPENDS "*.c" "*.cpp" "*.asm")
+    add_executable(${bin_name} ${SOURCES})
+    target_link_libraries(${bin_name} ${bin_libs})
+    add_custom_command(
+        TARGET ${bin_name}
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE_NAME:${bin_name}> ${USER_BIN_DIRECTORY}
+    )
+    add_generated_bin(${bin_name})
+endmacro(generate_user_bin)
+
+macro(generate_library lib_name)
+    include_directories(".")
+    file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "*.cpp")
+    add_library(${lib_name} ${SOURCES})
+endmacro(generate_library)
 
 add_subdirectory("kernel")
 add_subdirectory("userspace")
-add_subdirectory("libsystem")
+add_subdirectory("libraries")
 
 
-
+get_property(__generated_bins GLOBAL PROPERTY generated_bins)
 add_custom_command(
         OUTPUT  ${OUTPUT_ISO}
-        DEPENDS  ${OUTPUT_FILE}
-        #DEPENDS userspace libsystem
-        COMMAND python ../utils/make_bootable_iso.py ${OUTPUT_IMAGE} ${BINS_DIRECTORY} ${ROOT_DIRECTORY} ${OUTPUT_ISO}
+        DEPENDS  ${KERNEL_EXE} ${__generated_bins}
+        COMMAND python ../utils/make_bootable_iso.py ${KERNEL_IMAGE} ${BINS_DIRECTORY} ${ROOT_DIRECTORY} ${OUTPUT_ISO}
         COMMENT "Creating ISO file..."
 )
 

@@ -1,7 +1,8 @@
 #include <libsystem/Systemcalls/Systemcalls.h>
 #include <libsystem/Types.h>
+
 void execute_command(char* command) {}
-extern "C" int main()
+int main()
 {
 	HANDLE kb_fd = OpenFile("/Devices/keyboard", 0, 1);
 	HANDLE con_fd = OpenFile("/Devices/console", 1, 1);
@@ -20,7 +21,7 @@ extern "C" int main()
 				WriteFile(con_fd, "ً\n$> ", 7);
 				index = 0;
 			} else {
-				buff[index++];
+				buff[index++] = c;
 				WriteFile(con_fd, &c, 1);
 			}
 		} else {
