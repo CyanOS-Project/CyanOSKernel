@@ -32,5 +32,5 @@ void IDT::fill_idt_entry(uint8_t idt_entry, uint32_t address, uint16_t segment, 
 
 void IDT::load_idt()
 {
-	asm volatile("LIDT (%0)" : : "r"(&idt));
+	asm volatile("lidt (%0)" : : "r"(&idt));
 }

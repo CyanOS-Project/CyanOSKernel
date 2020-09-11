@@ -11,6 +11,6 @@ mov gs, ax;
 
 push dword [esp+4];
 push far_jmp;
-retfd;
+retf;
 far_jmp: nop;
 ret;

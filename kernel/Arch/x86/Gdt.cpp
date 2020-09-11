@@ -59,10 +59,10 @@ void GDT::fill_gdt(uint32_t base, uint16_t limit)
 
 void GDT::load_gdt()
 {
-	asm volatile("LGDT (%0)" : : "r"(&gdt));
+	asm volatile("lgdt (%0)" : : "r"(&gdt));
 }
 
 void GDT::load_tss(uint16_t tss)
 {
-	asm volatile("LTR %0" : : "a"(tss));
+	asm volatile("ltr %0" : : "a"(tss));
 }

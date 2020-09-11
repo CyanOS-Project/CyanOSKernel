@@ -20,18 +20,18 @@ void Context::switch_task_stack(uint32_t task_stack_start)
 
 void Context::enter_usermode(uintptr_t address, uintptr_t stack)
 {
-	asm volatile("MOV %%ds,%0;"
-	             "MOV %%es,%0;"
-	             "MOV %%fs,%0;"
-	             "MOV %%gs,%0;"
-	             "PUSH %0;"
-	             "PUSH %1;"
-	             "PUSH %2;"
-	             "PUSH %3;"
-	             "PUSH %4;"
-	             "IRET;"
+	asm volatile("mov %0, %%ds;"
+	             "mov %0, %%es;"
+	             "mov %0, %%fs;"
+	             "mov %0, %%gs;"
+	             "pushl %0;"
+	             "pushl %1;"
+	             "pushl %2;"
+	             "pushl %3;"
+	             "pushl %4;"
+	             "iret;"
 	             :
-	             : "r"(uint16_t{UDS_SELECTOR}), "r"(uint32_t{stack}), "i"(uint32_t{EFLAGS_IF_ENABLE}),
+	             : "r"(uint32_t{UDS_SELECTOR}), "r"(uint32_t{stack}), "i"(uint32_t{EFLAGS_IF_ENABLE}),
 	               "r"(uint32_t{UCS_SELECTOR}), "r"(uint32_t{address}));
 }
 

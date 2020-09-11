@@ -71,7 +71,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	Process& proc = Process::create_new_process("test_process", "/Tar/UserBinary/Shell");
 	Thread::create_thread(proc, test_server, 0);
 	Thread::create_thread(proc, test_client, 0);
-	// Thread::create_thread(proc, test_ls, 0);
+	Thread::create_thread(proc, test_ls, 0);
 
 	Thread::yield();
 	while (1) {
