@@ -1,6 +1,6 @@
 #include "Spinlock.h"
 #include "Asm.h"
-#include "Utils/Assert.h"
+#include "Assert.h"
 
 void StaticSpinlock::init()
 {

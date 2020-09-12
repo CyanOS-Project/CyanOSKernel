@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utils/Types.h"
+#include "Types.h"
 
 #define IMAGE_NUMBEROF_DIRECTORY_ENTRIES 16
 #define IMAGE_NT_SIGNATURE               0x00004550

@@ -1,9 +1,9 @@
 #pragma once
 #include "Arch/x86/Context.h"
 #include "Filesystem/VirtualFilesystem.h"
+#include "Result.h"
 #include "Tasking/Process.h"
-#include "Utils/Result.h"
-#include "Utils/Types.h"
+#include "Types.h"
 
 typedef Result<int> (*generic_syscall)(int arg0, int arg1, int arg2, int arg3, int arg4);
 

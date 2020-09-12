@@ -1,7 +1,7 @@
 #include "Console.h"
 #include "Arch/x86/Panic.h"
+#include "Clib.h"
 #include "Kernel_map.h"
-#include "Lib/Stdlib.h"
 #include "Tasking/ScopedLock.h"
 #include "VirtualMemory/Memory.h"
 

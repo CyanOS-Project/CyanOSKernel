@@ -1,12 +1,12 @@
 #pragma once
 
+#include "Algorithms.h"
 #include "FileDescription.h"
+#include "List.h"
 #include "Tasking/ScopedLock.h"
 #include "Tasking/SpinLock.h"
-#include "Utils/Algorithms.h"
-#include "Utils/List.h"
-#include "Utils/Types.h"
-#include "Utils/UniquePointer.h"
+#include "Types.h"
+#include "UniquePointer.h"
 
 typedef size_t Handle;
 

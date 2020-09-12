@@ -1,8 +1,8 @@
 #include "TarFS.h"
+#include "Algorithms.h"
+#include "ErrorCodes.h"
+#include "Stack.h"
 #include "Tasking/ScopedLock.h"
-#include "Utils/Algorithms.h"
-#include "Utils/ErrorCodes.h"
-#include "Utils/Stack.h"
 
 UniquePointer<FSNode> TarFS::alloc(const StringView& name, void* tar_address, size_t size)
 {

@@ -38,8 +38,8 @@ template <class T> class List
 
 		Iterator operator++(int);
 		Iterator& operator++();
-		bool operator!=(const List<T>::Iterator& other);
-		bool operator==(const List<T>::Iterator& other);
+		bool operator!=(const List<T>::Iterator& other) const;
+		bool operator==(const List<T>::Iterator& other) const;
 		T* operator->();
 		T& operator*();
 		friend List<T>;
@@ -81,13 +81,9 @@ template <class T> List<T>::Iterator::Iterator(Node* t_head, size_t index) : m_c
 	}
 }
 
-template <class T> List<T>::Iterator::Iterator(const Iterator& other) : m_current{other.m_current}
-{
-}
+template <class T> List<T>::Iterator::Iterator(const Iterator& other) : m_current{other.m_current} {}
 
-template <class T> List<T>::Iterator::Iterator(Node* t_node) : m_current{t_node}
-{
-}
+template <class T> List<T>::Iterator::Iterator(Node* t_node) : m_current{t_node} {}
 
 template <class T> typename List<T>::Iterator List<T>::Iterator::operator++(int arg)
 {
@@ -103,12 +99,12 @@ template <class T> typename List<T>::Iterator& List<T>::Iterator::operator++()
 	return *this;
 }
 
-template <class T> bool List<T>::Iterator::operator!=(const List<T>::Iterator& other)
+template <class T> bool List<T>::Iterator::operator!=(const List<T>::Iterator& other) const
 {
 	return m_current != other.m_current;
 }
 
-template <class T> bool List<T>::Iterator::operator==(const List<T>::Iterator& other)
+template <class T> bool List<T>::Iterator::operator==(const List<T>::Iterator& other) const
 {
 	return m_current == other.m_current;
 }
@@ -128,9 +124,7 @@ template <class T> T* List<T>::Iterator::operator->()
 	return &m_current->data;
 }
 
-template <class T> List<T>::List() : m_head{nullptr}, m_tail{nullptr}, m_count{0}
-{
-}
+template <class T> List<T>::List() : m_head{nullptr}, m_tail{nullptr}, m_count{0} {}
 
 template <class T> List<T>::~List()
 {

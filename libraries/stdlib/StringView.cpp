@@ -5,8 +5,8 @@
 	#include <cstring>
 	#define ASSERT(x) assert(x)
 #else
-	#include "Lib/Stdlib.h"
-	#include "Utils/Assert.h"
+	#include "Clib.h"
+	#include "Assert.h"
 #endif
 #include "String.h"
 

@@ -2,12 +2,12 @@
 
 #include "FSNode.h"
 #include "FileDescription.h"
+#include "List.h"
+#include "PathParser.h"
+#include "Result.h"
 #include "Tasking/SpinLock.h"
-#include "Utils/List.h"
-#include "Utils/PathParser.h"
-#include "Utils/Result.h"
-#include "Utils/Types.h"
-#include "Utils/UniquePointer.h"
+#include "Types.h"
+#include "UniquePointer.h"
 
 class VFS
 {

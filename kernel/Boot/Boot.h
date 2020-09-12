@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Arch/x86/Asm.h"
+#include "Assert.h"
 #include "Kernel_init.h"
 #include "Kernel_map.h"
 #include "Multiboot2.h"
-#include "Utils/Assert.h"
-#include "Utils/Types.h"
+#include "Types.h"
 #include "VirtualMemory/Memory.h"
 
 typedef struct __attribute__((__packed__)) {

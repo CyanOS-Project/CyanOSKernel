@@ -1,8 +1,8 @@
 
 #pragma once
 
-#include "Utils/Result.h"
-#include "Utils/Types.h"
+#include "Result.h"
+#include "Types.h"
 #include "Winnt.h"
 
 class PELoader

@@ -1,14 +1,14 @@
 #pragma once
 
+#include "CircularBuffer.h"
 #include "Filesystem/FSNode.h"
+#include "List.h"
 #include "Socket.h"
+#include "String.h"
+#include "StringView.h"
 #include "Tasking/WaitQueue.h"
-#include "Utils/CircularBuffer.h"
-#include "Utils/List.h"
-#include "Utils/String.h"
-#include "Utils/StringView.h"
-#include "Utils/Types.h"
-#include "Utils/UniquePointer.h"
+#include "Types.h"
+#include "UniquePointer.h"
 
 class SocketFS : public FSNode
 {

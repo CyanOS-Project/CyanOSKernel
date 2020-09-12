@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Asm.h"
-#include "Utils/Types.h"
+#include "Types.h"
 
 #define PIC1_BASE       (0x20)
 #define PIC2_BASE       (0xA0)

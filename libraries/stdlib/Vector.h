@@ -36,8 +36,8 @@ template <class T> class Vector
 		Iterator& operator++();
 		Iterator operator+(int);
 		Iterator operator-(int);
-		bool operator!=(const Vector<T>::Iterator& other);
-		bool operator==(const Vector<T>::Iterator& other);
+		bool operator!=(const Vector<T>::Iterator& other) const;
+		bool operator==(const Vector<T>::Iterator& other) const;
 		T* operator->();
 		T& operator*();
 
@@ -78,18 +78,14 @@ template <class T> class Vector
 	T& operator[](size_t index) const;
 };
 
-template <class T> Vector<T>::Iterator::Iterator(T* storage, size_t index) : m_storage{storage}, m_current{index}
-{
-}
+template <class T> Vector<T>::Iterator::Iterator(T* storage, size_t index) : m_storage{storage}, m_current{index} {}
 
 template <class T>
 Vector<T>::Iterator::Iterator(const Iterator& other) : m_storage{other.m_storage}, m_current{other.m_current}
 {
 }
 
-template <class T> Vector<T>::Iterator::Iterator(T* storage) : m_storage{storage}, m_current{0}
-{
-}
+template <class T> Vector<T>::Iterator::Iterator(T* storage) : m_storage{storage}, m_current{0} {}
 
 template <class T> typename Vector<T>::Iterator Vector<T>::Iterator::operator++(int arg)
 {
@@ -115,12 +111,12 @@ template <class T> typename Vector<T>::Iterator& Vector<T>::Iterator::operator++
 	return *this;
 }
 
-template <class T> bool Vector<T>::Iterator::operator!=(const Vector<T>::Iterator& other)
+template <class T> bool Vector<T>::Iterator::operator!=(const Vector<T>::Iterator& other) const
 {
 	return m_current != other.m_current;
 }
 
-template <class T> bool Vector<T>::Iterator::operator==(const Vector<T>::Iterator& other)
+template <class T> bool Vector<T>::Iterator::operator==(const Vector<T>::Iterator& other) const
 {
 	return m_current == other.m_current && m_storage == other.m_storage;
 }

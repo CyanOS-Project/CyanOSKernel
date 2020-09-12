@@ -3,9 +3,9 @@
 #include "Arch/x86/Context.h"
 #include "Arch/x86/Spinlock.h"
 #include "Process.h"
+#include "Result.h"
 #include "Thread.h"
-#include "Utils/Result.h"
-#include "Utils/Types.h"
+#include "Types.h"
 
 enum class ScheduleType {
 	FORCED,

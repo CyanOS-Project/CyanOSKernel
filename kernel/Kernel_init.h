@@ -1,5 +1,5 @@
 #pragma once
-#include "Utils/Types.h"
+#include "Types.h"
 
 struct Module {
 	uintptr_t start;

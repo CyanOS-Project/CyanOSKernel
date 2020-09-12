@@ -1,12 +1,12 @@
 #include "Scheduler.h"
 #include "Arch/x86/Asm.h"
 #include "Arch/x86/Isr.h"
+#include "Assert.h"
 #include "Devices/Timer/Pit.h"
 #include "Filesystem/VirtualFilesystem.h"
 #include "Loader/PE.h"
 #include "ScopedLock.h"
 #include "SystemCall.h"
-#include "Utils/Assert.h"
 #include "VirtualMemory/Memory.h"
 
 StaticSpinlock Scheduler::lock;

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "Filesystem/FSNode.h"
+#include "List.h"
 #include "Tasking/SpinLock.h"
-#include "Utils/List.h"
-#include "Utils/Types.h"
-#include "Utils/UniquePointer.h"
+#include "Types.h"
+#include "UniquePointer.h"
 
 class DeviceFS : public FSNode
 {

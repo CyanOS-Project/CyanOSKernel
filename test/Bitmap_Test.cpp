@@ -2,7 +2,7 @@
 	#undef __STRICT_ANSI__
 #endif
 
-#include "Utils/Bitmap.h"
+#include "Bitmap.h"
 #include <gtest/gtest.h>
 
 TEST(Bitmap_Test, SearchForUsed)

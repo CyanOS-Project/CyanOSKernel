@@ -1,9 +1,9 @@
 #pragma once
 
 #include "FSNode.h"
-#include "Utils/Result.h"
-#include "Utils/Types.h"
-#include "Utils/UniquePointer.h"
+#include "Result.h"
+#include "Types.h"
+#include "UniquePointer.h"
 
 enum class SeekOrigin { SET, CURRENT, END };
 struct FileInfo {
@@ -19,7 +19,7 @@ class FileDescription
   private:
 	FSNode& m_node;
 	size_t m_current_position = 0;
-	bool m_has_changed = false;
+	// bool m_has_changed = false;
 
   public:
 	const NodeType m_type;

@@ -1,7 +1,7 @@
 #include "FileDescription.h"
+#include "Clib.h"
+#include "ErrorCodes.h"
 #include "FSNode.h"
-#include "Lib/Stdlib.h"
-#include "Utils/ErrorCodes.h"
 
 FileDescription::FileDescription(FSNode& node, OpenMode mode) : m_node(node), m_type{node.m_type}, m_mode{mode} {}
 

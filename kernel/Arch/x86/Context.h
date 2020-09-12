@@ -2,7 +2,7 @@
 
 #include "Gdt.h"
 #include "Isr.h"
-#include "Utils/Types.h"
+#include "Types.h"
 
 class Context
 {

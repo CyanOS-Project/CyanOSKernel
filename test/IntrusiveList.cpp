@@ -2,7 +2,7 @@
 	#undef __STRICT_ANSI__
 #endif
 
-#include "Utils/IntrusiveList.h"
+#include "IntrusiveList.h"
 #include <gtest/gtest.h>
 
 struct TestStruct : public IntrusiveListNode<TestStruct> {
@@ -16,9 +16,7 @@ struct TestStruct : public IntrusiveListNode<TestStruct> {
 			return false;
 		return true;
 	}
-	TestStruct(int aa, int bb) : a{aa}, b{bb}
-	{
-	}
+	TestStruct(int aa, int bb) : a{aa}, b{bb} {}
 };
 
 TEST(IntrusiveList_Test, Iteration)

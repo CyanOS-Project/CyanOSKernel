@@ -1,11 +1,11 @@
 #pragma once
+#include "Bitmap.h"
+#include "IntrusiveList.h"
+#include "IterationDecision.h"
+#include "Result.h"
+#include "Types.h"
 #include "Arch/x86/Spinlock.h"
 #include "Process.h"
-#include "Utils/Bitmap.h"
-#include "Utils/IntrusiveList.h"
-#include "Utils/IterationDecision.h"
-#include "Utils/Result.h"
-#include "Utils/Types.h"
 
 enum class ThreadState {
 	RUNNABLE,

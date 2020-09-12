@@ -1,7 +1,7 @@
 #ifdef __STRICT_ANSI__
 	#undef __STRICT_ANSI__
 #endif
-#include "Utils/Vector.h"
+#include "Vector.h"
 #include <gtest/gtest.h>
 
 struct TestStruct {

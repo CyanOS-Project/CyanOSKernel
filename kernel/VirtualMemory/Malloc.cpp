@@ -1,5 +1,5 @@
 #include "Arch/x86/Panic.h"
-#include "Utils/Types.h"
+#include "Types.h"
 #include "VirtualMemory/Heap.h"
 
 void* operator new(size_t size)

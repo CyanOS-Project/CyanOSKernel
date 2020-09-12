@@ -2,9 +2,9 @@
 
 #include "Arch/x86/Spinlock.h"
 #include "DebugPort.h"
-#include "Utils/String.h"
-#include "Utils/StringView.h"
-#include "Utils/Types.h"
+#include "String.h"
+#include "StringView.h"
+#include "Types.h"
 
 class Hex;
 
@@ -33,33 +33,25 @@ class Logger
 class dbg : public Logger
 {
   public:
-	dbg() : Logger{DebugColor::Green}
-	{
-	}
+	dbg() : Logger{DebugColor::Green} {}
 };
 
 class info : public Logger
 {
   public:
-	info() : Logger{DebugColor::Bright_Blue}
-	{
-	}
+	info() : Logger{DebugColor::Bright_Blue} {}
 };
 
 class warn : public Logger
 {
   public:
-	warn() : Logger{DebugColor::Yellow}
-	{
-	}
+	warn() : Logger{DebugColor::Yellow} {}
 };
 
 class err : public Logger
 {
   public:
-	err() : Logger{DebugColor::Red}
-	{
-	}
+	err() : Logger{DebugColor::Red} {}
 };
 
 class Hex
@@ -68,8 +60,6 @@ class Hex
 	int m_data;
 
   public:
-	Hex(int num) : m_data(num)
-	{
-	}
+	Hex(int num) : m_data(num) {}
 	friend class Logger;
 };

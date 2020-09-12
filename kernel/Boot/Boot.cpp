@@ -1,7 +1,7 @@
 
 #include "Boot.h"
+#include "Algorithms.h"
 #include "Devices/DebugPort/Logger.h"
-#include "Utils/Algorithms.h"
 
 BootloaderInfo bootloader_info;
 __attribute__((section(".multiboot2"))) const volatile Mutiboot2_Header my_multiboot2_header = {

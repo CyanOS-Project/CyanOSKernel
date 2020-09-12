@@ -5,8 +5,8 @@
 	#include <cstring>
 	#define ASSERT(x) assert(x)
 #else
-	#include "Lib/Stdlib.h"
-	#include "Utils/Assert.h"
+	#include "Clib.h"
+	#include "Assert.h"
 #endif
 
 PathParser::PathParser(const StringView& path) : m_path{path}, m_count{calc_count()}
@@ -14,9 +14,7 @@ PathParser::PathParser(const StringView& path) : m_path{path}, m_count{calc_coun
 	ASSERT(is_valid());
 }
 
-PathParser::~PathParser()
-{
-}
+PathParser::~PathParser() {}
 
 size_t PathParser::count() const
 {

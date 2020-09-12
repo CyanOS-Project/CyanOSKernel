@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Arch/x86/Spinlock.h"
-#include "Lib/Stdlib.h"
+#include "Clib.h"
 #include "Memory.h"
-#include "Utils/Types.h"
+#include "Types.h"
 
 #define ADDR_TO_HEADER(x)                  ((unsigned)x - sizeof(BlockHeader))
 #define HEADER_TO_ADDR(x)                  ((unsigned)x + sizeof(BlockHeader))

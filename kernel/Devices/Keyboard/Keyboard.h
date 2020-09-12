@@ -2,12 +2,12 @@
 
 #include "Arch/x86/Isr.h"
 #include "Arch/x86/Pic.h"
+#include "CircularBuffer.h"
 #include "Devices/DebugPort/DebugPort.h"
 #include "Filesystem/FSNode.h"
 #include "Tasking/WaitQueue.h"
-#include "Utils/CircularBuffer.h"
-#include "Utils/Types.h"
-#include "Utils/UniquePointer.h"
+#include "Types.h"
+#include "UniquePointer.h"
 
 class Keyboard : public FSNode
 {

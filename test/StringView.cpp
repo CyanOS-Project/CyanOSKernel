@@ -4,7 +4,7 @@
 #define UNIT_TESTING
 #define ASSERT(x) (void)ASSERT_TRUE(false)
 
-#include "Utils/StringView.h"
+#include "StringView.h"
 #include <gtest/gtest.h>
 
 TEST(StringView_Test, Construction)

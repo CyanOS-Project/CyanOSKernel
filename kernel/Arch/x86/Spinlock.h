@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utils/Types.h"
+#include "Types.h"
 
 class StaticSpinlock
 {

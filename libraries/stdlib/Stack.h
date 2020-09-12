@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Utils/Algorithms.h"
-#include "Utils/Types.h"
+#include "Algorithms.h"
+#include "Types.h"
 #ifdef __UNIT_TESTS
 	#include <assert.h>
 	#define ASSERT(x) assert(x)

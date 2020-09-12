@@ -1,14 +1,14 @@
 #pragma once
 
+#include "Bitmap.h"
 #include "Devices/DebugPort/Logger.h"
 #include "Devices/Timer/Pit.h"
 #include "Filesystem/FileDescription.h"
 #include "Filesystem/VirtualFilesystem.h"
+#include "PathParser.h"
 #include "Tasking/Loader/PE.h"
 #include "Tasking/Scheduler.h"
 #include "Tasking/Semaphore.h"
-#include "Utils/Bitmap.h"
-#include "Utils/PathParser.h"
 #include "VirtualMemory/Memory.h"
 
 Semaphore* sem_lock;

@@ -1,10 +1,10 @@
 #include "Process.h"
 #include "Arch/x86/Context.h"
+#include "Assert.h"
 #include "Filesystem/VirtualFilesystem.h"
 #include "Loader/PE.h"
 #include "ScopedLock.h"
 #include "Thread.h"
-#include "Utils/Assert.h"
 #include "VirtualMemory/Memory.h"
 
 List<Process>* Process::processes;

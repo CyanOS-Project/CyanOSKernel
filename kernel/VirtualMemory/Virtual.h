@@ -2,10 +2,10 @@
 
 #include "Arch/x86/Paging.h"
 #include "Arch/x86/Panic.h"
+#include "Assert.h"
 #include "Kernel_map.h"
 #include "Memory.h"
-#include "Utils/Assert.h"
-#include "Utils/Types.h"
+#include "Types.h"
 
 class VirtualMemory
 {

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Utils/Types.h"
+#include "Types.h"
 #ifdef __UNIT_TESTS
 	#include <assert.h>
 	#define ASSERT(x) assert(x)
@@ -35,8 +35,8 @@ template <typename T> class IntrusiveList
 		Iterator(T* node);
 		Iterator(const Iterator& other);
 		~Iterator() = default;
-		bool operator==(const Iterator& other);
-		bool operator!=(const Iterator& other);
+		bool operator==(const Iterator& other) const;
+		bool operator!=(const Iterator& other) const;
 		Iterator& operator++();
 		Iterator operator++(int);
 		T& operator*();
@@ -58,40 +58,24 @@ template <typename T> class IntrusiveList
 	Iterator begin() const;
 	Iterator end() const;
 
-	T* first() const
-	{
-		return m_head;
-	}
+	T* first() const { return m_head; }
 
-	T* tail() const
-	{
-		return m_tail;
-	}
+	T* tail() const { return m_tail; }
 
-	bool is_empty() const
-	{
-		return !m_count;
-	}
+	bool is_empty() const { return !m_count; }
 
-	size_t size() const
-	{
-		return m_count;
-	}
+	size_t size() const { return m_count; }
 };
-template <typename T> IntrusiveList<T>::Iterator::Iterator(T* node) : m_node{node}
-{
-}
+template <typename T> IntrusiveList<T>::Iterator::Iterator(T* node) : m_node{node} {}
 
-template <typename T> IntrusiveList<T>::Iterator::Iterator(const Iterator& other) : m_node{other.m_node}
-{
-}
+template <typename T> IntrusiveList<T>::Iterator::Iterator(const Iterator& other) : m_node{other.m_node} {}
 
-template <typename T> bool IntrusiveList<T>::Iterator::operator==(const Iterator& other)
+template <typename T> bool IntrusiveList<T>::Iterator::operator==(const Iterator& other) const
 {
 	return m_node == other.m_node;
 }
 
-template <typename T> bool IntrusiveList<T>::Iterator::operator!=(const Iterator& other)
+template <typename T> bool IntrusiveList<T>::Iterator::operator!=(const Iterator& other) const
 {
 	return m_node != other.m_node;
 }

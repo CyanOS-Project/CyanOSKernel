@@ -29,7 +29,7 @@ macro(generate_user_bin bin_name bin_libs)
     include_directories("." "../../libraries")
     file(GLOB SOURCES CONFIGURE_DEPENDS "*.c" "*.cpp" "*.asm")
     add_executable(${bin_name} ${SOURCES})
-    target_link_libraries(${bin_name} ${bin_libs})
+    target_link_libraries(${bin_name} ${bin_libs} "stdlib")
     add_custom_command(
         TARGET ${bin_name}
         POST_BUILD
@@ -39,7 +39,7 @@ macro(generate_user_bin bin_name bin_libs)
 endmacro(generate_user_bin)
 
 macro(generate_library lib_name)
-    include_directories(".")
+    include_directories("." )
     file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS "*.cpp")
     add_library(${lib_name} ${SOURCES})
 endmacro(generate_library)
@@ -53,7 +53,7 @@ get_property(__generated_bins GLOBAL PROPERTY generated_bins)
 add_custom_command(
         OUTPUT  ${OUTPUT_ISO}
         DEPENDS  ${KERNEL_EXE} ${__generated_bins}
-        COMMAND python ../utils/make_bootable_iso.py ${KERNEL_IMAGE} ${BINS_DIRECTORY} ${ROOT_DIRECTORY} ${OUTPUT_ISO}
+        COMMAND python ../build_tools/make_bootable_iso.py ${KERNEL_IMAGE} ${BINS_DIRECTORY} ${ROOT_DIRECTORY} ${OUTPUT_ISO}
         COMMENT "Creating ISO file..."
 )
 
@@ -69,11 +69,15 @@ add_custom_target(run
     COMMAND ${QEMU} ${QEMU_FLAGS} ${OUTPUT_ISO}
 )
 
+#------------------------------------- Testing-------------------------------------------------
+
+SET(CMAKE_C_FLAGS  "")
+SET(CMAKE_CXX_FLAGS  "-std=c++17")
+SET(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld-link")
 enable_testing()
 #add_subdirectory("googletest")
 #add_subdirectory("test")
 include(CTest)
-
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
 include(CPack)

@@ -1,35 +1,38 @@
-#include <libsystem/Systemcalls/Systemcalls.h>
-#include <libsystem/Types.h>
+#include <systemlib/Systemcalls/Systemcalls.h>
+#include <systemlib/Types.h>
+#include <systemlib/iostream/iostream.h>
 
-void execute_command(char* command) {}
+void execute_command(char* command)
+{
+	UNUSED(command);
+}
+
 int main()
 {
-	HANDLE kb_fd = OpenFile("/Devices/keyboard", 0, 1);
-	HANDLE con_fd = OpenFile("/Devices/console", 1, 1);
-	WriteFile(con_fd, "ًWelcome To CyanOS\n", 21);
-	WriteFile(con_fd, "ً$> ", 7);
+	printf("Welcome To CyanOS\n");
+	printf("Version 0.1 Alpha\n");
+	printf("$> ");
 
 	char c;
 	const size_t max = 1000;
 	char buff[max];
 	size_t index = 0;
-	while (ReadFile(kb_fd, &c, 1)) {
+	while ((c = get_char())) {
 		if (index < max) {
 			if (c == '\n') {
 				buff[index] = 0;
 				execute_command(buff);
-				WriteFile(con_fd, "ً\n$> ", 7);
+				printf("\n$> ");
 				index = 0;
 			} else {
 				buff[index++] = c;
-				WriteFile(con_fd, &c, 1);
+				printf(&c);
 			}
 		} else {
-			WriteFile(con_fd, "\ncommand is too long!", 22);
+			printf("\ncommand is too long!");
 			index = 0; // command is too long
 		}
 	}
-	CloseFile(kb_fd);
 	while (1) {
 	}
 	return 0;

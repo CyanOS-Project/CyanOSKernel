@@ -1,8 +1,8 @@
 #include "Thread.h"
 #include "Arch/x86/Context.h"
+#include "Assert.h"
 #include "Devices/Timer/Pit.h"
 #include "ScopedLock.h"
-#include "Utils/Assert.h"
 #include "VirtualMemory/Memory.h"
 #include "WaitQueue.h"
 
