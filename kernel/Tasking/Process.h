@@ -46,7 +46,7 @@ class Process
 	static Process& create_new_process(const StringView& name, const StringView& path);
 	static void setup();
 	static Result<Process&> get_process_from_pid(size_t pid);
-	int wait_for_termination();
+	int wait_for_signal();
 	~Process();
 
 	friend class List<Process>;

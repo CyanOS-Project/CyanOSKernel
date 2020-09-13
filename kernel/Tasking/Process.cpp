@@ -98,7 +98,7 @@ void Process::initiate_process(uintptr_t __pcb)
 	ASSERT_NOT_REACHABLE();
 }
 
-int Process::wait_for_termination()
+int Process::wait_for_signal()
 {
 	ScopedLock local_lock(m_lock);
 	m_singal_waiting_queue.wait_on_event([&]() { return true; }, local_lock);

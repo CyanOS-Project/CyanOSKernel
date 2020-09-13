@@ -1,7 +1,10 @@
 #include "ProcessDescription.h"
+#include "Tasking/Process.h"
 
 Result<UniquePointer<ProcessDescription>> ProcessDescription::open(size_t pid, int access)
 {
+	UNUSED(access);
+
 	auto result = Process::get_process_from_pid(pid);
 	if (result.is_error())
 		return ResultError(result.error());
@@ -9,8 +12,11 @@ Result<UniquePointer<ProcessDescription>> ProcessDescription::open(size_t pid, i
 	return UniquePointer<ProcessDescription>::make_unique(result.value());
 }
 
-ProcessDescription::ProcessDescription(const Process& process) : m_process{process} {}
+ProcessDescription::ProcessDescription(Process& process) : m_process{process} {}
 
 ProcessDescription::~ProcessDescription() {}
 
-int ProcessDescription::wait_signal() {}
+int ProcessDescription::wait_signal()
+{
+	return m_process.wait_for_signal();
+}

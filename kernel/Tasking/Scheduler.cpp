@@ -4,6 +4,7 @@
 #include "Devices/Timer/Pit.h"
 #include "Filesystem/VirtualFilesystem.h"
 #include "Loader/PE.h"
+#include "Process.h"
 #include "ScopedLock.h"
 #include "SystemCall.h"
 #include "VirtualMemory/Memory.h"

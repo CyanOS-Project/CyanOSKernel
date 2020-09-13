@@ -1,36 +1,65 @@
 #include "HandlesManager.h"
+#include "Tasking/ScopedLock.h"
 
 HandlesManager::HandlesManager() : m_lock{}, handle_table{} {}
 HandlesManager::~HandlesManager() {}
 
-Handle HandlesManager::add_file_description(UniquePointer<FileDescription>&& file_description)
+Handle HandlesManager::add_handle(UniquePointer<FileDescription>&& file_description)
 {
 	ScopedLock local_lock(m_lock);
-	handle_table.emplace_back(true, move(file_description));
+
+	auto& new_fd = file_description_table.push_back(move(file_description));
+	handle_table.emplace_back(HandleType::FileDescription, new_fd.ptr());
+	return handle_table.size() - 1;
+}
+Handle HandlesManager::add_handle(UniquePointer<ProcessDescription>&& process_description)
+{
+	ScopedLock local_lock(m_lock);
+
+	auto& new_fp = process_description_table.push_back(move(process_description));
+	handle_table.emplace_back(HandleType::ProcessDescription, new_fp.ptr());
 	return handle_table.size() - 1;
 }
 
 void HandlesManager::remove_handle(Handle handle)
 {
-	ASSERT(check_handle(handle));
-
 	ScopedLock local_lock(m_lock);
-	handle_table[handle].valid = false;
-	handle_table[handle].file_description.~UniquePointer();
+
+	ASSERT(check_handle(handle) != HandleType::Invalid);
+
+	handle_table[handle].type = HandleType::Invalid;
+	// handle_table[handle].file_description.~UniquePointer();
 }
 
 FileDescription& HandlesManager::get_file_description(Handle handle)
 {
-	ASSERT(check_handle(handle));
-
 	ScopedLock local_lock(m_lock);
+
+	ASSERT(handle_table[handle].file_description);
+
 	auto& handle_entry = handle_table[handle];
+	ASSERT(handle_entry.type == HandleType::FileDescription);
+
 	return *handle_entry.file_description;
 }
 
-bool HandlesManager::check_handle(Handle handle)
+ProcessDescription& HandlesManager::get_process_description(Handle handle)
 {
+	ScopedLock local_lock(m_lock);
+
+	ASSERT(handle_table[handle].process_description);
+
+	auto& handle_entry = handle_table[handle];
+	ASSERT(handle_entry.type == HandleType::ProcessDescription);
+
+	return *handle_entry.process_description;
+}
+
+HandleType HandlesManager::check_handle(Handle handle)
+{
+	ScopedLock local_lock(m_lock);
+
 	if (handle >= handle_table.size())
-		return false;
-	return handle_table[handle].valid;
+		return HandleType::Invalid;
+	return handle_table[handle].type;
 }

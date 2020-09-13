@@ -62,13 +62,13 @@ Result<int> OpenFile(char* path, int mode, int flags)
 		return ResultError(file_description.error());
 	}
 
-	Handle fd = Thread::current->parent_process().handles.add_file_description(move(file_description.value()));
+	Handle fd = Thread::current->parent_process().handles.add_handle(move(file_description.value()));
 	return fd;
 }
 
 Result<int> ReadFile(Handle handle, void* buff, size_t size)
 {
-	if (Thread::current->parent_process().handles.check_handle(handle) == false)
+	if (Thread::current->parent_process().handles.check_handle(handle) != HandleType::FileDescription)
 		return ResultError(ERROR_INVALID_HANDLE);
 
 	auto& description = Thread::current->parent_process().handles.get_file_description(handle);
@@ -81,7 +81,7 @@ Result<int> ReadFile(Handle handle, void* buff, size_t size)
 
 Result<int> WriteFile(Handle handle, void* buff, size_t size)
 {
-	if (Thread::current->parent_process().handles.check_handle(handle) == false)
+	if (Thread::current->parent_process().handles.check_handle(handle) != HandleType::FileDescription)
 		return ResultError(ERROR_INVALID_HANDLE);
 
 	auto& description = Thread::current->parent_process().handles.get_file_description(handle);
@@ -92,19 +92,9 @@ Result<int> WriteFile(Handle handle, void* buff, size_t size)
 	return result.value();
 }
 
-Result<int> CloseFile(Handle handle)
-{
-	if (Thread::current->parent_process().handles.check_handle(handle) == false)
-		return ResultError(ERROR_INVALID_HANDLE);
-
-	Thread::current->parent_process().handles.remove_handle(handle);
-	// Destructing the description will call close on FSNode.
-	return 0;
-}
-
 Result<int> QueryDirectory(Handle handle, DirectoryInfo* info)
 {
-	if (Thread::current->parent_process().handles.check_handle(handle) == false)
+	if (Thread::current->parent_process().handles.check_handle(handle) != HandleType::FileDescription)
 		return ResultError(ERROR_INVALID_HANDLE);
 
 	auto& description = Thread::current->parent_process().handles.get_file_description(handle);
@@ -112,6 +102,16 @@ Result<int> QueryDirectory(Handle handle, DirectoryInfo* info)
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}
+	return 0;
+}
+
+Result<int> CloseFile(Handle handle)
+{
+	if (Thread::current->parent_process().handles.check_handle(handle) != HandleType::FileDescription)
+		return ResultError(ERROR_INVALID_HANDLE);
+
+	Thread::current->parent_process().handles.remove_handle(handle);
+	// Destructing the description will call close on FSNode.
 	return 0;
 }
 

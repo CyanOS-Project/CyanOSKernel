@@ -2,7 +2,6 @@
 
 #include "Arch/x86/Context.h"
 #include "Arch/x86/Spinlock.h"
-#include "Process.h"
 #include "Thread.h"
 #include <Result.h>
 #include <Types.h>

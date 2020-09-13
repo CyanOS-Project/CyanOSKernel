@@ -1,14 +1,14 @@
 #pragma once
-#include "Tasking/Process.h"
 #include <Result.h>
 #include <Rule5.h>
 #include <UniquePointer.h>
 
+class Process;
 class ProcessDescription
 {
   private:
-	explicit ProcessDescription(const Process& process);
-	const Process& m_process;
+	explicit ProcessDescription(Process& process);
+	Process& m_process;
 
   public:
 	NON_COPYABLE(ProcessDescription);
