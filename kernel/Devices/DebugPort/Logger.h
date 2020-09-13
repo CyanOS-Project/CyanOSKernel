@@ -2,9 +2,9 @@
 
 #include "Arch/x86/Spinlock.h"
 #include "DebugPort.h"
-#include "String.h"
-#include "StringView.h"
-#include "Types.h"
+#include <String.h>
+#include <StringView.h>
+#include <Types.h>
 
 class Hex;
 

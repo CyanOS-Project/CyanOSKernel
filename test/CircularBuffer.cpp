@@ -2,7 +2,7 @@
 	#undef __STRICT_ANSI__
 #endif
 
-#include "CircularBuffer.h"
+#include <CircularBuffer.h>
 #include <gtest/gtest.h>
 
 TEST(CircularBuffer_Test, Initialization)

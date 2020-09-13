@@ -1,12 +1,12 @@
 #pragma once
 
-#include "Algorithms.h"
-#include "Types.h"
+#include <Algorithms.h>
+#include <Types.h>
 #ifdef __UNIT_TESTS
 	#include <assert.h>
 	#define ASSERT(x) assert(x)
 #else
-	#include "Assert.h"
+	#include <Assert.h>
 #endif
 
 template <class T> class CircularQueue
@@ -65,9 +65,7 @@ template <class T> class CircularQueue
 	T& operator[](int index);
 };
 
-template <class T> CircularQueue<T>::Iterator::Iterator(Node* t_node) : m_current(t_node), m_head(t_node)
-{
-}
+template <class T> CircularQueue<T>::Iterator::Iterator(Node* t_node) : m_current(t_node), m_head(t_node) {}
 
 // move the current node pointer number of nodes forward or backward relative to the current head.
 template <class T> void CircularQueue<T>::Iterator::move_cursor(int index)
@@ -141,9 +139,7 @@ template <class T> typename CircularQueue<T>::Node* CircularQueue<T>::Iterator::
 	return m_current;
 }
 
-template <class T> CircularQueue<T>::CircularQueue() : m_head(nullptr), m_count(0)
-{
-}
+template <class T> CircularQueue<T>::CircularQueue() : m_head(nullptr), m_count(0) {}
 
 template <class T> CircularQueue<T>::~CircularQueue()
 {

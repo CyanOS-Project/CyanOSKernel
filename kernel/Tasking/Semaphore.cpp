@@ -1,5 +1,5 @@
 #include "Semaphore.h"
-#include "Clib.h"
+#include <Clib.h>
 
 Semaphore::Semaphore(size_t t_max_count, size_t t_initial_value) :
     m_lock{},

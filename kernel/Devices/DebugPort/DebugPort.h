@@ -1,6 +1,6 @@
 #pragma once
-#include "StringView.h"
-#include "Types.h"
+#include <StringView.h>
+#include <Types.h>
 
 enum class DebugColor {
 	Black = 30,

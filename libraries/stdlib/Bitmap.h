@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Types.h"
+#include <Types.h>
 
 #define MAX_BITMAP_SIZE       24576
 #define CHECK_BIT(value, bit) ((value >> bit) & 1)

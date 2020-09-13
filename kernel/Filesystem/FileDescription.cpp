@@ -1,7 +1,25 @@
 #include "FileDescription.h"
-#include "Clib.h"
-#include "ErrorCodes.h"
 #include "FSNode.h"
+#include "VirtualFilesystem.h"
+#include <Clib.h>
+#include <ErrorCodes.h>
+
+Result<UniquePointer<FileDescription>> FileDescription::open(const StringView& path, OpenMode mode, OpenFlags flags)
+{
+	auto node = VFS::get_node(path, mode, flags);
+	if (node.error()) {
+		return ResultError(node.error());
+	}
+
+	auto description = UniquePointer<FileDescription>::make_unique(node.value(), mode);
+
+	auto open_ret = node.value().open(*description);
+	if (open_ret.is_error()) {
+		return ResultError(open_ret.error());
+	}
+
+	return description;
+}
 
 FileDescription::FileDescription(FSNode& node, OpenMode mode) : m_node(node), m_type{node.m_type}, m_mode{mode} {}
 

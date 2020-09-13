@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Clib.h"
 #include "Kernel_map.h"
-#include "Types.h"
+#include <Clib.h>
+#include <Types.h>
 
 #define NUMBER_OF_PAGE_DIRECOTRY_ENTRIES 1024
 #define NUMBER_OF_PAGE_TABLE_ENTRIES     1024

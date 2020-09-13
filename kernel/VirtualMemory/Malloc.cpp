@@ -1,6 +1,6 @@
 #include "Arch/x86/Panic.h"
-#include "Types.h"
 #include "VirtualMemory/Heap.h"
+#include <Types.h>
 
 void* operator new(size_t size)
 {

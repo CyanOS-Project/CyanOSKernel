@@ -4,7 +4,7 @@
 #include "Isr.h"
 #include "Kernel_map.h"
 #include "Paging.h"
-#include "Types.h"
+#include <Types.h>
 
 #define NUMBER_OF_IDT_ENTRIES    256
 #define NUMBER_OF_IDT_EXCEPTIONS 32

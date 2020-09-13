@@ -1,12 +1,12 @@
-#include "PathParser.h"
+#include <PathParser.h>
 #ifdef __UNIT_TESTS
 	#include <assert.h>
 	#include <stdio.h>
 	#include <cstring>
 	#define ASSERT(x) assert(x)
 #else
-	#include "Clib.h"
-	#include "Assert.h"
+	#include <Clib.h>
+	#include <Assert.h>
 #endif
 
 PathParser::PathParser(const StringView& path) : m_path{path}, m_count{calc_count()}

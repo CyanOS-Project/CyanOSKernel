@@ -1,12 +1,10 @@
 #include "Kernel_init.h"
-#include "Algorithms.h"
 #include "Arch/x86/Asm.h"
 #include "Arch/x86/Gdt.h"
 #include "Arch/x86/Idt.h"
 #include "Arch/x86/Paging.h"
 #include "Arch/x86/Panic.h"
 #include "Arch/x86/Pic.h"
-#include "Assert.h"
 #include "Devices/Console/Console.h"
 #include "Devices/DebugPort/DebugPort.h"
 #include "Devices/DebugPort/Logger.h"
@@ -22,22 +20,11 @@
 #include "Tasking/Semaphore.h"
 #include "Tasking/Thread.h"
 #include "Tests.h"
-#include "UniquePointer.h"
 #include "VirtualMemory/Heap.h"
 #include "VirtualMemory/Memory.h"
-
-void display_time()
-{
-	while (1) {
-		DATE_TIME date;
-		RTC::get_time(&date);
-		// printf("Time is %d:%d:%d  %d-%d-20%d\n", date.year, date.minutes, date.seconds, date.day_of_month,
-		// date.month,
-		//      date.year);
-		// Scheduler::sleep(500);
-		// removeLine();
-	}
-}
+#include <Algorithms.h>
+#include <Assert.h>
+#include <UniquePointer.h>
 
 extern "C" void kernel_init(BootloaderInfo* boot_info)
 {
@@ -69,8 +56,8 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 
 	info() << "Starting the first process.";
 	Process& proc = Process::create_new_process("test_process", "/Tar/UserBinary/Shell");
-	Thread::create_thread(proc, test_server, 0);
-	Thread::create_thread(proc, test_client, 0);
+	// Thread::create_thread(proc, test_server, 0);
+	// Thread::create_thread(proc, test_client, 0);
 	Thread::create_thread(proc, test_ls, 0);
 
 	Thread::yield();

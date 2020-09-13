@@ -1,9 +1,9 @@
 #pragma once
 
-#include "Clib.h"
 #include "Kernel_map.h"
 #include "Paging.h"
-#include "Types.h"
+#include <Clib.h>
+#include <Types.h>
 
 #define GDT_NUMBER_OF_ENTRIES              6
 #define SEGMENT_SELECTOR(index, prv_level) (index << 3 | prv_level)

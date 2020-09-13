@@ -1,11 +1,11 @@
 #include "Process.h"
 #include "Arch/x86/Context.h"
-#include "Assert.h"
 #include "Filesystem/VirtualFilesystem.h"
 #include "Loader/PE.h"
 #include "ScopedLock.h"
 #include "Thread.h"
 #include "VirtualMemory/Memory.h"
+#include <Assert.h>
 
 List<Process>* Process::processes;
 Bitmap* Process::pid_bitmap;
@@ -44,7 +44,7 @@ Process::~Process() {}
 Result<uintptr_t> Process::load_executable(const StringView& path)
 {
 	ScopedLock local_lock(m_lock);
-	auto fd = VFS::open(path, OpenMode::OM_READ, OpenFlags::OF_OPEN_EXISTING);
+	auto fd = FileDescription::open(path, OpenMode::OM_READ, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the executable file, error: " << fd.error();
 		return ResultError(fd.error());

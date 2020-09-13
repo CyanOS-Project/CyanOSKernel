@@ -1,15 +1,15 @@
 #pragma once
 
-#include "Bitmap.h"
 #include "Devices/DebugPort/Logger.h"
 #include "Devices/Timer/Pit.h"
 #include "Filesystem/FileDescription.h"
 #include "Filesystem/VirtualFilesystem.h"
-#include "PathParser.h"
 #include "Tasking/Loader/PE.h"
 #include "Tasking/Scheduler.h"
 #include "Tasking/Semaphore.h"
 #include "VirtualMemory/Memory.h"
+#include <Bitmap.h>
+#include <PathParser.h>
 
 Semaphore* sem_lock;
 void test_semaphore_thread2(uintptr_t arg)
@@ -63,7 +63,7 @@ void test_pipe1(uintptr_t arg)
 {
 	UNUSED(arg);
 
-	auto fd = VFS::open("/fs/my_pipe2", OpenMode::OM_READ, OpenFlags::OF_CREATE_NEW);
+	auto fd = FileDescription::open("/fs/my_pipe2", OpenMode::OM_READ, OpenFlags::OF_CREATE_NEW);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();
@@ -84,7 +84,7 @@ void test_pipe2(uintptr_t arg)
 {
 	UNUSED(arg);
 	Thread::sleep(1000);
-	auto fd = VFS::open("/fs/my_pipe", OpenMode::OM_WRITE, OpenFlags::OF_OPEN_EXISTING);
+	auto fd = FileDescription::open("/fs/my_pipe", OpenMode::OM_WRITE, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();
@@ -104,7 +104,7 @@ void test_keyboard(uintptr_t arg)
 {
 	UNUSED(arg);
 
-	auto fd = VFS::open("/Devices/keyboard", OpenMode::OM_WRITE, OpenFlags::OF_OPEN_EXISTING);
+	auto fd = FileDescription::open("/Devices/keyboard", OpenMode::OM_WRITE, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();
@@ -122,7 +122,7 @@ void test_keyboard2(uintptr_t arg)
 {
 	UNUSED(arg);
 
-	auto fd = VFS::open("/Devices/keyboard", OpenMode::OM_WRITE, OpenFlags::OF_OPEN_EXISTING);
+	auto fd = FileDescription::open("/Devices/keyboard", OpenMode::OM_WRITE, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();
@@ -140,7 +140,7 @@ void test_console(uintptr_t arg)
 {
 	UNUSED(arg);
 
-	auto fd = VFS::open("/Devices/console", OpenMode::OM_WRITE, OpenFlags::OF_OPEN_EXISTING);
+	auto fd = FileDescription::open("/Devices/console", OpenMode::OM_WRITE, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();
@@ -154,14 +154,13 @@ void test_server(uintptr_t arg)
 {
 	UNUSED(arg);
 
-	auto fd = VFS::open("/Sockets/test", OpenMode::OM_SERVER, OpenFlags::OF_CREATE_NEW);
+	auto fd = FileDescription::open("/Sockets/test", OpenMode::OM_SERVER, OpenFlags::OF_CREATE_NEW);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();
 		return;
 	}
 
-	dbg() << "passed";
 	auto connection_fd = fd.value()->accept();
 	if (connection_fd.is_error()) {
 		warn() << "error accepting the connection, error: " << fd.error();
@@ -181,7 +180,7 @@ void test_client(uintptr_t arg)
 {
 	UNUSED(arg);
 	Thread::current->sleep(100);
-	auto fd = VFS::open("/Sockets/test", OpenMode::OM_CLIENT, OpenFlags::OF_OPEN_EXISTING);
+	auto fd = FileDescription::open("/Sockets/test", OpenMode::OM_CLIENT, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();
@@ -207,7 +206,7 @@ void test_ls(uintptr_t arg)
 {
 	UNUSED(arg);
 
-	auto fd = VFS::open("/Tar/UserBinary", OpenMode::OM_READ, OpenFlags::OF_OPEN_EXISTING);
+	auto fd = FileDescription::open("/Tar/UserBinary", OpenMode::OM_READ, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
 		HLT();

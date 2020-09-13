@@ -1,9 +1,9 @@
 #include "SystemCall.h"
-#include "Algorithms.h"
 #include "Arch/x86/Isr.h"
 #include "Arch/x86/Panic.h"
 #include "Devices/DebugPort/Logger.h"
 #include "Tasking/Thread.h"
+#include <Algorithms.h>
 
 //#pragma GCC diagnostic ignored "-Wcast-function-type"
 
@@ -57,7 +57,7 @@ unsigned SystemCall::syscalls_count = sizeof(systemcalls_routines) / sizeof(gene
 
 Result<int> OpenFile(char* path, int mode, int flags)
 {
-	auto file_description = VFS::open(path, static_cast<OpenMode>(mode), static_cast<OpenFlags>(flags));
+	auto file_description = FileDescription::open(path, static_cast<OpenMode>(mode), static_cast<OpenFlags>(flags));
 	if (file_description.is_error()) {
 		return ResultError(file_description.error());
 	}

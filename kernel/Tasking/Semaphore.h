@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Types.h"
 #include "WaitQueue.h"
+#include <Types.h>
 
 class Semaphore
 {

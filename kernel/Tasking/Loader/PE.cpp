@@ -1,8 +1,8 @@
 #include "PE.h"
-#include "Algorithms.h"
-#include "Clib.h"
-#include "ErrorCodes.h"
 #include "VirtualMemory/Memory.h"
+#include <Algorithms.h>
+#include <Clib.h>
+#include <ErrorCodes.h>
 
 Result<uintptr_t> PELoader::load(const char* file, size_t size)
 {

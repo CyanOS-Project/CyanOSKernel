@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Rule5.h"
+#include <Rule5.h>
 
 template <typename T> class ScopedLock
 {

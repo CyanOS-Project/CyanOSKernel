@@ -1,9 +1,9 @@
 
 #pragma once
 
-#include "Result.h"
-#include "Types.h"
 #include "Winnt.h"
+#include <Result.h>
+#include <Types.h>
 
 class PELoader
 {

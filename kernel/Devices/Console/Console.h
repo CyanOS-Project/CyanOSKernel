@@ -1,8 +1,8 @@
 #pragma once
 #include "Filesystem/FSNode.h"
 #include "Tasking/SpinLock.h"
-#include "Types.h"
-#include "UniquePointer.h"
+#include <Types.h>
+#include <UniquePointer.h>
 
 #define VGATEXTMODE_BUFFER 0x000B8000
 

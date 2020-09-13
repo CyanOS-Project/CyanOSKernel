@@ -1,9 +1,9 @@
 #include "VirtualFilesystem.h"
 #include "Arch/x86/Panic.h"
-#include "Assert.h"
-#include "ErrorCodes.h"
 #include "Tasking/ScopedLock.h"
 #include "Tasking/Thread.h"
+#include <Assert.h>
+#include <ErrorCodes.h>
 
 List<UniquePointer<FSNode>>* VFS::fs_roots;
 Spinlock VFS::lock;
@@ -13,23 +13,6 @@ void VFS::setup()
 	// lock the VFS and nodes.
 	fs_roots = new List<UniquePointer<FSNode>>;
 	lock.init();
-}
-
-Result<UniquePointer<FileDescription>> VFS::open(const StringView& path, OpenMode mode, OpenFlags flags)
-{
-	auto node = get_node(path, mode, flags);
-	if (node.error()) {
-		return ResultError(node.error());
-	}
-
-	auto description = UniquePointer<FileDescription>::make_unique(node.value(), mode);
-
-	auto open_ret = node.value().open(*description);
-	if (open_ret.is_error()) {
-		return ResultError(open_ret.error());
-	}
-
-	return description;
 }
 
 Result<void> VFS::mount(UniquePointer<FSNode>&& new_fs_root)

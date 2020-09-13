@@ -1,14 +1,14 @@
 #pragma once
 
 #include "FSNode.h"
-#include "FileDescription.h"
-#include "List.h"
-#include "PathParser.h"
-#include "Result.h"
 #include "Tasking/SpinLock.h"
-#include "Types.h"
-#include "UniquePointer.h"
+#include <List.h>
+#include <PathParser.h>
+#include <Result.h>
+#include <Types.h>
+#include <UniquePointer.h>
 
+class FileDescription;
 class VFS
 {
   private:
@@ -27,7 +27,6 @@ class VFS
 
   public:
 	static void setup();
-	static Result<UniquePointer<FileDescription>> open(const StringView& path, OpenMode mode, OpenFlags flags);
 	static Result<void> mount(UniquePointer<FSNode>&& fs_root);
 	static Result<void> unmount();
 	static Result<void> remove();
@@ -37,4 +36,6 @@ class VFS
 	static Result<void> chown();
 	static Result<void> make_link();
 	static Result<void> remove_link();
+
+	friend class FileDescription;
 };

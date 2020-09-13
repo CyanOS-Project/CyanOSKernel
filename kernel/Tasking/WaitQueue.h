@@ -1,6 +1,6 @@
 #pragma once
-#include "IntrusiveList.h"
 #include "Thread.h"
+#include <IntrusiveList.h>
 
 class WaitQueue
 {

@@ -4,10 +4,10 @@
 #include "Arch/x86/Paging.h"
 #include "Arch/x86/Panic.h"
 #include "Arch/x86/Spinlock.h"
-#include "Assert.h"
 #include "Physical.h"
-#include "Types.h"
 #include "Virtual.h"
+#include <Assert.h>
+#include <Types.h>
 
 enum MEMORY_TYPE {
 	KERNEL = 1,

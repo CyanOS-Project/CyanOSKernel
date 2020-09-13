@@ -2,10 +2,10 @@
 
 #include "Arch/x86/Paging.h"
 #include "Arch/x86/Panic.h"
-#include "Assert.h"
-#include "Clib.h"
 #include "Kernel_map.h"
-#include "Types.h"
+#include <Assert.h>
+#include <Clib.h>
+#include <Types.h>
 
 #define MAX_PHYSICAL_4K_PAGES (1024 * 1024)
 #define TEST_BIT(value, bit)  (((value) >> (bit)) & 1)

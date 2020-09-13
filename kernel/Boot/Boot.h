@@ -1,12 +1,12 @@
 #pragma once
 
 #include "Arch/x86/Asm.h"
-#include "Assert.h"
 #include "Kernel_init.h"
 #include "Kernel_map.h"
 #include "Multiboot2.h"
-#include "Types.h"
 #include "VirtualMemory/Memory.h"
+#include <Assert.h>
+#include <Types.h>
 
 typedef struct __attribute__((__packed__)) {
 	multiboot_header header __attribute__((aligned(MULTIBOOT_HEADER_ALIGN)));

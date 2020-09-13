@@ -1,8 +1,8 @@
 #pragma once
 
-#include "Algorithms.h"
-#include "Assert.h"
-#include "Types.h"
+#include <Algorithms.h>
+#include <Assert.h>
+#include <Types.h>
 
 template <typename T> class SharedPointer
 {
@@ -12,10 +12,7 @@ template <typename T> class SharedPointer
 		return SharedPointer(new T{forward<Args>(args)...});
 	}
 
-	explicit SharedPointer(T* ptr) : m_storage{ptr}, m_reference_count{new size_t{0}}
-	{
-		assert(m_storage);
-	}
+	explicit SharedPointer(T* ptr) : m_storage{ptr}, m_reference_count{new size_t{0}} { assert(m_storage); }
 
 	SharedPointer(SharedPointer&& other) : m_storage{other.m_storage}, m_reference_count{other.m_reference_count}
 	{
@@ -49,40 +46,19 @@ template <typename T> class SharedPointer
 		return *this;
 	}
 
-	~SharedPointer()
-	{
-		check_and_delete_object();
-	}
+	~SharedPointer() { check_and_delete_object(); }
 
-	T& operator*()
-	{
-		return *m_storage;
-	}
+	T& operator*() { return *m_storage; }
 
-	T* operator->()
-	{
-		return m_storage;
-	}
+	T* operator->() { return m_storage; }
 
-	bool operator==(const SharedPointer& other)
-	{
-		return (m_storage == other.m_storage);
-	}
+	bool operator==(const SharedPointer& other) { return (m_storage == other.m_storage); }
 
-	bool operator!=(const SharedPointer& other)
-	{
-		return (m_storage != other.m_storage);
-	}
+	bool operator!=(const SharedPointer& other) { return (m_storage != other.m_storage); }
 
-	T* get()
-	{
-		return m_storage;
-	}
+	T* get() { return m_storage; }
 
-	size_t use_count()
-	{
-		return *m_reference_count;
-	}
+	size_t use_count() { return *m_reference_count; }
 
   private:
 	T* m_storage = nullptr;

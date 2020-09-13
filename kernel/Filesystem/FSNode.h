@@ -1,10 +1,10 @@
 #pragma once
 
-#include "ErrorCodes.h"
-#include "Result.h"
-#include "String.h"
-#include "StringView.h"
-#include "Types.h"
+#include <ErrorCodes.h>
+#include <Result.h>
+#include <String.h>
+#include <StringView.h>
+#include <Types.h>
 
 #define MAX_FILE_NAME 64
 

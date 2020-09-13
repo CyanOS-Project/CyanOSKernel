@@ -1,14 +1,14 @@
 #pragma once
 
 #include "Arch/x86/Spinlock.h"
-#include "Bitmap.h"
 #include "Filesystem/HandlesManager.h"
-#include "List.h"
-#include "Result.h"
-#include "String.h"
-#include "StringView.h"
-#include "Types.h"
-#include "UniquePointer.h"
+#include <Bitmap.h>
+#include <List.h>
+#include <Result.h>
+#include <String.h>
+#include <StringView.h>
+#include <Types.h>
+#include <UniquePointer.h>
 
 enum class ProcessState {
 	RUNNING,

@@ -1,11 +1,11 @@
 #pragma once
 
 #include "Filesystem/FSNode.h"
-#include "List.h"
-#include "Result.h"
-#include "String.h"
 #include "Tasking/SpinLock.h"
-#include "Types.h"
+#include <List.h>
+#include <Result.h>
+#include <String.h>
+#include <Types.h>
 
 class INode : public FSNode
 {
