@@ -1,19 +1,10 @@
 #include "WaitQueue.h"
 #include "ScopedLock.h"
+#include "Thread.h"
 
 WaitQueue::WaitQueue() : m_lock{}, m_threads{} {}
 
 WaitQueue::~WaitQueue() {}
-
-void WaitQueue::wait()
-{
-	ScopedLock queue_lock(m_lock);
-	Thread::current->block();
-	m_threads.push_back(*Thread::current);
-	queue_lock.release();
-
-	Thread::yield();
-}
 
 void WaitQueue::wake_up(size_t num)
 {

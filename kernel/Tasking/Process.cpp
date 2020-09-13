@@ -26,8 +26,19 @@ Process& Process::create_new_process(const StringView& name, const StringView& p
 	return pcb;
 }
 
+Result<Process&> Process::get_process_from_pid(size_t pid)
+{
+	for (auto&& i : *processes) {
+		if (i.m_pid == pid) {
+			return i;
+		}
+	}
+	return ResultError(ERROR_INVALID_PID);
+}
+
 Process::Process(const StringView& name, const StringView& path) :
     m_lock{},
+    // m_singal_waiting_queue{},
     m_pid{reserve_pid()},
     m_name{name},
     m_path{path},
@@ -85,4 +96,11 @@ void Process::initiate_process(uintptr_t __pcb)
 	void* thread_user_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE);
 	Context::enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE - 4);
 	ASSERT_NOT_REACHABLE();
+}
+
+int Process::wait_for_termination()
+{
+	ScopedLock local_lock(m_lock);
+	m_singal_waiting_queue.wait_on_event([&]() { return true; }, local_lock);
+	return m_return_status;
 }

@@ -1,4 +1,5 @@
 #include "Pipe.h"
+#include "Filesystem/FileDescription.h"
 #include "Tasking/ScopedLock.h"
 #include <ErrorCodes.h>
 #include <PathParser.h>

@@ -1,4 +1,5 @@
 #include "Semaphore.h"
+#include "ScopedLock.h"
 #include <Clib.h>
 
 Semaphore::Semaphore(size_t t_max_count, size_t t_initial_value) :
@@ -13,15 +14,12 @@ Semaphore::~Semaphore() {}
 
 void Semaphore::acquire()
 {
-	m_lock.acquire();
+	ScopedLock local_lock(m_lock);
 
 	if (m_count < m_max_count) {
 		m_count++;
-		m_lock.release();
 	} else {
-		m_lock.release();
-		m_queue.wait();
-		acquire();
+		m_queue.wait(local_lock);
 	}
 }
 

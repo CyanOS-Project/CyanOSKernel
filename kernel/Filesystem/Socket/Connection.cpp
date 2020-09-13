@@ -1,4 +1,5 @@
 #include "Connection.h"
+#include "Filesystem/FileDescription.h"
 
 Connection::Connection(const StringView& name) :
     FSNode{name, 0, 0, NodeType::Connection, 0},

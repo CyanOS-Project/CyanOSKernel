@@ -1,6 +1,6 @@
 #pragma once
 #include "Arch/x86/Spinlock.h"
-#include "Process.h"
+#include "SpinLock.h"
 #include <Bitmap.h>
 #include <IntrusiveList.h>
 #include <IterationDecision.h>
@@ -17,6 +17,7 @@ enum class ThreadState {
 const size_t STACK_SIZE = 0x1000;
 
 class WaitQueue;
+class Process;
 
 class Thread : public IntrusiveListNode<Thread>
 {
