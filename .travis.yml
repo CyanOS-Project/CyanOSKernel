@@ -3,23 +3,20 @@ language: cpp
 compiler:
   - clang
 
-addons:
-  apt:
-    update: true
-    packages:
-    - nasm
-    - grub2
-    - xorriso
-    - cmake
-    - mtools
 
 matrix:
   include:
     - compiler: clang
       addons:
         apt:
+          update: true
           packages:
             - clang-10
+            - nasm
+            - grub2
+            - xorriso
+            - cmake
+            - mtools
       env:
         - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
 before_install:
