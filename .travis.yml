@@ -1,29 +1,22 @@
 dist: focal
 language: cpp
-compiler: clang
+compiler:
+- clang++
 
-matrix:
-  include:
-    - compiler: clang
-      addons:
-        apt:
-          update: true
-          packages:
-            - clang-10
-            - nasm
-            - grub2
-            - xorriso
-            - cmake
-            - mtools
-      env:
-        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
-before_install:
-  - eval "${MATRIX_EVAL}"
-
+addons:
+  apt:
+    update: true
+    packages:
+    - nasm
+    - grub2
+    - xorriso
+    - cmake
+    - mtools
+    - clang-10
 
 script:
-  - export CC=clang-10
-  - export CXX=clang++-10
+  - ln -s /usr/bin/clang-10 /usr/local/bin/clang
+  - ln -s /usr/bin/clang-10 /usr/local/bin/clang++
   - mkdir build && cd build
   - cmake .. -G "Unix Makefiles"
   - make
