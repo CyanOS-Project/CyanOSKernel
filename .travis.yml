@@ -12,13 +12,19 @@ addons:
     - xorriso
     - cmake
     - mtools
-    - clang-10
 
-env:
-    - COMPILER=clang
-    - CC=clang-10
-    - CXX=clang++-10
-
+matrix:
+  include:
+    - compiler: clang
+      addons:
+        apt:
+          packages:
+            - clang-10
+      env:
+        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
+before_install:
+  - eval "${MATRIX_EVAL}"
+      
 
 script:
   - mkdir build && cd build
