@@ -23,11 +23,14 @@ class SystemCall
 Result<int> OpenFile(char* path, int mode, int flags);
 Result<int> ReadFile(Handle handle, void* buff, size_t size);
 Result<int> WriteFile(Handle handle, void* buff, size_t size);
-Result<int> CloseFile(Handle handle);
 Result<int> QueryDirectory(Handle handle, DirectoryInfo* info);
+Result<int> CloseFile(Handle handle);
 
 Result<int> CreateThread(void* address, int arg);
 Result<int> CreateRemoteThread(int process, void* address, int arg);
 Result<int> CreateProcess(char* name, char* path, int flags);
+Result<int> OpenProcess(size_t pid, int access);
+Result<int> TerminateProcess(Handle handle, int status);
+Result<int> WaitSignal(Handle handle, int signal);
 Result<int> Sleep(size_t size);
 Result<int> Yield();

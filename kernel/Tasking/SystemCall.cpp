@@ -44,12 +44,15 @@ void SystemCall::systemcall_handler(ISRContextFrame* frame)
 generic_syscall SystemCall::systemcalls_routines[] = {reinterpret_cast<generic_syscall>(OpenFile),
                                                       reinterpret_cast<generic_syscall>(ReadFile),
                                                       reinterpret_cast<generic_syscall>(WriteFile),
-                                                      reinterpret_cast<generic_syscall>(CloseFile),
+                                                      reinterpret_cast<generic_syscall>(QueryDirectory),
                                                       reinterpret_cast<generic_syscall>(CloseFile),
 
                                                       reinterpret_cast<generic_syscall>(CreateThread),
-                                                      reinterpret_cast<generic_syscall>(CreateRemoteThread), //
+                                                      reinterpret_cast<generic_syscall>(CreateRemoteThread),
                                                       reinterpret_cast<generic_syscall>(CreateProcess),
+                                                      reinterpret_cast<generic_syscall>(OpenProcess),
+                                                      reinterpret_cast<generic_syscall>(TerminateProcess),
+                                                      reinterpret_cast<generic_syscall>(WaitSignal),
                                                       reinterpret_cast<generic_syscall>(Sleep),
                                                       reinterpret_cast<generic_syscall>(Yield)};
 
@@ -133,8 +136,38 @@ Result<int> CreateRemoteThread(int process, void* address, int arg)
 Result<int> CreateProcess(char* name, char* path, int flags)
 {
 	UNUSED(flags);
-	Process::create_new_process(name, path);
-	return 0;
+	auto& process = Process::create_new_process(name, path);
+
+	auto fp = OpenProcess(process.pid, 0);
+	ASSERT(!fp.is_error());
+
+	return fp.value();
+}
+
+Result<int> OpenProcess(size_t pid, int access)
+{
+	auto process_description = ProcessDescription::open(pid, access);
+	if (process_description.is_error()) {
+		return ResultError(process_description.error());
+	}
+
+	Handle fp = Thread::current->parent_process().handles.add_handle(move(process_description.value()));
+	return fp;
+}
+
+Result<int> TerminateProcess(Handle handle, int status)
+{
+	if (handle == Handle(-1)) {
+		Thread::current->parent_process().terminate(status);
+		return 0;
+	} else {
+		if (Thread::current->parent_process().handles.check_handle(handle) != HandleType::ProcessDescription)
+			return ResultError(ERROR_INVALID_HANDLE);
+
+		auto& description = Thread::current->parent_process().handles.get_process_description(handle);
+		description.terminate_process(status);
+		return 0;
+	}
 }
 
 Result<int> Sleep(size_t size)
@@ -147,4 +180,15 @@ Result<int> Yield()
 {
 	Thread::yield();
 	return 0;
+}
+
+Result<int> WaitSignal(Handle handle, int signal)
+{
+	UNUSED(signal);
+
+	if (Thread::current->parent_process().handles.check_handle(handle) != HandleType::ProcessDescription)
+		return ResultError(ERROR_INVALID_HANDLE);
+
+	auto& description = Thread::current->parent_process().handles.get_process_description(handle);
+	return description.wait_signal();
 }

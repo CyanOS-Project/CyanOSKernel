@@ -1,6 +1,7 @@
 #include "Thread.h"
 #include "Arch/x86/Context.h"
 #include "Devices/Timer/Pit.h"
+#include "Process.h"
 #include "ScopedLock.h"
 #include "VirtualMemory/Memory.h"
 #include "WaitQueue.h"
@@ -25,6 +26,7 @@ Thread& Thread::create_thread(Process& parent_process, thread_function address, 
 	ScopedLock local_lock(global_lock);
 	Thread& new_thread = *new Thread(parent_process, address, argument);
 	ready_threads->push_back(new_thread);
+	parent_process.threads.emplace_back(new_thread);
 	return new_thread;
 }
 
@@ -90,9 +92,9 @@ unsigned Thread::reserve_tid()
 void Thread::terminate()
 {
 	ScopedLock local_lock(m_lock);
-	ASSERT(m_state == ThreadState::RUNNABLE);
+	ASSERT(m_state == ThreadState::RUNNABLE); // FIXME: what if it was blocked ?
 	ready_threads->remove(*this);
-	this->~Thread();
+	// this->~Thread(); TODO: an object can't just terminate itself !!
 }
 
 void Thread::sleep(unsigned ms)

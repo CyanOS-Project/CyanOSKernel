@@ -5,6 +5,7 @@
 #include "WaitQueue.h"
 #include <Bitmap.h>
 #include <List.h>
+#include <Reference.h>
 #include <Result.h>
 #include <String.h>
 #include <StringView.h>
@@ -16,8 +17,10 @@ enum class ProcessState {
 	ACTIVE,
 	BLOCKED,
 	SUSPENDED,
+	TERMINATED,
 };
 
+class Thread;
 class Process
 {
   private:
@@ -35,18 +38,21 @@ class Process
 	unsigned reserve_pid();
 
   public:
-	const size_t m_pid;
-	const String m_name;
-	const String m_path;
-	const uintptr_t m_page_directory;
-	const ProcessState m_state;
-	const Process* m_parent;
+	const size_t pid;
+	const String name;
+	const String path;
+	const uintptr_t page_directory;
+	const Process* parent;
+	ProcessState state;
 	HandlesManager handles;
+	List<Reference<Thread>> threads;
 
 	static Process& create_new_process(const StringView& name, const StringView& path);
 	static void setup();
 	static Result<Process&> get_process_from_pid(size_t pid);
+	void terminate(int status_code);
 	int wait_for_signal();
+
 	~Process();
 
 	friend class List<Process>;

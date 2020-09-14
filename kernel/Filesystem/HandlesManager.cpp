@@ -12,6 +12,7 @@ Handle HandlesManager::add_handle(UniquePointer<FileDescription>&& file_descript
 	handle_table.emplace_back(HandleType::FileDescription, new_fd.ptr());
 	return handle_table.size() - 1;
 }
+
 Handle HandlesManager::add_handle(UniquePointer<ProcessDescription>&& process_description)
 {
 	ScopedLock local_lock(m_lock);
@@ -25,19 +26,38 @@ void HandlesManager::remove_handle(Handle handle)
 {
 	ScopedLock local_lock(m_lock);
 
-	ASSERT(check_handle(handle) != HandleType::Invalid);
+	auto& handle_entry = handle_table[handle];
+	ASSERT(handle_entry.file_description);
+	ASSERT(handle_entry.type != HandleType::Invalid);
 
-	handle_table[handle].type = HandleType::Invalid;
-	// handle_table[handle].file_description.~UniquePointer();
+	switch (handle_entry.type) {
+		case HandleType::FileDescription:
+			file_description_table.remove_if([&](UniquePointer<FileDescription>& fd) {
+				if (fd.ptr() == handle_entry.file_description)
+					return true;
+				return false;
+			});
+			break;
+		case HandleType::ProcessDescription:
+			process_description_table.remove_if([&](UniquePointer<ProcessDescription>& fd) {
+				if (fd.ptr() == handle_entry.process_description)
+					return true;
+				return false;
+			});
+			break;
+		case HandleType::Invalid:
+			ASSERT_NOT_REACHABLE();
+			break;
+	}
+	handle_entry.type = HandleType::Invalid;
 }
 
 FileDescription& HandlesManager::get_file_description(Handle handle)
 {
 	ScopedLock local_lock(m_lock);
 
-	ASSERT(handle_table[handle].file_description);
-
 	auto& handle_entry = handle_table[handle];
+	ASSERT(handle_entry.file_description);
 	ASSERT(handle_entry.type == HandleType::FileDescription);
 
 	return *handle_entry.file_description;
@@ -47,9 +67,8 @@ ProcessDescription& HandlesManager::get_process_description(Handle handle)
 {
 	ScopedLock local_lock(m_lock);
 
-	ASSERT(handle_table[handle].process_description);
-
 	auto& handle_entry = handle_table[handle];
+	ASSERT(handle_entry.process_description);
 	ASSERT(handle_entry.type == HandleType::ProcessDescription);
 
 	return *handle_entry.process_description;

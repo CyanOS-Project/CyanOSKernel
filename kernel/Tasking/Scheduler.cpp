@@ -34,11 +34,11 @@ void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
 	}
 	Thread& next_thread = select_next_thread();
 	if (Thread::current) {
-		if (next_thread.m_parent.m_pid != Thread::current->m_parent.m_pid) {
-			switch_page_directory(next_thread.m_parent.m_page_directory);
+		if (next_thread.m_parent.pid != Thread::current->m_parent.pid) {
+			switch_page_directory(next_thread.m_parent.page_directory);
 		}
 	} else {
-		switch_page_directory(next_thread.m_parent.m_page_directory);
+		switch_page_directory(next_thread.m_parent.page_directory);
 	}
 	Thread::current = &next_thread;
 	load_context(current_context, &next_thread);

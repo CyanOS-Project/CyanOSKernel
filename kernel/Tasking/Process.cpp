@@ -29,7 +29,7 @@ Process& Process::create_new_process(const StringView& name, const StringView& p
 Result<Process&> Process::get_process_from_pid(size_t pid)
 {
 	for (auto&& i : *processes) {
-		if (i.m_pid == pid) {
+		if (i.pid == pid) {
 			return i;
 		}
 	}
@@ -38,16 +38,16 @@ Result<Process&> Process::get_process_from_pid(size_t pid)
 
 Process::Process(const StringView& name, const StringView& path) :
     m_lock{},
-    // m_singal_waiting_queue{},
-    m_pid{reserve_pid()},
-    m_name{name},
-    m_path{path},
-    m_page_directory{Memory::create_new_virtual_space()},
-    m_state{ProcessState::ACTIVE},
-    m_parent{nullptr},
-    handles{}
+    m_singal_waiting_queue{},
+    pid{reserve_pid()},
+    name{name},
+    path{path},
+    page_directory{Memory::create_new_virtual_space()},
+    parent{nullptr},
+    state{ProcessState::ACTIVE},
+    handles{},
+    threads{}
 {
-	m_lock.init();
 }
 
 Process::~Process() {}
@@ -87,10 +87,10 @@ unsigned Process::reserve_pid()
 void Process::initiate_process(uintptr_t __pcb)
 {
 	Process* pcb = reinterpret_cast<Process*>(__pcb);
-	auto&& executable_entrypoint = pcb->load_executable(pcb->m_path);
+	auto&& executable_entrypoint = pcb->load_executable(pcb->path);
 	if (executable_entrypoint.is_error()) {
 		warn() << "couldn't load the process, error: " << executable_entrypoint.error() << "\n";
-		return; // Remove thread
+		return; // Terminate Process
 	}
 	// return ResultError(execable_entrypoint.error());
 	void* thread_user_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE);
@@ -98,9 +98,23 @@ void Process::initiate_process(uintptr_t __pcb)
 	ASSERT_NOT_REACHABLE();
 }
 
+void Process::terminate(int status_code)
+{
+	ScopedLock local_lock(m_lock);
+	state = ProcessState::TERMINATED;
+
+	for (auto&& i : threads) {
+		i->terminate();
+	}
+
+	// FIXME: free Process memory, maybe static function should call this function ?
+	m_return_status = status_code;
+	m_singal_waiting_queue.wake_up_all();
+}
+
 int Process::wait_for_signal()
 {
 	ScopedLock local_lock(m_lock);
-	m_singal_waiting_queue.wait_on_event([&]() { return true; }, local_lock);
+	m_singal_waiting_queue.wait(local_lock);
 	return m_return_status;
 }

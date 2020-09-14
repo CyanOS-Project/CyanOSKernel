@@ -15,7 +15,8 @@ class ProcessDescription
 	NON_MOVABLE(ProcessDescription);
 	static Result<UniquePointer<ProcessDescription>> open(size_t pid, int access);
 	~ProcessDescription();
-	int wait_signal();
+	Result<int> wait_signal();
+	Result<void> terminate_process(int status);
 
 	friend class UniquePointer<ProcessDescription>;
 };

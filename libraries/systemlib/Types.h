@@ -9,4 +9,4 @@
 
 #define MASKABLE_PRAM(x) (1 << x)
 
-typedef size_t HANDLE;
+typedef size_t Handle;

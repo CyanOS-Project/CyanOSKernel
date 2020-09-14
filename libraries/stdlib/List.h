@@ -53,6 +53,9 @@ template <class T> class List
 
 	Iterator begin();
 	Iterator end();
+	Iterator find(T& element);                                     // TODO: do unit test
+	template <class Predicate> Iterator find(Predicate predicate); // TODO: do unit test
+
 	template <typename... U> T& emplace_back(U&&... u);
 	template <typename... U> T& emplace_front(U&&... u);
 	T& push_back(const T& new_data);
@@ -212,6 +215,26 @@ template <class T> typename List<T>::Iterator List<T>::begin()
 template <class T> typename List<T>::Iterator List<T>::end()
 {
 	return Iterator(nullptr);
+}
+
+template <class T> typename List<T>::Iterator List<T>::find(T& element)
+{
+	for (auto i = begin(); i != end(); i++) {
+		if (&element == &*i) {
+			return i;
+		}
+	}
+	return end();
+}
+
+template <class T> template <class Predicate> typename List<T>::Iterator List<T>::find(Predicate predicate)
+{
+	for (auto i = begin(); i != end(); i++) {
+		if (predicate(*i)) {
+			return i;
+		}
+	}
+	return end();
 }
 
 template <class T> template <typename... U> T& List<T>::emplace_back(U&&... u)

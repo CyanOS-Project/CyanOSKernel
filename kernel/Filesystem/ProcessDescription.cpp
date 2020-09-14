@@ -16,7 +16,13 @@ ProcessDescription::ProcessDescription(Process& process) : m_process{process} {}
 
 ProcessDescription::~ProcessDescription() {}
 
-int ProcessDescription::wait_signal()
+Result<int> ProcessDescription::wait_signal()
 {
 	return m_process.wait_for_signal();
+}
+
+Result<void> ProcessDescription::terminate_process(int status)
+{
+	m_process.terminate(status);
+	return ResultError(ERROR_SUCCESS);
 }
