@@ -17,6 +17,8 @@ addons:
 script:
   - sudo ln -s /usr/bin/clang-10 /usr/local/bin/clang
   - sudo ln -s /usr/bin/clang-10 /usr/local/bin/clang++
+  - export CC=/usr/bin/clang-10
+  - export CXX=/usr/bin/clang-10
   - mkdir build && cd build
   - cmake .. -G "Unix Makefiles"
   - make
