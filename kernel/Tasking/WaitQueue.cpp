@@ -4,7 +4,10 @@
 
 WaitQueue::WaitQueue() : m_lock{}, m_threads{} {}
 
-WaitQueue::~WaitQueue() {}
+WaitQueue::~WaitQueue()
+{
+	wake_up_all(); // FIXME: is it okay to do so ?
+}
 
 void WaitQueue::wake_up(size_t num)
 {

@@ -44,7 +44,7 @@ class HandlesManager
 
   private:
 	Spinlock m_lock;
-	List<HandleEntry> handle_table; // FIXME:should be vector.
-	List<UniquePointer<FileDescription>> file_description_table;
-	List<UniquePointer<ProcessDescription>> process_description_table;
+	List<HandleEntry> handle_table;                                    // FIXME: convert it to a vector.
+	List<UniquePointer<FileDescription>> file_description_table;       // TODO: should a vector ?
+	List<UniquePointer<ProcessDescription>> process_description_table; // TODO: should a vector ?
 };

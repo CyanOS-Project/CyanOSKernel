@@ -12,6 +12,12 @@ addons:
     - xorriso
     - cmake
     - mtools
+    - clang-10
+
+env:
+    - COMPILER=clang++-10
+    - CC=clang-10
+    - CXX=clang++-10
 
 script:
 - mkdir build && cd build
