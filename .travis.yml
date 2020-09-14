@@ -17,7 +17,7 @@ matrix:
             - xorriso
             - cmake
             - mtools
-    - env: CXX=clang++-10 CC=clang-10 ASM=nasm
+      - env: CXX=clang++-10 CC=clang-10 ASM=nasm
       
 
 script:
