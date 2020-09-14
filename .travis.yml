@@ -1,8 +1,6 @@
 dist: focal
 language: cpp
-compiler:
-  - clang
-
+compiler: clang
 
 matrix:
   include:
@@ -17,7 +15,14 @@ matrix:
             - xorriso
             - cmake
             - mtools
-    - env: CXX=clang++-10 CC=clang-10
+      env:
+        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
+before_install:
+  - eval "${MATRIX_EVAL}"
+
+script:
+  - export CC=clang-10
+  - export CXX=clang++-10
       
 
 script:
