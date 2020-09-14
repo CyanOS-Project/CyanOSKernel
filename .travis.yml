@@ -17,10 +17,7 @@ matrix:
             - xorriso
             - cmake
             - mtools
-      env:
-        - MATRIX_EVAL="CC=clang-10 && CXX=clang++-10"
-before_install:
-  - eval "${MATRIX_EVAL}"
+    - env: CXX=clang++-10 CC=clang-10
       
 
 script:
