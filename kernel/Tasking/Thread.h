@@ -13,6 +13,8 @@ enum class ThreadState {
 	BLOCKED_QUEUE,
 	SUSPENDED,
 };
+enum class ThreadPrivilege { Kernel, User };
+
 const size_t STACK_SIZE = 0x1000;
 
 class WaitQueue;
@@ -29,9 +31,10 @@ class Thread : public IntrusiveListNode<Thread>
 	static void thread_finishing();
 
 	Spinlock m_lock;
-	const unsigned m_tid;
+	const size_t m_tid;
 	Process& m_parent;
 	ThreadState m_state;
+	ThreadPrivilege m_privilege;
 	WaitQueue* m_blocker;
 	unsigned m_sleep_ticks;
 	uintptr_t m_kernel_stack_start;
@@ -40,11 +43,11 @@ class Thread : public IntrusiveListNode<Thread>
 	uintptr_t m_user_stack_start;
 
 	unsigned reserve_tid();
-	Thread(Process& process, thread_function address, uintptr_t argument);
+	Thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv);
 
   public:
 	static Thread* current;
-	static Thread& create_thread(Process& parent_process, thread_function address, uintptr_t argument);
+	static Thread& create_thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv);
 	static void sleep(unsigned ms);
 	static void yield();
 	static void setup();

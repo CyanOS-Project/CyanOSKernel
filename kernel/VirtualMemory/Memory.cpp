@@ -22,8 +22,6 @@ void Memory::setup_page_fault_handler()
 
 void Memory::page_fault_handler(ISRContextFrame* isr_info)
 {
-	// printf("Page= %X EIP=%X\t CS=%X\t ESP=%X \t\n", get_faulted_page(), isr_info->eip, isr_info->cs,
-	// isr_info->registers.esp);
 	err() << "--------------------";
 	err() << "Page Fault:";
 	err() << "Instruction: " << Hex(isr_info->eip);

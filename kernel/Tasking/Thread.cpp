@@ -21,12 +21,12 @@ void Thread::setup()
 	sleeping_threads = new IntrusiveList<Thread>;
 }
 
-Thread& Thread::create_thread(Process& parent_process, thread_function address, uintptr_t argument)
+Thread& Thread::create_thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv)
 {
 	ScopedLock local_lock(global_lock);
 
-	Thread& new_thread = ready_threads->emplace_back(parent_process, address, argument);
-	parent_process.threads.emplace_back(new_thread);
+	Thread& new_thread = ready_threads->emplace_back(process, address, argument, priv);
+	process.threads.emplace_back(new_thread);
 
 	if (current == nullptr) {
 		current = &new_thread;
@@ -35,25 +35,27 @@ Thread& Thread::create_thread(Process& parent_process, thread_function address, 
 	return new_thread;
 }
 
-Thread::Thread(Process& parent_process, thread_function address, uintptr_t argument) :
+Thread::Thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv) :
     m_lock{},
     m_tid{reserve_tid()},
-    m_parent{parent_process},
+    m_parent{process},
     m_state{ThreadState::RUNNABLE},
+    m_privilege{priv},
     m_blocker{nullptr}
 {
-	m_lock.init();
 	void* thread_kernel_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
 
 	uintptr_t stack_pointer = 0;
-	if (parent_process.privilege_level == ProcessPrivilege::KERNEL) {
-		stack_pointer = Context::setup_task_stack_context(ContextType::Kernel, //
-		                                                  thread_kernel_stack, STACK_SIZE, uintptr_t(address),
-		                                                  uintptr_t(thread_finishing), argument);
+	ContextInformation info = {.stack = thread_kernel_stack,
+	                           .stack_size = STACK_SIZE,
+	                           .start_function = uintptr_t(address),
+	                           .return_function = uintptr_t(thread_finishing),
+	                           .argument = argument};
+
+	if (priv == ThreadPrivilege::Kernel) {
+		stack_pointer = Context::setup_task_stack_context(ContextType::Kernel, info);
 	} else {
-		stack_pointer = Context::setup_task_stack_context(ContextType::User, //
-		                                                  thread_kernel_stack, STACK_SIZE, uintptr_t(address),
-		                                                  uintptr_t(thread_finishing), argument);
+		stack_pointer = Context::setup_task_stack_context(ContextType::User, info);
 	}
 
 	m_kernel_stack_start = uintptr_t(thread_kernel_stack);

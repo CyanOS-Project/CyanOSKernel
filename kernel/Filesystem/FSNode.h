@@ -13,10 +13,10 @@ enum OpenFlags {
 	OF_CREATE_NEW = MASKABLE_PRAM(1),
 };
 enum OpenMode {
-	OM_READ = 1 << MASKABLE_PRAM(0),
-	OM_WRITE = 1 << MASKABLE_PRAM(1),
-	OM_SERVER = 1 << MASKABLE_PRAM(2),
-	OM_CLIENT = 1 << MASKABLE_PRAM(3),
+	OM_READ = MASKABLE_PRAM(0),
+	OM_WRITE = MASKABLE_PRAM(1),
+	OM_SERVER = MASKABLE_PRAM(2),
+	OM_CLIENT = MASKABLE_PRAM(3),
 };
 enum class NodeType { Root, Folder, File, Pipe, Link, Device, Socket, Connection };
 

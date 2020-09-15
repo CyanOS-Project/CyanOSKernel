@@ -10,7 +10,6 @@ INode::INode(const StringView& name, NodeType type, size_t size, char* data) :
     m_lock{},
     m_children{}
 {
-	m_lock.init();
 }
 
 INode::~INode() {}

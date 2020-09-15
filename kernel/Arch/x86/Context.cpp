@@ -1,17 +1,16 @@
 #include "Context.h"
 
-uint32_t Context::setup_task_stack_context(ContextType type, void* stack, uint32_t stack_size, uint32_t start_function,
-                                           uint32_t return_function, uint32_t argument)
+uint32_t Context::setup_task_stack_context(ContextType type, ContextInformation& info)
 {
 	InitialTaskContext* context =
-	    reinterpret_cast<InitialTaskContext*>(uintptr_t(stack) + stack_size - sizeof(InitialTaskContext));
-	context->return_address = return_function;
-	context->argument = argument;
-	context->isr_frame.eip = start_function;
+	    reinterpret_cast<InitialTaskContext*>(uintptr_t(info.stack) + info.stack_size - sizeof(InitialTaskContext));
+	context->return_address = info.return_function;
+	context->argument = info.argument;
+	context->isr_frame.eip = info.start_function;
 	if (type == ContextType::Kernel) {
 		context->isr_frame.cs = KCS_SELECTOR;
 	} else {
-		context->isr_frame.cs = KCS_SELECTOR;
+		context->isr_frame.cs = UCS_SELECTOR;
 	}
 
 	context->isr_frame.eflags = EFLAGS_IF_ENABLE;

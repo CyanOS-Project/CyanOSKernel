@@ -13,13 +13,13 @@
 #include <UniquePointer.h>
 
 enum class ProcessState {
-	RUNNING,
-	ACTIVE,
-	BLOCKED,
-	SUSPENDED,
-	TERMINATED,
+	Running,
+	Active,
+	Blocked,
+	Suspended,
+	Terminated,
 };
-enum class ProcessPrivilege { KERNEL, USER };
+enum class ProcessPrivilege { Kernel, User };
 
 class Thread;
 class Process

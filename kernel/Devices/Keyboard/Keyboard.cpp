@@ -22,7 +22,6 @@ Keyboard::Keyboard(const StringView& name) :
 	ASSERT(current_instance == nullptr);
 
 	current_instance = this;
-	m_lock.init();
 	PIC::enable_irq(PIC_KEYBOARD);
 	ISR::register_isr_handler(keyboard_driver_handler, PIC_KEYBOARD + PIC1_IDT_OFFSET);
 }

@@ -14,7 +14,6 @@ PipeFS::PipeFS(const StringView& name) :
     m_lock{}
 {
 	// FIXME: multiple writers, one reader.
-	m_lock.init();
 }
 
 PipeFS::~PipeFS() {}

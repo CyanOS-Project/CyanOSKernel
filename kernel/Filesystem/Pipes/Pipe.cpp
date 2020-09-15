@@ -13,7 +13,6 @@ Pipe::Pipe(const StringView& name) :
     m_readers{0},
     m_writers{0}
 {
-	m_lock.init();
 	// FIXME: multiple writers, one reader.
 }
 

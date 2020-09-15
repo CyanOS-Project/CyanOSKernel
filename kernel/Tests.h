@@ -15,12 +15,12 @@ Semaphore* sem_lock;
 void test_semaphore_thread2(uintptr_t arg)
 {
 	UNUSED(arg);
-	// printf("Thread2:\n");
+	warn() << "Thread2:";
 	sem_lock->acquire();
-	// printf("Semaphore acquired by thread2\n");
+	warn() << "Semaphore acquired by thread2";
 	Thread::sleep(1000);
 	sem_lock->release();
-	// printf("Semaphore released by thread2\n");
+	warn() << "Semaphore released by thread2";
 	while (1) {
 		HLT();
 	}
@@ -28,16 +28,17 @@ void test_semaphore_thread2(uintptr_t arg)
 
 void test_semaphore(uintptr_t arg)
 {
+	// FIXME: there is a race condition here.
 	UNUSED(arg);
-	// printf("Thread1:\n");
+	warn() << "Thread1:";
 	sem_lock = new Semaphore(1);
 	sem_lock->acquire();
-	Thread::create_thread(Thread::current->parent_process(), test_semaphore_thread2, 0);
-	// printf("Semaphore acquired by thread1\n");
+	Thread::create_thread(Thread::current->parent_process(), test_semaphore_thread2, 0, ThreadPrivilege::Kernel);
+	warn() << "Semaphore acquired by thread1";
 	Thread::sleep(3000);
-	// printf("wakeup thread1\n");
+	warn() << "wakeup thread1";
 	sem_lock->release();
-	// printf("Semaphore released by thread1\n");
+	warn() << "Semaphore released by thread1";
 	while (1) {
 		HLT();
 	}

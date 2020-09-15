@@ -56,16 +56,16 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	info() << "\bDone!";
 
 	info() << "Starting the system process...";
-	Process& proc = Process::create_virtual_process("system", ProcessPrivilege::USER);
-	Thread::create_thread(proc, nullptr, 0); // this thread will continue executing this function.
+	Process& proc = Process::create_virtual_process("system", ProcessPrivilege::User);
+	Thread::create_thread(proc, nullptr, 0, ThreadPrivilege::Kernel); // It will just continue here.
 	Thread::yield();
-	Thread::create_thread(proc, idle, 0);
+	Thread::create_thread(proc, idle, 0, ThreadPrivilege::Kernel);
 	info() << "\bDone!";
 
 	info() << "CyanOS is ready!";
-	Process& proc2 = Process::create_new_process("test_process", "/Tar/UserBinary/Shell", ProcessPrivilege::USER);
-	Thread::create_thread(proc, test_server, 0);
-	Thread::create_thread(proc, test_client, 0);
+	Process& proc2 = Process::create_new_process("test_process", "/Tar/UserBinary/Shell", ProcessPrivilege::User);
+	Thread::create_thread(proc, test_server, 0, ThreadPrivilege::Kernel);
+	Thread::create_thread(proc, test_client, 0, ThreadPrivilege::Kernel);
 	// Thread::create_thread(proc2, test_ls, 0);
 
 	ENABLE_INTERRUPTS();

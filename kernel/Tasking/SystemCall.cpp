@@ -127,7 +127,7 @@ Result<int> CreateThread(Handle process, void* address, int arg)
 Result<int> CreateProcess(char* name, char* path, int flags)
 {
 	UNUSED(flags);
-	auto& process = Process::create_new_process(name, path, ProcessPrivilege::KERNEL);
+	auto& process = Process::create_new_process(name, path, ProcessPrivilege::User);
 
 	auto fp = OpenProcess(process.pid, 0);
 	ASSERT(!fp.is_error());
