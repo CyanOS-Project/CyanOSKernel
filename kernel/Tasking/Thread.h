@@ -11,7 +11,6 @@ enum class ThreadState {
 	RUNNABLE,
 	BLOCKED_SLEEP,
 	BLOCKED_QUEUE,
-	BLOCKED_IO,
 	SUSPENDED,
 };
 const size_t STACK_SIZE = 0x1000;
@@ -23,21 +22,23 @@ class Thread : public IntrusiveListNode<Thread>
 {
   private:
 	typedef void (*thread_function)(uintptr_t argument);
-	static void idle(_UNUSED_PARAM(uintptr_t));
 	static Bitmap* m_tid_bitmap;
 	static IntrusiveList<Thread>* ready_threads;
 	static IntrusiveList<Thread>* sleeping_threads;
 	static StaticSpinlock global_lock;
+	static void idle(_UNUSED_PARAM(uintptr_t));
 
 	Spinlock m_lock;
 	const unsigned m_tid;
+	Process& m_parent;
+	ThreadState m_state;
+	WaitQueue* m_blocker;
 	unsigned m_sleep_ticks;
 	uintptr_t m_kernel_stack_start;
 	uintptr_t m_kernel_stack_end;
 	uintptr_t m_kernel_stack_pointer;
 	uintptr_t m_user_stack_start;
-	Process& m_parent;
-	ThreadState m_state;
+
 	unsigned reserve_tid();
 	Thread(Process& process, thread_function address, uintptr_t argument);
 
@@ -47,17 +48,16 @@ class Thread : public IntrusiveListNode<Thread>
 	static void sleep(unsigned ms);
 	static void yield();
 	static void setup();
+	static size_t number_of_ready_threads();
 
 	void wake_up_from_queue();
 	void wake_up_from_sleep();
-	void block();
+	void block(WaitQueue& blocker);
 	void terminate();
 	~Thread();
 	unsigned tid();
 	ThreadState state();
 	Process& parent_process();
-
-	static size_t number_of_ready_threads();
 
 	template <typename Callback> static void for_each_sleeping(Callback callback)
 	{
@@ -82,6 +82,8 @@ class Thread : public IntrusiveListNode<Thread>
 			}
 		}
 	}
+
 	friend class Scheduler;
 	friend class WaitQueue;
+	friend class IntrusiveList<Thread>;
 };

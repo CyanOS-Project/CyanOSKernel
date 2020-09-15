@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Algorithms.h>
 #include <Types.h>
 #ifdef __UNIT_TESTS
 	#include <assert.h>
@@ -52,19 +53,17 @@ template <typename T> class IntrusiveList
 	IntrusiveList& operator=(const IntrusiveList&) = delete;
 	IntrusiveList& operator=(IntrusiveList&&) = delete;
 
-	void push_back(T& node);
-	T* pop_front();
-	T* remove(T& node);
+	template <typename... U> T& emplace_back(U&&... u);
+	T& push_back(T& node);
+	T& pop_front();
+	T& remove(T& node);
 	Iterator begin() const;
 	Iterator end() const;
-
-	T* first() const { return m_head; }
-
-	T* tail() const { return m_tail; }
-
-	bool is_empty() const { return !m_count; }
-
-	size_t size() const { return m_count; }
+	T& first() const;
+	T& tail() const;
+	Iterator current(T& node) const;
+	bool is_empty() const;
+	size_t size() const;
 };
 template <typename T> IntrusiveList<T>::Iterator::Iterator(T* node) : m_node{node} {}
 
@@ -140,25 +139,34 @@ template <typename T> void IntrusiveList<T>::append_node(T& node)
 	m_count++;
 }
 
-template <typename T> void IntrusiveList<T>::push_back(T& node)
+template <typename T> template <typename... U> T& IntrusiveList<T>::emplace_back(U&&... u)
 {
+	T& node = *new T{forward<U>(u)...};
 	append_node(node);
-}
-
-template <typename T> T* IntrusiveList<T>::pop_front()
-{
-	if (!m_head) {
-		return nullptr;
-	}
-	T* node = m_head;
-	remove_node(*node);
 	return node;
 }
 
-template <typename T> T* IntrusiveList<T>::remove(T& node)
+template <typename T> T& IntrusiveList<T>::push_back(T& node)
 {
+	append_node(node);
+	return node;
+}
+
+template <typename T> T& IntrusiveList<T>::pop_front()
+{
+	ASSERT(m_head);
+
+	T* node = m_head;
+	remove_node(*node);
+	return *node;
+}
+
+template <typename T> T& IntrusiveList<T>::remove(T& node)
+{
+	ASSERT(m_head);
+
 	remove_node(node);
-	return &node;
+	return node;
 }
 
 template <typename T> typename IntrusiveList<T>::Iterator IntrusiveList<T>::begin() const
@@ -169,4 +177,33 @@ template <typename T> typename IntrusiveList<T>::Iterator IntrusiveList<T>::begi
 template <typename T> typename IntrusiveList<T>::Iterator IntrusiveList<T>::end() const
 {
 	return Iterator(nullptr);
+}
+
+template <typename T> typename IntrusiveList<T>::Iterator IntrusiveList<T>::current(T& node) const
+{
+	return Iterator{&node};
+}
+
+template <typename T> T& IntrusiveList<T>::first() const
+{
+	ASSERT(m_head);
+
+	return *m_head;
+}
+
+template <typename T> T& IntrusiveList<T>::tail() const
+{
+	ASSERT(m_head);
+
+	return *m_tail;
+}
+
+template <typename T> bool IntrusiveList<T>::is_empty() const
+{
+	return !m_count;
+}
+
+template <typename T> size_t IntrusiveList<T>::size() const
+{
+	return m_count;
 }

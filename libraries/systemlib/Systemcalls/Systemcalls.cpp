@@ -25,42 +25,37 @@ void CloseFile(Handle handle)
 	syscall1(4, size_t(handle));
 }
 
-Handle CreateThread(void* address, int arg)
+Handle CreateThread(Handle handle, void* address, int arg)
 {
-	return syscall2(5, size_t(address), size_t(arg));
-}
-
-Handle CreateRemoteThread(Handle handle, void* address, int arg)
-{
-	return syscall3(6, size_t(handle), size_t(address), size_t(arg));
+	return syscall3(5, size_t(handle), size_t(address), size_t(arg));
 }
 
 Handle CreateProcess(const char* name, const char* path, int flags)
 {
-	return syscall3(7, size_t(name), size_t(path), size_t(flags));
+	return syscall3(6, size_t(name), size_t(path), size_t(flags));
 }
 
 Handle OpenProcess(size_t pid, int access)
 {
-	return syscall2(8, size_t(pid), size_t(access));
+	return syscall2(7, size_t(pid), size_t(access));
 }
 
 void TerminateProcess(Handle handle, int status)
 {
-	syscall2(9, size_t(handle), size_t(status));
+	syscall2(8, size_t(handle), size_t(status));
 }
 
 void WaitSignal(Handle handle, int signal)
 {
-	syscall2(10, size_t(handle), size_t(signal));
+	syscall2(9, size_t(handle), size_t(signal));
 }
 
 void Sleep(size_t ms)
 {
-	syscall1(11, size_t(ms));
+	syscall1(10, size_t(ms));
 }
 
 void Yield()
 {
-	syscall0(12);
+	syscall0(11);
 }

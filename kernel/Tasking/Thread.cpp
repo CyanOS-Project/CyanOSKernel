@@ -24,8 +24,8 @@ void Thread::setup()
 Thread& Thread::create_thread(Process& parent_process, thread_function address, uintptr_t argument)
 {
 	ScopedLock local_lock(global_lock);
-	Thread& new_thread = *new Thread(parent_process, address, argument);
-	ready_threads->push_back(new_thread);
+
+	Thread& new_thread = ready_threads->emplace_back(parent_process, address, argument);
 	parent_process.threads.emplace_back(new_thread);
 	return new_thread;
 }
@@ -33,7 +33,9 @@ Thread& Thread::create_thread(Process& parent_process, thread_function address, 
 Thread::Thread(Process& parent_process, thread_function address, uintptr_t argument) :
     m_lock{},
     m_tid{reserve_tid()},
-    m_parent{parent_process}
+    m_parent{parent_process},
+    m_state{ThreadState::RUNNABLE},
+    m_blocker{nullptr}
 {
 	m_lock.init();
 	void* thread_kernel_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
@@ -51,23 +53,28 @@ Thread::~Thread() {}
 void Thread::wake_up_from_queue()
 {
 	ScopedLock local_lock(m_lock);
+
 	ready_threads->push_back(*this);
 	m_state = ThreadState::RUNNABLE;
+	m_blocker = nullptr;
 }
 
 void Thread::wake_up_from_sleep()
 {
 	ScopedLock local_lock(m_lock);
+
 	sleeping_threads->remove(*this);
 	ready_threads->push_back(*this);
 	m_state = ThreadState::RUNNABLE;
 }
 
-void Thread::block()
+void Thread::block(WaitQueue& blocker)
 {
 	ScopedLock local_lock(m_lock);
+
 	ready_threads->remove(*this);
 	m_state = ThreadState::BLOCKED_QUEUE;
+	m_blocker = &blocker;
 }
 
 void Thread::yield()
@@ -92,20 +99,38 @@ unsigned Thread::reserve_tid()
 void Thread::terminate()
 {
 	ScopedLock local_lock(m_lock);
-	ASSERT(m_state == ThreadState::RUNNABLE); // FIXME: what if it was blocked ?
-	ready_threads->remove(*this);
-	// this->~Thread(); TODO: an object can't just terminate itself !!
+
+	switch (m_state) {
+		case ThreadState::RUNNABLE:
+			ready_threads->remove(*this);
+			break;
+
+		case ThreadState::BLOCKED_SLEEP:
+			sleeping_threads->remove(*this);
+			break;
+
+		case ThreadState::BLOCKED_QUEUE:
+			ASSERT(m_blocker);
+			m_blocker->terminate_blocked_thread(*this);
+			break;
+
+		case ThreadState::SUSPENDED:
+			ASSERT_NOT_REACHABLE(); // TODO: ThreadState::SUSPENDED
+			break;
+	}
+
+	// FIXME: free Thread memory, maybe static function should call this function ?
 }
 
 void Thread::sleep(unsigned ms)
 {
-	{
-		ScopedLock local_lock(current->m_lock);
-		current->m_sleep_ticks = PIT::ticks + ms;
-		current->m_state = ThreadState::BLOCKED_SLEEP;
-		ready_threads->remove(*current);
-		sleeping_threads->push_back(*current);
-	}
+	ScopedLock local_lock(current->m_lock);
+	current->m_sleep_ticks = PIT::ticks + ms;
+	current->m_state = ThreadState::BLOCKED_SLEEP;
+	ready_threads->remove(*current);
+	sleeping_threads->push_back(*current);
+
+	local_lock.release();
 	yield();
 }
 
@@ -126,5 +151,7 @@ ThreadState Thread::state()
 
 size_t Thread::number_of_ready_threads()
 {
+	ScopedLock local_lock(global_lock);
+
 	return ready_threads->size();
 }

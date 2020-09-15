@@ -47,8 +47,7 @@ generic_syscall SystemCall::systemcalls_routines[] = {reinterpret_cast<generic_s
                                                       reinterpret_cast<generic_syscall>(QueryDirectory),
                                                       reinterpret_cast<generic_syscall>(CloseFile),
 
-                                                      reinterpret_cast<generic_syscall>(CreateThread),
-                                                      reinterpret_cast<generic_syscall>(CreateRemoteThread),
+                                                      reinterpret_cast<generic_syscall>(CreateThread), //
                                                       reinterpret_cast<generic_syscall>(CreateProcess),
                                                       reinterpret_cast<generic_syscall>(OpenProcess),
                                                       reinterpret_cast<generic_syscall>(TerminateProcess),
@@ -118,16 +117,8 @@ Result<int> CloseFile(Handle handle)
 	return 0;
 }
 
-Result<int> CreateThread(void* address, int arg)
+Result<int> CreateThread(Handle process, void* address, int arg)
 {
-	UNUSED(address);
-	UNUSED(arg);
-	return 0;
-}
-
-Result<int> CreateRemoteThread(int process, void* address, int arg)
-{
-	UNUSED(process);
 	UNUSED(address);
 	UNUSED(arg);
 	return 0;

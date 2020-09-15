@@ -26,14 +26,16 @@ void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
 	// FIXME: schedule idle if there is no ready thread
 	// TODO: move all unnecessary stuff to a separate thread to be performed later.
 	ScopedLock local_lock(lock);
-	if (type == ScheduleType::TIMED)
-		wake_up_sleepers();
 
-	if (Thread::current) {
+	if (type == ScheduleType::TIMED) {
+		wake_up_sleepers();
+	}
+
+	if (Thread::current) { // FIXME: get rid of this check
 		save_context(current_context, Thread::current);
 	}
 	Thread& next_thread = select_next_thread();
-	if (Thread::current) {
+	if (Thread::current) { // FIXME: get rid of this check
 		if (next_thread.m_parent.pid != Thread::current->m_parent.pid) {
 			switch_page_directory(next_thread.m_parent.page_directory);
 		}
@@ -46,20 +48,18 @@ void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
 
 Thread& Scheduler::select_next_thread()
 {
-	// HACK: fix this silly way of choosing new process.
-	static size_t rr_index = 0;
-	Thread* next_thread = nullptr;
-	size_t threads_index = 0;
-	Thread::for_each_ready([&](auto& thread) {
-		if (threads_index++ == rr_index % Thread::number_of_ready_threads()) {
-			next_thread = &thread;
-			return IterationDecision::Break;
-		}
-		return IterationDecision::Continue;
-	});
+	// Simple Round Robinson
 	ASSERT(Thread::number_of_ready_threads());
-	rr_index = (rr_index + 1) % Thread::number_of_ready_threads();
-	return *next_thread;
+	if (!Thread::current) { // FIXME: get rid of this check
+		return *Thread::ready_threads->begin();
+	}
+
+	auto next_thread = ++Thread::ready_threads->current(*Thread::current);
+	if (next_thread == Thread::ready_threads->end()) {
+		return *Thread::ready_threads->begin();
+	} else {
+		return *next_thread;
+	}
 }
 
 void Scheduler::wake_up_sleepers()

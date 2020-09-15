@@ -26,8 +26,7 @@ Result<int> WriteFile(Handle handle, void* buff, size_t size);
 Result<int> QueryDirectory(Handle handle, DirectoryInfo* info);
 Result<int> CloseFile(Handle handle);
 
-Result<int> CreateThread(void* address, int arg);
-Result<int> CreateRemoteThread(int process, void* address, int arg);
+Result<int> CreateThread(Handle process, void* address, int arg);
 Result<int> CreateProcess(char* name, char* path, int flags);
 Result<int> OpenProcess(size_t pid, int access);
 Result<int> TerminateProcess(Handle handle, int status);

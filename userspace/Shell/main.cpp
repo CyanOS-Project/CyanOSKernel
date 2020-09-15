@@ -5,9 +5,6 @@
 
 void execute_command(char* command)
 {
-	printf("your command is: ");
-	printf(command);
-	printf("\n");
 	if (strcmp(command, "TestApp") == 0) {
 		Handle child = CreateProcess("TestApp", "/Tar/UserBinary/TestApp", 0);
 		WaitSignal(child, 0);

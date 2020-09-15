@@ -101,15 +101,15 @@ void Process::initiate_process(uintptr_t __pcb)
 void Process::terminate(int status_code)
 {
 	ScopedLock local_lock(m_lock);
-	state = ProcessState::TERMINATED;
 
 	for (auto&& i : threads) {
 		i->terminate();
 	}
 
-	// FIXME: free Process memory, maybe static function should call this function ?
+	state = ProcessState::TERMINATED;
 	m_return_status = status_code;
 	m_singal_waiting_queue.wake_up_all();
+	// FIXME: free Process memory, maybe static function should call this function ?
 }
 
 int Process::wait_for_signal()
