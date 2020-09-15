@@ -1,6 +1,6 @@
 #include "Context.h"
 
-uint32_t Context::setup_task_stack_context(void* stack, uint32_t stack_size, uint32_t start_function,
+uint32_t Context::setup_task_stack_context(ContextType type, void* stack, uint32_t stack_size, uint32_t start_function,
                                            uint32_t return_function, uint32_t argument)
 {
 	InitialTaskContext* context =
@@ -8,7 +8,12 @@ uint32_t Context::setup_task_stack_context(void* stack, uint32_t stack_size, uin
 	context->return_address = return_function;
 	context->argument = argument;
 	context->isr_frame.eip = start_function;
-	context->isr_frame.cs = KCS_SELECTOR;
+	if (type == ContextType::Kernel) {
+		context->isr_frame.cs = KCS_SELECTOR;
+	} else {
+		context->isr_frame.cs = KCS_SELECTOR;
+	}
+
 	context->isr_frame.eflags = EFLAGS_IF_ENABLE;
 	return uint32_t(&context->isr_frame) + 4;
 }

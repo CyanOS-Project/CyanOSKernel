@@ -4,6 +4,7 @@
 #include "Isr.h"
 #include <Types.h>
 
+enum class ContextType { Kernel, User };
 class Context
 {
   private:
@@ -15,8 +16,8 @@ class Context
 	static const uint32_t EFLAGS_IF_ENABLE = 0x202;
 
   public:
-	static uint32_t setup_task_stack_context(void* stack, uint32_t stack_size, uint32_t start_function,
-	                                         uint32_t return_function, uint32_t argument);
+	static uint32_t setup_task_stack_context(ContextType type, void* stack, uint32_t stack_size,
+	                                         uint32_t start_function, uint32_t return_function, uint32_t argument);
 	static void switch_task_stack(uint32_t task_stack_start);
 	static void enter_usermode(uintptr_t thread_address, uintptr_t thread_stack);
 

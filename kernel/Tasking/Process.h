@@ -19,6 +19,7 @@ enum class ProcessState {
 	SUSPENDED,
 	TERMINATED,
 };
+enum class ProcessPrivilege { KERNEL, USER };
 
 class Thread;
 class Process
@@ -33,7 +34,7 @@ class Process
 	WaitQueue m_singal_waiting_queue;
 	int m_return_status;
 
-	Process(const StringView& name, const StringView& path);
+	Process(const StringView& name, const StringView& path, ProcessPrivilege privilege);
 	Result<uintptr_t> load_executable(const StringView& path);
 	unsigned reserve_pid();
 
@@ -41,13 +42,15 @@ class Process
 	const size_t pid;
 	const String name;
 	const String path;
+	const ProcessPrivilege privilege_level;
 	const uintptr_t page_directory;
 	const Process* parent;
 	ProcessState state;
 	HandlesManager handles;
 	List<Reference<Thread>> threads; // FIXME: convert it to a vector.
 
-	static Process& create_new_process(const StringView& name, const StringView& path);
+	static Process& create_virtual_process(const StringView& name, ProcessPrivilege privilege);
+	static Process& create_new_process(const StringView& name, const StringView& path, ProcessPrivilege privilege);
 	static void setup();
 	static Result<Process&> get_process_from_pid(size_t pid);
 	void terminate(int status_code);

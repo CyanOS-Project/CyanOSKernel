@@ -18,10 +18,17 @@ void Process::setup()
 	global_lock.init();
 }
 
-Process& Process::create_new_process(const StringView& name, const StringView& path)
+Process& Process::create_virtual_process(const StringView& name, ProcessPrivilege privilege)
 {
 	ScopedLock local_lock(global_lock);
-	auto& pcb = processes->emplace_back(name, path);
+	auto& pcb = processes->emplace_back(name, "", privilege);
+	return pcb;
+}
+
+Process& Process::create_new_process(const StringView& name, const StringView& path, ProcessPrivilege privilege)
+{
+	ScopedLock local_lock(global_lock);
+	auto& pcb = processes->emplace_back(name, path, privilege);
 	Thread::create_thread(pcb, initiate_process, uintptr_t(&pcb));
 	return pcb;
 }
@@ -36,12 +43,13 @@ Result<Process&> Process::get_process_from_pid(size_t pid)
 	return ResultError(ERROR_INVALID_PID);
 }
 
-Process::Process(const StringView& name, const StringView& path) :
+Process::Process(const StringView& name, const StringView& path, ProcessPrivilege privilege) :
     m_lock{},
     m_singal_waiting_queue{},
     pid{reserve_pid()},
     name{name},
     path{path},
+    privilege_level{privilege},
     page_directory{Memory::create_new_virtual_space()},
     parent{nullptr},
     state{ProcessState::ACTIVE},

@@ -26,6 +26,7 @@
 #include <Assert.h>
 #include <UniquePointer.h>
 
+void idle(uintptr_t);
 extern "C" void kernel_init(BootloaderInfo* boot_info)
 {
 	Logger::init();
@@ -36,9 +37,9 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	IDT::setup();
 	Memory::setup_stage2();
 	Heap::setup();
-	Scheduler::setup();
 	PIC::setup();
 	PIT::setup();
+	Scheduler::setup();
 	info() << "\bDone!";
 
 	info() << "Setting up file systems... ";
@@ -54,15 +55,30 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	DeviceFS::add_device(Console::alloc("console"));
 	info() << "\bDone!";
 
-	info() << "Starting the first process.";
-	Process& proc = Process::create_new_process("test_process", "/Tar/UserBinary/Shell");
-	// Thread::create_thread(proc, test_server, 0);
-	// Thread::create_thread(proc, test_client, 0);
-	Thread::create_thread(proc, test_ls, 0);
+	info() << "Starting the system process...";
+	Process& proc = Process::create_virtual_process("system", ProcessPrivilege::USER);
+	Thread::create_thread(proc, nullptr, 0); // this thread will continue executing this function.
+	Thread::yield();
+	Thread::create_thread(proc, idle, 0);
+	info() << "\bDone!";
 
+	info() << "CyanOS is ready!";
+	Process& proc2 = Process::create_new_process("test_process", "/Tar/UserBinary/Shell", ProcessPrivilege::USER);
+	Thread::create_thread(proc, test_server, 0);
+	Thread::create_thread(proc, test_client, 0);
+	// Thread::create_thread(proc2, test_ls, 0);
+
+	ENABLE_INTERRUPTS();
 	Thread::yield();
 	while (1) {
 		HLT();
 	}
 	ASSERT_NOT_REACHABLE();
+}
+
+void idle(uintptr_t)
+{
+	while (1) {
+		HLT();
+	}
 }

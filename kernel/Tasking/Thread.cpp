@@ -27,6 +27,11 @@ Thread& Thread::create_thread(Process& parent_process, thread_function address, 
 
 	Thread& new_thread = ready_threads->emplace_back(parent_process, address, argument);
 	parent_process.threads.emplace_back(new_thread);
+
+	if (current == nullptr) {
+		current = &new_thread;
+	}
+
 	return new_thread;
 }
 
@@ -40,8 +45,17 @@ Thread::Thread(Process& parent_process, thread_function address, uintptr_t argum
 	m_lock.init();
 	void* thread_kernel_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
 
-	uintptr_t stack_pointer = Context::setup_task_stack_context(thread_kernel_stack, STACK_SIZE, uintptr_t(address), //
-	                                                            uintptr_t(idle), argument);
+	uintptr_t stack_pointer = 0;
+	if (parent_process.privilege_level == ProcessPrivilege::KERNEL) {
+		stack_pointer = Context::setup_task_stack_context(ContextType::Kernel, //
+		                                                  thread_kernel_stack, STACK_SIZE, uintptr_t(address),
+		                                                  uintptr_t(thread_finishing), argument);
+	} else {
+		stack_pointer = Context::setup_task_stack_context(ContextType::User, //
+		                                                  thread_kernel_stack, STACK_SIZE, uintptr_t(address),
+		                                                  uintptr_t(thread_finishing), argument);
+	}
+
 	m_kernel_stack_start = uintptr_t(thread_kernel_stack);
 	m_kernel_stack_end = m_kernel_stack_start + STACK_SIZE;
 	m_kernel_stack_pointer = stack_pointer;
@@ -82,8 +96,11 @@ void Thread::yield()
 	asm volatile("int $0x81");
 }
 
-void Thread::idle(_UNUSED_PARAM(uintptr_t))
+void Thread::thread_finishing()
 {
+	uintptr_t stack = 0;
+	asm("mov %0,%%esp" : "=r"(stack));
+	warn() << stack;
 	while (1) {
 		HLT();
 	}

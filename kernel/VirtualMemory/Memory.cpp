@@ -26,6 +26,7 @@ void Memory::page_fault_handler(ISRContextFrame* isr_info)
 	// isr_info->registers.esp);
 	err() << "--------------------";
 	err() << "Page Fault:";
+	err() << "Instruction: " << Hex(isr_info->eip);
 	err() << "Addr: " << Hex(get_faulted_page());
 	if (!PF_PRESENT(isr_info->error_code)) {
 		err() << "accessing non-present page";

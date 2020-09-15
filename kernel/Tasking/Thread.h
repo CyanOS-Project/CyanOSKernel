@@ -26,7 +26,7 @@ class Thread : public IntrusiveListNode<Thread>
 	static IntrusiveList<Thread>* ready_threads;
 	static IntrusiveList<Thread>* sleeping_threads;
 	static StaticSpinlock global_lock;
-	static void idle(_UNUSED_PARAM(uintptr_t));
+	static void thread_finishing();
 
 	Spinlock m_lock;
 	const unsigned m_tid;
