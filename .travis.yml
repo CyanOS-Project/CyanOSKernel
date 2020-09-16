@@ -1,5 +1,4 @@
 dist: focal
-sudo: required
 language:
   - cpp
 compiler:
@@ -15,6 +14,7 @@ addons:
       - cmake
       - mtools
       - clang-10
+      - gcc-10
 script:
   - sudo ln -s /usr/bin/clang-10 /usr/local/bin/clang
   - sudo ln -s /usr/bin/clang++-10 /usr/local/bin/clang++
