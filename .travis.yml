@@ -16,8 +16,8 @@ addons:
       - mtools
       - clang-10
 script:
-  - ln -s /usr/bin/clang-10 /usr/local/bin/clang
-  - ln -s /usr/bin/clang++-10 /usr/local/bin/clang++
+  - sudo ln -s /usr/bin/clang-10 /usr/local/bin/clang
+  - sudo ln -s /usr/bin/clang++-10 /usr/local/bin/clang++
   - export CC=/usr/bin/clang-10
   - export CXX=/usr/bin/clang++-10
   - gcc -v && g++ -v && cmake --version
