@@ -1,24 +1,26 @@
 dist: focal
-language: cpp
+sudo: required
+language:
+  - cpp
 compiler:
-- clang++
-
+  - clang
 addons:
   apt:
-    update: true
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
-    - nasm
-    - grub2
-    - xorriso
-    - cmake
-    - mtools
-    - clang-10
-
+      - nasm
+      - grub2
+      - xorriso
+      - cmake
+      - mtools
+      - clang-10
 script:
-  - sudo ln -s /usr/bin/clang-10 /usr/local/bin/clang
-  - sudo ln -s /usr/bin/clang-10 /usr/local/bin/clang++
+  - ln -s /usr/bin/clang-10 /usr/local/bin/clang
+  - ln -s /usr/bin/clang++-10 /usr/local/bin/clang++
   - export CC=/usr/bin/clang-10
-  - export CXX=/usr/bin/clang-10
+  - export CXX=/usr/bin/clang++-10
+  - gcc -v && g++ -v && cmake --version
   - mkdir build && cd build
   - cmake .. -G "Unix Makefiles"
   - make
