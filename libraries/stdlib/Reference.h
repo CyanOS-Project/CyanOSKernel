@@ -30,25 +30,25 @@ template <typename T> Reference<T>::Reference(T& storage) : m_storage{&storage} 
 template <typename T> Reference<T>::Reference(const Reference<T>& other)
 {
 	ASSERT(other.m_storage);
-	m_storage { other.m_storage }
+	m_storage{other.m_storage};
 }
 
 template <typename T> Reference<T>::Reference(Reference<T>&& other)
 {
 	ASSERT(other.m_storage);
-	m_storage { move(other.m_storage) }
+	m_storage{move(other.m_storage)};
 }
 
 template <typename T> Reference<T>& Reference<T>::operator=(const Reference<T>& other)
 {
 	ASSERT(other.m_storage);
-	m_storage { other.m_storage }
+	m_storage{other.m_storage};
 }
 
 template <typename T> Reference<T>& Reference<T>::operator=(Reference<T>&& other)
 {
 	ASSERT(other.m_storage);
-	m_storage { move(other.m_storage) }
+	m_storage{move(other.m_storage)};
 }
 
 template <typename T> Reference<T>::~Reference() {}
