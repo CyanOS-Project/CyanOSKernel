@@ -97,7 +97,7 @@ void Process::initiate_process(uintptr_t __pcb)
 	Process* pcb = reinterpret_cast<Process*>(__pcb);
 	auto&& executable_entrypoint = pcb->load_executable(pcb->path);
 	if (executable_entrypoint.is_error()) {
-		warn() << "couldn't load the process, error: " << executable_entrypoint.error() << "\n";
+		warn() << "couldn't load the process, error: " << executable_entrypoint.error();
 		return; // Terminate Process
 	}
 	// return ResultError(execable_entrypoint.error());
@@ -116,8 +116,8 @@ void Process::terminate(int status_code)
 {
 	ScopedLock local_lock(m_lock);
 
-	for (auto&& i : threads) {
-		i->terminate();
+	for (auto&& thread : threads) {
+		thread->terminate();
 	}
 
 	state = ProcessState::Terminated;

@@ -36,7 +36,6 @@ Thread& Thread::create_thread(Process& process, thread_function address, uintptr
 }
 
 Thread::Thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv) :
-    m_lock{},
     m_tid{reserve_tid()},
     m_parent{process},
     m_state{ThreadState::RUNNABLE},
@@ -68,7 +67,7 @@ Thread::~Thread() {}
 
 void Thread::wake_up_from_queue()
 {
-	ScopedLock local_lock(m_lock);
+	ScopedLock local_lock(global_lock);
 
 	ready_threads->push_back(*this);
 	m_state = ThreadState::RUNNABLE;
@@ -77,7 +76,7 @@ void Thread::wake_up_from_queue()
 
 void Thread::wake_up_from_sleep()
 {
-	ScopedLock local_lock(m_lock);
+	ScopedLock local_lock(global_lock);
 
 	sleeping_threads->remove(*this);
 	ready_threads->push_back(*this);
@@ -86,7 +85,7 @@ void Thread::wake_up_from_sleep()
 
 void Thread::block(WaitQueue& blocker)
 {
-	ScopedLock local_lock(m_lock);
+	ScopedLock local_lock(global_lock);
 
 	ready_threads->remove(*this);
 	m_state = ThreadState::BLOCKED_QUEUE;
@@ -100,9 +99,7 @@ void Thread::yield()
 
 void Thread::thread_finishing()
 {
-	uintptr_t stack = 0;
-	asm("mov %0,%%esp" : "=r"(stack));
-	warn() << stack;
+	warn() << "thread returned.";
 	while (1) {
 		HLT();
 	}
@@ -117,7 +114,7 @@ unsigned Thread::reserve_tid()
 
 void Thread::terminate()
 {
-	ScopedLock local_lock(m_lock);
+	ScopedLock local_lock(global_lock);
 
 	switch (m_state) {
 		case ThreadState::RUNNABLE:
@@ -134,7 +131,7 @@ void Thread::terminate()
 			break;
 
 		case ThreadState::SUSPENDED:
-			ASSERT_NOT_REACHABLE(); // TODO: ThreadState::SUSPENDED
+			ASSERT_NOT_REACHABLE();
 			break;
 	}
 
@@ -143,28 +140,36 @@ void Thread::terminate()
 
 void Thread::sleep(unsigned ms)
 {
-	ScopedLock local_lock(current->m_lock);
+	ScopedLock local_lock(global_lock);
+
 	current->m_sleep_ticks = PIT::ticks + ms;
 	current->m_state = ThreadState::BLOCKED_SLEEP;
 	ready_threads->remove(*current);
 	sleeping_threads->push_back(*current);
 
 	local_lock.release();
+
 	yield();
 }
 
 unsigned Thread::tid()
 {
+	ScopedLock local_lock(global_lock);
+
 	return m_tid;
 }
 
 Process& Thread::parent_process()
 {
+	ScopedLock local_lock(global_lock);
+
 	return m_parent;
 }
 
 ThreadState Thread::state()
 {
+	ScopedLock local_lock(global_lock);
+
 	return m_state;
 }
 

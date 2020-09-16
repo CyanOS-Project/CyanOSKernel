@@ -1,4 +1,5 @@
 #include "Logger.h"
+#include <Assert.h>
 #include <Clib.h>
 
 StaticSpinlock Logger::lock;
@@ -38,11 +39,11 @@ Logger& Logger::operator<<(const char str)
 
 Logger& Logger::operator<<(uint64_t num)
 {
-	char buf[5];
-	itoa(buf, num & 0xFFFFFFFF, 16);
+	char buf[9];
+	itoa(buf, (num & 0xFFFFFFFF00000000) >> 32, 16);
 	toupper(buf);
 	DebugPort::write(buf, m_color);
-	itoa(buf, num & 0xFFFFFFFF00000000, 16);
+	itoa(buf, num & 0xFFFFFFFF, 16);
 	toupper(buf);
 	DebugPort::write(buf, m_color);
 	return *this;
@@ -73,17 +74,21 @@ Logger& Logger::operator<<(unsigned num)
 
 Logger& Logger::operator<<(Hex num)
 {
-	char buf[5];
+	char buf[9];
 	itoa(buf, num.m_data, 16);
 	toupper(buf);
 	DebugPort::write("0x", m_color);
+	size_t leading_zeros = sizeof(uintptr_t) * 2 - strlen(buf);
+	for (size_t i = 0; i < leading_zeros; i++) {
+		DebugPort::write("0", m_color);
+	}
 	DebugPort::write(buf, m_color);
 	return *this;
 }
 
 Logger& Logger::operator<<(void* ptr)
 {
-	char buf[5];
+	char buf[9];
 	itoa(buf, (int)ptr, 16);
 	toupper(buf);
 	DebugPort::write("0x", m_color);

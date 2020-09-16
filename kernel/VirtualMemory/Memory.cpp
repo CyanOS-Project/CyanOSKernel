@@ -20,12 +20,26 @@ void Memory::setup_page_fault_handler()
 	ISR::register_isr_handler(page_fault_handler, IRQ_NUMBER::PF);
 }
 
+void dump_memory(void* addr, size_t size)
+{
+	uintptr_t* mem = static_cast<uintptr_t*>(addr);
+	dbg printer;
+	for (size_t i = 0; i < size / 4; i++) {
+		if (i % 4 == 0) {
+			printer << "\n" << &mem[i] << ": ";
+		}
+		printer << Hex(mem[i]) << "   ";
+	}
+}
 void Memory::page_fault_handler(ISRContextFrame* isr_info)
 {
 	err() << "--------------------";
 	err() << "Page Fault:";
 	err() << "Instruction: " << Hex(isr_info->eip);
 	err() << "Addr: " << Hex(get_faulted_page());
+
+	dump_memory(reinterpret_cast<void*>(isr_info->registers.esp), 0x20);
+
 	if (!PF_PRESENT(isr_info->error_code)) {
 		err() << "accessing non-present page";
 	}

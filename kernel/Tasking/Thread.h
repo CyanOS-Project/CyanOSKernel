@@ -30,7 +30,6 @@ class Thread : public IntrusiveListNode<Thread>
 	static StaticSpinlock global_lock;
 	static void thread_finishing();
 
-	Spinlock m_lock;
 	const size_t m_tid;
 	Process& m_parent;
 	ThreadState m_state;
@@ -57,10 +56,10 @@ class Thread : public IntrusiveListNode<Thread>
 	void wake_up_from_sleep();
 	void block(WaitQueue& blocker);
 	void terminate();
-	~Thread();
 	unsigned tid();
 	ThreadState state();
 	Process& parent_process();
+	~Thread();
 
 	template <typename Callback> static void for_each_sleeping(Callback callback)
 	{

@@ -28,7 +28,6 @@ void test_semaphore_thread2(uintptr_t arg)
 
 void test_semaphore(uintptr_t arg)
 {
-	// FIXME: there is a race condition here.
 	UNUSED(arg);
 	warn() << "Thread1:";
 	sem_lock = new Semaphore(1);
@@ -44,21 +43,27 @@ void test_semaphore(uintptr_t arg)
 	}
 }
 
-/*void thread_test(uintptr_t arg)
+void thread_test(uintptr_t arg)
 {
-    //printf("Thread %d\n", arg);
-    for (size_t i = 0; i < 3; i++) {
-        //printf("Thread %d:Hello %d\n", arg, i);
-    }
+	warn() << "Thread " << arg;
+	for (size_t i = 0; i < 3; i++) {
+		warn() << "Thread " << arg << ": Hello " << i;
+	}
+	while (true) {
+		// HLT();
+	}
 }
 void test_threading(uintptr_t arg)
 {
-    //printf("Main thread: creating other threads\n");
-    for (size_t i = 0; i < 3; i++) {
-        //printf("Main thread: Creating thread%d\n", i);
-        Scheduler::create_new_thread(0, thread_test, i);
-    }
-}*/
+	// printf("Main thread: creating other threads\n");
+	for (size_t i = 0; i < 200; i++) {
+		warn() << "Main thread: Creating thread " << i;
+		Thread::create_thread(Thread::current->parent_process(), thread_test, i, ThreadPrivilege::Kernel);
+	}
+	while (true) {
+		/* code */
+	}
+}
 
 void test_pipe1(uintptr_t arg)
 {

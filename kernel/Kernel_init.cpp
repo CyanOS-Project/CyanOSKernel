@@ -35,6 +35,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	info() << "Setting up core components... ";
 	GDT::setup();
 	IDT::setup();
+
 	Memory::setup_stage2();
 	Heap::setup();
 	PIC::setup();
@@ -64,9 +65,10 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 
 	info() << "CyanOS is ready!";
 	Process& proc2 = Process::create_new_process("test_process", "/Tar/UserBinary/Shell", ProcessPrivilege::User);
-	Thread::create_thread(proc, test_server, 0, ThreadPrivilege::Kernel);
-	Thread::create_thread(proc, test_client, 0, ThreadPrivilege::Kernel);
-	// Thread::create_thread(proc2, test_ls, 0);
+	// Thread::create_thread(proc2, test_semaphore, 0, ThreadPrivilege::Kernel);
+	// Thread::create_thread(proc2, test_server, 0, ThreadPrivilege::Kernel);
+	// Thread::create_thread(proc2, test_client, 0, ThreadPrivilege::Kernel);
+	// Thread::create_thread(proc2, test_ls, 0, ThreadPrivilege::Kernel);
 
 	ENABLE_INTERRUPTS();
 	Thread::yield();

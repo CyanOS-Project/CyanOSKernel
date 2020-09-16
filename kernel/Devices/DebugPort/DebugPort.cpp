@@ -4,7 +4,7 @@
 
 void DebugPort::write(const char* data, size_t size, DebugColor color)
 {
-	char num[2];
+	char num[3];
 	itoa(num, static_cast<int>(color), 10);
 	put("\x1B[", 2);
 	put(num, 2);
@@ -14,7 +14,7 @@ void DebugPort::write(const char* data, size_t size, DebugColor color)
 }
 void DebugPort::write(const char* data, DebugColor color)
 {
-	char num[2];
+	char num[3];
 	itoa(num, static_cast<int>(color), 10);
 	put("\x1B[", 2);
 	put(num, 2);

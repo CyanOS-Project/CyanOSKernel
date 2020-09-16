@@ -195,27 +195,27 @@ void Paging::fill_page_table_entry(PAGE_TABLE_ENTRY* page_table_entry, uint16_t 
 
 void Paging::load_page_directory(uint32_t page_direcotry)
 {
-	asm("movl %0, %%cr3" : : "r"(page_direcotry) :);
+	asm volatile("movl %0, %%cr3" : : "r"(page_direcotry) :);
 }
 
 void Paging::enable_paging()
 {
-	asm("movl %%cr0, %%eax;"
-	    "or  %0, %%eax;"
-	    "movl %%eax, %%cr0 ;"
-	    :
-	    : "i"(CR0_WP | CR0_PAGING)
-	    : "eax");
+	asm volatile("movl %%cr0, %%eax;"
+	             "or  %0, %%eax;"
+	             "movl %%eax, %%cr0 ;"
+	             :
+	             : "i"(CR0_WP | CR0_PAGING)
+	             : "eax");
 }
 
 void Paging::enable_PSE()
 {
-	asm("movl %%cr4, %%eax;"
-	    "or %0, %%eax;"
-	    "movl %%eax, %%cr4;"
-	    :
-	    : "i"(CR4_PSE)
-	    : "eax");
+	asm volatile("movl %%cr4, %%eax;"
+	             "or %0, %%eax;"
+	             "movl %%eax, %%cr4;"
+	             :
+	             : "i"(CR4_PSE)
+	             : "eax");
 }
 
 void Paging::invalidate_page(uint32_t addr)
