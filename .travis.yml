@@ -3,23 +3,19 @@ language:
   - cpp
 compiler:
   - clang
-addons:
-  apt:
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - nasm
-      - grub2
-      - xorriso
-      - cmake
-      - mtools
-      - clang-10
-      - gcc-10
+
+
+before_install:
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo apt-get update -q
+  - sudo apt-get install -y nasm grub2 xorriso mtools cmake
+  - sudo apt-get install -y clang-10
+  - export CC=/usr/bin/clang-10
+  - export CXX=/usr/bin/clang++-10
+
 script:
   - sudo ln -s /usr/bin/clang-10 /usr/local/bin/clang
   - sudo ln -s /usr/bin/clang++-10 /usr/local/bin/clang++
-  - export CC=/usr/bin/clang-10
-  - export CXX=/usr/bin/clang++-10
   - clang-10 -v && clang -v
   - mkdir build && cd build
   - cmake .. -G "Unix Makefiles"
