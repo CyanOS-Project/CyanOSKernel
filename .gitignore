@@ -1,3 +1,6 @@
 build/
 *.code-workspace
 .vscode/
+CyanOS.srctrlbm
+CyanOS.srctrlprj
+CyanOS.srctrldb

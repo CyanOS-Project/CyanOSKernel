@@ -7,13 +7,14 @@ size_t ReadFile(Handle handle, void* buff, size_t size);
 size_t WriteFile(Handle handle, const void* buff, size_t size);
 void QueryDirectory(Handle handle, void* info);
 void CloseFile(Handle handle);
+void Sleep(size_t size);
+void Yield();
 Handle CreateThread(Handle handle, void* address, int arg);
 Handle CreateProcess(const char* name, const char* path, int flags);
 Handle OpenProcess(size_t pid, int access);
 void TerminateProcess(Handle handle, int status);
+void TerminateThread(Handle handle, int status);
 void WaitSignal(Handle handle, int signal);
-void Sleep(size_t size);
-void Yield();
 
 inline int syscall0(size_t sysnum)
 {

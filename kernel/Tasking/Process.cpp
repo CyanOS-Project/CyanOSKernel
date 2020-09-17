@@ -36,7 +36,7 @@ Process& Process::create_new_process(const StringView& name, const StringView& p
 Result<Process&> Process::get_process_from_pid(size_t pid)
 {
 	for (auto&& i : *processes) {
-		if (i.pid == pid) {
+		if (i.m_pid == pid) {
 			return i;
 		}
 	}
@@ -46,15 +46,15 @@ Result<Process&> Process::get_process_from_pid(size_t pid)
 Process::Process(const StringView& name, const StringView& path, ProcessPrivilege privilege) :
     m_lock{},
     m_singal_waiting_queue{},
-    pid{reserve_pid()},
-    name{name},
-    path{path},
-    privilege_level{privilege},
-    page_directory{Memory::create_new_virtual_space()},
-    parent{nullptr},
-    state{ProcessState::Active},
-    handles{},
-    threads{}
+    m_pid{reserve_pid()},
+    m_name{name},
+    m_path{path},
+    m_privilege_level{privilege},
+    m_page_directory{Memory::create_new_virtual_space()},
+    m_parent{nullptr},
+    m_state{ProcessState::Active},
+    m_handles{},
+    m_threads{}
 {
 }
 
@@ -95,17 +95,17 @@ unsigned Process::reserve_pid()
 void Process::initiate_process(uintptr_t __pcb)
 {
 	Process* pcb = reinterpret_cast<Process*>(__pcb);
-	auto&& executable_entrypoint = pcb->load_executable(pcb->path);
+	auto&& executable_entrypoint = pcb->load_executable(pcb->m_path);
 	if (executable_entrypoint.is_error()) {
 		warn() << "couldn't load the process, error: " << executable_entrypoint.error();
 		return; // Terminate Process
 	}
 	// return ResultError(execable_entrypoint.error());
 
-	if (pcb->privilege_level == ProcessPrivilege::User) {
+	if (pcb->m_privilege_level == ProcessPrivilege::User) {
 		void* thread_user_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE);
 		Context::enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE - 4);
-	} else if (pcb->privilege_level == ProcessPrivilege::Kernel) {
+	} else if (pcb->m_privilege_level == ProcessPrivilege::Kernel) {
 		ASSERT_NOT_REACHABLE(); // TODO: kernel process.
 	}
 
@@ -116,11 +116,11 @@ void Process::terminate(int status_code)
 {
 	ScopedLock local_lock(m_lock);
 
-	for (auto&& thread : threads) {
+	for (auto&& thread : m_threads) {
 		thread->terminate();
 	}
 
-	state = ProcessState::Terminated;
+	m_state = ProcessState::Terminated;
 	m_return_status = status_code;
 	m_singal_waiting_queue.wake_up_all();
 	// FIXME: free Process memory, maybe static function should call this function ?
@@ -131,4 +131,65 @@ int Process::wait_for_signal()
 	ScopedLock local_lock(m_lock);
 	m_singal_waiting_queue.wait(local_lock);
 	return m_return_status;
+}
+
+size_t Process::pid()
+{
+	ScopedLock local_lock(m_lock);
+	return m_pid;
+}
+
+String Process::name()
+{
+	ScopedLock local_lock(m_lock);
+	return m_name;
+}
+
+String Process::path()
+{
+	ScopedLock local_lock(m_lock);
+	return m_path;
+}
+
+uintptr_t Process::page_directory()
+{
+	ScopedLock local_lock(m_lock);
+	return m_page_directory;
+}
+
+Process const* Process::parent()
+{
+	ScopedLock local_lock(m_lock);
+	return m_parent;
+}
+
+ProcessState Process::state()
+{
+	ScopedLock local_lock(m_lock);
+	return m_state;
+}
+
+HandlesManager& Process::handles()
+{
+	// FIXME: Handle Manager is not locked yet, it should use process's lock to prevent race condition
+	//		 when you try to add handle to the process while the process is being destroyed.
+	ScopedLock local_lock(m_lock);
+	return m_handles;
+}
+
+void Process::list_new_thread(Thread& thread)
+{
+	ScopedLock local_lock(m_lock);
+	m_threads.emplace_back(thread);
+}
+
+void Process::unlist_new_thread(Thread& thread)
+{
+	ScopedLock local_lock(m_lock);
+	m_threads.remove_if([&](Reference<Thread>& cur) {
+		if (cur->tid() == thread.tid())
+			return true;
+		else
+			return false;
+	});
 }

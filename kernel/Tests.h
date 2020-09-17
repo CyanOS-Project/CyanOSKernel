@@ -55,6 +55,7 @@ void thread_test(uintptr_t arg)
 }
 void test_threading(uintptr_t arg)
 {
+	UNUSED(arg);
 	// printf("Main thread: creating other threads\n");
 	for (size_t i = 0; i < 200; i++) {
 		warn() << "Main thread: Creating thread " << i;

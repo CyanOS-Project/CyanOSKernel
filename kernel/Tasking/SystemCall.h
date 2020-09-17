@@ -30,6 +30,7 @@ Result<int> CreateThread(Handle process, void* address, int arg);
 Result<int> CreateProcess(char* name, char* path, int flags);
 Result<int> OpenProcess(size_t pid, int access);
 Result<int> TerminateProcess(Handle handle, int status);
+Result<int> TerminateThread(Handle handle, int status);
 Result<int> WaitSignal(Handle handle, int signal);
 Result<int> Sleep(size_t size);
 Result<int> Yield();

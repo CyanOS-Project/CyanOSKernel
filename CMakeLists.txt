@@ -3,6 +3,7 @@ SET(CMAKE_TOOLCHAIN_FILE "Toolchain.i686-pe.cmake")
 cmake_minimum_required(VERSION 3.0.0)
 set(CMAKE_ASM_NASM_OBJECT_FORMAT win32)
 enable_language(ASM_NASM)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(CyanOS VERSION 0.1.0)
 
 SET(KERNEL_EXE "kernel.bin")

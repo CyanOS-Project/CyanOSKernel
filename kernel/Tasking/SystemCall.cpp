@@ -7,6 +7,23 @@
 
 //#pragma GCC diagnostic ignored "-Wcast-function-type"
 
+generic_syscall SystemCall::systemcalls_routines[] = {reinterpret_cast<generic_syscall>(OpenFile),
+                                                      reinterpret_cast<generic_syscall>(ReadFile),
+                                                      reinterpret_cast<generic_syscall>(WriteFile),
+                                                      reinterpret_cast<generic_syscall>(QueryDirectory),
+                                                      reinterpret_cast<generic_syscall>(CloseFile),
+
+                                                      reinterpret_cast<generic_syscall>(Sleep),
+                                                      reinterpret_cast<generic_syscall>(Yield),
+                                                      reinterpret_cast<generic_syscall>(CreateThread), //
+                                                      reinterpret_cast<generic_syscall>(CreateProcess),
+                                                      reinterpret_cast<generic_syscall>(OpenProcess),
+                                                      reinterpret_cast<generic_syscall>(TerminateProcess),
+                                                      reinterpret_cast<generic_syscall>(TerminateThread),
+                                                      reinterpret_cast<generic_syscall>(WaitSignal)};
+
+unsigned SystemCall::syscalls_count = sizeof(systemcalls_routines) / sizeof(generic_syscall);
+
 void SystemCall::setup()
 {
 	ISR::register_isr_handler(systemcall_handler, SYSCALL_IRQ);
@@ -41,22 +58,6 @@ void SystemCall::systemcall_handler(ISRContextFrame* frame)
 	}
 }
 
-generic_syscall SystemCall::systemcalls_routines[] = {reinterpret_cast<generic_syscall>(OpenFile),
-                                                      reinterpret_cast<generic_syscall>(ReadFile),
-                                                      reinterpret_cast<generic_syscall>(WriteFile),
-                                                      reinterpret_cast<generic_syscall>(QueryDirectory),
-                                                      reinterpret_cast<generic_syscall>(CloseFile),
-
-                                                      reinterpret_cast<generic_syscall>(CreateThread), //
-                                                      reinterpret_cast<generic_syscall>(CreateProcess),
-                                                      reinterpret_cast<generic_syscall>(OpenProcess),
-                                                      reinterpret_cast<generic_syscall>(TerminateProcess),
-                                                      reinterpret_cast<generic_syscall>(WaitSignal),
-                                                      reinterpret_cast<generic_syscall>(Sleep),
-                                                      reinterpret_cast<generic_syscall>(Yield)};
-
-unsigned SystemCall::syscalls_count = sizeof(systemcalls_routines) / sizeof(generic_syscall);
-
 Result<int> OpenFile(char* path, int mode, int flags)
 {
 	auto file_description = FileDescription::open(path, static_cast<OpenMode>(mode), static_cast<OpenFlags>(flags));
@@ -64,16 +65,16 @@ Result<int> OpenFile(char* path, int mode, int flags)
 		return ResultError(file_description.error());
 	}
 
-	Handle fd = Thread::current->parent_process().handles.add_handle(move(file_description.value()));
+	Handle fd = Thread::current->parent_process().handles().add_handle(move(file_description.value()));
 	return fd;
 }
 
 Result<int> ReadFile(Handle handle, void* buff, size_t size)
 {
-	if (Thread::current->parent_process().handles.check_handle(handle) != HandleType::FileDescription)
+	if (Thread::current->parent_process().handles().check_handle(handle) != HandleType::FileDescription)
 		return ResultError(ERROR_INVALID_HANDLE);
 
-	auto& description = Thread::current->parent_process().handles.get_file_description(handle);
+	auto& description = Thread::current->parent_process().handles().get_file_description(handle);
 	auto result = description.read(buff, size);
 	if (result.is_error()) {
 		return ResultError(result.error());
@@ -83,10 +84,10 @@ Result<int> ReadFile(Handle handle, void* buff, size_t size)
 
 Result<int> WriteFile(Handle handle, void* buff, size_t size)
 {
-	if (Thread::current->parent_process().handles.check_handle(handle) != HandleType::FileDescription)
+	if (Thread::current->parent_process().handles().check_handle(handle) != HandleType::FileDescription)
 		return ResultError(ERROR_INVALID_HANDLE);
 
-	auto& description = Thread::current->parent_process().handles.get_file_description(handle);
+	auto& description = Thread::current->parent_process().handles().get_file_description(handle);
 	auto result = description.write(buff, size);
 	if (result.is_error()) {
 		return ResultError(result.error());
@@ -96,10 +97,10 @@ Result<int> WriteFile(Handle handle, void* buff, size_t size)
 
 Result<int> QueryDirectory(Handle handle, DirectoryInfo* info)
 {
-	if (Thread::current->parent_process().handles.check_handle(handle) != HandleType::FileDescription)
+	if (Thread::current->parent_process().handles().check_handle(handle) != HandleType::FileDescription)
 		return ResultError(ERROR_INVALID_HANDLE);
 
-	auto& description = Thread::current->parent_process().handles.get_file_description(handle);
+	auto& description = Thread::current->parent_process().handles().get_file_description(handle);
 	auto result = description.dir_query(info);
 	if (result.is_error()) {
 		return ResultError(result.error());
@@ -109,16 +110,17 @@ Result<int> QueryDirectory(Handle handle, DirectoryInfo* info)
 
 Result<int> CloseFile(Handle handle)
 {
-	if (Thread::current->parent_process().handles.check_handle(handle) != HandleType::FileDescription)
+	if (Thread::current->parent_process().handles().check_handle(handle) != HandleType::FileDescription)
 		return ResultError(ERROR_INVALID_HANDLE);
 
-	Thread::current->parent_process().handles.remove_handle(handle);
+	Thread::current->parent_process().handles().remove_handle(handle);
 	// Destructing the description will call close on FSNode.
 	return 0;
 }
 
 Result<int> CreateThread(Handle process, void* address, int arg)
 {
+	UNUSED(process);
 	UNUSED(address);
 	UNUSED(arg);
 	return 0;
@@ -129,7 +131,7 @@ Result<int> CreateProcess(char* name, char* path, int flags)
 	UNUSED(flags);
 	auto& process = Process::create_new_process(name, path, ProcessPrivilege::User);
 
-	auto fp = OpenProcess(process.pid, 0);
+	auto fp = OpenProcess(process.pid(), 0);
 	ASSERT(!fp.is_error());
 
 	return fp.value();
@@ -142,7 +144,7 @@ Result<int> OpenProcess(size_t pid, int access)
 		return ResultError(process_description.error());
 	}
 
-	Handle fp = Thread::current->parent_process().handles.add_handle(move(process_description.value()));
+	Handle fp = Thread::current->parent_process().handles().add_handle(move(process_description.value()));
 	return fp;
 }
 
@@ -152,13 +154,20 @@ Result<int> TerminateProcess(Handle handle, int status)
 		Thread::current->parent_process().terminate(status);
 		return 0;
 	} else {
-		if (Thread::current->parent_process().handles.check_handle(handle) != HandleType::ProcessDescription)
+		if (Thread::current->parent_process().handles().check_handle(handle) != HandleType::ProcessDescription)
 			return ResultError(ERROR_INVALID_HANDLE);
 
-		auto& description = Thread::current->parent_process().handles.get_process_description(handle);
+		auto& description = Thread::current->parent_process().handles().get_process_description(handle);
 		description.terminate_process(status);
 		return 0;
 	}
+}
+
+Result<int> TerminateThread(Handle handle, int status)
+{
+	UNUSED(handle);
+	UNUSED(status);
+	return 0;
 }
 
 Result<int> Sleep(size_t size)
@@ -177,9 +186,9 @@ Result<int> WaitSignal(Handle handle, int signal)
 {
 	UNUSED(signal);
 
-	if (Thread::current->parent_process().handles.check_handle(handle) != HandleType::ProcessDescription)
+	if (Thread::current->parent_process().handles().check_handle(handle) != HandleType::ProcessDescription)
 		return ResultError(ERROR_INVALID_HANDLE);
 
-	auto& description = Thread::current->parent_process().handles.get_process_description(handle);
+	auto& description = Thread::current->parent_process().handles().get_process_description(handle);
 	return description.wait_signal();
 }

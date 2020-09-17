@@ -36,8 +36,8 @@ void Scheduler::schedule(ISRContextFrame* current_context, ScheduleType type)
 	save_context(current_context, Thread::current);
 	Thread& next_thread = select_next_thread();
 	if (&next_thread != Thread::current) { // check if we really need to switch
-		if (next_thread.m_parent.pid != Thread::current->m_parent.pid) {
-			switch_page_directory(next_thread.m_parent.page_directory);
+		if (next_thread.m_parent.pid() != Thread::current->m_parent.pid()) {
+			switch_page_directory(next_thread.m_parent.page_directory());
 		}
 		Thread::current = &next_thread;
 		load_context(current_context, &next_thread);

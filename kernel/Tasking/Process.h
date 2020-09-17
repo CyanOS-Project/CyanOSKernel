@@ -32,6 +32,16 @@ class Process
 
 	Spinlock m_lock;
 	WaitQueue m_singal_waiting_queue;
+	const size_t m_pid;
+	const String m_name;
+	const String m_path;
+	const ProcessPrivilege m_privilege_level;
+	const uintptr_t m_page_directory;
+	Process const* m_parent;
+	ProcessState m_state;
+	HandlesManager m_handles;
+	List<Reference<Thread>> m_threads; // FIXME: convert it to a vector.
+
 	int m_return_status;
 
 	Process(const StringView& name, const StringView& path, ProcessPrivilege privilege);
@@ -39,23 +49,22 @@ class Process
 	unsigned reserve_pid();
 
   public:
-	const size_t pid;
-	const String name;
-	const String path;
-	const ProcessPrivilege privilege_level;
-	const uintptr_t page_directory;
-	const Process* parent;
-	ProcessState state;
-	HandlesManager handles;
-	List<Reference<Thread>> threads; // FIXME: convert it to a vector.
-
 	static Process& create_virtual_process(const StringView& name, ProcessPrivilege privilege);
 	static Process& create_new_process(const StringView& name, const StringView& path, ProcessPrivilege privilege);
 	static void setup();
 	static Result<Process&> get_process_from_pid(size_t pid);
+
+	size_t pid();
+	String name();
+	String path();
+	uintptr_t page_directory();
+	Process const* parent();
+	ProcessState state();
+	HandlesManager& handles();
 	void terminate(int status_code);
 	int wait_for_signal();
-
+	void list_new_thread(Thread& thread);
+	void unlist_new_thread(Thread& thread);
 	~Process();
 
 	friend class List<Process>;

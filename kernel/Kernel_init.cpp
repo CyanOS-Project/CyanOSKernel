@@ -64,7 +64,8 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	info() << "\bDone!";
 
 	info() << "CyanOS is ready!";
-	Process& proc2 = Process::create_new_process("test_process", "/Tar/UserBinary/Shell", ProcessPrivilege::User);
+	Process::create_new_process("test_process", "/Tar/UserBinary/Shell", ProcessPrivilege::User);
+	// Process& proc2 = Process::create_new_process("test_process", "/Tar/UserBinary/Shell", ProcessPrivilege::User);
 	// Thread::create_thread(proc2, test_semaphore, 0, ThreadPrivilege::Kernel);
 	// Thread::create_thread(proc2, test_server, 0, ThreadPrivilege::Kernel);
 	// Thread::create_thread(proc2, test_client, 0, ThreadPrivilege::Kernel);
@@ -72,7 +73,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 
 	ENABLE_INTERRUPTS();
 	Thread::yield();
-	while (1) {
+	while (true) {
 		HLT();
 	}
 	ASSERT_NOT_REACHABLE();
@@ -80,7 +81,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 
 void idle(uintptr_t)
 {
-	while (1) {
+	while (true) {
 		HLT();
 	}
 }

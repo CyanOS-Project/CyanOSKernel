@@ -53,8 +53,8 @@ template <class T> class List
 
 	Iterator begin();
 	Iterator end();
-	Iterator find(T& element);                                     // TODO: do unit test
-	template <class Predicate> Iterator find(Predicate predicate); // TODO: do unit test
+	Iterator find(T& element);                                        // TODO: do unit test
+	template <class Predicate> Iterator find_if(Predicate predicate); // TODO: do unit test
 
 	template <typename... U> T& emplace_back(U&&... u);
 	template <typename... U> T& emplace_front(U&&... u);
@@ -65,7 +65,7 @@ template <class T> class List
 	void pop_back();
 	void pop_front();
 	void insert(const Iterator& node, const T& new_node);
-	void erase(const Iterator&);
+	void remove(const Iterator&);
 	template <class Predicate> bool remove_if(Predicate predicate);
 	template <class Predicate> bool contains(Predicate predicate);
 	void clear();
@@ -227,7 +227,7 @@ template <class T> typename List<T>::Iterator List<T>::find(T& element)
 	return end();
 }
 
-template <class T> template <class Predicate> typename List<T>::Iterator List<T>::find(Predicate predicate)
+template <class T> template <class Predicate> typename List<T>::Iterator List<T>::find_if(Predicate predicate)
 {
 	for (auto i = begin(); i != end(); i++) {
 		if (predicate(*i)) {
@@ -258,7 +258,7 @@ template <class T> template <class Predicate> bool List<T>::remove_if(Predicate 
 	while (i != end()) {
 		auto iterator_copy = i++;
 		if (predicate(*iterator_copy)) {
-			erase(iterator_copy);
+			remove(iterator_copy);
 			is_removed = true;
 		}
 	}
@@ -323,7 +323,7 @@ template <class T> void List<T>::insert(const Iterator& pos, const T& new_data)
 	append_node(*new_node, pos.m_current);
 }
 
-template <class T> void List<T>::erase(const Iterator& itr)
+template <class T> void List<T>::remove(const Iterator& itr)
 {
 	ASSERT(itr.m_current);
 	remove_node(*itr.m_current);

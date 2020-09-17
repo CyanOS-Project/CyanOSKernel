@@ -26,7 +26,7 @@ Thread& Thread::create_thread(Process& process, thread_function address, uintptr
 	ScopedLock local_lock(global_lock);
 
 	Thread& new_thread = ready_threads->emplace_back(process, address, argument, priv);
-	process.threads.emplace_back(new_thread);
+	process.list_new_thread(new_thread);
 
 	if (current == nullptr) {
 		current = &new_thread;
@@ -134,7 +134,7 @@ void Thread::terminate()
 			ASSERT_NOT_REACHABLE();
 			break;
 	}
-
+	m_parent.unlist_new_thread(*this);
 	// FIXME: free Thread memory, maybe static function should call this function ?
 }
 
