@@ -10,7 +10,7 @@ void CloseFile(Handle handle);
 void Sleep(size_t size);
 void Yield();
 Handle CreateThread(Handle handle, void* address, int arg);
-Handle CreateProcess(const char* name, const char* path, int flags);
+Handle CreateProcess(const char* path, const char* argument, int flags);
 Handle OpenProcess(size_t pid, int access);
 void TerminateProcess(Handle handle, int status);
 void TerminateThread(Handle handle, int status);

@@ -58,7 +58,7 @@ void SystemCall::systemcall_handler(ISRContextFrame* frame)
 	}
 }
 
-Result<int> OpenFile(char* path, int mode, int flags)
+Result<int> OpenFile(const char* path, int mode, int flags)
 {
 	auto file_description = FileDescription::open(path, static_cast<OpenMode>(mode), static_cast<OpenFlags>(flags));
 	if (file_description.is_error()) {
@@ -126,10 +126,11 @@ Result<int> CreateThread(Handle process, void* address, int arg)
 	return 0;
 }
 
-Result<int> CreateProcess(char* name, char* path, int flags)
+Result<int> CreateProcess(const char* path, const char* argument, int flags)
 {
 	UNUSED(flags);
-	auto& process = Process::create_new_process(name, path, ProcessPrivilege::User);
+
+	auto& process = Process::create_new_process(path, argument, ProcessPrivilege::User);
 
 	auto fp = OpenProcess(process.pid(), 0);
 	ASSERT(!fp.is_error());

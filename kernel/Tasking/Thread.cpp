@@ -114,25 +114,30 @@ unsigned Thread::reserve_tid()
 
 void Thread::terminate()
 {
-	ScopedLock local_lock(global_lock);
-
 	switch (m_state) {
-		case ThreadState::RUNNABLE:
+		case ThreadState::RUNNABLE: {
+			ScopedLock local_lock(global_lock);
+
 			ready_threads->remove(*this);
 			break;
+		}
+		case ThreadState::BLOCKED_SLEEP: {
+			ScopedLock local_lock(global_lock);
 
-		case ThreadState::BLOCKED_SLEEP:
 			sleeping_threads->remove(*this);
 			break;
-
-		case ThreadState::BLOCKED_QUEUE:
+		}
+		case ThreadState::BLOCKED_QUEUE: {
 			ASSERT(m_blocker);
+			ScopedLock local_lock(global_lock);
+
 			m_blocker->terminate_blocked_thread(*this);
 			break;
-
-		case ThreadState::SUSPENDED:
+		}
+		case ThreadState::SUSPENDED: {
 			ASSERT_NOT_REACHABLE();
 			break;
+		}
 	}
 	m_parent.unlist_new_thread(*this);
 	// FIXME: free Thread memory, maybe static function should call this function ?

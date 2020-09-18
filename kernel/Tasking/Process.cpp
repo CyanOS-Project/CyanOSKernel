@@ -25,10 +25,11 @@ Process& Process::create_virtual_process(const StringView& name, ProcessPrivileg
 	return pcb;
 }
 
-Process& Process::create_new_process(const StringView& name, const StringView& path, ProcessPrivilege privilege)
+Process& Process::create_new_process(const StringView& path, const StringView& argument, ProcessPrivilege privilege)
 {
 	ScopedLock local_lock(global_lock);
-	auto& pcb = processes->emplace_back(name, path, privilege);
+
+	auto& pcb = processes->emplace_back(path, argument, privilege);
 	Thread::create_thread(pcb, initiate_process, uintptr_t(&pcb), ThreadPrivilege::Kernel);
 	return pcb;
 }
@@ -43,12 +44,13 @@ Result<Process&> Process::get_process_from_pid(size_t pid)
 	return ResultError(ERROR_INVALID_PID);
 }
 
-Process::Process(const StringView& name, const StringView& path, ProcessPrivilege privilege) :
+Process::Process(const StringView& path, const StringView& argument, ProcessPrivilege privilege) :
     m_lock{},
     m_singal_waiting_queue{},
     m_pid{reserve_pid()},
-    m_name{name},
+    m_name{PathParser(path).last_element()},
     m_path{path},
+    m_argument{argument},
     m_privilege_level{privilege},
     m_page_directory{Memory::create_new_virtual_space()},
     m_parent{nullptr},
@@ -63,6 +65,7 @@ Process::~Process() {}
 Result<uintptr_t> Process::load_executable(const StringView& path)
 {
 	ScopedLock local_lock(m_lock);
+
 	auto fd = FileDescription::open(path, OpenMode::OM_READ, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the executable file, error: " << fd.error();
@@ -92,18 +95,33 @@ unsigned Process::reserve_pid()
 	return id;
 }
 
+bool Process::initiate_user_pcb(Process& process, UserPCB& pcb)
+{
+	memcpy(pcb.arg, process.m_argument.c_str(), process.m_path.length());
+	memcpy(pcb.path, process.m_path.c_str(), process.m_path.length());
+	pcb.pid = process.m_pid;
+	return true;
+}
+
 void Process::initiate_process(uintptr_t __pcb)
 {
 	Process* pcb = reinterpret_cast<Process*>(__pcb);
+
 	auto&& executable_entrypoint = pcb->load_executable(pcb->m_path);
 	if (executable_entrypoint.is_error()) {
 		warn() << "couldn't load the process, error: " << executable_entrypoint.error();
-		return; // Terminate Process
+		pcb->terminate(executable_entrypoint.error());
+		return;
 	}
-	// return ResultError(execable_entrypoint.error());
+
+	UserPCB* user_pcb = reinterpret_cast<UserPCB*>(Memory::alloc(sizeof(UserPCB), MEMORY_TYPE::WRITABLE));
+	if (!initiate_user_pcb(*pcb, *user_pcb)) {
+		pcb->terminate(ERROR_READING_ARGS);
+	}
 
 	if (pcb->m_privilege_level == ProcessPrivilege::User) {
 		void* thread_user_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE);
+
 		Context::enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE - 4);
 	} else if (pcb->m_privilege_level == ProcessPrivilege::Kernel) {
 		ASSERT_NOT_REACHABLE(); // TODO: kernel process.
@@ -114,11 +132,12 @@ void Process::initiate_process(uintptr_t __pcb)
 
 void Process::terminate(int status_code)
 {
-	ScopedLock local_lock(m_lock);
 
 	for (auto&& thread : m_threads) {
 		thread->terminate();
 	}
+
+	ScopedLock local_lock(m_lock);
 
 	m_state = ProcessState::Terminated;
 	m_return_status = status_code;
@@ -149,6 +168,12 @@ String Process::path()
 {
 	ScopedLock local_lock(m_lock);
 	return m_path;
+}
+
+ProcessPrivilege Process::privilege_level()
+{
+	ScopedLock local_lock(m_lock);
+	return m_privilege_level;
 }
 
 uintptr_t Process::page_directory()
@@ -186,6 +211,7 @@ void Process::list_new_thread(Thread& thread)
 void Process::unlist_new_thread(Thread& thread)
 {
 	ScopedLock local_lock(m_lock);
+
 	m_threads.remove_if([&](Reference<Thread>& cur) {
 		if (cur->tid() == thread.tid())
 			return true;

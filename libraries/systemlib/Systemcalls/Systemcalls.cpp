@@ -40,9 +40,9 @@ Handle CreateThread(Handle handle, void* address, int arg)
 	return syscall3(7, size_t(handle), size_t(address), size_t(arg));
 }
 
-Handle CreateProcess(const char* name, const char* path, int flags)
+Handle CreateProcess(const char* path, const char* argument, int flags)
 {
-	return syscall3(8, size_t(name), size_t(path), size_t(flags));
+	return syscall3(8, size_t(path), size_t(argument), size_t(flags));
 }
 
 Handle OpenProcess(size_t pid, int access)

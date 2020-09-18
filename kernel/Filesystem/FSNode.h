@@ -7,6 +7,8 @@
 #include <Types.h>
 
 #define MAX_FILE_NAME 64
+#define MAX_PATH_SIZE 512
+#define MAX_ARG_SIZE  512
 
 enum OpenFlags {
 	OF_OPEN_EXISTING = MASKABLE_PRAM(0),

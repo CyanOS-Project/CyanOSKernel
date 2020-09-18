@@ -64,7 +64,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	info() << "\bDone!";
 
 	info() << "CyanOS is ready!";
-	Process::create_new_process("test_process", "/Tar/UserBinary/Shell", ProcessPrivilege::User);
+	Process::create_new_process("/Tar/UserBinary/Shell", "", ProcessPrivilege::User);
 	// Process& proc2 = Process::create_new_process("test_process", "/Tar/UserBinary/Shell", ProcessPrivilege::User);
 	// Thread::create_thread(proc2, test_semaphore, 0, ThreadPrivilege::Kernel);
 	// Thread::create_thread(proc2, test_server, 0, ThreadPrivilege::Kernel);

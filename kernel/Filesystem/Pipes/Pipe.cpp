@@ -56,6 +56,10 @@ Result<size_t> Pipe::read(FileDescription& desc, void* buff, size_t offset, size
 
 	ScopedLock local_lock(m_lock);
 
+	if (size > BUFFER_SIZE) {
+		return ResultError(ERROR_EOF);
+	}
+
 	m_wait_queue.wait_on_event([&]() { return !can_read(desc); }, local_lock);
 
 	size_t size_to_read = min(size, m_buffer.size());
@@ -75,6 +79,10 @@ Result<size_t> Pipe::write(FileDescription& desc, const void* buff, size_t offse
 	UNUSED(offset);
 
 	ScopedLock local_lock(m_lock);
+
+	if (size > BUFFER_SIZE) {
+		return ResultError(ERROR_EOF);
+	}
 
 	m_wait_queue.wait_on_event([&]() { return !can_write(desc); }, local_lock);
 

@@ -16,3 +16,4 @@
 #define ERROR_FS_ALREADY_EXISTS     13
 #define ERROR_INVALID_HANDLE        14
 #define ERROR_INVALID_PID           15
+#define ERROR_READING_ARGS          16

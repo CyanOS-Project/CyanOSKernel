@@ -8,6 +8,7 @@ class String
 	size_t m_size = 0;
 	char* m_data = nullptr;
 	void cleanup();
+	const char m_empty_str = '\0'; // TODO: optimize using empty string if an empty string is entered.
 
   public:
 	String(const StringView& str);

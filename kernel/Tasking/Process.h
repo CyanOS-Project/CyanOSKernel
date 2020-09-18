@@ -25,38 +25,45 @@ class Thread;
 class Process
 {
   private:
+	struct UserPCB {
+		size_t pid;
+		char path[MAX_PATH_SIZE];
+		char arg[MAX_PATH_SIZE];
+	};
 	static Bitmap* pid_bitmap;
 	static List<Process>* processes;
 	static StaticSpinlock global_lock;
 	static void initiate_process(uintptr_t pcb);
+	static bool initiate_user_pcb(Process& process, UserPCB& pcb);
 
 	Spinlock m_lock;
 	WaitQueue m_singal_waiting_queue;
 	const size_t m_pid;
 	const String m_name;
 	const String m_path;
+	const String m_argument;
 	const ProcessPrivilege m_privilege_level;
 	const uintptr_t m_page_directory;
 	Process const* m_parent;
 	ProcessState m_state;
 	HandlesManager m_handles;
 	List<Reference<Thread>> m_threads; // FIXME: convert it to a vector.
-
 	int m_return_status;
 
-	Process(const StringView& name, const StringView& path, ProcessPrivilege privilege);
+	Process(const StringView& path, const StringView& argument, ProcessPrivilege privilege);
 	Result<uintptr_t> load_executable(const StringView& path);
 	unsigned reserve_pid();
 
   public:
 	static Process& create_virtual_process(const StringView& name, ProcessPrivilege privilege);
-	static Process& create_new_process(const StringView& name, const StringView& path, ProcessPrivilege privilege);
+	static Process& create_new_process(const StringView& path, const StringView& argument, ProcessPrivilege privilege);
 	static void setup();
 	static Result<Process&> get_process_from_pid(size_t pid);
 
 	size_t pid();
 	String name();
 	String path();
+	ProcessPrivilege privilege_level();
 	uintptr_t page_directory();
 	Process const* parent();
 	ProcessState state();
