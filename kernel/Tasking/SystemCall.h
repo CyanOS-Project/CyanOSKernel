@@ -14,7 +14,7 @@ class SystemCall
 	static unsigned syscalls_count;
 
 	static generic_syscall get_syscall_routine(unsigned syscall_num);
-	static void systemcall_handler(ISRContextFrame* frame);
+	static void systemcall_handler(ISRContextFrame& frame);
 
   public:
 	static void setup();

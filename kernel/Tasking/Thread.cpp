@@ -40,9 +40,12 @@ Thread::Thread(Process& process, thread_function address, uintptr_t argument, Th
     m_parent{process},
     m_state{ThreadState::RUNNABLE},
     m_privilege{priv},
-    m_blocker{nullptr}
+    m_blocker{nullptr},
+    m_tib{UniquePointer<UserThreadInformationBlock>(reinterpret_cast<UserThreadInformationBlock*>(
+        Memory::alloc(sizeof(UserThreadInformationBlock), MEMORY_TYPE::WRITABLE)))}
 {
 	void* thread_kernel_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
+	void* tib = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE);
 
 	uintptr_t stack_pointer = 0;
 	ContextInformation info = {.stack = thread_kernel_stack,

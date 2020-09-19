@@ -21,7 +21,7 @@ class Memory
 {
   private:
 	static StaticSpinlock lock;
-	static void page_fault_handler(ISRContextFrame* isr_info);
+	static void page_fault_handler(ISRContextFrame& isr_info);
 	static uint32_t parse_flags(uint32_t mem_flags);
 	static void* _alloc_no_lock(uint32_t size, uint32_t flags);
 	static void* _alloc_no_lock(void* virtual_address, uint32_t size, uint32_t flags);

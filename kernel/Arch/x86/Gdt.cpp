@@ -20,10 +20,13 @@ void GDT::setup()
 	fill_gdt_entry(SEGMENT_INDEX(UDS_SELECTOR), 0, 0xFFFFF, GDT_DATA_PL3, 0x0D);
 	// TSS
 	fill_gdt_entry(SEGMENT_INDEX(TSS_SELECTOR), uint32_t(&tss_entry), sizeof(TSS_ENTRY), GDT_TSS_PL3, 0);
+	// FS and GS
+	fill_gdt_entry(SEGMENT_INDEX(TIB_SELECTOR), 0, 0xFFFFF, GDT_DATA_PL3, 0x0D);
+	fill_gdt_entry(SEGMENT_INDEX(PIB_SELECTOR), 0, 0xFFFFF, GDT_DATA_PL3, 0x0D);
 
 	load_gdt();
 
-	load_segments(KCS_SELECTOR, KDS_SELECTOR);
+	load_segments(KCS_SELECTOR, KDS_SELECTOR, TIB_SELECTOR, PIB_SELECTOR);
 	setup_tss(0);
 }
 
@@ -60,6 +63,16 @@ void GDT::fill_gdt(uint32_t base, uint16_t limit)
 void GDT::load_gdt()
 {
 	asm volatile("lgdt (%0)" : : "r"(&gdt));
+}
+
+void GDT::load_fs(uint32_t address)
+{
+	fill_gdt_entry(SEGMENT_INDEX(TIB_SELECTOR), address, 0xFFFFF, GDT_DATA_PL3, 0x0D);
+}
+
+void GDT::load_gs(uint32_t address)
+{
+	fill_gdt_entry(SEGMENT_INDEX(PIB_SELECTOR), address, 0xFFFFF, GDT_DATA_PL3, 0x0D);
 }
 
 void GDT::load_tss(uint16_t tss)

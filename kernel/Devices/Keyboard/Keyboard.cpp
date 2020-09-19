@@ -78,7 +78,7 @@ void Keyboard::enqueue_keystoke(unsigned char data)
 	}
 }
 
-void Keyboard::keyboard_driver_handler(ISRContextFrame* frame)
+void Keyboard::keyboard_driver_handler(ISRContextFrame& frame)
 {
 	UNUSED(frame);
 	current_instance->enqueue_keystoke(in8(KBD_DATA_PORT));

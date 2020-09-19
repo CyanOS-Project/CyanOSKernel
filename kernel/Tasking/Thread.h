@@ -6,6 +6,7 @@
 #include <IterationDecision.h>
 #include <Result.h>
 #include <Types.h>
+#include <UniquePointer.h>
 
 enum class ThreadState {
 	RUNNABLE,
@@ -23,6 +24,10 @@ class Process;
 class Thread : public IntrusiveListNode<Thread>
 {
   private:
+	struct UserThreadInformationBlock {
+		size_t tid;
+	};
+
 	typedef void (*thread_function)(uintptr_t argument);
 	static Bitmap* m_tid_bitmap;
 	static IntrusiveList<Thread>* ready_threads;
@@ -35,6 +40,7 @@ class Thread : public IntrusiveListNode<Thread>
 	ThreadState m_state;
 	ThreadPrivilege m_privilege;
 	WaitQueue* m_blocker;
+	UniquePointer<UserThreadInformationBlock> m_tib;
 	unsigned m_sleep_ticks;
 	uintptr_t m_kernel_stack_start;
 	uintptr_t m_kernel_stack_end;

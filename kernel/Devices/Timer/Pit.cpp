@@ -15,7 +15,7 @@ void PIT::setup()
 	// out8(I86_PIT_REG_COUNTER0, 0xff); // Higher Half
 }
 
-void PIT::pit_handler(ISRContextFrame* frame)
+void PIT::pit_handler(ISRContextFrame& frame)
 {
 	Scheduler::schedule(frame, ScheduleType::TIMED);
 	ticks++;

@@ -56,8 +56,13 @@ Process::Process(const StringView& path, const StringView& argument, ProcessPriv
     m_parent{nullptr},
     m_state{ProcessState::Active},
     m_handles{},
-    m_threads{}
+    m_threads{},
+    m_pib{UniquePointer<UserProcessInformationBlock>(reinterpret_cast<UserProcessInformationBlock*>(
+        Memory::alloc(sizeof(UserProcessInformationBlock), MEMORY_TYPE::WRITABLE)))}
 {
+	memcpy(m_pib->arg, m_argument.c_str(), m_path.length());
+	memcpy(m_pib->path, m_path.c_str(), m_path.length());
+	m_pib->pid = m_pid;
 }
 
 Process::~Process() {}
@@ -95,14 +100,6 @@ unsigned Process::reserve_pid()
 	return id;
 }
 
-bool Process::initiate_user_pcb(Process& process, UserPCB& pcb)
-{
-	memcpy(pcb.arg, process.m_argument.c_str(), process.m_path.length());
-	memcpy(pcb.path, process.m_path.c_str(), process.m_path.length());
-	pcb.pid = process.m_pid;
-	return true;
-}
-
 void Process::initiate_process(uintptr_t __pcb)
 {
 	Process* pcb = reinterpret_cast<Process*>(__pcb);
@@ -112,11 +109,6 @@ void Process::initiate_process(uintptr_t __pcb)
 		warn() << "couldn't load the process, error: " << executable_entrypoint.error();
 		pcb->terminate(executable_entrypoint.error());
 		return;
-	}
-
-	UserPCB* user_pcb = reinterpret_cast<UserPCB*>(Memory::alloc(sizeof(UserPCB), MEMORY_TYPE::WRITABLE));
-	if (!initiate_user_pcb(*pcb, *user_pcb)) {
-		pcb->terminate(ERROR_READING_ARGS);
 	}
 
 	if (pcb->m_privilege_level == ProcessPrivilege::User) {
@@ -132,7 +124,6 @@ void Process::initiate_process(uintptr_t __pcb)
 
 void Process::terminate(int status_code)
 {
-
 	for (auto&& thread : m_threads) {
 		thread->terminate();
 	}
@@ -200,6 +191,12 @@ HandlesManager& Process::handles()
 	//		 when you try to add handle to the process while the process is being destroyed.
 	ScopedLock local_lock(m_lock);
 	return m_handles;
+}
+
+Process::UserProcessInformationBlock& Process::pib()
+{
+	ScopedLock local_lock(m_lock);
+	return *m_pib;
 }
 
 void Process::list_new_thread(Thread& thread)

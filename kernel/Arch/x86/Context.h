@@ -25,18 +25,20 @@ class Context
 
   public:
 	static uint32_t setup_task_stack_context(ContextType type, ContextInformation& info);
-	static void switch_task_stack(uint32_t task_stack_start);
+	static void switch_task_stack(uint32_t task_stack_start, uint32_t pib, uint32_t tib);
 	static void enter_usermode(uintptr_t thread_address, uintptr_t thread_stack);
+	static void set_fs_segment(uintptr_t address);
+	static void set_gs_segment(uintptr_t address);
 
-	static void set_return_value(ISRContextFrame* frame, uint32_t value);
-	static void set_return_arg1(ISRContextFrame* frame, uint32_t value);
-	static void set_return_arg2(ISRContextFrame* frame, uint32_t value);
-	static void set_return_arg3(ISRContextFrame* frame, uint32_t value);
+	static void set_return_value(ISRContextFrame& frame, uint32_t value);
+	static void set_return_arg1(ISRContextFrame& frame, uint32_t value);
+	static void set_return_arg2(ISRContextFrame& frame, uint32_t value);
+	static void set_return_arg3(ISRContextFrame& frame, uint32_t value);
 
-	static uint32_t syscall_num(ISRContextFrame* frame);
-	static uint32_t syscall_param1(ISRContextFrame* frame);
-	static uint32_t syscall_param2(ISRContextFrame* frame);
-	static uint32_t syscall_param3(ISRContextFrame* frame);
-	static uint32_t syscall_param4(ISRContextFrame* frame);
-	static uint32_t syscall_param5(ISRContextFrame* frame);
+	static uint32_t syscall_num(ISRContextFrame& frame);
+	static uint32_t syscall_param1(ISRContextFrame& frame);
+	static uint32_t syscall_param2(ISRContextFrame& frame);
+	static uint32_t syscall_param3(ISRContextFrame& frame);
+	static uint32_t syscall_param4(ISRContextFrame& frame);
+	static uint32_t syscall_param5(ISRContextFrame& frame);
 };

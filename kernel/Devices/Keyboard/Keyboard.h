@@ -12,7 +12,7 @@
 class Keyboard : public FSNode
 {
   public:
-	static void keyboard_driver_handler(ISRContextFrame*);
+	static void keyboard_driver_handler(ISRContextFrame&);
 	static UniquePointer<FSNode> alloc(const StringView& name);
 
 	~Keyboard();

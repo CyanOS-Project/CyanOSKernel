@@ -13,6 +13,8 @@
 #define UCS_SELECTOR                       SEGMENT_SELECTOR(3, 3)
 #define UDS_SELECTOR                       SEGMENT_SELECTOR(4, 3)
 #define TSS_SELECTOR                       SEGMENT_SELECTOR(5, 3)
+#define TIB_SELECTOR                       SEGMENT_SELECTOR(6, 3) // Thread Information Block
+#define PIB_SELECTOR                       SEGMENT_SELECTOR(7, 3) // Process Information Block
 
 #define SEG_DESCTYPE(x) (((x)&0x01) << 0x04) // Descriptor type (0 for system, 1 for code/data)
 #define SEG_PRES(x)     (((x)&0x01) << 0x07) // Present
@@ -92,7 +94,7 @@ struct TSS_ENTRY {
 };
 #pragma pack()
 
-extern "C" void load_segments(uint16_t code_segment, uint16_t data_segment);
+extern "C" void load_segments(uint16_t cs, uint16_t ds, uint16_t fs, uint16_t gs);
 
 class GDT
 {
@@ -110,4 +112,6 @@ class GDT
 	static void setup();
 	static void setup_tss(uint32_t kernel_stack);
 	static void set_tss_stack(uint32_t kernel_stack);
+	static void load_fs(uint32_t address);
+	static void load_gs(uint32_t address);
 };

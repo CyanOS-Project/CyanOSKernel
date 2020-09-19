@@ -25,7 +25,7 @@ class Thread;
 class Process
 {
   private:
-	struct UserPCB {
+	struct UserProcessInformationBlock {
 		size_t pid;
 		char path[MAX_PATH_SIZE];
 		char arg[MAX_PATH_SIZE];
@@ -34,7 +34,6 @@ class Process
 	static List<Process>* processes;
 	static StaticSpinlock global_lock;
 	static void initiate_process(uintptr_t pcb);
-	static bool initiate_user_pcb(Process& process, UserPCB& pcb);
 
 	Spinlock m_lock;
 	WaitQueue m_singal_waiting_queue;
@@ -48,6 +47,7 @@ class Process
 	ProcessState m_state;
 	HandlesManager m_handles;
 	List<Reference<Thread>> m_threads; // FIXME: convert it to a vector.
+	UniquePointer<UserProcessInformationBlock> m_pib;
 	int m_return_status;
 
 	Process(const StringView& path, const StringView& argument, ProcessPrivilege privilege);
@@ -68,6 +68,7 @@ class Process
 	Process const* parent();
 	ProcessState state();
 	HandlesManager& handles();
+	UserProcessInformationBlock& pib();
 	void terminate(int status_code);
 	int wait_for_signal();
 	void list_new_thread(Thread& thread);
