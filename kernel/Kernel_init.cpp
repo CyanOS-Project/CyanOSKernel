@@ -58,13 +58,21 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 
 	info() << "Starting the system process...";
 	Process& proc = Process::create_virtual_process("system", ProcessPrivilege::User);
-	Thread::create_thread(proc, nullptr, 0, ThreadPrivilege::Kernel); // It will just continue here.
+	Thread::create_init_thread(proc); // It will just continue here.
 	Thread::yield();
 	Thread::create_thread(proc, idle, 0, ThreadPrivilege::Kernel);
 	info() << "\bDone!";
 
 	info() << "CyanOS is ready!";
-	Process::create_new_process("/Tar/UserBinary/Shell", "", ProcessPrivilege::User);
+	auto& proc2 = Process::create_new_process("/Tar/UserBinary/Shell", "", ProcessPrivilege::User);
+	Thread::create_thread(proc2, test_tid1, 0, ThreadPrivilege::Kernel);
+	Thread::create_thread(proc2, test_tid2, 0, ThreadPrivilege::Kernel);
+
+	auto& proc3 = Process::create_new_process("/Tar/UserBinary/TestApp", "", ProcessPrivilege::User);
+	Thread::create_thread(proc3, test_tid1, 0, ThreadPrivilege::Kernel);
+	Thread::create_thread(proc3, test_tid2, 0, ThreadPrivilege::Kernel);
+	//
+
 	// Process& proc2 = Process::create_new_process("test_process", "/Tar/UserBinary/Shell", ProcessPrivilege::User);
 	// Thread::create_thread(proc2, test_semaphore, 0, ThreadPrivilege::Kernel);
 	// Thread::create_thread(proc2, test_server, 0, ThreadPrivilege::Kernel);

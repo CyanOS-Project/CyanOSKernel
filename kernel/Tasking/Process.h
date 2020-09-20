@@ -47,7 +47,7 @@ class Process
 	ProcessState m_state;
 	HandlesManager m_handles;
 	List<Reference<Thread>> m_threads; // FIXME: convert it to a vector.
-	UniquePointer<UserProcessInformationBlock> m_pib;
+	UserProcessInformationBlock* m_pib;
 	int m_return_status;
 
 	Process(const StringView& path, const StringView& argument, ProcessPrivilege privilege);
@@ -68,7 +68,7 @@ class Process
 	Process const* parent();
 	ProcessState state();
 	HandlesManager& handles();
-	UserProcessInformationBlock& pib();
+	uintptr_t pib();
 	void terminate(int status_code);
 	int wait_for_signal();
 	void list_new_thread(Thread& thread);

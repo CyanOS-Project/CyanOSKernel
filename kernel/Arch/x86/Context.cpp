@@ -20,8 +20,8 @@ uint32_t Context::setup_task_stack_context(ContextType type, ContextInformation&
 void Context::switch_task_stack(uint32_t task_stack_start, uint32_t pib, uint32_t tib)
 {
 	GDT::set_tss_stack(task_stack_start);
-	// GDT::load_fs(pib);
-	// GDT::load_fs(tib);
+	GDT::load_gs(pib);
+	GDT::load_fs(tib);
 }
 
 void Context::enter_usermode(uintptr_t address, uintptr_t stack)

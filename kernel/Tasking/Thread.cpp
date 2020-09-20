@@ -28,10 +28,14 @@ Thread& Thread::create_thread(Process& process, thread_function address, uintptr
 	Thread& new_thread = ready_threads->emplace_back(process, address, argument, priv);
 	process.list_new_thread(new_thread);
 
-	if (current == nullptr) {
-		current = &new_thread;
-	}
+	return new_thread;
+}
 
+Thread& Thread::create_init_thread(Process& process)
+{
+	ASSERT(current == nullptr);
+	auto& new_thread = create_thread(process, nullptr, 0, ThreadPrivilege::Kernel);
+	current = &new_thread;
 	return new_thread;
 }
 
@@ -40,12 +44,9 @@ Thread::Thread(Process& process, thread_function address, uintptr_t argument, Th
     m_parent{process},
     m_state{ThreadState::RUNNABLE},
     m_privilege{priv},
-    m_blocker{nullptr},
-    m_tib{UniquePointer<UserThreadInformationBlock>(reinterpret_cast<UserThreadInformationBlock*>(
-        Memory::alloc(sizeof(UserThreadInformationBlock), MEMORY_TYPE::WRITABLE)))}
+    m_blocker{nullptr}
 {
 	void* thread_kernel_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
-	void* tib = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE);
 
 	uintptr_t stack_pointer = 0;
 	ContextInformation info = {.stack = thread_kernel_stack,
@@ -64,6 +65,20 @@ Thread::Thread(Process& process, thread_function address, uintptr_t argument, Th
 	m_kernel_stack_end = m_kernel_stack_start + STACK_SIZE;
 	m_kernel_stack_pointer = stack_pointer;
 	m_state = ThreadState::RUNNABLE;
+
+	if (current && (m_parent.pid() != Thread::current->m_parent.pid())) {
+		Memory::switch_page_directory(m_parent.page_directory());
+
+		m_tib = reinterpret_cast<UserThreadInformationBlock*>(
+		    Memory::alloc(sizeof(UserThreadInformationBlock), MEMORY_TYPE::WRITABLE));
+		m_tib->tid = m_tid;
+
+		Memory::switch_page_directory(Thread::current->m_parent.page_directory());
+	} else {
+		m_tib = reinterpret_cast<UserThreadInformationBlock*>(
+		    Memory::alloc(sizeof(UserThreadInformationBlock), MEMORY_TYPE::WRITABLE));
+		m_tib->tid = m_tid;
+	}
 }
 
 Thread::~Thread() {}

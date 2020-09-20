@@ -70,7 +70,8 @@ void Scheduler::wake_up_sleepers()
 void Scheduler::load_context(ISRContextFrame& current_context, Thread& thread)
 {
 	current_context.context_stack = thread.m_kernel_stack_pointer;
-	Context::switch_task_stack(thread.m_kernel_stack_end, uintptr_t(&thread.m_parent.pib()), uintptr_t(&thread.m_tib));
+	Context::switch_task_stack(thread.m_kernel_stack_end, uintptr_t(thread.parent_process().pib()),
+	                           uintptr_t(thread.m_tib));
 }
 
 void Scheduler::save_context(const ISRContextFrame& current_context, Thread& thread)

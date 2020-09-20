@@ -23,7 +23,7 @@ void Memory::setup_page_fault_handler()
 void dump_memory(void* addr, size_t size)
 {
 	uintptr_t* mem = static_cast<uintptr_t*>(addr);
-	dbg printer;
+	err printer;
 	for (size_t i = 0; i < size / 4; i++) {
 		if (i % 4 == 0) {
 			printer << "\n" << &mem[i] << ": ";
@@ -38,8 +38,6 @@ void Memory::page_fault_handler(ISRContextFrame& isr_info)
 	err() << "Instruction: " << Hex(isr_info.eip);
 	err() << "Addr: " << Hex(get_faulted_page());
 
-	dump_memory(reinterpret_cast<void*>(isr_info.registers.esp), 0x20);
-
 	if (!PF_PRESENT(isr_info.error_code)) {
 		err() << "accessing non-present page";
 	}
@@ -49,7 +47,9 @@ void Memory::page_fault_handler(ISRContextFrame& isr_info)
 	if (PF_WR(isr_info.error_code)) {
 		err() << "writing to read only page";
 	}
-	PANIC("Page fault.");
+	dump_memory(reinterpret_cast<void*>(isr_info.registers.esp), 0x20);
+
+	PANIC("");
 }
 
 void* Memory::alloc(uint32_t size, uint32_t flags)

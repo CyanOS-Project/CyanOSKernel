@@ -40,7 +40,7 @@ class Thread : public IntrusiveListNode<Thread>
 	ThreadState m_state;
 	ThreadPrivilege m_privilege;
 	WaitQueue* m_blocker;
-	UniquePointer<UserThreadInformationBlock> m_tib;
+	UserThreadInformationBlock* m_tib;
 	unsigned m_sleep_ticks;
 	uintptr_t m_kernel_stack_start;
 	uintptr_t m_kernel_stack_end;
@@ -53,6 +53,7 @@ class Thread : public IntrusiveListNode<Thread>
   public:
 	static Thread* current;
 	static Thread& create_thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv);
+	static Thread& create_init_thread(Process& process);
 	static void sleep(unsigned ms);
 	static void yield();
 	static void setup();

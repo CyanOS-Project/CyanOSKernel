@@ -5,7 +5,7 @@
 #include <Clib.h>
 #include <Types.h>
 
-#define GDT_NUMBER_OF_ENTRIES              6
+#define GDT_NUMBER_OF_ENTRIES              8
 #define SEGMENT_SELECTOR(index, prv_level) (index << 3 | prv_level)
 #define SEGMENT_INDEX(segment)             (segment >> 3)
 #define KCS_SELECTOR                       SEGMENT_SELECTOR(1, 0)

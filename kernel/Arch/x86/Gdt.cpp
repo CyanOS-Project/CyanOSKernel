@@ -68,11 +68,13 @@ void GDT::load_gdt()
 void GDT::load_fs(uint32_t address)
 {
 	fill_gdt_entry(SEGMENT_INDEX(TIB_SELECTOR), address, 0xFFFFF, GDT_DATA_PL3, 0x0D);
+	load_gdt();
 }
 
 void GDT::load_gs(uint32_t address)
 {
 	fill_gdt_entry(SEGMENT_INDEX(PIB_SELECTOR), address, 0xFFFFF, GDT_DATA_PL3, 0x0D);
+	load_gdt();
 }
 
 void GDT::load_tss(uint16_t tss)

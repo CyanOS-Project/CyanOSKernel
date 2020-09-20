@@ -17,10 +17,10 @@
 #define SYSCALL_IRQ  0x80
 
 struct RegistersContext {
-	uint32_t ds;
-	uint32_t es;
-	uint32_t fs;
 	uint32_t gs;
+	uint32_t fs;
+	uint32_t es;
+	uint32_t ds;
 	uint32_t edi;
 	uint32_t esi;
 	uint32_t ebp;
