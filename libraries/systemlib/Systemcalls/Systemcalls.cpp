@@ -20,7 +20,7 @@ void QueryDirectory(Handle handle, void* info)
 	syscall2(3, size_t(handle), size_t(info));
 }
 
-void CloseFile(Handle handle)
+void CloseHandle(Handle handle)
 {
 	syscall1(4, size_t(handle));
 }
@@ -63,4 +63,11 @@ void TerminateThread(Handle handle, int status)
 void WaitSignal(Handle handle, int signal)
 {
 	syscall2(12, size_t(handle), size_t(signal));
+}
+
+int GetLastError()
+{
+	int error;
+	asm("movl %%fs:0x4, %0" : "=r"(error));
+	return error;
 }

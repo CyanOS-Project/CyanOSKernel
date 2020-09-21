@@ -1,4 +1,5 @@
 #include <Clib.h>
+#include <ErrorCodes.h>
 #include <systemlib/Systemcalls/Systemcalls.h>
 #include <systemlib/Types.h>
 #include <systemlib/iostream/iostream.h>
@@ -8,6 +9,7 @@ void execute_command(char* command)
 	if (strcmp(command, "TestApp") == 0) {
 		Handle child = CreateProcess("/Tar/UserBinary/TestApp", "this is an argment", 0);
 		WaitSignal(child, 0);
+
 	} else {
 		printf("Undefined command.\n"); // TODO: do some cute error messages here.
 	}
