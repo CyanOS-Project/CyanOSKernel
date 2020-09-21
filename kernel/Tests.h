@@ -242,16 +242,20 @@ void test_tid1(uintptr_t arg)
 {
 	UNUSED(arg);
 	uint32_t tid, pid;
+	char* exe_arg;
 	asm("movl %%fs:0x0,%0" : "=r"(tid));
 	asm("movl %%gs:0x0,%0" : "=r"(pid));
-	warn() << "PID:" << pid << " TID:" << tid;
+	asm("movl %%gs:0x8,%0" : "=r"(exe_arg));
+	warn() << "PID:" << pid << " TID:" << tid << " Arg: " << exe_arg;
 }
 
 void test_tid2(uintptr_t arg)
 {
 	UNUSED(arg);
 	uint32_t tid, pid;
+	char* exe_arg;
 	asm("movl %%fs:0x0,%0" : "=r"(tid));
 	asm("movl %%gs:0x0,%0" : "=r"(pid));
-	warn() << "PID:" << pid << " TID:" << tid;
+	asm("movl %%gs:0x8,%0" : "=r"(exe_arg));
+	warn() << "PID:" << pid << " TID:" << tid << "Arg: " << exe_arg;
 }

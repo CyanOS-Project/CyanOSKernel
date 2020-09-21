@@ -13,7 +13,7 @@ void execute_command(char* command)
 	}
 }
 
-int main()
+int main(int argc, const char* argv[])
 {
 	printf("Welcome To CyanOS\n");
 	printf("Version 0.1 Alpha\n");

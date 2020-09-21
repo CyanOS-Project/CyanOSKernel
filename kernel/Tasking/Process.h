@@ -27,8 +27,10 @@ class Process
   private:
 	struct UserProcessInformationBlock {
 		size_t pid;
-		char path[MAX_PATH_SIZE];
-		char arg[MAX_PATH_SIZE];
+		char* path;
+		char* argument;
+		char path_data[MAX_PATH_SIZE];
+		char argument_data[MAX_PATH_SIZE];
 	};
 	static Bitmap* pid_bitmap;
 	static List<Process>* processes;

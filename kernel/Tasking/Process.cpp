@@ -59,14 +59,16 @@ Process::Process(const StringView& path, const StringView& argument, ProcessPriv
     m_threads{},
     m_pib{nullptr}
 {
-
 	Memory::switch_page_directory(m_page_directory);
 
 	m_pib = reinterpret_cast<UserProcessInformationBlock*>(
 	    Memory::alloc(sizeof(UserProcessInformationBlock), MEMORY_TYPE::WRITABLE));
+
 	m_pib->pid = m_pid;
-	memcpy(m_pib->arg, m_argument.c_str(), m_path.length());
-	memcpy(m_pib->path, m_path.c_str(), m_path.length());
+	m_pib->path = m_pib->path_data;
+	m_pib->argument = m_pib->argument_data;
+	memcpy(m_pib->argument_data, m_argument.c_str(), m_path.length());
+	memcpy(m_pib->path_data, m_path.c_str(), m_path.length());
 
 	if (Thread::current) {
 		Memory::switch_page_directory(Thread::current->parent_process().page_directory());
