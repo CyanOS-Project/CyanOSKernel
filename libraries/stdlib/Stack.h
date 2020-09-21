@@ -1,12 +1,12 @@
 #pragma once
 
-#include <Algorithms.h>
-#include <Types.h>
+#include "Algorithms.h"
+#include "Types.h"
 #ifdef __UNIT_TESTS
 	#include <assert.h>
 	#define ASSERT(x) assert(x)
 #else
-	#include <Assert.h>
+	#include "Assert.h"
 #endif
 template <typename T> class Stack
 {

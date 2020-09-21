@@ -72,12 +72,9 @@ add_custom_target(run
 
 #------------------------------------- Testing-------------------------------------------------
 
-SET(CMAKE_C_FLAGS  "")
-SET(CMAKE_CXX_FLAGS  "-std=c++17")
-SET(CMAKE_EXE_LINKER_FLAGS "-fuse-ld=lld-link")
 enable_testing()
-#add_subdirectory("googletest")
-#add_subdirectory("test")
+add_subdirectory("googletest")
+add_subdirectory("test")
 include(CTest)
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

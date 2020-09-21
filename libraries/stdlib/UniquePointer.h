@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Algorithms.h>
-#include <Assert.h>
-#include <Rule5.h>
+#include "Algorithms.h"
+#include "Assert.h"
+#include "Rule5.h"
 
 template <typename T> class UniquePointer
 {

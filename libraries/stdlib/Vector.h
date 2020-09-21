@@ -1,15 +1,15 @@
 #pragma once
 
-#include <Algorithms.h>
-#include <Rule5.h>
-#include <Types.h>
+#include "Algorithms.h"
+#include "Rule5.h"
+#include "Types.h"
 
 #ifdef __UNIT_TESTS
 	#include <assert.h>
 	#define ASSERT(x)               assert(x)
 	#define ASSERT_NOT_REACHABLE(x) assert(false)
 #else
-	#include <Assert.h>
+	#include "Assert.h"
 #endif
 
 template <class T> class Vector

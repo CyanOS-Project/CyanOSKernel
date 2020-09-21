@@ -1,8 +1,8 @@
 #pragma once
 
-#include <Algorithms.h>
-#include <Assert.h>
-#include <Types.h>
+#include "Algorithms.h"
+#include "Assert.h"
+#include "Types.h"
 
 template <typename T> class SharedPointer
 {

@@ -1,8 +1,8 @@
 #ifdef __STRICT_ANSI__
 	#undef __STRICT_ANSI__
 #endif
-#include <List.h>
 #include <gtest/gtest.h>
+#include <stdlib/List.h>
 
 struct TestStruct {
 	int a;
@@ -46,16 +46,16 @@ TEST(List_Test, Erasing)
 	EXPECT_EQ(list.size(), 3);
 	EXPECT_FALSE(list.is_empty());
 
-	list.erase(++list.begin());
+	list.remove(++list.begin());
 	EXPECT_EQ(list.size(), 2);
 	EXPECT_TRUE(list[0] == raw_list[0]);
 	EXPECT_TRUE(list[1] == raw_list[2]);
 
-	list.erase(++list.begin());
+	list.remove(++list.begin());
 	EXPECT_EQ(list.size(), 1);
 	EXPECT_TRUE(list[0] == raw_list[0]);
 
-	list.erase(list.begin());
+	list.remove(list.begin());
 	EXPECT_EQ(list.size(), 0);
 	EXPECT_TRUE(list.is_empty());
 

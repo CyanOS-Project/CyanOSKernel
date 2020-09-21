@@ -6,8 +6,8 @@
 	#include <string.h>
 	#define ASSERT(x) assert(x)
 #else
-	#include <Clib.h>
-	#include <Assert.h>
+	#include "Clib.h"
+	#include "Assert.h"
 #endif
 Bitmap::Bitmap(size_t size) : m_size(size)
 {
