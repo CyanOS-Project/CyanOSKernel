@@ -1,4 +1,4 @@
-#include <Bitmap.h>
+#include "Bitmap.h"
 
 #ifdef __UNIT_TESTS
 	#include <assert.h>

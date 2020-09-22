@@ -65,6 +65,16 @@ void WaitSignal(Handle handle, int signal)
 	syscall2(12, size_t(handle), size_t(signal));
 }
 
+void* VirtualAlloc(void* address, size_t size, int flags)
+{
+	return reinterpret_cast<void*>(syscall3(13, size_t(address), size_t(size), size_t(flags)));
+}
+
+void VirtualFree(void* address, size_t size)
+{
+	syscall2(14, size_t(address), size_t(size));
+}
+
 int GetLastError()
 {
 	int error;

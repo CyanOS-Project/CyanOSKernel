@@ -17,3 +17,4 @@
 #define ERROR_INVALID_HANDLE        14
 #define ERROR_INVALID_PID           15
 #define ERROR_READING_ARGS          16
+#define ERROR_ACCESS_DENIED         17

@@ -3,6 +3,7 @@
 #include "Arch/x86/Panic.h"
 #include "Devices/DebugPort/Logger.h"
 #include "Tasking/Thread.h"
+#include "VirtualMemory/Memory.h"
 #include <Algorithms.h>
 
 //#pragma GCC diagnostic ignored "-Wcast-function-type"
@@ -192,4 +193,27 @@ Result<int> WaitSignal(Handle handle, int signal)
 
 	auto& description = Thread::current->parent_process().handles().get_process_description(handle);
 	return description.wait_signal();
+}
+
+Result<int> VirtualAlloc(void* address, size_t size, int flags)
+{
+	if ((flags & MEMORY_TYPE::KERNEL) &&
+	    (Thread::current->parent_process().privilege_level() != ProcessPrivilege::Kernel)) {
+		return ResultError(ERROR_ACCESS_DENIED);
+	}
+
+	void* ret = nullptr;
+	if (address) {
+		ret = Memory::alloc(address, size, flags);
+	} else {
+		ret = Memory::alloc(size, flags);
+	}
+	return reinterpret_cast<int>(ret);
+}
+
+Result<int> VirtualFree(void* address, size_t size)
+{
+	// FIXME: check if it's not kernel page.
+	Memory::free(address, size, 0);
+	return 0;
 }

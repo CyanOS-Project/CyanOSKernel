@@ -34,3 +34,6 @@ Result<int> TerminateThread(Handle handle, int status);
 Result<int> WaitSignal(Handle handle, int signal);
 Result<int> Sleep(size_t size);
 Result<int> Yield();
+
+Result<int> VirtualAlloc(void* address, size_t size, int flags);
+Result<int> VirtualFree(void* address, size_t size);

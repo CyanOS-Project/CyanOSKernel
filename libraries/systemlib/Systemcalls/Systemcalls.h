@@ -15,6 +15,8 @@ Handle OpenProcess(size_t pid, int access);
 void TerminateProcess(Handle handle, int status);
 void TerminateThread(Handle handle, int status);
 void WaitSignal(Handle handle, int signal);
+void* VirtualAlloc(void* address, size_t size, int flags);
+void VirtualFree(void* address, size_t size);
 
 int GetLastError();
 
