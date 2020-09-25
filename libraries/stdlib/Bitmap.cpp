@@ -62,8 +62,11 @@ unsigned Bitmap::find_first_unused(unsigned count)
 	size_t remaining_count = count;
 	size_t bit_index = 0;
 	while (bit_index < m_size) {
-		if (m_bitmap_data[bit_index / 8] == 0xFF)
+		if (m_bitmap_data[bit_index / 8] == 0xFF){
 			bit_index += 8;
+			continue;
+		}
+
 		if (!CHECK_BIT(m_bitmap_data[bit_index / 8], bit_index % 8))
 			remaining_count--;
 		else
@@ -80,8 +83,10 @@ unsigned Bitmap::find_first_used(unsigned count)
 	size_t remaining_count = count;
 	size_t bit_index = 0;
 	while (bit_index < m_size) {
-		if (m_bitmap_data[bit_index / 8] == 0)
+		if (m_bitmap_data[bit_index / 8] == 0){
 			bit_index += 8;
+			continue;
+		}
 		if (CHECK_BIT(m_bitmap_data[bit_index / 8], bit_index % 8))
 			remaining_count--;
 		else
