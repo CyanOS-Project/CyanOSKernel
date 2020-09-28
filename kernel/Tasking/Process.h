@@ -32,7 +32,7 @@ class Process
 		char path_data[MAX_PATH_SIZE];
 		char argument_data[MAX_PATH_SIZE];
 	};
-	static Bitmap* pid_bitmap;
+	static Bitmap<MAX_BITMAP_SIZE>* pid_bitmap;
 	static List<Process>* processes;
 	static StaticSpinlock global_lock;
 	static void initiate_process(uintptr_t pcb);

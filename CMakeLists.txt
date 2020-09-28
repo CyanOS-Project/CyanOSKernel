@@ -73,8 +73,8 @@ add_custom_target(run
 #------------------------------------- Testing-------------------------------------------------
 
 enable_testing()
-add_subdirectory("googletest")
-add_subdirectory("test")
+#add_subdirectory("googletest")
+#add_subdirectory("test")
 include(CTest)
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

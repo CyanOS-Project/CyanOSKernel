@@ -8,12 +8,12 @@
 #include <Assert.h>
 
 List<Process>* Process::processes;
-Bitmap* Process::pid_bitmap;
+Bitmap<MAX_BITMAP_SIZE>* Process::pid_bitmap;
 StaticSpinlock Process::global_lock;
 
 void Process::setup()
 {
-	pid_bitmap = new Bitmap(MAX_BITMAP_SIZE);
+	pid_bitmap = new Bitmap<MAX_BITMAP_SIZE>;
 	processes = new List<Process>;
 	global_lock.init();
 }
@@ -105,8 +105,8 @@ Result<uintptr_t> Process::load_executable(const StringView& path)
 
 unsigned Process::reserve_pid()
 {
-	unsigned id = pid_bitmap->find_first_unused();
-	pid_bitmap->set_used(id);
+	unsigned id = pid_bitmap->find_first_clear();
+	pid_bitmap->set(id);
 	return id;
 }
 

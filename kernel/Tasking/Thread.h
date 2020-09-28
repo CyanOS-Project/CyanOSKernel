@@ -29,7 +29,7 @@ class Thread : public IntrusiveListNode<Thread>
 	};
 
 	typedef void (*thread_function)(uintptr_t argument);
-	static Bitmap* m_tid_bitmap;
+	static Bitmap<MAX_BITMAP_SIZE>* m_tid_bitmap;
 	static IntrusiveList<Thread>* ready_threads;
 	static IntrusiveList<Thread>* sleeping_threads;
 	static StaticSpinlock global_lock;

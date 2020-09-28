@@ -10,13 +10,13 @@
 IntrusiveList<Thread>* Thread::ready_threads = nullptr;
 IntrusiveList<Thread>* Thread::sleeping_threads = nullptr;
 Thread* Thread::current = nullptr;
-Bitmap* Thread::m_tid_bitmap;
+Bitmap<MAX_BITMAP_SIZE>* Thread::m_tid_bitmap;
 StaticSpinlock Thread::global_lock;
 
 void Thread::setup()
 {
 	global_lock.init();
-	m_tid_bitmap = new Bitmap(MAX_BITMAP_SIZE);
+	m_tid_bitmap = new Bitmap<MAX_BITMAP_SIZE>;
 	ready_threads = new IntrusiveList<Thread>;
 	sleeping_threads = new IntrusiveList<Thread>;
 }
@@ -125,8 +125,8 @@ void Thread::thread_finishing()
 
 unsigned Thread::reserve_tid()
 {
-	unsigned id = m_tid_bitmap->find_first_unused();
-	m_tid_bitmap->set_used(id);
+	unsigned id = m_tid_bitmap->find_first_clear();
+	m_tid_bitmap->set(id);
 	return id;
 }
 
