@@ -5,8 +5,8 @@ include_directories("../libraries/stdlib")
 SET(triple i686-none-windows)
 SET(CMAKE_C_COMPILER_TARGET ${triple})
 SET(CMAKE_CXX_COMPILER_TARGET ${triple})
-SET(CMAKE_C_FLAGS  "--target=${triple} -march=i686 -O0 -gdwarf -Wall -Wextra --pedantic -ffreestanding")
-SET(CMAKE_CXX_FLAGS  "--target=${triple} -march=i686 -O0 -gdwarf -Wall -Wextra --pedantic -ffreestanding -fno-exceptions -fno-rtti")
+SET(CMAKE_C_FLAGS  "--target=${triple} -march=i686 -O0 -gdwarf-4 -Wall -Wextra --pedantic -ffreestanding")
+SET(CMAKE_CXX_FLAGS  "--target=${triple} -march=i686 -O0 -gdwarf-4 -Wall -Wextra --pedantic -ffreestanding -fno-exceptions -fno-rtti")
 SET(CMAKE_EXE_LINKER_FLAGS  "--target=i686 -Wl,-T${CMAKE_CURRENT_SOURCE_DIR}/linker.ld -nostdlib")
 
 

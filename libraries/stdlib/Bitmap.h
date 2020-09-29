@@ -17,7 +17,7 @@
 template <size_t bitmap_size> class Bitmap
 {
   private:
-	uint8_t m_bitmap_data[bitmap_size / 8];
+	uint8_t m_bitmap_data[(bitmap_size / 8) + 1];
 	static_assert(bitmap_size <= MAX_BITMAP_SIZE);
 
   public:
@@ -27,10 +27,12 @@ template <size_t bitmap_size> class Bitmap
 	void set_range(size_t position, size_t count);
 	void clear(size_t position);
 	void clear_range(size_t position, size_t count);
-	size_t find_first_set();
-	size_t find_first_set_range(size_t count);
-	size_t find_first_clear();
-	size_t find_first_clear_range(size_t count);
+	size_t find_first_set(size_t start_search = 0);
+	size_t find_first_set_range(size_t count, size_t start_search = 0);
+	size_t find_first_clear(size_t start_search = 0);
+	size_t find_first_clear_range(size_t count, size_t start_search = 0);
+	bool check_set(size_t position);
+	bool check_clear(size_t position);
 };
 
 template <size_t bitmap_size> Bitmap<bitmap_size>::Bitmap()
@@ -40,12 +42,12 @@ template <size_t bitmap_size> Bitmap<bitmap_size>::Bitmap()
 
 template <size_t bitmap_size> Bitmap<bitmap_size>::~Bitmap() {}
 
-template <size_t bitmap_size> void Bitmap<bitmap_size>::set(unsigned position)
+template <size_t bitmap_size> void Bitmap<bitmap_size>::set(size_t position)
 {
 	set_range(position, 1);
 }
 
-template <size_t bitmap_size> void Bitmap<bitmap_size>::set_range(unsigned position, unsigned count)
+template <size_t bitmap_size> void Bitmap<bitmap_size>::set_range(size_t position, size_t count)
 {
 	if (position > bitmap_size) {
 		return;
@@ -58,12 +60,12 @@ template <size_t bitmap_size> void Bitmap<bitmap_size>::set_range(unsigned posit
 	}
 }
 
-template <size_t bitmap_size> void Bitmap<bitmap_size>::clear(unsigned position)
+template <size_t bitmap_size> void Bitmap<bitmap_size>::clear(size_t position)
 {
 	clear_range(position, 1);
 }
 
-template <size_t bitmap_size> void Bitmap<bitmap_size>::clear_range(unsigned position, unsigned count)
+template <size_t bitmap_size> void Bitmap<bitmap_size>::clear_range(size_t position, size_t count)
 {
 	if (position > bitmap_size) {
 		return;
@@ -76,10 +78,10 @@ template <size_t bitmap_size> void Bitmap<bitmap_size>::clear_range(unsigned pos
 	}
 }
 
-template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_clear_range(unsigned count)
+template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_clear_range(size_t count, size_t start_search)
 {
 	size_t remaining_count = count;
-	size_t bit_index = 0;
+	size_t bit_index = start_search;
 	while (bit_index < bitmap_size) {
 		if (m_bitmap_data[bit_index / 8] == 0xFF) {
 			bit_index += 8;
@@ -98,10 +100,10 @@ template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_clear_range
 	return BITMAP_NO_BITS_LEFT;
 }
 
-template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_set_range(unsigned count)
+template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_set_range(size_t count, size_t start_search)
 {
 	size_t remaining_count = count;
-	size_t bit_index = 0;
+	size_t bit_index = start_search;
 	while (bit_index < bitmap_size) {
 		if (m_bitmap_data[bit_index / 8] == 0) {
 			bit_index += 8;
@@ -119,12 +121,22 @@ template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_set_range(u
 	return BITMAP_NO_BITS_LEFT;
 }
 
-template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_clear()
+template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_clear(size_t start_search)
 {
-	return find_first_clear_range(1);
+	return find_first_clear_range(1, start_search);
 }
 
-template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_set()
+template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_set(size_t start_search)
 {
-	return find_first_set_range(1);
+	return find_first_set_range(1, start_search);
+}
+
+template <size_t SIZE> bool Bitmap<SIZE>::check_set(size_t position)
+{
+	return CHECK_BIT(m_bitmap_data[position / 8], position % 8);
+}
+
+template <size_t SIZE> bool Bitmap<SIZE>::check_clear(size_t position)
+{
+	return !CHECK_BIT(m_bitmap_data[position / 8], position % 8);
 }
