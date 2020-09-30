@@ -4,17 +4,11 @@
 #include "Arch/x86/Paging.h"
 #include "Arch/x86/Panic.h"
 #include "Arch/x86/Spinlock.h"
+#include "MemoryConstants.h"
 #include "Physical.h"
 #include "Virtual.h"
 #include <Assert.h>
 #include <Types.h>
-
-enum MEMORY_TYPE {
-	PAGE_USER = 1,
-	PAGE_READWRITE = 2,
-	PAGE_COPY_ON_WRITE = 4,
-};
-
 #define AVAILABLE_PAGES_START (GET_FRAME(0x100000))
 
 class Memory

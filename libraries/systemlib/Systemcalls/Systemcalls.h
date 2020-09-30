@@ -1,6 +1,7 @@
 #pragma once
 
 #include "../Types.h"
+#include "kernel/VirtualMemory/MemoryConstants.h"
 
 Handle OpenFile(const char* path, int mode, int flags);
 size_t ReadFile(Handle handle, void* buff, size_t size);
