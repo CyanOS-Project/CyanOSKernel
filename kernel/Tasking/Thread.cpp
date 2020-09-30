@@ -46,7 +46,7 @@ Thread::Thread(Process& process, thread_function address, uintptr_t argument, Th
     m_privilege{priv},
     m_blocker{nullptr}
 {
-	void* thread_kernel_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
+	void* thread_kernel_stack = valloc(STACK_SIZE, PAGE_READWRITE);
 
 	uintptr_t stack_pointer = 0;
 	ContextInformation info = {.stack = thread_kernel_stack,
@@ -70,13 +70,13 @@ Thread::Thread(Process& process, thread_function address, uintptr_t argument, Th
 		Memory::switch_page_directory(m_parent.page_directory());
 
 		m_tib = reinterpret_cast<UserThreadInformationBlock*>(
-		    Memory::alloc(sizeof(UserThreadInformationBlock), MEMORY_TYPE::WRITABLE));
+		    valloc(sizeof(UserThreadInformationBlock), PAGE_USER | PAGE_READWRITE));
 		m_tib->tid = m_tid;
 
 		Memory::switch_page_directory(Thread::current->m_parent.page_directory());
 	} else {
 		m_tib = reinterpret_cast<UserThreadInformationBlock*>(
-		    Memory::alloc(sizeof(UserThreadInformationBlock), MEMORY_TYPE::WRITABLE));
+		    valloc(sizeof(UserThreadInformationBlock), PAGE_USER | PAGE_READWRITE));
 		m_tib->tid = m_tid;
 	}
 }

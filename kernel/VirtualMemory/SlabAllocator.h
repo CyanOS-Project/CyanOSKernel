@@ -44,14 +44,13 @@ template <size_t slab_size, size_t memory_size> class Slab
 
 inline void* request_memory_from_os(size_t size)
 {
-	void* address = Memory::alloc(size, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
-	ASSERT(address);
+	void* address = valloc(size, PAGE_READWRITE);
 	return address;
 }
 
 inline void free_memory_to_os(void* addrss, size_t size)
 {
-	Memory::free(addrss, size, 0);
+	vfree(addrss, size, 0);
 }
 
 template <size_t slab_size, size_t memory_size> void Slab<slab_size, memory_size>::init(Slab* prev)

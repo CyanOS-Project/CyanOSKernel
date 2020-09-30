@@ -37,8 +37,7 @@ bool VirtualMemory::check_free_pages(uint32_t start_address, uint32_t pages_num)
 
 uintptr_t VirtualMemory::create_page_table()
 {
-	uintptr_t pt_addr =
-	    (uintptr_t)Memory::_alloc_no_lock(sizeof(PAGE_TABLE), MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
+	uintptr_t pt_addr = (uintptr_t)Memory::_alloc_no_lock(sizeof(PAGE_TABLE), PAGE_READWRITE);
 	Paging::unmap_pages(pt_addr, GET_PAGES(sizeof(PAGE_TABLE))); // we don't need table to be in virtual memory.
 	return pt_addr;
 }

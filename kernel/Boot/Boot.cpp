@@ -37,11 +37,11 @@ extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_inf
 	// maping ramdisk to virtual memory
 	uintptr_t ustar_fs = reinterpret_cast<uintptr_t>(Memory::map(bootloader_info_local.ramdisk.start, //
 	                                                             bootloader_info_local.ramdisk.size,  //
-	                                                             MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
+	                                                             PAGE_READWRITE));
 	bootloader_info_local.ramdisk.start = ustar_fs;
 	memcpy(&bootloader_info, &bootloader_info_local, sizeof(BootloaderInfo));
 	// Set new stack for high memory kernel.
-	uintptr_t new_stack = uintptr_t(Memory::alloc(STACK_SIZE, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
+	uintptr_t new_stack = uintptr_t(valloc(STACK_SIZE, PAGE_READWRITE));
 
 	SET_STACK(new_stack + STACK_SIZE);
 	CALL(kernel_init, &bootloader_info)

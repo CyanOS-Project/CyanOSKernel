@@ -61,7 +61,7 @@ void Console::initiate_console()
 {
 	m_hPosition = 0;
 	m_vPosition = 0;
-	m_video_ram = (uint16_t*)Memory::map(VGATEXTMODE_BUFFER, 0x1000, MEMORY_TYPE::WRITABLE | MEMORY_TYPE::KERNEL);
+	m_video_ram = (uint16_t*)Memory::map(VGATEXTMODE_BUFFER, 0x1000, PAGE_READWRITE);
 	if (!m_video_ram)
 		PANIC("Cannot map text mode memory");
 

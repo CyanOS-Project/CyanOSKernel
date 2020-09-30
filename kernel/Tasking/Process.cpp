@@ -61,8 +61,8 @@ Process::Process(const StringView& path, const StringView& argument, ProcessPriv
 {
 	Memory::switch_page_directory(m_page_directory);
 
-	m_pib = reinterpret_cast<UserProcessInformationBlock*>(
-	    Memory::alloc(sizeof(UserProcessInformationBlock), MEMORY_TYPE::WRITABLE));
+	m_pib = static_cast<UserProcessInformationBlock*>(
+	    valloc(sizeof(UserProcessInformationBlock), PAGE_USER | PAGE_READWRITE));
 
 	m_pib->pid = m_pid;
 	m_pib->path = m_pib->path_data;
@@ -88,7 +88,7 @@ Result<uintptr_t> Process::load_executable(const StringView& path)
 	}
 	auto file_info = fd.value()->fstat();
 	// FIXME: fix malloc to use more than 4096 bytes and use UniquePointer here.
-	char* buff = static_cast<char*>(Memory::alloc(file_info.value().size, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE));
+	char* buff = static_cast<char*>(valloc(file_info.value().size, PAGE_READWRITE));
 	memset(buff, 0, file_info.value().size);
 	auto result = fd.value()->read(buff, file_info.value().size);
 	if (result.is_error()) {
@@ -122,7 +122,7 @@ void Process::initiate_process(uintptr_t __pcb)
 	}
 
 	if (pcb->m_privilege_level == ProcessPrivilege::User) {
-		void* thread_user_stack = Memory::alloc(STACK_SIZE, MEMORY_TYPE::WRITABLE);
+		void* thread_user_stack = valloc(STACK_SIZE, PAGE_USER | PAGE_READWRITE);
 
 		Context::enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE - 4);
 	} else if (pcb->m_privilege_level == ProcessPrivilege::Kernel) {

@@ -77,7 +77,7 @@ void test_pipe1(uintptr_t arg)
 
 		return;
 	}
-	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
+	char* buff = (char*)valloc(0xc00, PAGE_READWRITE);
 	memset(buff, 0, 4096);
 	auto result = fd.value()->read(buff, 12);
 	dbg() << "got it, read";
@@ -97,7 +97,7 @@ void test_pipe2(uintptr_t arg)
 		HLT();
 		return;
 	}
-	char* buff = (char*)Memory::alloc(0xc00, MEMORY_TYPE::KERNEL | MEMORY_TYPE::WRITABLE);
+	char* buff = (char*)valloc(0xc00, PAGE_READWRITE);
 	memset(buff, 0, 4096);
 	auto result = fd.value()->write(static_cast<const void*>("Hello there"), 12);
 	dbg() << "got it, write";

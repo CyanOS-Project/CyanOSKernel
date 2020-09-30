@@ -197,16 +197,12 @@ Result<int> WaitSignal(Handle handle, int signal)
 
 Result<int> VirtualAlloc(void* address, size_t size, int flags)
 {
-	if ((flags & MEMORY_TYPE::KERNEL) &&
-	    (Thread::current->parent_process().privilege_level() != ProcessPrivilege::Kernel)) {
-		return ResultError(ERROR_ACCESS_DENIED);
-	}
 
 	void* ret = nullptr;
 	if (address) {
-		ret = Memory::alloc(address, size, flags);
+		ret = valloc(address, size, flags | PAGE_USER);
 	} else {
-		ret = Memory::alloc(size, flags);
+		ret = valloc(size, flags | PAGE_USER);
 	}
 	return reinterpret_cast<int>(ret);
 }

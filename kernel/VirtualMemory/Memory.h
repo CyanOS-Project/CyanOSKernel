@@ -10,9 +10,9 @@
 #include <Types.h>
 
 enum MEMORY_TYPE {
-	KERNEL = 1,
-	WRITABLE = 2,
-	COPY_ON_WRITE = 4,
+	PAGE_USER = 1,
+	PAGE_READWRITE = 2,
+	PAGE_COPY_ON_WRITE = 4,
 };
 
 #define AVAILABLE_PAGES_START (GET_FRAME(0x100000))
@@ -46,3 +46,7 @@ class Memory
 
 	friend class VirtualMemory;
 };
+
+void* valloc(void* virtual_address, uint32_t size, uint32_t flags);
+void* valloc(uint32_t size, uint32_t flags);
+void vfree(void* virtual_address, uint32_t size, uint32_t flags);
