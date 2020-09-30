@@ -4,7 +4,7 @@
 #include "Arch/x86/Paging.h"
 #include "Arch/x86/Panic.h"
 #include "Arch/x86/Spinlock.h"
-#include "MemoryConstants.h"
+#include "MemoryDefinitions.h"
 #include "Physical.h"
 #include "Virtual.h"
 #include <Assert.h>

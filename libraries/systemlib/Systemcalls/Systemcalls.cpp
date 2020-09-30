@@ -75,6 +75,11 @@ void VirtualFree(void* address, size_t size)
 	syscall2(14, size_t(address), size_t(size));
 }
 
+void QueryFileInformation(Handle handle, FileInfo* info)
+{
+	syscall2(15, size_t(handle), size_t(info));
+}
+
 int GetLastError()
 {
 	int error;

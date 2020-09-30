@@ -6,15 +6,6 @@
 #include <Types.h>
 #include <UniquePointer.h>
 
-enum class SeekOrigin { SET, CURRENT, END };
-struct FileInfo {
-	size_t size;
-};
-
-struct DirectoryInfo {
-	char file_name[MAX_FILE_NAME];
-};
-
 class FileDescription
 {
   private:

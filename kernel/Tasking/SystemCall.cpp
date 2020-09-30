@@ -12,8 +12,7 @@ generic_syscall SystemCall::systemcalls_routines[] = {reinterpret_cast<generic_s
                                                       reinterpret_cast<generic_syscall>(ReadFile),
                                                       reinterpret_cast<generic_syscall>(WriteFile),
                                                       reinterpret_cast<generic_syscall>(QueryDirectory),
-                                                      reinterpret_cast<generic_syscall>(CloseFile),
-
+                                                      reinterpret_cast<generic_syscall>(CloseHandle),
                                                       reinterpret_cast<generic_syscall>(Sleep),
                                                       reinterpret_cast<generic_syscall>(Yield),
                                                       reinterpret_cast<generic_syscall>(CreateThread), //
@@ -21,7 +20,8 @@ generic_syscall SystemCall::systemcalls_routines[] = {reinterpret_cast<generic_s
                                                       reinterpret_cast<generic_syscall>(OpenProcess),
                                                       reinterpret_cast<generic_syscall>(TerminateProcess),
                                                       reinterpret_cast<generic_syscall>(TerminateThread),
-                                                      reinterpret_cast<generic_syscall>(WaitSignal)};
+                                                      reinterpret_cast<generic_syscall>(WaitSignal),
+                                                      reinterpret_cast<generic_syscall>(QueryFileInformation)};
 
 unsigned SystemCall::syscalls_count = sizeof(systemcalls_routines) / sizeof(generic_syscall);
 
@@ -109,9 +109,27 @@ Result<int> QueryDirectory(Handle handle, DirectoryInfo* info)
 	return 0;
 }
 
-Result<int> CloseFile(Handle handle)
+Result<int> QueryFileInformation(Handle handle, FileInfo* info)
 {
+	if (!info)
+		return ResultError(ERROR_INVALID_PARAMETERS);
+
 	if (Thread::current->parent_process().handles().check_handle(handle) != HandleType::FileDescription)
+		return ResultError(ERROR_INVALID_HANDLE);
+
+	auto& description = Thread::current->parent_process().handles().get_file_description(handle);
+	auto result = description.fstat();
+	if (result.is_error()) {
+		return ResultError(result.error());
+	}
+
+	*info = result.value();
+	return 0;
+}
+
+Result<int> CloseHandle(Handle handle)
+{
+	if (Thread::current->parent_process().handles().check_handle(handle) != HandleType::Invalid)
 		return ResultError(ERROR_INVALID_HANDLE);
 
 	Thread::current->parent_process().handles().remove_handle(handle);
@@ -197,7 +215,6 @@ Result<int> WaitSignal(Handle handle, int signal)
 
 Result<int> VirtualAlloc(void* address, size_t size, int flags)
 {
-
 	void* ret = nullptr;
 	if (address) {
 		ret = valloc(address, size, flags | PAGE_USER);

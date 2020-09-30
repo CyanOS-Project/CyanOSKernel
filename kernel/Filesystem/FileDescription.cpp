@@ -1,5 +1,6 @@
 #include "FileDescription.h"
 #include "FSNode.h"
+#include "FileSystemDefinitions.h"
 #include "VirtualFilesystem.h"
 #include <Clib.h>
 #include <ErrorCodes.h>

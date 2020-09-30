@@ -24,7 +24,8 @@ Result<int> OpenFile(const char* path, int mode, int flags);
 Result<int> ReadFile(Handle handle, void* buff, size_t size);
 Result<int> WriteFile(Handle handle, void* buff, size_t size);
 Result<int> QueryDirectory(Handle handle, DirectoryInfo* info);
-Result<int> CloseFile(Handle handle);
+Result<int> QueryFileInformation(Handle handle, FileInfo* info);
+Result<int> CloseHandle(Handle handle);
 
 Result<int> CreateThread(Handle process, void* address, int arg);
 Result<int> CreateProcess(const char* path, const char* argument, int flags);

@@ -1,12 +1,14 @@
 #pragma once
 
 #include "../Types.h"
-#include "kernel/VirtualMemory/MemoryConstants.h"
+#include "kernel/Filesystem/FileSystemDefinitions.h"
+#include "kernel/VirtualMemory/MemoryDefinitions.h"
 
 Handle OpenFile(const char* path, int mode, int flags);
 size_t ReadFile(Handle handle, void* buff, size_t size);
 size_t WriteFile(Handle handle, const void* buff, size_t size);
 void QueryDirectory(Handle handle, void* info);
+void QueryFileInformation(Handle handle, FileInfo* info);
 void CloseHandle(Handle handle);
 void Sleep(size_t size);
 void Yield();
