@@ -27,14 +27,6 @@ class String
 	String operator+(const String& other) const;
 	char operator[](size_t off) const;
 
-	String& push_back(char c);
-	String& pop_back();
-	String& insert(size_t pos, const String& str);
-	String& insert(size_t pos, const String& str, size_t subpos, size_t sublen);
-	String& insert(size_t pos, const char* str);
-	String& insert(size_t pos, const char* str, size_t subpos, size_t sublen);
-	char& operator[](size_t off);
-
 	bool operator==(const StringView& other) const;
 	bool operator==(const String& other) const;
 	bool operator==(const char* other) const;
@@ -50,6 +42,26 @@ class String
 	size_t rfind(char c, size_t pos = END) const;
 	const char* c_str() const;
 	size_t length() const;
+
+	String& push_back(char c);
+	String& pop_back();
+	char& operator[](size_t off);
+	String& insert(size_t pos, const String& str);
+	String& insert(size_t pos, const String& str, size_t subpos, size_t sublen);
+	String& insert(size_t pos, const char* str);
+	String& insert(size_t pos, const char* str, size_t subpos, size_t sublen);
+	void erase(size_t pos, size_t len);
+	template <typename Predictor> void erase_if(Predictor predictor)
+	{
+		size_t i = 0;
+		while (i < m_size) {
+			if (predictor(m_data[i])) {
+				erase(i, 1);
+			} else {
+				i++;
+			}
+		}
+	};
 
 	static const size_t END;
 	static const size_t NOT_FOUND;

@@ -52,7 +52,7 @@ class Process
 	UserProcessInformationBlock* m_pib;
 	int m_return_status;
 
-	Process(const StringView& path, const StringView& argument, ProcessPrivilege privilege);
+	Process(const StringView& name, const StringView& path, const StringView& argument, ProcessPrivilege privilege);
 	Result<uintptr_t> load_executable(const StringView& path);
 	unsigned reserve_pid();
 

@@ -10,9 +10,11 @@ class ArgumentParser
 	String m_data;
 	Vector<StringView> m_argument_list;
 
+	void trim_arguments();
+
   public:
 	ArgumentParser(StringView argument);
 	~ArgumentParser() = default;
 	size_t count() const;
-	StringView operator[](int) const;
+	StringView operator[](size_t) const;
 };

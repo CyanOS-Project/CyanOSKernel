@@ -176,6 +176,7 @@ String& String::insert(size_t pos, const String& str, size_t subpos, size_t subl
 		pos = m_size;
 
 	ASSERT(subpos + sublen <= str.m_size);
+	ASSERT(pos <= m_size);
 
 	const size_t str_len = str.m_size > sublen ? sublen : str.m_size;
 	const size_t new_len = str_len + m_size;
@@ -200,6 +201,7 @@ String& String::insert(size_t pos, const char* str, size_t subpos, size_t sublen
 		pos = m_size;
 
 	ASSERT(subpos + sublen <= strlen(str));
+	ASSERT(pos <= m_size);
 
 	const size_t new_len = sublen + m_size;
 	char* new_data = new char[new_len + 1];
@@ -213,6 +215,14 @@ String& String::insert(size_t pos, const char* str, size_t subpos, size_t sublen
 	m_size = new_len;
 	m_data = new_data;
 	return *this;
+}
+
+void String::erase(size_t pos, size_t len)
+{
+	ASSERT(pos <= m_size);
+
+	memcpy(m_data + pos, m_data + pos + len, m_size - pos + len);
+	m_size -= len;
 }
 
 char& String::operator[](size_t off)

@@ -23,7 +23,7 @@ size_t PathParser::count() const
 
 StringView PathParser::last_element() const
 {
-	return element(m_count);
+	return element(m_count - 1);
 }
 
 StringView PathParser::element(size_t index) const

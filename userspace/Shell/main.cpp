@@ -26,7 +26,7 @@ void execute_command(char* command)
 		WaitSignal(child, 0);
 		CloseHandle(child);
 	} else {
-		printf("Undefined command.\n"); // TODO: do some cute error messages here.
+		printf("Undefined command."); // TODO: do some cute error messages here.
 	}
 }
 
@@ -46,7 +46,7 @@ int main(int argc, const char* argv[])
 				buff[index] = 0;
 				printf("\n");
 				execute_command(buff);
-				printf("$> ");
+				printf("\n$> ");
 				index = 0;
 			} else if (c == '\b') {
 				if (index > 0) {

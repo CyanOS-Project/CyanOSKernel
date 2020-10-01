@@ -21,7 +21,7 @@ void Process::setup()
 Process& Process::create_virtual_process(const StringView& name, ProcessPrivilege privilege)
 {
 	ScopedLock local_lock(global_lock);
-	auto& pcb = processes->emplace_back(name, "", privilege);
+	auto& pcb = processes->emplace_back(name, "", "", privilege);
 	return pcb;
 }
 
@@ -29,7 +29,7 @@ Process& Process::create_new_process(const StringView& path, const StringView& a
 {
 	ScopedLock local_lock(global_lock);
 
-	auto& pcb = processes->emplace_back(path, argument, privilege);
+	auto& pcb = processes->emplace_back(PathParser(path).last_element(), path, argument, privilege);
 	Thread::create_thread(pcb, initiate_process, uintptr_t(&pcb), ThreadPrivilege::Kernel);
 	return pcb;
 }
@@ -44,11 +44,12 @@ Result<Process&> Process::get_process_from_pid(size_t pid)
 	return ResultError(ERROR_INVALID_PID);
 }
 
-Process::Process(const StringView& path, const StringView& argument, ProcessPrivilege privilege) :
+Process::Process(const StringView& name, const StringView& path, const StringView& argument,
+                 ProcessPrivilege privilege) :
     m_lock{},
     m_singal_waiting_queue{},
     m_pid{reserve_pid()},
-    m_name{PathParser(path).last_element()},
+    m_name{name},
     m_path{path},
     m_argument{argument},
     m_privilege_level{privilege},
@@ -67,8 +68,10 @@ Process::Process(const StringView& path, const StringView& argument, ProcessPriv
 	m_pib->pid = m_pid;
 	m_pib->path = m_pib->path_data;
 	m_pib->argument = m_pib->argument_data;
-	memcpy(m_pib->argument_data, m_argument.c_str(), m_path.length());
+	memcpy(m_pib->argument_data, m_argument.c_str(), m_argument.length());
 	memcpy(m_pib->path_data, m_path.c_str(), m_path.length());
+	m_pib->argument_data[m_argument.length()] = 0;
+	m_pib->path_data[m_path.length()] = 0;
 
 	if (Thread::current) {
 		Memory::switch_page_directory(Thread::current->parent_process().page_directory());
