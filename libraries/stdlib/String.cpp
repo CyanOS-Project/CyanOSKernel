@@ -215,6 +215,12 @@ String& String::insert(size_t pos, const char* str, size_t subpos, size_t sublen
 	return *this;
 }
 
+char& String::operator[](size_t off)
+{
+	ASSERT(off < m_size);
+	return m_data[off];
+}
+
 bool String::operator==(const StringView& other) const
 {
 	if (m_size != other.m_size)

@@ -20,8 +20,13 @@ StringView::StringView(const char* str) : m_size{strlen(str)}, m_data{str}
 	ASSERT(m_data);
 }
 
-StringView::StringView(const char* str, size_t len) : m_size{len}, m_data{str}
+StringView::StringView(const char* str, size_t len) : m_data{str}
 {
+	if (len == END)
+		m_size = strlen(str);
+	else
+		m_size = len;
+
 	ASSERT(m_data);
 }
 
@@ -166,7 +171,7 @@ size_t StringView::rfind(char c, size_t pos) const
 	return rfind(str, pos);
 }
 
-const char* StringView::c_str() const
+const char* StringView::data() const
 {
 	return m_data;
 }

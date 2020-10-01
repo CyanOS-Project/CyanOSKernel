@@ -260,15 +260,3 @@ void test_tid2(uintptr_t arg)
 	asm("movl %%gs:0x8,%0" : "=r"(exe_arg));
 	warn() << "PID:" << pid << " TID:" << tid << "Arg: " << exe_arg;
 }
-
-void test_argument(uintptr_t arg)
-{
-	UNUSED(arg);
-	warn() << "I'm here";
-	ArgumentParser myarg("Hello this_is_arg1 this_is_arg2");
-	warn() << myarg.count();
-	warn() << myarg[0];
-	warn() << myarg[1];
-	warn() << myarg[2];
-	warn() << myarg[3];
-}

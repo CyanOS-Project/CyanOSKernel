@@ -106,7 +106,7 @@ Result<void> FileDescription::dir_query(DirectoryInfo* info)
 	if (file_name.is_error())
 		return ResultError(file_name.error());
 
-	memcpy(info->file_name, file_name.value().c_str(), file_name.value().length());
+	memcpy(info->file_name, file_name.value().data(), file_name.value().length());
 	info->file_name[file_name.value().length()] = 0;
 	m_current_position++;
 

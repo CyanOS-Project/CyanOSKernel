@@ -1,11 +1,14 @@
+#include "Assert.h"
+#include "String.h"
 #include "StringView.h"
 #include "Types.h"
+#include "Vector.h"
 
 class ArgumentParser
 {
   private:
-	StringView m_argument;
-	size_t m_count;
+	String m_data;
+	Vector<StringView> m_argument_list;
 
   public:
 	ArgumentParser(StringView argument);

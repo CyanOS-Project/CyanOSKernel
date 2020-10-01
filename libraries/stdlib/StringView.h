@@ -31,7 +31,7 @@ class StringView
 	size_t rfind(const char* s, size_t pos = END) const;
 	size_t rfind(char c, size_t pos = END) const;
 	size_t length() const { return m_size; }
-	const char* c_str() const;
+	const char* data() const;
 	static const size_t END;
 	static const size_t NOT_FOUND;
 

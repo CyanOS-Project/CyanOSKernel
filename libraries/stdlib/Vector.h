@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Algorithms.h"
+#include "New.h"
 #include "Rule5.h"
 #include "Types.h"
 

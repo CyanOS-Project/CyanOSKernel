@@ -1,3 +1,4 @@
+#include <ArgumentParser.h>
 #include <Clib.h>
 #include <ErrorCodes.h>
 #include <systemlib/Systemcalls/Systemcalls.h>
@@ -11,7 +12,6 @@ void execute_command(char* command)
 		WaitSignal(child, 0);
 		CloseHandle(child);
 	} else if (strcmp(command, "cat") == 0) {
-
 	} else {
 		printf("Undefined command.\n"); // TODO: do some cute error messages here.
 	}

@@ -33,6 +33,7 @@ class String
 	String& insert(size_t pos, const String& str, size_t subpos, size_t sublen);
 	String& insert(size_t pos, const char* str);
 	String& insert(size_t pos, const char* str, size_t subpos, size_t sublen);
+	char& operator[](size_t off);
 
 	bool operator==(const StringView& other) const;
 	bool operator==(const String& other) const;
