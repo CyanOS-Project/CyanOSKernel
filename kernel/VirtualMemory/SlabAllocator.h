@@ -1,4 +1,5 @@
 #pragma once
+#include "Tasking/ScopedLock.h"
 #include "VirtualMemory/Memory.h"
 #include <Bitmap.h>
 #include <Types.h>
@@ -27,6 +28,8 @@ template <size_t slab_size, size_t memory_size> class Slab
 
 	static_assert(memory_size > MAX_HEADER_SIZE);
 	static_assert((sizeof(MemoryBlock<slab_size>) + MAX_HEADER_SIZE) <= memory_size);
+
+	StaticSpinlock m_lock;
 
 	bool is_address_in_slab(void* address);
 	void* alloc_in_current_slab(size_t block_index);
@@ -61,12 +64,16 @@ template <size_t slab_size, size_t memory_size> void Slab<slab_size, memory_size
 	header.next = nullptr;
 	header.free_blocks = MAX_BLOCKS;
 	header.next_fit_block = 0;
+	m_lock.init();
 }
 
 template <size_t slab_size, size_t memory_size> void* Slab<slab_size, memory_size>::alloc()
 {
+
 	ASSERT(header.magic == MAGIC);
 	ASSERT(header.size == slab_size);
+
+	ScopedLock local_lock(m_lock);
 
 	size_t block_index = -1;
 	if (header.free_blocks &&
@@ -83,6 +90,9 @@ template <size_t slab_size, size_t memory_size> void Slab<slab_size, memory_size
 {
 	ASSERT(header.magic == MAGIC);
 	ASSERT(header.size == slab_size);
+
+	ScopedLock local_lock(m_lock);
+
 	ASSERT(is_address_in_slab(address));
 
 	size_t block_index = (uintptr_t(address) - uintptr_t(blocks)) / sizeof(MemoryBlock<slab_size>);

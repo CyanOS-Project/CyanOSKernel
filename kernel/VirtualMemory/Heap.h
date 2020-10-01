@@ -1,5 +1,6 @@
 #pragma once
 #include "SlabAllocator.h"
+#include "Tasking/SpinLock.h"
 #include <Types.h>
 
 class Heap
@@ -10,8 +11,8 @@ class Heap
 	static Slab<0x040, PAGE_SIZE> slab_0x40;
 	static Slab<0x080, PAGE_SIZE> slab_0x80;
 	static Slab<0x100, PAGE_SIZE> slab_0x100;
-	static Slab<0x200, PAGE_SIZE> slab_0x200;
-	static Slab<0x300, PAGE_SIZE> slab_0x300;
+	// static Slab<0x200, PAGE_SIZE> slab_0x200;
+	// static Slab<0x300, PAGE_SIZE> slab_0x300;
 
   public:
 	static void setup();

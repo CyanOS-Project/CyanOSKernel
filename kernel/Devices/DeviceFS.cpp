@@ -13,6 +13,7 @@ UniquePointer<FSNode> DeviceFS::alloc(const StringView& name)
 DeviceFS::DeviceFS(const StringView& name) : FSNode{name, 0, 0, NodeType::Root, 0}
 {
 	ASSERT(children == 0);
+	// FIXME: lock me.
 	// ScopedLock local_lock(m_lock);
 	children = new List<UniquePointer<FSNode>>;
 }

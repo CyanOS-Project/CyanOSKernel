@@ -42,9 +42,9 @@ generic_syscall SystemCall::get_syscall_routine(unsigned syscall_num)
 
 void SystemCall::systemcall_handler(ISRContextFrame& frame)
 {
-	dbg() << "System Call " << Context::syscall_num(frame) << " (" << Hex(Context::syscall_param1(frame)) << " ,"
+	/*dbg() << "System Call " << Context::syscall_num(frame) << " (" << Hex(Context::syscall_param1(frame)) << " ,"
 	      << Hex(Context::syscall_param2(frame)) << " ," << Hex(Context::syscall_param3(frame)) << " ,"
-	      << Hex(Context::syscall_param4(frame)) << " ," << Hex(Context::syscall_param5(frame)) << ")";
+	      << Hex(Context::syscall_param4(frame)) << " ," << Hex(Context::syscall_param5(frame)) << ")";*/
 
 	generic_syscall syscall = get_syscall_routine(Context::syscall_num(frame));
 	if (!syscall) {

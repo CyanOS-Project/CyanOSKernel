@@ -10,6 +10,7 @@ Slab<0x100, PAGE_SIZE> Heap::slab_0x100;
 
 void Heap::setup()
 {
+	// FIXME: do some locks.
 	slab_0x10.init();
 	slab_0x20.init();
 	slab_0x40.init();
