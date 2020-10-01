@@ -10,4 +10,5 @@ SET(CMAKE_EXE_LINKER_FLAGS  "--target=${triple} -march=i686 -nostdlib -Wl,-entry
 include_directories("../libraries/stdlib")
 add_subdirectory("Shell")
 add_subdirectory("Test")
+add_subdirectory("Cat")
 

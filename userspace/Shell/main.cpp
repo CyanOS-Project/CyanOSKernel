@@ -7,11 +7,24 @@
 
 void execute_command(char* command)
 {
-	if (strcmp(command, "TestApp") == 0) {
-		Handle child = CreateProcess("/Tar/UserBinary/TestApp", "this is an argment", 0);
+	ArgumentParser arguments(command);
+	if (arguments.count() == 0) {
+		return;
+	}
+
+	const char* args = nullptr;
+	if (arguments.count() > 1) {
+		args = arguments[1].data();
+	}
+
+	if (arguments[0] == "TestApp") {
+		Handle child = CreateProcess("/Tar/UserBinary/TestApp", args, 0);
 		WaitSignal(child, 0);
 		CloseHandle(child);
-	} else if (strcmp(command, "cat") == 0) {
+	} else if (arguments[0] == "cat") {
+		Handle child = CreateProcess("/Tar/UserBinary/cat", args, 0);
+		WaitSignal(child, 0);
+		CloseHandle(child);
 	} else {
 		printf("Undefined command.\n"); // TODO: do some cute error messages here.
 	}

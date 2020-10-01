@@ -21,6 +21,8 @@ generic_syscall SystemCall::systemcalls_routines[] = {reinterpret_cast<generic_s
                                                       reinterpret_cast<generic_syscall>(TerminateProcess),
                                                       reinterpret_cast<generic_syscall>(TerminateThread),
                                                       reinterpret_cast<generic_syscall>(WaitSignal),
+                                                      reinterpret_cast<generic_syscall>(VirtualAlloc),
+                                                      reinterpret_cast<generic_syscall>(VirtualFree),
                                                       reinterpret_cast<generic_syscall>(QueryFileInformation)};
 
 unsigned SystemCall::syscalls_count = sizeof(systemcalls_routines) / sizeof(generic_syscall);
@@ -149,7 +151,7 @@ Result<int> CreateProcess(const char* path, const char* argument, int flags)
 {
 	UNUSED(flags);
 
-	auto& process = Process::create_new_process(path, argument, ProcessPrivilege::User);
+	auto& process = Process::create_new_process(path, (argument == nullptr ? "" : argument), ProcessPrivilege::User);
 
 	auto fp = OpenProcess(process.pid(), 0);
 	ASSERT(!fp.is_error());

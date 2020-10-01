@@ -26,7 +26,7 @@ Result<uintptr_t> PELoader::load(const char* file, size_t size)
 		const uint32_t section_raw_size = section_header[i].SizeOfRawData;
 		const uint32_t section_vir_size = section_header[i].Misc.VirtualSize;
 
-		if (!section_va || !section_rd || !section_vir_size)
+		if (!section_va || !section_vir_size)
 			return ResultError(ERROR_INVALID_EXECUTABLE);
 
 		if ((section_rd + section_raw_size) > size)

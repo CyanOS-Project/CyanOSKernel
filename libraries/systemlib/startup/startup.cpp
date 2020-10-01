@@ -1,5 +1,6 @@
 
 #pragma once
+#include "../Systemcalls/Systemcalls.h"
 #include "../Types.h"
 #include <stdlib.h>
 
@@ -14,5 +15,6 @@ extern "C" int __startup()
 	main_args[0] = path;
 	main_args[1] = arg;
 	main(2, main_args);
+	TerminateProcess(-1, 0);
 	return 1;
 }
