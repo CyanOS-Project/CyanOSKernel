@@ -13,11 +13,10 @@
 #include <UniquePointer.h>
 
 enum class ProcessState {
-	Running,
 	Active,
 	Blocked,
 	Suspended,
-	Terminated,
+	Zombie,
 };
 enum class ProcessPrivilege { Kernel, User };
 
@@ -45,6 +44,7 @@ class Process
 	const String m_argument;
 	const ProcessPrivilege m_privilege_level;
 	const uintptr_t m_page_directory;
+	size_t m_descriptor_references;
 	Process const* m_parent;
 	ProcessState m_state;
 	HandlesManager m_handles;
@@ -55,6 +55,7 @@ class Process
 	Process(const StringView& name, const StringView& path, const StringView& argument, ProcessPrivilege privilege);
 	Result<uintptr_t> load_executable(const StringView& path);
 	unsigned reserve_pid();
+	void cleanup();
 
   public:
 	static Process& create_virtual_process(const StringView& name, ProcessPrivilege privilege);
@@ -75,6 +76,8 @@ class Process
 	int wait_for_signal();
 	void list_new_thread(Thread& thread);
 	void unlist_new_thread(Thread& thread);
+	void descriptor_referenced();
+	void descriptor_dereferenced();
 	~Process();
 
 	friend class List<Process>;

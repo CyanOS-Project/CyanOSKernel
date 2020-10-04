@@ -131,7 +131,7 @@ Result<int> QueryFileInformation(Handle handle, FileInfo* info)
 
 Result<int> CloseHandle(Handle handle)
 {
-	if (Thread::current->parent_process().handles().check_handle(handle) != HandleType::Invalid)
+	if (Thread::current->parent_process().handles().check_handle(handle) == HandleType::Invalid)
 		return ResultError(ERROR_INVALID_HANDLE);
 
 	Thread::current->parent_process().handles().remove_handle(handle);
@@ -174,6 +174,7 @@ Result<int> TerminateProcess(Handle handle, int status)
 {
 	if (handle == Handle(-1)) {
 		Thread::current->parent_process().terminate(status);
+		Thread::yield();
 		return 0;
 	} else {
 		if (Thread::current->parent_process().handles().check_handle(handle) != HandleType::ProcessDescription)

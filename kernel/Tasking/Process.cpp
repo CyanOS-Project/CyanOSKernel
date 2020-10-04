@@ -54,6 +54,7 @@ Process::Process(const StringView& name, const StringView& path, const StringVie
     m_argument{argument},
     m_privilege_level{privilege},
     m_page_directory{Memory::create_new_virtual_space()},
+    m_descriptor_references{0},
     m_parent{nullptr},
     m_state{ProcessState::Active},
     m_handles{},
@@ -78,7 +79,11 @@ Process::Process(const StringView& name, const StringView& path, const StringVie
 	}
 }
 
-Process::~Process() {}
+Process::~Process()
+{
+	ASSERT(pid_bitmap->check_set(m_pid));
+	pid_bitmap->clear(m_pid);
+}
 
 Result<uintptr_t> Process::load_executable(const StringView& path)
 {
@@ -137,22 +142,28 @@ void Process::initiate_process(uintptr_t __pcb)
 
 void Process::terminate(int status_code)
 {
+	// FIXME: m_threads are not protected from race conditions.
 	for (auto&& thread : m_threads) {
 		thread->terminate();
 	}
 
 	ScopedLock local_lock(m_lock);
 
-	m_state = ProcessState::Terminated;
+	m_state = ProcessState::Zombie;
 	m_return_status = status_code;
 	m_singal_waiting_queue.wake_up_all();
-	// FIXME: free Process memory, maybe static function should call this function ?
+
+	if (m_descriptor_references == 0) {
+		cleanup();
+	}
 }
 
 int Process::wait_for_signal()
 {
 	ScopedLock local_lock(m_lock);
-	m_singal_waiting_queue.wait(local_lock);
+	if (m_state != ProcessState::Zombie) {
+		m_singal_waiting_queue.wait(local_lock);
+	}
 	return m_return_status;
 }
 
@@ -228,4 +239,26 @@ void Process::unlist_new_thread(Thread& thread)
 		else
 			return false;
 	});
+}
+
+void Process::descriptor_referenced()
+{
+	ScopedLock local_lock(m_lock);
+	m_descriptor_references++;
+}
+
+void Process::descriptor_dereferenced()
+{
+	ScopedLock local_lock(m_lock);
+	ASSERT(m_descriptor_references);
+	m_descriptor_references--;
+	if (m_state == ProcessState::Zombie && m_descriptor_references == 0) {
+		cleanup();
+	}
+}
+
+void Process::cleanup()
+{
+	warn() << "Process " << m_pid << " is freed from memory.";
+	processes->remove(processes->find(*this));
 }

@@ -12,9 +12,15 @@ Result<UniquePointer<ProcessDescription>> ProcessDescription::open(size_t pid, i
 	return UniquePointer<ProcessDescription>::make_unique(result.value());
 }
 
-ProcessDescription::ProcessDescription(Process& process) : m_process{process} {}
+ProcessDescription::ProcessDescription(Process& process) : m_process{process}
+{
+	m_process.descriptor_referenced();
+}
 
-ProcessDescription::~ProcessDescription() {}
+ProcessDescription::~ProcessDescription()
+{
+	m_process.descriptor_dereferenced();
+}
 
 Result<int> ProcessDescription::wait_signal()
 {
