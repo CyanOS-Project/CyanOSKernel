@@ -13,17 +13,6 @@
 
 class Memory
 {
-  private:
-	static StaticSpinlock lock;
-	static void page_fault_handler(ISRContextFrame& isr_info);
-	static uint32_t parse_flags(uint32_t mem_flags);
-	static void* _alloc_no_lock(uint32_t size, uint32_t flags);
-	static void* _alloc_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
-	static void _free_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
-	static void* _map_no_lock(uintptr_t physical_address, uint32_t size, uint32_t flags);
-	static void _unmap_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
-	static void setup_page_fault_handler();
-
   public:
 	static unsigned get_kernel_pages();
 	static void setup();
@@ -37,6 +26,17 @@ class Memory
 	static uintptr_t create_new_virtual_space();
 	static unsigned virtual_memory_size();
 	static unsigned physical_memory_size();
+
+  private:
+	static StaticSpinlock lock;
+	static void page_fault_handler(ISRContextFrame& isr_info);
+	static uint32_t parse_flags(uint32_t mem_flags);
+	static void* _alloc_no_lock(uint32_t size, uint32_t flags);
+	static void* _alloc_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
+	static void _free_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
+	static void* _map_no_lock(uintptr_t physical_address, uint32_t size, uint32_t flags);
+	static void _unmap_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
+	static void setup_page_fault_handler();
 
 	friend class VirtualMemory;
 };

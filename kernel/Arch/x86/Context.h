@@ -15,14 +15,6 @@ struct ContextInformation {
 
 class Context
 {
-  private:
-	struct InitialTaskContext {
-		ISRContextFrame isr_frame;
-		uintptr_t return_address;
-		uintptr_t argument;
-	};
-	static const uint32_t EFLAGS_IF_ENABLE = 0x202;
-
   public:
 	static uint32_t setup_task_stack_context(ContextType type, ContextInformation& info);
 	static void switch_task_stack(uint32_t task_stack_start, uint32_t pib, uint32_t tib);
@@ -41,4 +33,12 @@ class Context
 	static uint32_t syscall_param3(ISRContextFrame& frame);
 	static uint32_t syscall_param4(ISRContextFrame& frame);
 	static uint32_t syscall_param5(ISRContextFrame& frame);
+
+  private:
+	struct InitialTaskContext {
+		ISRContextFrame isr_frame;
+		uintptr_t return_address;
+		uintptr_t argument;
+	};
+	static const uint32_t EFLAGS_IF_ENABLE = 0x202;
 };

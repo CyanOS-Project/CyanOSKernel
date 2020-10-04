@@ -29,10 +29,10 @@ enum I86_PIT_OCW {
 
 class PIT
 {
-  private:
-	static void pit_handler(ISRContextFrame& isr_info);
-
   public:
 	static void setup();
 	static unsigned ticks;
+
+  private:
+	static void pit_handler(ISRContextFrame& isr_info);
 };

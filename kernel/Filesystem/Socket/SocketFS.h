@@ -13,16 +13,15 @@
 class SocketFS : public FSNode
 {
 
+  public:
+	static UniquePointer<FSNode> alloc(const StringView& name);
+	~SocketFS();
+	Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) override;
+	Result<FSNode&> dir_lookup(const StringView& file_name) override;
+
   private:
 	List<Socket> m_children;
 	Spinlock m_lock;
 
 	explicit SocketFS(const StringView& name);
-
-  public:
-	static UniquePointer<FSNode> alloc(const StringView& name);
-
-	~SocketFS();
-	Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) override;
-	Result<FSNode&> dir_lookup(const StringView& file_name) override;
 };

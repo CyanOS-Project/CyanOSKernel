@@ -8,11 +8,6 @@
 
 class FileDescription
 {
-  private:
-	FSNode& m_node;
-	size_t m_current_position = 0;
-	// bool m_has_changed = false;
-
   public:
 	NON_MOVABLE(FileDescription);
 	NON_COPYABLE(FileDescription);
@@ -32,4 +27,9 @@ class FileDescription
 	Result<void> ioctl();
 	Result<void> mmap();
 	Result<void> dir_query(DirectoryInfo* info);
+
+  private:
+	FSNode& m_node;
+	size_t m_current_position = 0;
+	// bool m_has_changed = false;
 };

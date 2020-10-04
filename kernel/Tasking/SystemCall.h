@@ -9,15 +9,15 @@ typedef Result<int> (*generic_syscall)(int arg0, int arg1, int arg2, int arg3, i
 
 class SystemCall
 {
+  public:
+	static void setup();
+
   private:
 	static generic_syscall systemcalls_routines[];
 	static unsigned syscalls_count;
 
 	static generic_syscall get_syscall_routine(unsigned syscall_num);
 	static void systemcall_handler(ISRContextFrame& frame);
-
-  public:
-	static void setup();
 };
 
 Result<int> OpenFile(const char* path, int mode, int flags);

@@ -11,6 +11,15 @@
 
 class Connection : public FSNode
 {
+  public:
+	explicit Connection(const StringView& name);
+	~Connection();
+	Result<void> open(FileDescription&) override;
+	Result<size_t> read(FileDescription&, void* buff, size_t offset, size_t size) override;
+	Result<size_t> write(FileDescription&, const void* buff, size_t offset, size_t size) override;
+	bool can_read(FileDescription&) override;
+	bool can_write(FileDescription&) override;
+	Result<void> close(FileDescription&) override;
 
   private:
 	const static size_t BUFFER_SIZE = 1024;
@@ -22,16 +31,6 @@ class Connection : public FSNode
 	size_t read_server_buffer(FileDescription&, void* buff, size_t size);
 	size_t write_client_buffer(FileDescription&, const void* buff, size_t size);
 	size_t write_server_buffer(FileDescription&, const void* buff, size_t size);
-
-  public:
-	explicit Connection(const StringView& name);
-	~Connection();
-	Result<void> open(FileDescription&) override;
-	Result<size_t> read(FileDescription&, void* buff, size_t offset, size_t size) override;
-	Result<size_t> write(FileDescription&, const void* buff, size_t offset, size_t size) override;
-	bool can_read(FileDescription&) override;
-	bool can_write(FileDescription&) override;
-	Result<void> close(FileDescription&) override;
 
 	friend class Socket;
 };

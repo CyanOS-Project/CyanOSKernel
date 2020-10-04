@@ -98,6 +98,13 @@ extern "C" void load_segments(uint16_t cs, uint16_t ds, uint16_t fs, uint16_t gs
 
 class GDT
 {
+  public:
+	static void setup();
+	static void setup_tss(uint32_t kernel_stack);
+	static void set_tss_stack(uint32_t kernel_stack);
+	static void load_fs(uint32_t address);
+	static void load_gs(uint32_t address);
+
   private:
 	static void fill_gdt(uint32_t base, uint16_t limit);
 	static void load_gdt();
@@ -107,11 +114,4 @@ class GDT
 	static volatile GDT_DESCRIPTOR gdt;
 	static volatile GDT_ENTRY gdt_entries[];
 	static volatile TSS_ENTRY tss_entry;
-
-  public:
-	static void setup();
-	static void setup_tss(uint32_t kernel_stack);
-	static void set_tss_stack(uint32_t kernel_stack);
-	static void load_fs(uint32_t address);
-	static void load_gs(uint32_t address);
 };

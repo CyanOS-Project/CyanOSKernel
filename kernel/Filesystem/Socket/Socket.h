@@ -12,6 +12,15 @@
 
 class Socket : public FSNode
 {
+  public:
+	explicit Socket(const StringView& name);
+	~Socket();
+	Result<void> open(FileDescription&) override;
+	bool can_accept() override;
+	Result<FSNode&> accept() override;
+	Result<FSNode&> connect() override;
+	Result<void> close(FileDescription&) override;
+
   private:
 	struct NewPendingConnection {
 		bool is_accepted;
@@ -24,13 +33,4 @@ class Socket : public FSNode
 	WaitQueue m_server_wait_queue;
 	WaitQueue m_connections_wait_queue;
 	Spinlock m_lock;
-
-  public:
-	explicit Socket(const StringView& name);
-	~Socket();
-	Result<void> open(FileDescription&) override;
-	bool can_accept() override;
-	Result<FSNode&> accept() override;
-	Result<FSNode&> connect() override;
-	Result<void> close(FileDescription&) override;
 };

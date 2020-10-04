@@ -64,6 +64,20 @@ typedef volatile struct PAGE_TABLE_t {
 
 class Paging
 {
+  public:
+	static void setup(uint32_t num_kernel_pages);
+	static void map_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages, uint32_t flags);
+	static void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages);
+	static void unmap_pages(uint32_t virtual_address, uint32_t pages);
+	static bool check_page_present(uint32_t virtual_address);
+	static bool check_page_table_exists(uint32_t virtual_address);
+	static uint32_t get_physical_page(uint32_t virtual_address);
+	static void load_page_directory(uint32_t page_direcotry);
+	static void map_kernel_pd_entries(uint32_t pd);
+	static void map_page_table(uint32_t virtual_address, uint32_t pt);
+	static void map_page(uint32_t virtual_address, uint32_t physical_address, uint32_t flags);
+	static void unmap_page(uint32_t virtual_address);
+
   private:
 	static void setup_page_tables();
 	static void initialize_page_directory(PAGE_DIRECTORY* page_direcotry);
@@ -80,18 +94,4 @@ class Paging
 	static PAGE_DIRECTORY page_direcotry;
 	static PAGE_TABLE kernel_page_tables[];
 	static PAGE_TABLE boostrap_page_table[];
-
-  public:
-	static void setup(uint32_t num_kernel_pages);
-	static void map_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages, uint32_t flags);
-	static void map_boot_pages(uint32_t virtual_address, uint32_t physical_address, uint32_t pages);
-	static void unmap_pages(uint32_t virtual_address, uint32_t pages);
-	static bool check_page_present(uint32_t virtual_address);
-	static bool check_page_table_exists(uint32_t virtual_address);
-	static uint32_t get_physical_page(uint32_t virtual_address);
-	static void load_page_directory(uint32_t page_direcotry);
-	static void map_kernel_pd_entries(uint32_t pd);
-	static void map_page_table(uint32_t virtual_address, uint32_t pt);
-	static void map_page(uint32_t virtual_address, uint32_t physical_address, uint32_t flags);
-	static void unmap_page(uint32_t virtual_address);
 };

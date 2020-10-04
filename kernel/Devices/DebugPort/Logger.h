@@ -10,12 +10,6 @@ class Hex;
 
 class Logger
 {
-  private:
-	static StaticSpinlock lock;
-
-  protected:
-	DebugColor m_color;
-
   public:
 	static void init();
 	Logger(DebugColor color = DebugColor::White);
@@ -28,6 +22,12 @@ class Logger
 	Logger& operator<<(uint64_t num);
 	Logger& operator<<(Hex num);
 	Logger& operator<<(void* ptr);
+
+  private:
+	static StaticSpinlock lock;
+
+  protected:
+	DebugColor m_color;
 };
 
 class dbg : public Logger

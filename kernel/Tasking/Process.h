@@ -23,6 +23,29 @@ enum class ProcessPrivilege { Kernel, User };
 class Thread;
 class Process
 {
+  public:
+	static Process& create_virtual_process(const StringView& name, ProcessPrivilege privilege);
+	static Process& create_new_process(const StringView& path, const StringView& argument, ProcessPrivilege privilege);
+	static void setup();
+	static Result<Process&> get_process_from_pid(size_t pid);
+
+	size_t pid();
+	String name();
+	String path();
+	ProcessPrivilege privilege_level();
+	uintptr_t page_directory();
+	Process const* parent();
+	ProcessState state();
+	HandlesManager& handles();
+	uintptr_t pib();
+	void terminate(int status_code);
+	int wait_for_signal();
+	void list_new_thread(Thread& thread);
+	void unlist_new_thread(Thread& thread);
+	void descriptor_referenced();
+	void descriptor_dereferenced();
+	~Process();
+
   private:
 	struct UserProcessInformationBlock {
 		size_t pid;
@@ -54,31 +77,7 @@ class Process
 
 	Process(const StringView& name, const StringView& path, const StringView& argument, ProcessPrivilege privilege);
 	Result<uintptr_t> load_executable(const StringView& path);
-	unsigned reserve_pid();
+	size_t reserve_pid();
 	void cleanup();
-
-  public:
-	static Process& create_virtual_process(const StringView& name, ProcessPrivilege privilege);
-	static Process& create_new_process(const StringView& path, const StringView& argument, ProcessPrivilege privilege);
-	static void setup();
-	static Result<Process&> get_process_from_pid(size_t pid);
-
-	size_t pid();
-	String name();
-	String path();
-	ProcessPrivilege privilege_level();
-	uintptr_t page_directory();
-	Process const* parent();
-	ProcessState state();
-	HandlesManager& handles();
-	uintptr_t pib();
-	void terminate(int status_code);
-	int wait_for_signal();
-	void list_new_thread(Thread& thread);
-	void unlist_new_thread(Thread& thread);
-	void descriptor_referenced();
-	void descriptor_dereferenced();
-	~Process();
-
 	friend class List<Process>;
 };

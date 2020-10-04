@@ -3,7 +3,7 @@
 volatile uint8_t PhysicalMemory::physical_memory_tracer[MAX_PHYSICAL_4K_PAGES / 8];
 volatile unsigned PhysicalMemory::physical_memory_size;
 
-void PhysicalMemory::initialize()
+void PhysicalMemory::setup()
 {
 	for (size_t i = 0; i < sizeof(physical_memory_tracer); i++) {
 		physical_memory_tracer[i] = 0;

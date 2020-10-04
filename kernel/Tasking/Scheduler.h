@@ -13,6 +13,10 @@ enum class ScheduleType {
 
 class Scheduler
 {
+  public:
+	static void schedule(ISRContextFrame& current_context, ScheduleType type);
+	static void setup();
+
   private:
 	static StaticSpinlock lock;
 	static void load_context(ISRContextFrame& current_context, Thread& thread);
@@ -21,8 +25,4 @@ class Scheduler
 	static void wake_up_sleepers();
 	static void schedule_handler(ISRContextFrame& frame);
 	static Thread& select_next_thread();
-
-  public:
-	static void schedule(ISRContextFrame& current_context, ScheduleType type);
-	static void setup();
 };

@@ -4,10 +4,6 @@
 
 template <typename T> class ScopedLock
 {
-  private:
-	T& m_lock;
-	bool m_locked = false;
-
   public:
 	NON_COPYABLE(ScopedLock)
 	NON_MOVABLE(ScopedLock)
@@ -31,4 +27,8 @@ template <typename T> class ScopedLock
 		m_lock.acquire();
 		m_locked = true;
 	}
+
+  private:
+	T& m_lock;
+	bool m_locked = false;
 };

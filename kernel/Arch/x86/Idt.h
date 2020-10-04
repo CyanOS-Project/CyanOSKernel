@@ -36,13 +36,13 @@ struct IDTEntry {
 
 class IDT
 {
+  public:
+	static void setup();
+
   private:
 	static void fill_idt(uint32_t base, uint16_t limit);
 	static void load_idt();
 	static void fill_idt_entry(uint8_t idt_entry, uint32_t address, uint16_t segment, uint8_t type);
 	static volatile IDT_DISCRIPTOR idt;
 	static volatile IDTEntry idt_entries[];
-
-  public:
-	static void setup();
 };

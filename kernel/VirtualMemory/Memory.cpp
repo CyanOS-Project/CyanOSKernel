@@ -6,7 +6,7 @@ void Memory::setup()
 {
 	lock.init();
 	Paging::setup(get_kernel_pages());
-	PhysicalMemory::initialize();
+	PhysicalMemory::setup();
 	PhysicalMemory::set_used_pages(GET_FRAME(KERNEL_PHYSICAL_ADDRESS), get_kernel_pages());
 }
 
@@ -87,12 +87,11 @@ void Memory::unmap(void* virtual_address, uint32_t size, uint32_t flags)
 
 uintptr_t Memory::create_new_virtual_space()
 {
-
 	uintptr_t page_directory = (uintptr_t)alloc(sizeof(PAGE_DIRECTORY), PAGE_READWRITE);
 	ScopedLock local_lock(lock);
 	Paging::map_kernel_pd_entries(page_directory);
-	Paging::unmap_pages(page_directory,
-	                    GET_PAGES(sizeof(PAGE_DIRECTORY))); // unmap pd from virtual memory but keep it in physical
+	// unmap page directory from virtual memory but keep it in physical
+	Paging::unmap_pages(page_directory, GET_PAGES(sizeof(PAGE_DIRECTORY)));
 	uintptr_t physical_address = Paging::get_physical_page(page_directory) * PAGE_SIZE;
 	return physical_address;
 }

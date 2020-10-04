@@ -65,11 +65,11 @@ typedef void (*isr_function)(ISRContextFrame&);
 extern "C" uintptr_t isr_vector[];
 class ISR
 {
-  private:
-	static const char* exception_messages[];
-
   public:
 	static void default_interrupt_handler(ISRContextFrame& info);
 	static void initiate_isr_dispatcher_vector();
 	static void register_isr_handler(isr_function address, uint8_t irq_number);
+
+  private:
+	static const char* exception_messages[];
 };

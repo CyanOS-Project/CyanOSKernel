@@ -25,9 +25,9 @@ struct DATE_TIME {
 
 class RTC
 {
-  private:
-	static ::uint8_t BCDtoBYTE(uint8_t BCD);
-
   public:
 	static void get_time(DATE_TIME* Time);
+
+  private:
+	static ::uint8_t BCDtoBYTE(uint8_t BCD);
 };

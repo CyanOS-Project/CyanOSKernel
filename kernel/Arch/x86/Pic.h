@@ -35,8 +35,6 @@
 
 class PIC
 {
-  private:
-	/* data */
   public:
 	static void setup();
 	static void enable_irq(uint8_t irq);

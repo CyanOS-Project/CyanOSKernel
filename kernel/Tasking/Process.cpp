@@ -83,88 +83,8 @@ Process::~Process()
 {
 	ASSERT(pid_bitmap->check_set(m_pid));
 	pid_bitmap->clear(m_pid);
-}
 
-Result<uintptr_t> Process::load_executable(const StringView& path)
-{
-	ScopedLock local_lock(m_lock);
-
-	auto fd = FileDescription::open(path, OpenMode::OM_READ, OpenFlags::OF_OPEN_EXISTING);
-	if (fd.is_error()) {
-		warn() << "error opening the executable file, error: " << fd.error();
-		return ResultError(fd.error());
-	}
-	auto file_info = fd.value()->fstat();
-	// FIXME: fix malloc to use more than 4096 bytes and use UniquePointer here.
-	char* buff = static_cast<char*>(valloc(file_info.value().size, PAGE_READWRITE));
-	memset(buff, 0, file_info.value().size);
-	auto result = fd.value()->read(buff, file_info.value().size);
-	if (result.is_error()) {
-		return ResultError(result.error());
-	}
-
-	auto execable_entrypoint = PELoader::load(buff, file_info.value().size);
-	if (execable_entrypoint.is_error()) {
-		return ResultError(execable_entrypoint.error());
-	}
-	Memory::free(buff, file_info.value().size, 0);
-	return execable_entrypoint.value();
-}
-
-unsigned Process::reserve_pid()
-{
-	unsigned id = pid_bitmap->find_first_clear();
-	pid_bitmap->set(id);
-	return id;
-}
-
-void Process::initiate_process(uintptr_t __pcb)
-{
-	Process* pcb = reinterpret_cast<Process*>(__pcb);
-
-	auto&& executable_entrypoint = pcb->load_executable(pcb->m_path);
-	if (executable_entrypoint.is_error()) {
-		warn() << "couldn't load the process, error: " << executable_entrypoint.error();
-		pcb->terminate(executable_entrypoint.error());
-		return;
-	}
-
-	if (pcb->m_privilege_level == ProcessPrivilege::User) {
-		void* thread_user_stack = valloc(STACK_SIZE, PAGE_USER | PAGE_READWRITE);
-
-		Context::enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE - 4);
-	} else if (pcb->m_privilege_level == ProcessPrivilege::Kernel) {
-		ASSERT_NOT_REACHABLE(); // TODO: kernel process.
-	}
-
-	ASSERT_NOT_REACHABLE();
-}
-
-void Process::terminate(int status_code)
-{
-	// FIXME: m_threads are not protected from race conditions.
-	for (auto&& thread : m_threads) {
-		thread->terminate();
-	}
-
-	ScopedLock local_lock(m_lock);
-
-	m_state = ProcessState::Zombie;
-	m_return_status = status_code;
-	m_singal_waiting_queue.wake_up_all();
-
-	if (m_descriptor_references == 0) {
-		cleanup();
-	}
-}
-
-int Process::wait_for_signal()
-{
-	ScopedLock local_lock(m_lock);
-	if (m_state != ProcessState::Zombie) {
-		m_singal_waiting_queue.wait(local_lock);
-	}
-	return m_return_status;
+	// free_page_direcotry(); FIXME: delete page directory.
 }
 
 size_t Process::pid()
@@ -223,6 +143,35 @@ uintptr_t Process::pib()
 	return reinterpret_cast<uintptr_t>(m_pib);
 }
 
+void Process::terminate(int status_code)
+{
+	// FIXME: m_threads are not protected from race conditions.
+	for (auto&& thread : m_threads) {
+		thread->terminate();
+	}
+
+	ScopedLock local_lock(m_lock);
+
+	ASSERT(m_state != ProcessState::Zombie);
+
+	m_state = ProcessState::Zombie;
+	m_return_status = status_code;
+	m_singal_waiting_queue.wake_up_all();
+
+	if (m_descriptor_references == 0) {
+		cleanup();
+	}
+}
+
+int Process::wait_for_signal()
+{
+	ScopedLock local_lock(m_lock);
+	if (m_state != ProcessState::Zombie) {
+		m_singal_waiting_queue.wait(local_lock);
+	}
+	return m_return_status;
+}
+
 void Process::list_new_thread(Thread& thread)
 {
 	ScopedLock local_lock(m_lock);
@@ -255,6 +204,61 @@ void Process::descriptor_dereferenced()
 	if (m_state == ProcessState::Zombie && m_descriptor_references == 0) {
 		cleanup();
 	}
+}
+
+Result<uintptr_t> Process::load_executable(const StringView& path)
+{
+	ScopedLock local_lock(m_lock);
+
+	auto fd = FileDescription::open(path, OpenMode::OM_READ, OpenFlags::OF_OPEN_EXISTING);
+	if (fd.is_error()) {
+		warn() << "error opening the executable file, error: " << fd.error();
+		return ResultError(fd.error());
+	}
+	auto file_info = fd.value()->fstat();
+	// FIXME: fix malloc to use more than 4096 bytes and use UniquePointer here.
+	char* buff = static_cast<char*>(valloc(file_info.value().size, PAGE_READWRITE));
+	memset(buff, 0, file_info.value().size);
+	auto result = fd.value()->read(buff, file_info.value().size);
+	if (result.is_error()) {
+		return ResultError(result.error());
+	}
+
+	auto execable_entrypoint = PELoader::load(buff, file_info.value().size);
+	if (execable_entrypoint.is_error()) {
+		return ResultError(execable_entrypoint.error());
+	}
+	Memory::free(buff, file_info.value().size, 0);
+	return execable_entrypoint.value();
+}
+
+void Process::initiate_process(uintptr_t __pcb)
+{
+	Process* pcb = reinterpret_cast<Process*>(__pcb);
+
+	auto&& executable_entrypoint = pcb->load_executable(pcb->m_path);
+	if (executable_entrypoint.is_error()) {
+		warn() << "couldn't load the process, error: " << executable_entrypoint.error();
+		pcb->terminate(executable_entrypoint.error());
+		return;
+	}
+
+	if (pcb->m_privilege_level == ProcessPrivilege::User) {
+		void* thread_user_stack = valloc(STACK_SIZE, PAGE_USER | PAGE_READWRITE);
+
+		Context::enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE - 4);
+	} else if (pcb->m_privilege_level == ProcessPrivilege::Kernel) {
+		ASSERT_NOT_REACHABLE(); // TODO: kernel process.
+	}
+
+	ASSERT_NOT_REACHABLE();
+}
+
+size_t Process::reserve_pid()
+{
+	size_t id = pid_bitmap->find_first_clear();
+	pid_bitmap->set(id);
+	return id;
 }
 
 void Process::cleanup()
