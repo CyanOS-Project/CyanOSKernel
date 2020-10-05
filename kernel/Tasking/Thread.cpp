@@ -10,13 +10,13 @@
 IntrusiveList<Thread>* Thread::ready_threads = nullptr;
 IntrusiveList<Thread>* Thread::sleeping_threads = nullptr;
 Thread* Thread::current = nullptr;
-Bitmap<MAX_BITMAP_SIZE>* Thread::m_tid_bitmap;
+Bitmap<MAX_BITMAP_SIZE>* Thread::tid_bitmap;
 StaticSpinlock Thread::global_lock;
 
 void Thread::setup()
 {
 	global_lock.init();
-	m_tid_bitmap = new Bitmap<MAX_BITMAP_SIZE>;
+	tid_bitmap = new Bitmap<MAX_BITMAP_SIZE>;
 	ready_threads = new IntrusiveList<Thread>;
 	sleeping_threads = new IntrusiveList<Thread>;
 }
@@ -81,7 +81,11 @@ Thread::Thread(Process& process, thread_function address, uintptr_t argument, Th
 	}
 }
 
-Thread::~Thread() {}
+Thread::~Thread()
+{
+	ASSERT(tid_bitmap->check_set(m_tid));
+	tid_bitmap->clear(m_tid);
+}
 
 void Thread::wake_up_from_queue()
 {
@@ -123,10 +127,10 @@ void Thread::thread_finishing()
 	}
 }
 
-unsigned Thread::reserve_tid()
+size_t Thread::reserve_tid()
 {
-	unsigned id = m_tid_bitmap->find_first_clear();
-	m_tid_bitmap->set(id);
+	size_t id = tid_bitmap->find_first_clear();
+	tid_bitmap->set(id);
 	return id;
 }
 
@@ -158,10 +162,10 @@ void Thread::terminate()
 		}
 	}
 	m_parent.unlist_new_thread(*this);
-	// FIXME: free Thread memory, maybe static function should call this function ?
+	cleanup();
 }
 
-void Thread::sleep(unsigned ms)
+void Thread::sleep(size_t ms)
 {
 	ScopedLock local_lock(global_lock);
 
@@ -175,7 +179,7 @@ void Thread::sleep(unsigned ms)
 	yield();
 }
 
-unsigned Thread::tid()
+size_t Thread::tid()
 {
 	ScopedLock local_lock(global_lock);
 
@@ -201,4 +205,10 @@ size_t Thread::number_of_ready_threads()
 	ScopedLock local_lock(global_lock);
 
 	return ready_threads->size();
+}
+
+void Thread::cleanup()
+{
+	warn() << "Thread " << m_tid << " is freed from memory.";
+	delete this;
 }

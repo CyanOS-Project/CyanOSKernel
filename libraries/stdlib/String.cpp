@@ -16,7 +16,8 @@ const size_t String::NOT_FOUND = -1;
 String::String(const StringView& str) : m_size{str.length()}, m_data{new char[m_size + 1]}
 {
 	ASSERT(m_data);
-	memcpy(m_data, str.m_data, m_size + 1);
+	memcpy(m_data, str.m_data, m_size);
+	m_data[m_size] = 0;
 }
 
 String::String(const char* str) : m_size{strlen(str)}, m_data{new char[m_size + 1]}

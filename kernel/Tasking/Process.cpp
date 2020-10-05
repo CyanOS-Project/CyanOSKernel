@@ -29,7 +29,7 @@ Process& Process::create_new_process(const StringView& path, const StringView& a
 {
 	ScopedLock local_lock(global_lock);
 
-	auto& pcb = processes->emplace_back(PathParser(path).last_element(), path, argument, privilege);
+	auto& pcb = processes->emplace_back(VFS::traverse_path(path).last_element(), path, argument, privilege);
 	Thread::create_thread(pcb, initiate_process, uintptr_t(&pcb), ThreadPrivilege::Kernel);
 	return pcb;
 }

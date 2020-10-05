@@ -70,7 +70,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	// Thread::create_thread(proc2, test_server, 0, ThreadPrivilege::Kernel);
 	// Thread::create_thread(proc2, test_client, 0, ThreadPrivilege::Kernel);
 	// Thread::create_thread(proc2, test_ls, 0, ThreadPrivilege::Kernel);
-
+	pathparser_test(0);
 	ENABLE_INTERRUPTS();
 	Thread::yield();
 	while (true) {

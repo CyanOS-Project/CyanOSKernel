@@ -10,8 +10,8 @@
 #endif
 #include "String.h"
 
-const size_t StringView::END = -1;
-const size_t StringView::NOT_FOUND = -1;
+const size_t StringView::END = size_t(-1);
+const size_t StringView::NOT_FOUND = size_t(-1);
 
 StringView::StringView(const String& str) : m_size{str.length()}, m_data{str.c_str()} {}
 

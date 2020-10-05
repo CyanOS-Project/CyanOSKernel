@@ -29,7 +29,7 @@ class Thread : public IntrusiveListNode<Thread>
 	static Thread* current;
 	static Thread& create_thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv);
 	static Thread& create_init_thread(Process& process);
-	static void sleep(unsigned ms);
+	static void sleep(size_t ms);
 	static void yield();
 	static void setup();
 	static size_t number_of_ready_threads();
@@ -38,7 +38,7 @@ class Thread : public IntrusiveListNode<Thread>
 	void wake_up_from_sleep();
 	void block(WaitQueue& blocker);
 	void terminate();
-	unsigned tid();
+	size_t tid();
 	ThreadState state();
 	Process& parent_process();
 	~Thread();
@@ -72,7 +72,7 @@ class Thread : public IntrusiveListNode<Thread>
 		size_t tid;
 	};
 
-	static Bitmap<MAX_BITMAP_SIZE>* m_tid_bitmap;
+	static Bitmap<MAX_BITMAP_SIZE>* tid_bitmap;
 	static IntrusiveList<Thread>* ready_threads;
 	static IntrusiveList<Thread>* sleeping_threads;
 	static StaticSpinlock global_lock;
@@ -84,14 +84,15 @@ class Thread : public IntrusiveListNode<Thread>
 	ThreadPrivilege m_privilege;
 	WaitQueue* m_blocker;
 	UserThreadInformationBlock* m_tib;
-	unsigned m_sleep_ticks;
+	size_t m_sleep_ticks;
 	uintptr_t m_kernel_stack_start;
 	uintptr_t m_kernel_stack_end;
 	uintptr_t m_kernel_stack_pointer;
 	uintptr_t m_user_stack_start;
 
-	unsigned reserve_tid();
 	Thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv);
+	size_t reserve_tid();
+	void cleanup();
 
 	friend class Scheduler;
 	friend class WaitQueue;

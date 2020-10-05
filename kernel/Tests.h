@@ -11,6 +11,7 @@
 #include <ArgumentParser.h>
 #include <Bitmap.h>
 #include <PathParser.h>
+#include <PathParser2.h>
 
 Semaphore* sem_lock;
 void test_semaphore_thread2(uintptr_t arg)
@@ -259,4 +260,14 @@ void test_tid2(uintptr_t arg)
 	asm("movl %%gs:0x0,%0" : "=r"(pid));
 	asm("movl %%gs:0x8,%0" : "=r"(exe_arg));
 	warn() << "PID:" << pid << " TID:" << tid << "Arg: " << exe_arg;
+}
+
+void pathparser_test(uintptr_t arg)
+{
+	PathParser2 parser("drivers/test", "/bin/test");
+	warn() << parser.last_element();
+	warn() << parser.element(0);
+	warn() << parser.element(1);
+	warn() << parser.element(2);
+	warn() << parser.element(3);
 }
