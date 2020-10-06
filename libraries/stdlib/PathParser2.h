@@ -4,24 +4,28 @@
 
 enum class PathType { Absolute, Relative, RelativeRecursive };
 
-class PathParser2
+class PathView
 {
-  private:
-	StringView m_working_dir;
-	const size_t m_working_dir_count;
-	StringView m_path;
-	const size_t m_count;
-	size_t calculate_count(const StringView& path) const;
-	StringView get_element_from_full_path(const StringView& path, size_t index) const;
-
   public:
 	static bool is_valid(const StringView& path);
 	static PathType get_type(const StringView& path);
 
-	explicit PathParser2(const StringView& absolute_path);
-	explicit PathParser2(const StringView& relative_path, const StringView& working_dir);
-	~PathParser2();
-	size_t count() const;
-	StringView element(size_t index) const;
-	StringView last_element() const;
+	PathView(StringView path);
+	PathView(StringView working_dir, StringView relative_path);
+	~PathView();
+	int count() const;
+	StringView operator[](int) const;
+	PathView sub_path(int start_index, int end_index) const;
+
+  private:
+	PathType m_type;
+	StringView m_absolute_path;
+	StringView m_relative_path;
+	const int m_absolute_path_count;
+	const int m_relative_path_count;
+	int count_elements(const StringView& path) const;
+	StringView get_element_from_full_path(const StringView& path, int index) const;
+	StringView sub_absolute_path(int start_index, int end_index) const;
+	StringView sub_relative_path(int start_index, int end_index) const;
+	StringView get_sub_path(StringView path, int start_index, int end_index) const;
 };

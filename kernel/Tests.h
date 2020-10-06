@@ -264,10 +264,16 @@ void test_tid2(uintptr_t arg)
 
 void pathparser_test(uintptr_t arg)
 {
-	PathParser2 parser("drivers/test", "/bin/test");
-	warn() << parser.last_element();
-	warn() << parser.element(0);
-	warn() << parser.element(1);
-	warn() << parser.element(2);
-	warn() << parser.element(3);
+	PathView parser("/drivers/test", "bin/test2");
+	warn() << parser.count();
+	warn() << parser[-1];
+	warn() << parser[0];
+	warn() << parser[1];
+	warn() << parser[2];
+	warn() << parser[3];
+
+	PathView new_path = parser.sub_path(1, 2);
+	warn() << new_path.count();
+	warn() << new_path[0];
+	warn() << new_path[1];
 }

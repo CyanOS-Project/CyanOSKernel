@@ -81,7 +81,7 @@ Result<FSNode&> VFS::get_node(const StringView& path, OpenMode mode, OpenFlags f
 
 Result<FSNode&> VFS::create_new_node(const StringView& path, OpenMode mode, OpenFlags flags)
 {
-	PathParser2 parser = traverse_path(path);
+	PathParser parser(path);
 
 	auto parent_node = traverse_parent_node(parser);
 	if (parent_node.error()) {
@@ -93,7 +93,7 @@ Result<FSNode&> VFS::create_new_node(const StringView& path, OpenMode mode, Open
 
 Result<FSNode&> VFS::open_existing_node(const StringView& path)
 {
-	PathParser2 parser = traverse_path(path);
+	PathParser parser(path);
 
 	auto node = traverse_node(parser);
 	if (node.error()) {
@@ -103,7 +103,7 @@ Result<FSNode&> VFS::open_existing_node(const StringView& path)
 	return node.value();
 }
 
-Result<FSNode&> VFS::traverse_parent_node(const PathParser2& parser)
+Result<FSNode&> VFS::traverse_parent_node(const PathParser& parser)
 {
 	size_t path_elements_count = parser.count();
 	if (path_elements_count == 0) {
@@ -112,7 +112,7 @@ Result<FSNode&> VFS::traverse_parent_node(const PathParser2& parser)
 	return traverse_node_deep(parser, path_elements_count - 1);
 }
 
-Result<FSNode&> VFS::traverse_node(const PathParser2& parser)
+Result<FSNode&> VFS::traverse_node(const PathParser& parser)
 {
 	size_t path_elements_count = parser.count();
 	if (path_elements_count == 0)
@@ -121,7 +121,7 @@ Result<FSNode&> VFS::traverse_node(const PathParser2& parser)
 	return traverse_node_deep(parser, path_elements_count);
 }
 
-Result<FSNode&> VFS::traverse_node_deep(const PathParser2& parser, size_t depth)
+Result<FSNode&> VFS::traverse_node_deep(const PathParser& parser, size_t depth)
 {
 	if (fs_roots->size() == 0)
 		return ResultError(ERROR_NO_ROOT_NODE);
@@ -149,16 +149,17 @@ FSNode* VFS::get_root_node(const StringView& root_name)
 	return nullptr;
 }
 
-PathParser2 VFS::traverse_path(const StringView& path)
+PathParser VFS::traverse_path(const StringView& path)
 {
-	switch (PathParser2::get_type(path)) {
-		case PathType::Absolute:
-			return PathParser2(path);
-		case PathType::Relative:
-			ASSERT_NOT_REACHABLE();
-			return PathParser2(path);
-		case PathType::RelativeRecursive:
-			ASSERT_NOT_REACHABLE();
-			return PathParser2(path);
-	}
+	/*switch (PathParser::get_type(path)) {
+	    case PathType::Absolute:
+	        return PathParser(path);
+	    case PathType::Relative:
+	        ASSERT_NOT_REACHABLE();
+	        return PathParser(path);
+	    case PathType::RelativeRecursive:
+	        ASSERT_NOT_REACHABLE();
+	        return PathParser(path);
+	}*/
+	return PathParser("");
 }
