@@ -10,7 +10,6 @@
 #include "VirtualMemory/Memory.h"
 #include <ArgumentParser.h>
 #include <Bitmap.h>
-#include <PathParser.h>
 #include <PathParser2.h>
 
 Semaphore* sem_lock;
@@ -272,8 +271,9 @@ void pathparser_test(uintptr_t arg)
 	warn() << parser[2];
 	warn() << parser[3];
 
-	PathView new_path = parser.sub_path(1, 2);
+	PathView new_path = parser.sub_path(1, 3);
 	warn() << new_path.count();
 	warn() << new_path[0];
 	warn() << new_path[1];
+	warn() << new_path[2];
 }

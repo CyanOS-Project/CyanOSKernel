@@ -9,6 +9,10 @@
 	#include "Assert.h"
 #endif
 
+PathView::PathView(const String& path) : PathView{StringView{path}} {}
+
+PathView::PathView(const char* path) : PathView{StringView{path}} {}
+
 PathView::PathView(StringView path) :
     m_type{get_type(path)},
     m_absolute_path{m_type == PathType::Absolute ? path : ""},
@@ -39,7 +43,7 @@ int PathView::count() const
 StringView PathView::operator[](int index) const
 {
 	ASSERT(index < count());
-	ASSERT(index > -count());
+	ASSERT(index > -count() - 1);
 	if (index < 0) {
 		index = count() + index;
 	}
@@ -53,8 +57,8 @@ StringView PathView::operator[](int index) const
 
 PathView PathView::sub_path(int start_index, int end_index) const
 {
-	ASSERT((start_index < count()) && (start_index > -count()));
-	ASSERT((end_index < count()) && (end_index > -count()));
+	ASSERT((start_index < count()) && (start_index > -count() - 1));
+	ASSERT((end_index < count()) && (end_index > -count() - 1));
 
 	if (start_index < 0) {
 		start_index = count() + start_index;
@@ -77,12 +81,19 @@ PathView PathView::sub_path(int start_index, int end_index) const
 	}
 }
 
+String PathView::full_path() const
+{
+	String full_path_str(m_absolute_path);
+	full_path_str += m_relative_path;
+	return full_path_str;
+}
+
 bool PathView::is_valid(const StringView& path)
 {
 	if (path.length() == 0)
 		return false;
 
-	if (path[path.length() - 1] == SPLITER)
+	if (path.length() != 1 && path[path.length() - 1] == SPLITER)
 		return false;
 
 	return true;
@@ -137,20 +148,16 @@ StringView PathView::sub_absolute_path(int start_index, int end_index) const
 		start_pos = m_absolute_path.find(SPLITER, start_pos) + 1;
 	}
 
-	size_t len = [&]() {
-		if (end_index < m_absolute_path_count - 1) {
-			int end_pos = start_pos;
-			int end_index_search = end_index - start_index + 1;
-			while (end_index_search--) {
-				end_pos = m_absolute_path.find(SPLITER, end_pos) + 1;
-			}
-			return size_t(end_pos - start_pos);
-		} else {
-			return StringView::END;
+	if (end_index < m_absolute_path_count - 1) {
+		int end_pos = start_pos;
+		int end_index_search = end_index - start_index + 1;
+		while (end_index_search--) {
+			end_pos = m_absolute_path.find(SPLITER, end_pos) + 1;
 		}
-	}();
-
-	return m_absolute_path.substr(start_pos - 1, len);
+		return m_absolute_path.substr(start_pos - 1, size_t(end_pos - start_pos));
+	} else {
+		return m_absolute_path.substr(start_pos - 1, StringView::END);
+	}
 }
 
 StringView PathView::sub_relative_path(int start_index, int end_index) const
@@ -172,34 +179,33 @@ StringView PathView::sub_relative_path(int start_index, int end_index) const
 		start_pos = m_absolute_path.find(SPLITER, start_pos) + 1;
 	}
 
-	size_t len = [&]() {
-		if (end_index < m_relative_path_count - 1) {
-			int end_pos = start_pos;
-			int end_index_search = end_index - start_index + 1;
-			while (end_index_search--) {
-				end_pos = m_relative_path.find(SPLITER, end_pos) + 1;
-			}
-			return size_t(end_pos - start_pos);
-		} else {
-			return StringView::END;
+	if (end_index < m_relative_path_count - 1) {
+		int end_pos = start_pos;
+		int end_index_search = end_index - start_index + 1;
+		while (end_index_search--) {
+			end_pos = m_relative_path.find(SPLITER, end_pos) + 1;
 		}
-	}();
-
-	return m_relative_path.substr(start_pos, len - 1);
+		return m_relative_path.substr(start_pos, size_t(end_pos - start_pos) - 1);
+	} else {
+		return m_relative_path.substr(start_pos, StringView::END);
+	}
 }
 
 int PathView::count_elements(const StringView& path) const
 {
-	int count = 0;
+	if (path[0] == SPLITER && path.length() == 1) {
+		return 0;
+	}
+
 	int last_found = 0;
 	if (path[0] == SPLITER) {
 		last_found = 1;
 	}
 
-	do {
-		last_found = path.find(SPLITER, last_found + 1);
+	int count = 0;
+	while ((last_found = path.find(SPLITER, last_found)) != StringView::NOT_FOUND && ++last_found) {
 		++count;
-	} while (last_found != StringView::NOT_FOUND);
+	}
 
-	return count;
+	return count + 1;
 }

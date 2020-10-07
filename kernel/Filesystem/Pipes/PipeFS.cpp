@@ -1,7 +1,6 @@
 #include "PipeFS.h"
 #include "Tasking/ScopedLock.h"
 #include <ErrorCodes.h>
-#include <PathParser.h>
 
 UniquePointer<FSNode> PipeFS::alloc(const StringView& name)
 {

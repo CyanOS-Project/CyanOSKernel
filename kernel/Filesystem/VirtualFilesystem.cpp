@@ -68,7 +68,7 @@ Result<void> VFS::remove_link()
 	return ResultError(ERROR_INVALID_PARAMETERS);
 }
 
-Result<FSNode&> VFS::get_node(const StringView& path, OpenMode mode, OpenFlags flags)
+Result<FSNode&> VFS::get_node(PathView path, OpenMode mode, OpenFlags flags)
 {
 	if (flags == OpenFlags::OF_CREATE_NEW) {
 		return create_new_node(path, mode, flags);
@@ -79,23 +79,19 @@ Result<FSNode&> VFS::get_node(const StringView& path, OpenMode mode, OpenFlags f
 	}
 }
 
-Result<FSNode&> VFS::create_new_node(const StringView& path, OpenMode mode, OpenFlags flags)
+Result<FSNode&> VFS::create_new_node(PathView path, OpenMode mode, OpenFlags flags)
 {
-	PathParser parser(path);
-
-	auto parent_node = traverse_parent_node(parser);
+	auto parent_node = traverse_parent_node(path);
 	if (parent_node.error()) {
 		return ResultError(parent_node.error());
 	}
 
-	return parent_node.value().create(parser.element(parser.count() - 1), mode, flags);
+	return parent_node.value().create(path[path.count() - 1], mode, flags);
 }
 
-Result<FSNode&> VFS::open_existing_node(const StringView& path)
+Result<FSNode&> VFS::open_existing_node(PathView path)
 {
-	PathParser parser(path);
-
-	auto node = traverse_node(parser);
+	auto node = traverse_node(path);
 	if (node.error()) {
 		return ResultError(node.error());
 	}
@@ -103,35 +99,35 @@ Result<FSNode&> VFS::open_existing_node(const StringView& path)
 	return node.value();
 }
 
-Result<FSNode&> VFS::traverse_parent_node(const PathParser& parser)
+Result<FSNode&> VFS::traverse_parent_node(PathView path)
 {
-	size_t path_elements_count = parser.count();
+	size_t path_elements_count = path.count();
 	if (path_elements_count == 0) {
 		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 	}
-	return traverse_node_deep(parser, path_elements_count - 1);
+	return traverse_node_deep(path, path_elements_count - 1);
 }
 
-Result<FSNode&> VFS::traverse_node(const PathParser& parser)
+Result<FSNode&> VFS::traverse_node(PathView path)
 {
-	size_t path_elements_count = parser.count();
+	size_t path_elements_count = path.count();
 	if (path_elements_count == 0)
 		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 
-	return traverse_node_deep(parser, path_elements_count);
+	return traverse_node_deep(path, path_elements_count);
 }
 
-Result<FSNode&> VFS::traverse_node_deep(const PathParser& parser, size_t depth)
+Result<FSNode&> VFS::traverse_node_deep(PathView path, size_t depth)
 {
 	if (fs_roots->size() == 0)
 		return ResultError(ERROR_NO_ROOT_NODE);
 
-	FSNode* current = get_root_node(parser.element(0));
+	FSNode* current = get_root_node(path[0]);
 	if (!current)
 		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 
 	for (size_t i = 1; i < depth; i++) {
-		auto next_node = current->dir_lookup(parser.element(i));
+		auto next_node = current->dir_lookup(path[i]);
 		if (next_node.is_error())
 			return ResultError(next_node.error());
 		current = &next_node.value();
@@ -149,17 +145,17 @@ FSNode* VFS::get_root_node(const StringView& root_name)
 	return nullptr;
 }
 
-PathParser VFS::traverse_path(const StringView& path)
+PathView VFS::traverse_path(PathView path)
 {
-	/*switch (PathParser::get_type(path)) {
+	/*switch (PathView::get_type(path)) {
 	    case PathType::Absolute:
-	        return PathParser(path);
+	        return PathView(path);
 	    case PathType::Relative:
 	        ASSERT_NOT_REACHABLE();
-	        return PathParser(path);
+	        return PathView(path);
 	    case PathType::RelativeRecursive:
 	        ASSERT_NOT_REACHABLE();
-	        return PathParser(path);
+	        return PathView(path);
 	}*/
-	return PathParser("");
+	return PathView("");
 }

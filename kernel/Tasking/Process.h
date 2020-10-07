@@ -5,6 +5,7 @@
 #include "WaitQueue.h"
 #include <Bitmap.h>
 #include <List.h>
+#include <PathParser2.h>
 #include <Reference.h>
 #include <Result.h>
 #include <String.h>
@@ -24,8 +25,8 @@ class Thread;
 class Process
 {
   public:
-	static Process& create_virtual_process(const StringView& name, ProcessPrivilege privilege);
-	static Process& create_new_process(const StringView& path, const StringView& argument, ProcessPrivilege privilege);
+	static Process& create_virtual_process(StringView name, ProcessPrivilege privilege);
+	static Process& create_new_process(PathView path, StringView argument, ProcessPrivilege privilege);
 	static void setup();
 	static Result<Process&> get_process_from_pid(size_t pid);
 
@@ -75,8 +76,8 @@ class Process
 	UserProcessInformationBlock* m_pib;
 	int m_return_status;
 
-	Process(const StringView& name, const StringView& path, const StringView& argument, ProcessPrivilege privilege);
-	Result<uintptr_t> load_executable(const StringView& path);
+	Process(StringView name, PathView path, StringView argument, ProcessPrivilege privilege);
+	Result<uintptr_t> load_executable(PathView path);
 	size_t reserve_pid();
 	void cleanup();
 	friend class List<Process>;

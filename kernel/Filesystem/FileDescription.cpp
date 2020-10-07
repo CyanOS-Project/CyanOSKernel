@@ -5,7 +5,7 @@
 #include <Clib.h>
 #include <ErrorCodes.h>
 
-Result<UniquePointer<FileDescription>> FileDescription::open(const StringView& path, OpenMode mode, OpenFlags flags)
+Result<UniquePointer<FileDescription>> FileDescription::open(PathView path, OpenMode mode, OpenFlags flags)
 {
 	auto node = VFS::get_node(path, mode, flags);
 	if (node.error()) {

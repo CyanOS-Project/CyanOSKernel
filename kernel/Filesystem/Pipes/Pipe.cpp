@@ -2,7 +2,6 @@
 #include "Filesystem/FileDescription.h"
 #include "Tasking/ScopedLock.h"
 #include <ErrorCodes.h>
-#include <PathParser.h>
 
 Pipe::Pipe(const StringView& name) :
     FSNode(name, 0, 0, NodeType::Pipe, BUFFER_SIZE),

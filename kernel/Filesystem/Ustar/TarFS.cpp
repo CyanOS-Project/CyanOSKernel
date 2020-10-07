@@ -41,11 +41,10 @@ void TarFS::parse_ustar(size_t size)
 	while (uintptr_t(tar_parser) < (uintptr_t(m_tar_address) + size)) {
 		if (!tar_parser->name[0])
 			break;
-		String path = regulate_path(tar_parser->name);
-		PathParser parser = PathParser(StringView(path));
+		PathView path{regulate_path(tar_parser->name)};
 
-		if (parser.count() > 1) {
-			while (directories.back()->m_name != (parser.element(parser.count() - 2)) && (directories.size() > 1)) {
+		if (path.count() > 1) {
+			while (directories.back()->m_name != (path[-2]) && (directories.size() > 1)) {
 				directories.dequeue();
 			}
 		} else {
@@ -56,7 +55,7 @@ void TarFS::parse_ustar(size_t size)
 
 		auto& new_node = add_child_node(
 		    *directories.back(),                //
-		    parser.element(parser.count() - 1), //
+		    path[-1],                           //
 		    tar_parser->typeflag,               //
 		    octal_to_decimal(tar_parser->size), //
 		    tar_parser->typeflag != USTARFileType::DIRECTORY ? reinterpret_cast<char*>(tar_parser + 1) : nullptr);

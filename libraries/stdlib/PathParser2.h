@@ -1,4 +1,5 @@
 #pragma once
+#include "String.h"
 #include "StringView.h"
 #define SPLITER '/'
 
@@ -10,12 +11,15 @@ class PathView
 	static bool is_valid(const StringView& path);
 	static PathType get_type(const StringView& path);
 
+	PathView(const String& path);
 	PathView(StringView path);
+	PathView(const char* path);
 	PathView(StringView working_dir, StringView relative_path);
 	~PathView();
 	int count() const;
 	StringView operator[](int) const;
 	PathView sub_path(int start_index, int end_index) const;
+	String full_path() const;
 
   private:
 	PathType m_type;

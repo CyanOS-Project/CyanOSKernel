@@ -3,7 +3,7 @@
 #include "FSNode.h"
 #include "Tasking/SpinLock.h"
 #include <List.h>
-#include <PathParser.h>
+#include <PathParser2.h>
 #include <Result.h>
 #include <Types.h>
 #include <UniquePointer.h>
@@ -22,18 +22,18 @@ class VFS
 	static Result<void> chown();
 	static Result<void> make_link();
 	static Result<void> remove_link();
-	static PathParser traverse_path(const StringView& path);
+	static PathView traverse_path(PathView path);
 
   private:
 	static List<UniquePointer<FSNode>>* fs_roots;
 	static Spinlock lock;
 
-	static Result<FSNode&> traverse_parent_node(const PathParser& parser);
-	static Result<FSNode&> traverse_node(const PathParser& parser);
-	static Result<FSNode&> traverse_node_deep(const PathParser& parser, size_t depth);
-	static Result<FSNode&> get_node(const StringView& path, OpenMode mode, OpenFlags flags);
-	static Result<FSNode&> create_new_node(const StringView& path, OpenMode mode, OpenFlags flags);
-	static Result<FSNode&> open_existing_node(const StringView& path);
+	static Result<FSNode&> traverse_parent_node(PathView);
+	static Result<FSNode&> traverse_node(PathView);
+	static Result<FSNode&> traverse_node_deep(PathView, size_t depth);
+	static Result<FSNode&> get_node(PathView, OpenMode mode, OpenFlags flags);
+	static Result<FSNode&> create_new_node(PathView, OpenMode mode, OpenFlags flags);
+	static Result<FSNode&> open_existing_node(PathView);
 	static FSNode* get_root_node(const StringView& root_name);
 
 	friend class FileDescription;

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FSNode.h"
+#include <PathParser2.h>
 #include <Result.h>
 #include <Rule5.h>
 #include <Types.h>
@@ -15,7 +16,7 @@ class FileDescription
 	const NodeType m_type;
 	const OpenMode m_mode;
 
-	static Result<UniquePointer<FileDescription>> open(const StringView& path, OpenMode mode, OpenFlags flags);
+	static Result<UniquePointer<FileDescription>> open(PathView path, OpenMode mode, OpenFlags flags);
 	FileDescription(FSNode& node, OpenMode mode);
 	~FileDescription();
 	Result<size_t> read(void* buff, size_t size);

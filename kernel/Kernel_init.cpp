@@ -56,6 +56,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	DeviceFS::add_device(Console::alloc("console"));
 	info() << "\bDone!";
 
+	PathView ff("/");
 	info() << "Starting the system process...";
 	Process& proc = Process::create_virtual_process("system", ProcessPrivilege::User);
 	Thread::create_init_thread(proc); // It will just continue here.
