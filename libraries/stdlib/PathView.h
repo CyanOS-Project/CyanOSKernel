@@ -18,7 +18,7 @@ class PathView
 	PathView(StringView working_dir, StringView relative_path);
 	~PathView();
 	void set_absolute_path(PathView path);
-	int count() const;
+	size_t count() const;
 	PathType type() const;
 	StringView operator[](int) const;
 	PathView sub_path(int start_index, int end_index) const;
@@ -28,11 +28,11 @@ class PathView
 	PathType m_type;
 	StringView m_absolute_path;
 	StringView m_relative_path;
-	int m_absolute_path_count;
-	int m_relative_path_count;
-	int count_elements(const StringView& path) const;
-	StringView get_element_from_full_path(const StringView& path, int index) const;
-	StringView sub_absolute_path(int start_index, int end_index) const;
-	StringView sub_relative_path(int start_index, int end_index) const;
-	StringView get_sub_path(StringView path, int start_index, int end_index) const;
+	size_t m_absolute_path_count;
+	size_t m_relative_path_count;
+	size_t count_elements(const StringView& path) const;
+	StringView get_element_from_full_path(const StringView& path, size_t index) const;
+	StringView sub_absolute_path(size_t start_index, size_t end_index) const;
+	StringView sub_relative_path(size_t start_index, size_t end_index) const;
+	StringView get_sub_path(StringView path, size_t start_index, size_t end_index) const;
 };

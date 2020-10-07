@@ -2,6 +2,8 @@
 
 uint32_t Context::setup_task_stack_context(ContextType type, ContextInformation& info)
 {
+	UNUSED(type);
+
 	InitialTaskContext* context =
 	    reinterpret_cast<InitialTaskContext*>(uintptr_t(info.stack) + info.stack_size - sizeof(InitialTaskContext));
 	context->return_address = info.return_function;

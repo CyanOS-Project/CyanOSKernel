@@ -1,5 +1,4 @@
 
-#pragma once
 #include "../Systemcalls/Systemcalls.h"
 #include "../Types.h"
 #include <stdlib.h>

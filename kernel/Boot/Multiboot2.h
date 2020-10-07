@@ -21,6 +21,9 @@
 
 #include <Types.h>
 
+#pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
+#pragma clang diagnostic ignored "-Wnested-anon-types"
+
 #ifndef MULTIBOOT_HEADER
 	#define MULTIBOOT_HEADER 1
 

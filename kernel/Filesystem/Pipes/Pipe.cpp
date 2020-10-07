@@ -20,7 +20,7 @@ Pipe::~Pipe() {}
 Result<void> Pipe::open(FileDescription& disc)
 {
 	/*if (m_readers != 0) {
-	    return ResultError(ERROR_INVALID_PARAMETERS);
+	    return ResultError(ERROR_INVALID_PARAMETER);
 	}*/
 
 	if (disc.m_mode == OpenMode::OM_READ) {
@@ -28,7 +28,7 @@ Result<void> Pipe::open(FileDescription& disc)
 	} else if (disc.m_mode == OpenMode::OM_WRITE) {
 		m_writers++;
 	} else {
-		return ResultError(ERROR_INVALID_PARAMETERS);
+		return ResultError(ERROR_INVALID_PARAMETER);
 	}
 
 	return ResultError(ERROR_SUCCESS);

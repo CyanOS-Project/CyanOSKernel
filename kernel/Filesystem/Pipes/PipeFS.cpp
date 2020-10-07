@@ -38,7 +38,7 @@ Result<StringView> PipeFS::dir_query(size_t index)
 {
 	ScopedLock local_lock(m_lock);
 	if (index >= m_children.size())
-		return ResultError(ERROR_INVALID_PARAMETERS);
+		return ResultError(ERROR_INVALID_PARAMETER);
 
 	// FIXME: it's not efficeint way to iterate them all again;
 	auto itr = m_children.begin();

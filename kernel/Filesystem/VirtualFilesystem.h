@@ -28,9 +28,7 @@ class VFS
 	static List<UniquePointer<FSNode>>* fs_roots;
 	static Spinlock lock;
 
-	static Result<FSNode&> traverse_parent_node(PathView);
 	static Result<FSNode&> traverse_node(PathView);
-	static Result<FSNode&> traverse_node_deep(PathView, size_t depth);
 	static Result<FSNode&> get_node(PathView, OpenMode mode, OpenFlags flags);
 	static Result<FSNode&> create_new_node(PathView, OpenMode mode, OpenFlags flags);
 	static Result<FSNode&> open_existing_node(PathView);

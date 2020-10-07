@@ -22,7 +22,7 @@ Result<UniquePointer<FileDescription>> FileDescription::open(PathView path, Open
 	return description;
 }
 
-FileDescription::FileDescription(FSNode& node, OpenMode mode) : m_node(node), m_type{node.m_type}, m_mode{mode} {}
+FileDescription::FileDescription(FSNode& node, OpenMode mode) : m_type{node.m_type}, m_mode{mode}, m_node(node) {}
 
 FileDescription::~FileDescription()
 {
@@ -120,10 +120,10 @@ Result<FileInfo> FileDescription::fstat()
 
 Result<void> FileDescription::ioctl()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return ResultError(ERROR_INVALID_PARAMETER);
 }
 
 Result<void> FileDescription::mmap()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return ResultError(ERROR_INVALID_PARAMETER);
 }

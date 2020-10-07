@@ -63,6 +63,10 @@ void SystemCall::systemcall_handler(ISRContextFrame& frame)
 
 Result<int> OpenFile(const char* path, int mode, int flags)
 {
+	if (PathView::is_valid(path) == false) {
+		return ResultError(ERROR_INVALID_PARAMETER);
+	}
+
 	auto file_description = FileDescription::open(path, static_cast<OpenMode>(mode), static_cast<OpenFlags>(flags));
 	if (file_description.is_error()) {
 		return ResultError(file_description.error());
@@ -114,7 +118,7 @@ Result<int> QueryDirectory(Handle handle, DirectoryInfo* info)
 Result<int> QueryFileInformation(Handle handle, FileInfo* info)
 {
 	if (!info)
-		return ResultError(ERROR_INVALID_PARAMETERS);
+		return ResultError(ERROR_INVALID_PARAMETER);
 
 	if (Thread::current->parent_process().handles().check_handle(handle) != HandleType::FileDescription)
 		return ResultError(ERROR_INVALID_HANDLE);

@@ -31,42 +31,42 @@ Result<void> VFS::mount(UniquePointer<FSNode>&& new_fs_root)
 
 Result<void> VFS::unmount()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return ResultError(ERROR_INVALID_PARAMETER);
 }
 
 Result<void> VFS::remove()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return ResultError(ERROR_INVALID_PARAMETER);
 }
 
 Result<void> VFS::make_directory()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return ResultError(ERROR_INVALID_PARAMETER);
 }
 
 Result<void> VFS::remove_directory()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return ResultError(ERROR_INVALID_PARAMETER);
 }
 
 Result<void> VFS::rename()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return ResultError(ERROR_INVALID_PARAMETER);
 }
 
 Result<void> VFS::chown()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return ResultError(ERROR_INVALID_PARAMETER);
 }
 
 Result<void> VFS::make_link()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return ResultError(ERROR_INVALID_PARAMETER);
 }
 
 Result<void> VFS::remove_link()
 {
-	return ResultError(ERROR_INVALID_PARAMETERS);
+	return ResultError(ERROR_INVALID_PARAMETER);
 }
 
 Result<FSNode&> VFS::get_node(PathView path, OpenMode mode, OpenFlags flags)
@@ -76,13 +76,13 @@ Result<FSNode&> VFS::get_node(PathView path, OpenMode mode, OpenFlags flags)
 	} else if (flags == OpenFlags::OF_OPEN_EXISTING) {
 		return open_existing_node(path);
 	} else {
-		return ResultError(ERROR_INVALID_PARAMETERS);
+		return ResultError(ERROR_INVALID_PARAMETER);
 	}
 }
 
 Result<FSNode&> VFS::create_new_node(PathView path, OpenMode mode, OpenFlags flags)
 {
-	auto parent_node = traverse_parent_node(path);
+	auto parent_node = traverse_node(path.sub_path(0, -2));
 	if (parent_node.error()) {
 		return ResultError(parent_node.error());
 	}
@@ -100,32 +100,16 @@ Result<FSNode&> VFS::open_existing_node(PathView path)
 	return node.value();
 }
 
-Result<FSNode&> VFS::traverse_parent_node(PathView path)
-{
-	if (path.type() == PathType::Relative || path.type() == PathType::RelativeRecursive) {
-		path.set_absolute_path(PathView(Thread::current->parent_process().path()).sub_path(0, -2));
-	}
-	size_t path_elements_count = path.count();
-	if (path_elements_count == 0) {
-		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
-	}
-	return traverse_node_deep(path, path_elements_count - 1);
-}
-
 Result<FSNode&> VFS::traverse_node(PathView path)
 {
 	if (path.type() == PathType::Relative || path.type() == PathType::RelativeRecursive) {
 		path.set_absolute_path(PathView(Thread::current->parent_process().path()).sub_path(0, -2));
 	}
+
 	size_t path_elements_count = path.count();
 	if (path_elements_count == 0)
 		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 
-	return traverse_node_deep(path, path_elements_count);
-}
-
-Result<FSNode&> VFS::traverse_node_deep(PathView path, size_t depth)
-{
 	if (fs_roots->size() == 0)
 		return ResultError(ERROR_NO_ROOT_NODE);
 
@@ -133,7 +117,7 @@ Result<FSNode&> VFS::traverse_node_deep(PathView path, size_t depth)
 	if (!current)
 		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 
-	for (size_t i = 1; i < depth; i++) {
+	for (size_t i = 1; i < path.count(); i++) {
 		auto next_node = current->dir_lookup(path[i]);
 		if (next_node.is_error())
 			return ResultError(next_node.error());
@@ -150,19 +134,4 @@ FSNode* VFS::get_root_node(const StringView& root_name)
 		}
 	}
 	return nullptr;
-}
-
-PathView VFS::traverse_path(PathView path)
-{
-	/*switch (PathView::get_type(path)) {
-	    case PathType::Absolute:
-	        return PathView(path);
-	    case PathType::Relative:
-	        ASSERT_NOT_REACHABLE();
-	        return PathView(path);
-	    case PathType::RelativeRecursive:
-	        ASSERT_NOT_REACHABLE();
-	        return PathView(path);
-	}*/
-	return path;
 }

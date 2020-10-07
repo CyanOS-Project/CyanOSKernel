@@ -5,7 +5,7 @@
 #define ERROR_FILE_DOES_NOT_EXIST   2
 #define ERROR_MOUNTPOINT_EXISTS     3
 #define ERROR_EOF                   4
-#define ERROR_INVALID_PARAMETERS    5
+#define ERROR_INVALID_PARAMETER     5
 #define ERROR_INVALID_EXECUTABLE    6
 #define ERROR_LOADING_EXECUTABLE    7
 #define ERROR_NO_ROOT_NODE          8

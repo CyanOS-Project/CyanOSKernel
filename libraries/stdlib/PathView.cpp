@@ -45,7 +45,7 @@ void PathView::set_absolute_path(PathView path)
 	m_absolute_path_count = path.m_absolute_path_count;
 }
 
-int PathView::count() const
+size_t PathView::count() const
 {
 	return m_relative_path_count + m_absolute_path_count;
 }
@@ -57,13 +57,13 @@ PathType PathView::type() const
 
 StringView PathView::operator[](int index) const
 {
-	ASSERT(index < count());
-	ASSERT(index > -count() - 1);
+	ASSERT(index < int(count()));
+	ASSERT(index > -int(count()) - 1);
 	if (index < 0) {
 		index = count() + index;
 	}
 
-	if (index < m_absolute_path_count) {
+	if (index < int(m_absolute_path_count)) {
 		return get_element_from_full_path(m_absolute_path, index);
 	} else {
 		return get_element_from_full_path(m_relative_path, index - m_absolute_path_count);
@@ -72,8 +72,8 @@ StringView PathView::operator[](int index) const
 
 PathView PathView::sub_path(int start_index, int end_index) const
 {
-	ASSERT((start_index < count()) && (start_index > -count() - 1));
-	ASSERT((end_index < count()) && (end_index > -count() - 1));
+	ASSERT((start_index < int(count())) && (start_index > -int(count()) - 1));
+	ASSERT((end_index < int(count())) && (end_index > -int(count()) - 1));
 
 	if (start_index < 0) {
 		start_index = count() + start_index;
@@ -130,7 +130,7 @@ PathType PathView::get_type(const StringView& path)
 	}
 }
 
-StringView PathView::get_element_from_full_path(const StringView& path, int index) const
+StringView PathView::get_element_from_full_path(const StringView& path, size_t index) const
 {
 	int pos = 0;
 	if (path[0] == SPLITER) {
@@ -154,7 +154,7 @@ StringView PathView::get_element_from_full_path(const StringView& path, int inde
 	return path.substr(pos, len);
 }
 
-StringView PathView::sub_absolute_path(int start_index, int end_index) const
+StringView PathView::sub_absolute_path(size_t start_index, size_t end_index) const
 {
 	if (start_index >= m_absolute_path_count) {
 		return "";
@@ -178,7 +178,7 @@ StringView PathView::sub_absolute_path(int start_index, int end_index) const
 	}
 }
 
-StringView PathView::sub_relative_path(int start_index, int end_index) const
+StringView PathView::sub_relative_path(size_t start_index, size_t end_index) const
 {
 	if (end_index < m_absolute_path_count) {
 		return "";
@@ -209,7 +209,7 @@ StringView PathView::sub_relative_path(int start_index, int end_index) const
 	}
 }
 
-int PathView::count_elements(const StringView& path) const
+size_t PathView::count_elements(const StringView& path) const
 {
 	if (path[0] == SPLITER && path.length() == 1) {
 		return 0;
