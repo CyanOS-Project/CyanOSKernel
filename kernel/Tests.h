@@ -10,7 +10,7 @@
 #include "VirtualMemory/Memory.h"
 #include <ArgumentParser.h>
 #include <Bitmap.h>
-#include <PathParser2.h>
+#include <PathView.h>
 
 Semaphore* sem_lock;
 void test_semaphore_thread2(uintptr_t arg)
@@ -263,17 +263,10 @@ void test_tid2(uintptr_t arg)
 
 void pathparser_test(uintptr_t arg)
 {
-	PathView parser("/drivers/test", "bin/test2");
-	warn() << parser.count();
-	warn() << parser[-1];
-	warn() << parser[0];
-	warn() << parser[1];
-	warn() << parser[2];
-	warn() << parser[3];
+	UNUSED(arg);
+	PathView app_path("/drivers/folder1/folder2/folder3/myapp");
 
-	PathView new_path = parser.sub_path(1, 3);
-	warn() << new_path.count();
-	warn() << new_path[0];
-	warn() << new_path[1];
-	warn() << new_path[2];
+	PathView new_path("test2/test3.exe");
+	new_path.set_absolute_path(app_path.sub_path(0, -2));
+	warn() << new_path.full_path();
 }

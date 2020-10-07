@@ -1,5 +1,6 @@
 #include "VirtualFilesystem.h"
 #include "Arch/x86/Panic.h"
+#include "Tasking/Process.h"
 #include "Tasking/ScopedLock.h"
 #include "Tasking/Thread.h"
 #include <Assert.h>
@@ -101,6 +102,9 @@ Result<FSNode&> VFS::open_existing_node(PathView path)
 
 Result<FSNode&> VFS::traverse_parent_node(PathView path)
 {
+	if (path.type() == PathType::Relative || path.type() == PathType::RelativeRecursive) {
+		path.set_absolute_path(PathView(Thread::current->parent_process().path()).sub_path(0, -2));
+	}
 	size_t path_elements_count = path.count();
 	if (path_elements_count == 0) {
 		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
@@ -110,6 +114,9 @@ Result<FSNode&> VFS::traverse_parent_node(PathView path)
 
 Result<FSNode&> VFS::traverse_node(PathView path)
 {
+	if (path.type() == PathType::Relative || path.type() == PathType::RelativeRecursive) {
+		path.set_absolute_path(PathView(Thread::current->parent_process().path()).sub_path(0, -2));
+	}
 	size_t path_elements_count = path.count();
 	if (path_elements_count == 0)
 		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
@@ -157,5 +164,5 @@ PathView VFS::traverse_path(PathView path)
 	        ASSERT_NOT_REACHABLE();
 	        return PathView(path);
 	}*/
-	return PathView("");
+	return path;
 }

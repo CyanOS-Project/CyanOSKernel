@@ -1,4 +1,4 @@
-#include "PathParser2.h"
+#include "PathView.h"
 #ifdef __UNIT_TESTS
 	#include <assert.h>
 	#include <stdio.h>
@@ -35,9 +35,24 @@ PathView::PathView(StringView working_dir, StringView relative_path) :
 
 PathView::~PathView() {}
 
+void PathView::set_absolute_path(PathView path)
+{
+	ASSERT(m_type != PathType::Absolute);
+	ASSERT(path.m_type == PathType::Absolute);
+	ASSERT(path.m_absolute_path_count > 0);
+	ASSERT(path.m_relative_path_count == 0);
+	m_absolute_path = path.m_absolute_path;
+	m_absolute_path_count = path.m_absolute_path_count;
+}
+
 int PathView::count() const
 {
 	return m_relative_path_count + m_absolute_path_count;
+}
+
+PathType PathView::type() const
+{
+	return m_type;
 }
 
 StringView PathView::operator[](int index) const
@@ -84,7 +99,10 @@ PathView PathView::sub_path(int start_index, int end_index) const
 String PathView::full_path() const
 {
 	String full_path_str(m_absolute_path);
-	full_path_str += m_relative_path;
+	if (m_relative_path_count) {
+		full_path_str += "/";
+		full_path_str += m_relative_path;
+	}
 	return full_path_str;
 }
 
@@ -203,7 +221,7 @@ int PathView::count_elements(const StringView& path) const
 	}
 
 	int count = 0;
-	while ((last_found = path.find(SPLITER, last_found)) != StringView::NOT_FOUND && ++last_found) {
+	while ((last_found = path.find(SPLITER, last_found)) != int(StringView::NOT_FOUND) && ++last_found) {
 		++count;
 	}
 

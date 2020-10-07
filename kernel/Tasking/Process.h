@@ -5,7 +5,7 @@
 #include "WaitQueue.h"
 #include <Bitmap.h>
 #include <List.h>
-#include <PathParser2.h>
+#include <PathView.h>
 #include <Reference.h>
 #include <Result.h>
 #include <String.h>
