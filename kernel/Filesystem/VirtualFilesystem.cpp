@@ -69,6 +69,20 @@ Result<void> VFS::remove_link()
 	return ResultError(ERROR_INVALID_PARAMETER);
 }
 
+bool VFS::check_exitsts(PathView path)
+{
+	auto node = get_node(path, OM_READ, OF_OPEN_EXISTING);
+	return !node.is_error();
+}
+
+PathView VFS::resolve_path(PathView path)
+{
+	if (path.type() == PathType::Relative || path.type() == PathType::RelativeRecursive) {
+		path.set_absolute_path(PathView(Thread::current->parent_process().path()).sub_path(0, -2));
+	}
+	return path;
+}
+
 Result<FSNode&> VFS::get_node(PathView path, OpenMode mode, OpenFlags flags)
 {
 	if (flags == OpenFlags::OF_CREATE_NEW) {
@@ -102,9 +116,7 @@ Result<FSNode&> VFS::open_existing_node(PathView path)
 
 Result<FSNode&> VFS::traverse_node(PathView path)
 {
-	if (path.type() == PathType::Relative || path.type() == PathType::RelativeRecursive) {
-		path.set_absolute_path(PathView(Thread::current->parent_process().path()).sub_path(0, -2));
-	}
+	path = resolve_path(path);
 
 	size_t path_elements_count = path.count();
 	if (path_elements_count == 0)

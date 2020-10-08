@@ -1,9 +1,12 @@
 #include <ArgumentParser.h>
 #include <Clib.h>
 #include <ErrorCodes.h>
+#include <PathView.h>
 #include <systemlib/Systemcalls/Systemcalls.h>
 #include <systemlib/Types.h>
 #include <systemlib/iostream/iostream.h>
+
+static const char* bin_dir = "/Tar/UserBinary";
 
 void execute_command(char* command)
 {
@@ -17,17 +20,16 @@ void execute_command(char* command)
 		args = arguments[1].data();
 	}
 
-	if (arguments[0] == "TestApp") {
-		Handle child = CreateProcess("/Tar/UserBinary/TestApp", args, 0);
-		WaitSignal(child, 0);
-		CloseHandle(child);
-	} else if (arguments[0] == "cat") {
-		Handle child = CreateProcess("/Tar/UserBinary/cat", args, 0);
-		WaitSignal(child, 0);
-		CloseHandle(child);
-	} else {
-		printf("Undefined command."); // TODO: do some cute error messages here.
+	Handle child = CreateProcess(arguments[0].data(), args, 0);
+	if (!child) {
+		child = CreateProcess(PathView(bin_dir, arguments[0]).full_path().c_str(), args, 0);
+		if (!child) {
+			printf("Undefined command.");
+			return;
+		}
 	}
+	WaitSignal(child, 0);
+	CloseHandle(child);
 }
 
 int main(int argc, const char* argv[])

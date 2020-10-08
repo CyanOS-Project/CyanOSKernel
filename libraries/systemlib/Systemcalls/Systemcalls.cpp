@@ -1,5 +1,7 @@
 #include "Systemcalls.h"
 
+// APIs that use systemcalls
+
 Handle OpenFile(const char* path, int mode, int flags)
 {
 	return syscall3(0, size_t(path), size_t(mode), size_t(flags));
@@ -78,6 +80,13 @@ void VirtualFree(void* address, size_t size)
 void QueryFileInformation(Handle handle, FileInfo* info)
 {
 	syscall2(15, size_t(handle), size_t(info));
+}
+
+// Helper functions
+
+Handle GetCurrentProcess()
+{
+	return Handle(-1);
 }
 
 int GetLastError()

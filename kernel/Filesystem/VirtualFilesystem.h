@@ -22,7 +22,8 @@ class VFS
 	static Result<void> chown();
 	static Result<void> make_link();
 	static Result<void> remove_link();
-	static PathView traverse_path(PathView path);
+	static bool check_exitsts(PathView path);
+	static PathView resolve_path(PathView path);
 
   private:
 	static List<UniquePointer<FSNode>>* fs_roots;

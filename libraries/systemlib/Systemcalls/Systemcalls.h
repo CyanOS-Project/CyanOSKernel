@@ -15,6 +15,7 @@ void Yield();
 Handle CreateThread(Handle handle, void* address, int arg);
 Handle CreateProcess(const char* path, const char* argument, int flags);
 Handle OpenProcess(size_t pid, int access);
+Handle GetCurrentProcess();
 void TerminateProcess(Handle handle, int status);
 void TerminateThread(Handle handle, int status);
 void WaitSignal(Handle handle, int signal);

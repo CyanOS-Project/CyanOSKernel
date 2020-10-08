@@ -154,7 +154,13 @@ Result<int> CreateThread(Handle process, void* address, int arg)
 Result<int> CreateProcess(const char* path, const char* argument, int flags)
 {
 	UNUSED(flags);
+	if (PathView::is_valid(path) == false) {
+		return ResultError(ERROR_INVALID_PARAMETER);
+	}
 
+	if (VFS::check_exitsts(path) == false) {
+		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
+	}
 	auto& process = Process::create_new_process(path, (argument == nullptr ? "" : argument), ProcessPrivilege::User);
 
 	auto fp = OpenProcess(process.pid(), 0);
