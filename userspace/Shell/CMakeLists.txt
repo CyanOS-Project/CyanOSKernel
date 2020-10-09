@@ -1,1 +1,1 @@
-generate_user_bin("Shell"  "systemlib")
+generate_user_bin("shell"  "systemlib")

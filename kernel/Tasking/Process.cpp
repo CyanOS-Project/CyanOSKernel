@@ -28,8 +28,7 @@ Process& Process::create_virtual_process(StringView name, ProcessPrivilege privi
 Process& Process::create_new_process(PathView path, StringView argument, ProcessPrivilege privilege)
 {
 	ScopedLock local_lock(global_lock);
-
-	auto& pcb = processes->emplace_back(path[-1], VFS::resolve_path(path), argument, privilege);
+	auto& pcb = processes->emplace_back(path[-1], path, argument, privilege);
 	Thread::create_thread(pcb, initiate_process, uintptr_t(&pcb), ThreadPrivilege::Kernel);
 	return pcb;
 }
@@ -92,13 +91,13 @@ size_t Process::pid()
 	return m_pid;
 }
 
-String Process::name()
+const String& Process::name()
 {
 	ScopedLock local_lock(m_lock);
 	return m_name;
 }
 
-String Process::path()
+const String& Process::path()
 {
 	ScopedLock local_lock(m_lock);
 	return m_path;
@@ -211,7 +210,6 @@ Result<uintptr_t> Process::load_executable(PathView path)
 
 	auto fd = FileDescription::open(path, OpenMode::OM_READ, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
-		warn() << "error opening the executable file, error: " << fd.error();
 		return ResultError(fd.error());
 	}
 	auto file_info = fd.value()->fstat();
@@ -237,7 +235,7 @@ void Process::initiate_process(uintptr_t __pcb)
 
 	auto&& executable_entrypoint = pcb->load_executable(pcb->m_path);
 	if (executable_entrypoint.is_error()) {
-		warn() << "couldn't load the process, error: " << executable_entrypoint.error();
+		warn() << "couldn't load the process: \"" << pcb->m_path << "\" error: " << executable_entrypoint.error();
 		pcb->terminate(executable_entrypoint.error());
 		return;
 	}

@@ -67,7 +67,13 @@ Result<int> OpenFile(const char* path, int mode, int flags)
 		return ResultError(ERROR_INVALID_PARAMETER);
 	}
 
-	auto file_description = FileDescription::open(path, static_cast<OpenMode>(mode), static_cast<OpenFlags>(flags));
+	PathView absolute_path = VFS::resolve_path(path);
+	if (VFS::check_exitsts(absolute_path) == false) {
+		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
+	}
+
+	auto file_description =
+	    FileDescription::open(absolute_path, static_cast<OpenMode>(mode), static_cast<OpenFlags>(flags));
 	if (file_description.is_error()) {
 		return ResultError(file_description.error());
 	}
@@ -154,14 +160,17 @@ Result<int> CreateThread(Handle process, void* address, int arg)
 Result<int> CreateProcess(const char* path, const char* argument, int flags)
 {
 	UNUSED(flags);
+
 	if (PathView::is_valid(path) == false) {
 		return ResultError(ERROR_INVALID_PARAMETER);
 	}
 
-	if (VFS::check_exitsts(path) == false) {
+	PathView absolute_path = VFS::resolve_path(path);
+	if (VFS::check_exitsts(absolute_path) == false) {
 		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 	}
-	auto& process = Process::create_new_process(path, (argument == nullptr ? "" : argument), ProcessPrivilege::User);
+	auto& process =
+	    Process::create_new_process(absolute_path, (argument == nullptr ? "" : argument), ProcessPrivilege::User);
 
 	auto fp = OpenProcess(process.pid(), 0);
 	ASSERT(!fp.is_error());

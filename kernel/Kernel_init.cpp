@@ -45,10 +45,10 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 
 	info() << "Setting up file systems... ";
 	VFS::setup();
-	VFS::mount(TarFS::alloc("Tar", reinterpret_cast<void*>(boot_info->ramdisk.start), boot_info->ramdisk.size));
-	VFS::mount(PipeFS::alloc("Pipes"));
-	VFS::mount(DeviceFS::alloc("Devices"));
-	VFS::mount(SocketFS::alloc("Sockets"));
+	VFS::mount(TarFS::alloc("tar", reinterpret_cast<void*>(boot_info->ramdisk.start), boot_info->ramdisk.size));
+	VFS::mount(PipeFS::alloc("pipes"));
+	VFS::mount(DeviceFS::alloc("devices"));
+	VFS::mount(SocketFS::alloc("sockets"));
 	info() << "\bDone!";
 
 	info() << "Setting up devices... ";
@@ -65,12 +65,8 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	info() << "\bDone!";
 
 	info() << "CyanOS is ready!";
-	Process::create_new_process("/Tar/UserBinary/Shell", "", ProcessPrivilege::User);
+	Process::create_new_process("/tar/bin/shell", "", ProcessPrivilege::User);
 
-	// Thread::create_thread(proc, test_argument, 0, ThreadPrivilege::Kernel);
-	// Thread::create_thread(proc2, test_server, 0, ThreadPrivilege::Kernel);
-	// Thread::create_thread(proc2, test_client, 0, ThreadPrivilege::Kernel);
-	// Thread::create_thread(proc2, test_ls, 0, ThreadPrivilege::Kernel);
 	ENABLE_INTERRUPTS();
 	Thread::yield();
 	while (true) {

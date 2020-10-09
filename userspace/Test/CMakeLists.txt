@@ -1,1 +1,1 @@
-generate_user_bin("TestApp"  "systemlib")
+generate_user_bin("tests"  "systemlib")

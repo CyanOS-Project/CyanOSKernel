@@ -31,8 +31,8 @@ class Process
 	static Result<Process&> get_process_from_pid(size_t pid);
 
 	size_t pid();
-	String name();
-	String path();
+	const String& name();
+	const String& path();
 	ProcessPrivilege privilege_level();
 	uintptr_t page_directory();
 	Process const* parent();

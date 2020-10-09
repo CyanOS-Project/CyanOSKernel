@@ -116,8 +116,6 @@ Result<FSNode&> VFS::open_existing_node(PathView path)
 
 Result<FSNode&> VFS::traverse_node(PathView path)
 {
-	path = resolve_path(path);
-
 	size_t path_elements_count = path.count();
 	if (path_elements_count == 0)
 		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
