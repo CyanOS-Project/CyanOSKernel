@@ -1,3 +1,4 @@
+#include "String.h"
 #include <ArgumentParser.h>
 #include <Clib.h>
 #include <ErrorCodes.h>
@@ -6,15 +7,39 @@
 #include <systemlib/Types.h>
 #include <systemlib/iostream/iostream.h>
 
-static const char* bin_dir = "/Tar/UserBinary";
+static String* working_directory;
 
-void execute_command(char* command)
+enum class InternalCommands { cd, cwd, Invalid };
+
+InternalCommands parse_internal_command(const ArgumentParser& arguments)
 {
-	ArgumentParser arguments(command);
-	if (arguments.count() == 0) {
-		return;
+	if (arguments[0] == "cd") {
+		return InternalCommands::cd;
+	} else if (arguments[0] == "cwd") {
+		return InternalCommands::cwd;
+	} else {
+		return InternalCommands::Invalid;
 	}
-
+}
+void execute_internal_command(InternalCommands type, const ArgumentParser& arguments)
+{
+	switch (type) {
+		case InternalCommands::cd:
+			if (arguments.count() > 1) {
+				*working_directory = arguments[1];
+			} else {
+				printf("you need to specify a path.\n");
+			}
+			break;
+		case InternalCommands::cwd:
+			printf(working_directory->c_str());
+			break;
+		default:
+			break;
+	}
+}
+void execute_external_command(const ArgumentParser& arguments)
+{
 	const char* args = nullptr;
 	if (arguments.count() > 1) {
 		args = arguments[1].data();
@@ -22,7 +47,7 @@ void execute_command(char* command)
 
 	Handle child = CreateProcess(arguments[0].data(), args, 0);
 	if (!child) {
-		child = CreateProcess(PathView(bin_dir, arguments[0]).full_path().c_str(), args, 0);
+		child = CreateProcess(PathView(working_directory->c_str(), arguments[0]).full_path().c_str(), args, 0);
 		if (!child) {
 			printf("Undefined command.");
 			return;
@@ -32,8 +57,23 @@ void execute_command(char* command)
 	CloseHandle(child);
 }
 
+void execute_command(char* command)
+{
+	ArgumentParser arguments(command);
+	if (arguments.count() == 0) {
+		return;
+	}
+	InternalCommands com;
+	if ((com = parse_internal_command(arguments)) != InternalCommands::Invalid) {
+		execute_internal_command(com, arguments);
+	} else {
+		execute_external_command(arguments);
+	}
+}
+
 int main(int argc, const char* argv[])
 {
+	working_directory = new String("/Tar/UserBinary");
 	printf("Welcome To CyanOS\n");
 	printf("Version 0.1 Alpha\n");
 	printf("$> ");
