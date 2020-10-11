@@ -106,7 +106,7 @@ Result<FSNode&> TarFS::dir_lookup(const StringView& file_name)
 	return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 }
 
-Result<StringView> TarFS::dir_query(size_t index)
+Result<FSNode&> TarFS::dir_query(size_t index)
 {
 	ScopedLock local_lock(m_lock);
 	if (index >= m_children.size())
@@ -117,5 +117,5 @@ Result<StringView> TarFS::dir_query(size_t index)
 	while (index--) {
 		itr++;
 	}
-	return StringView(itr->m_name);
+	return *itr;
 }

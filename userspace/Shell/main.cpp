@@ -130,7 +130,15 @@ void command_cd(const ArgumentParser& arguments)
 		if (GetLastError()) {
 			printf("Cannot access this directory.\n");
 		} else {
-			*working_directory = new_path;
+			FileInfo info;
+			QueryFileInformation(dummy, &info);
+			if (GetLastError()) {
+				printf("Cannot access this directory.\n");
+			} else if (info.type != NodeType::Folder && info.type != NodeType::Root) {
+				printf("Path is not direcotry.\n");
+			} else {
+				*working_directory = new_path;
+			}
 			CloseHandle(dummy);
 		}
 	} else {

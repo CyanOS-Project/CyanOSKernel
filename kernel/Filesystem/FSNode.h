@@ -7,8 +7,6 @@
 #include <StringView.h>
 #include <Types.h>
 
-enum class NodeType { Root, Folder, File, Pipe, Link, Device, Socket, Connection };
-
 class VirtualFileSystem;
 class FileDescription;
 
@@ -64,6 +62,6 @@ class FSNode
 	{
 		return ResultError(ERROR_INVALID_OPERATION);
 	}
-	virtual Result<StringView> dir_query(UNUSEDARG size_t index) { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual Result<FSNode&> dir_query(UNUSEDARG size_t index) { return ResultError(ERROR_INVALID_OPERATION); }
 	friend class VFS;
 };

@@ -15,7 +15,7 @@ class DeviceFS : public FSNode
 
 	~DeviceFS();
 	Result<FSNode&> dir_lookup(const StringView& file_name) override;
-	Result<StringView> dir_query(size_t index) override;
+	Result<FSNode&> dir_query(size_t index) override;
 
   private:
 	// static Spinlock m_lock;

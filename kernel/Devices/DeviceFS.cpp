@@ -53,7 +53,7 @@ Result<FSNode&> DeviceFS::dir_lookup(const StringView& file_name)
 	return ResultError(ERROR_DEVICE_DOESNOT_EXIST);
 }
 
-Result<StringView> DeviceFS::dir_query(size_t index)
+Result<FSNode&> DeviceFS::dir_query(size_t index)
 {
 	UNUSED(index);
 	// ScopedLock local_lock(m_lock);

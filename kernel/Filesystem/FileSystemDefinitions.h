@@ -6,6 +6,7 @@
 #define MAX_PATH_SIZE 512
 #define MAX_ARG_SIZE  512
 
+enum class NodeType { Root, Folder, File, Pipe, Link, Device, Socket, Connection };
 enum OpenFlags {
 	OF_OPEN_EXISTING = MASKABLE_PRAM(0),
 	OF_CREATE_NEW = MASKABLE_PRAM(1),
@@ -20,8 +21,10 @@ enum OpenMode {
 enum class SeekOrigin { SET, CURRENT, END };
 struct FileInfo {
 	size_t size;
+	NodeType type;
 };
 
 struct DirectoryInfo {
 	char file_name[MAX_FILE_NAME];
+	NodeType type;
 };

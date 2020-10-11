@@ -102,12 +102,13 @@ Result<void> FileDescription::seek(int offset, SeekOrigin origin)
 
 Result<void> FileDescription::dir_query(DirectoryInfo* info)
 {
-	auto file_name = m_node.dir_query(m_current_position);
-	if (file_name.is_error())
-		return ResultError(file_name.error());
+	auto node = m_node.dir_query(m_current_position);
+	if (node.is_error())
+		return ResultError(node.error());
 
-	memcpy(info->file_name, file_name.value().data(), file_name.value().length());
-	info->file_name[file_name.value().length()] = 0;
+	memcpy(info->file_name, node.value().m_name.c_str(), node.value().m_name.length());
+	info->file_name[node.value().m_name.length()] = 0;
+	info->type = node.value().m_type;
 	m_current_position++;
 
 	return ResultError(ERROR_SUCCESS);
@@ -115,7 +116,7 @@ Result<void> FileDescription::dir_query(DirectoryInfo* info)
 
 Result<FileInfo> FileDescription::fstat()
 {
-	return FileInfo{m_node.m_size};
+	return FileInfo{m_node.m_size, m_node.m_type};
 }
 
 Result<void> FileDescription::ioctl()

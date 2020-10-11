@@ -48,7 +48,7 @@ class TarFS : public INode
 	static UniquePointer<FSNode> alloc(const StringView& name, void* tar_address, size_t size);
 	Result<void> open(UNUSEDARG FileDescription&) override;
 	Result<FSNode&> dir_lookup(const StringView& file_name) override;
-	Result<StringView> dir_query(UNUSEDARG size_t index) override;
+	Result<FSNode&> dir_query(UNUSEDARG size_t index) override;
 	~TarFS() override;
 
   private:
