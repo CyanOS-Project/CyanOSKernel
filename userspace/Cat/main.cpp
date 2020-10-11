@@ -13,14 +13,14 @@ int main(int argc, const char* argv[])
 
 	Handle fd = OpenFile(argv[2], OM_WRITE | OM_READ, OF_OPEN_EXISTING);
 	if ((result = GetLastError())) {
-		printf("Cannot open the file.");
+		printf("Cannot open the file.\n");
 		return result;
 	}
 
 	FileInfo info;
 	QueryFileInformation(fd, &info);
 	if ((result = GetLastError())) {
-		printf("Cannot read the file.");
+		printf("Cannot read the file.\n");
 		CloseHandle(fd);
 		return result;
 	}
@@ -29,13 +29,13 @@ int main(int argc, const char* argv[])
 	memset(buff, 0, info.size + 1);
 	ReadFile(fd, buff, info.size);
 	if ((result = GetLastError())) {
-		printf("Cannot read the file.");
+		printf("Cannot read the file.\n");
 		CloseHandle(fd);
 		return result;
 	}
 
 	printf(buff);
-
+	printf("\n");
 	delete[] buff;
 	CloseHandle(fd);
 

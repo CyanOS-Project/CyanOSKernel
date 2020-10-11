@@ -17,7 +17,7 @@ size_t WriteFile(Handle handle, const void* buff, size_t count)
 	return syscall3(2, size_t(handle), size_t(buff), size_t(count));
 }
 
-void QueryDirectory(Handle handle, void* info)
+void QueryDirectory(Handle handle, DirectoryInfo* info)
 {
 	syscall2(3, size_t(handle), size_t(info));
 }
