@@ -110,39 +110,40 @@ void execute_external_command(const ArgumentParser& arguments)
 
 void command_cd(const ArgumentParser& arguments)
 {
-	if (arguments.count() > 1) {
-		String new_path = [&]() {
-			if (arguments[1] == ".." || arguments[1] == "-") {
-				auto cwd_view = PathView(*working_directory);
-				if (cwd_view.count() > 1) {
-					return *working_directory;
-				} else {
-					return cwd_view.sub_path(0, -2).full_path();
-				}
-			} else if (PathView::get_type(arguments[1]) == PathType::Relative) {
-				return PathView(*working_directory, arguments[1].data()).full_path();
-			} else {
-				return String(arguments[1]);
-			}
-		}();
+	if (arguments.count() < 2) {
+		printf("You need to specify a path.\n");
+		return;
+	}
 
-		Handle dummy = OpenFile(new_path.c_str(), OM_READ, OF_OPEN_EXISTING);
+	String new_path = [&]() {
+		if (arguments[1] == ".." || arguments[1] == "-") {
+			auto cwd_view = PathView(*working_directory);
+			if (cwd_view.count() > 1) {
+				return *working_directory;
+			} else {
+				return cwd_view.sub_path(0, -2).full_path();
+			}
+		} else if (PathView::get_type(arguments[1]) == PathType::Relative) {
+			return PathView(*working_directory, arguments[1].data()).full_path();
+		} else {
+			return String(arguments[1]);
+		}
+	}();
+
+	Handle dummy = OpenFile(new_path.c_str(), OM_READ, OF_OPEN_EXISTING);
+	if (GetLastError()) {
+		printf("Cannot access this directory.\n");
+	} else {
+		FileInfo info;
+		QueryFileInformation(dummy, &info);
 		if (GetLastError()) {
 			printf("Cannot access this directory.\n");
+		} else if (info.type != NodeType::Folder && info.type != NodeType::Root) {
+			printf("Path is not direcotry.\n");
 		} else {
-			FileInfo info;
-			QueryFileInformation(dummy, &info);
-			if (GetLastError()) {
-				printf("Cannot access this directory.\n");
-			} else if (info.type != NodeType::Folder && info.type != NodeType::Root) {
-				printf("Path is not direcotry.\n");
-			} else {
-				*working_directory = new_path;
-			}
-			CloseHandle(dummy);
+			*working_directory = new_path;
 		}
-	} else {
-		printf("You need to specify a path.\n");
+		CloseHandle(dummy);
 	}
 }
 
@@ -165,7 +166,7 @@ void command_ls(const ArgumentParser& arguments)
 		printf("Cannot open the directory.\n");
 	}
 
-	DirectoryInfo info;
+	FileInfo info;
 	QueryDirectory(fd, &info);
 	while (!GetLastError()) {
 		printf(info.file_name);
@@ -174,3 +175,13 @@ void command_ls(const ArgumentParser& arguments)
 	}
 	CloseHandle(fd);
 }
+
+/*
+man
+ps
+free
+echo
+find
+kill
+x! (previous commands)
+*/

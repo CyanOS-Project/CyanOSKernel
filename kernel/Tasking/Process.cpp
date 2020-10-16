@@ -212,20 +212,21 @@ Result<uintptr_t> Process::load_executable(PathView path)
 	if (fd.is_error()) {
 		return ResultError(fd.error());
 	}
-	auto file_info = fd.value()->fstat();
+	FileInfo file_info;
+	fd.value()->file_query(file_info);
 	// FIXME: fix malloc to use more than 4096 bytes and use UniquePointer here.
-	char* buff = static_cast<char*>(valloc(file_info.value().size, PAGE_READWRITE));
-	memset(buff, 0, file_info.value().size);
-	auto result = fd.value()->read(buff, file_info.value().size);
+	char* buff = static_cast<char*>(valloc(file_info.size, PAGE_READWRITE));
+	memset(buff, 0, file_info.size);
+	auto result = fd.value()->read(buff, file_info.size);
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}
 
-	auto execable_entrypoint = PELoader::load(buff, file_info.value().size);
+	auto execable_entrypoint = PELoader::load(buff, file_info.size);
 	if (execable_entrypoint.is_error()) {
 		return ResultError(execable_entrypoint.error());
 	}
-	Memory::free(buff, file_info.value().size, 0);
+	Memory::free(buff, file_info.size, 0);
 	return execable_entrypoint.value();
 }
 

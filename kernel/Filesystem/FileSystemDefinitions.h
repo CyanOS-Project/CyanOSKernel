@@ -20,11 +20,7 @@ enum OpenMode {
 
 enum class SeekOrigin { SET, CURRENT, END };
 struct FileInfo {
-	size_t size;
-	NodeType type;
-};
-
-struct DirectoryInfo {
 	char file_name[MAX_FILE_NAME];
+	size_t size;
 	NodeType type;
 };

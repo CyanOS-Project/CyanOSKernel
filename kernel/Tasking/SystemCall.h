@@ -23,7 +23,7 @@ class SystemCall
 Result<int> OpenFile(const char* path, int mode, int flags);
 Result<int> ReadFile(Handle handle, void* buff, size_t size);
 Result<int> WriteFile(Handle handle, void* buff, size_t size);
-Result<int> QueryDirectory(Handle handle, DirectoryInfo* info);
+Result<int> QueryDirectory(Handle handle, FileInfo* info);
 Result<int> QueryFileInformation(Handle handle, FileInfo* info);
 Result<int> CloseHandle(Handle handle);
 
@@ -38,3 +38,9 @@ Result<int> Yield();
 
 Result<int> VirtualAlloc(void* address, size_t size, int flags);
 Result<int> VirtualFree(void* address, size_t size);
+
+Result<int> QueryProcessList();
+Result<int> QueryThreadList();
+Result<int> QuerySystemInformation();
+Result<int> QueryProcessInformation();
+Result<int> QueryThreadInformation();

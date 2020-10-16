@@ -24,10 +24,10 @@ class FileDescription
 	Result<UniquePointer<FileDescription>> connect();
 	Result<UniquePointer<FileDescription>> accept();
 	Result<void> seek(int offset, SeekOrigin origin);
-	Result<FileInfo> fstat();
 	Result<void> ioctl();
 	Result<void> mmap();
-	Result<void> dir_query(DirectoryInfo* info);
+	Result<void> dir_query(FileInfo& info);
+	Result<void> file_query(FileInfo& file);
 
   private:
 	FSNode& m_node;

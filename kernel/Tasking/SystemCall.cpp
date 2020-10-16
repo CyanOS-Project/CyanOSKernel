@@ -108,13 +108,13 @@ Result<int> WriteFile(Handle handle, void* buff, size_t size)
 	return result.value();
 }
 
-Result<int> QueryDirectory(Handle handle, DirectoryInfo* info)
+Result<int> QueryDirectory(Handle handle, FileInfo* info)
 {
 	if (Thread::current->parent_process().handles().check_handle(handle) != HandleType::FileDescription)
 		return ResultError(ERROR_INVALID_HANDLE);
 
 	auto& description = Thread::current->parent_process().handles().get_file_description(handle);
-	auto result = description.dir_query(info);
+	auto result = description.dir_query(*info);
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}
@@ -130,12 +130,10 @@ Result<int> QueryFileInformation(Handle handle, FileInfo* info)
 		return ResultError(ERROR_INVALID_HANDLE);
 
 	auto& description = Thread::current->parent_process().handles().get_file_description(handle);
-	auto result = description.fstat();
+	auto result = description.file_query(*info);
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}
-
-	*info = result.value();
 	return 0;
 }
 
@@ -252,3 +250,13 @@ Result<int> VirtualFree(void* address, size_t size)
 	Memory::free(address, size, 0);
 	return 0;
 }
+
+Result<int> QueryProcessList() {}
+
+Result<int> QueryThreadList() {}
+
+Result<int> QuerySystemInformation() {}
+
+Result<int> QueryProcessInformation() {}
+
+Result<int> QueryThreadInformation() {}

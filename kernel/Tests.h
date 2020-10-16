@@ -224,15 +224,15 @@ void test_ls(uintptr_t arg)
 		HLT();
 		return;
 	}
-	DirectoryInfo dir;
-	memset(&dir, 0, sizeof(DirectoryInfo));
+	FileInfo dir;
+	memset(&dir, 0, sizeof(FileInfo));
 
-	Result<void> result = fd.value()->dir_query(&dir);
+	Result<void> result = fd.value()->dir_query(dir);
 	if (result.is_error())
 		err() << result.error();
 	while (!result.is_error()) {
 		dbg() << dir.file_name;
-		result = fd.value()->dir_query(&dir);
+		result = fd.value()->dir_query(dir);
 	}
 	while (true) {
 		HLT();
