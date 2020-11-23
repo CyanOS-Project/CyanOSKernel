@@ -39,7 +39,7 @@ struct ISRContextFrame {
 	// uint32_t useresp, ss;
 };
 
-enum IRQ_NUMBER {
+enum IRQ_Number {
 	DE = 0,
 	DB = 1,
 	NMI = 2,
@@ -68,7 +68,7 @@ class ISR
   public:
 	static void default_interrupt_handler(ISRContextFrame& info);
 	static void initiate_isr_dispatcher_vector();
-	static void register_isr_handler(isr_function address, uint8_t irq_number);
+	static void register_isr_handler(isr_function address, uint8_t IRQ_Number);
 
   private:
 	static const char* exception_messages[];

@@ -6,7 +6,7 @@
 # CyanOS: A Hobbyist Operating System [![Build Status](https://travis-ci.com/AymenSekhri/CyanOS.svg?branch=master)](https://travis-ci.com/AymenSekhri/CyanOS)
 
 ## What's is this ?
-It's a x86 monolithic kernel operating system, coded in C++ 17 and few lines of x86 Assembly.
+It's a x86 monolithic preemptive kernel operating system, coded in C++ 17 and few lines of x86 Assembly.
 
 ## Why ?
 Why a new half working operating systems? you might ask, And the answer: because it's fun. This is my biggest project so far and I'm really learning a lot of new stuff on the way and enjoying every line I write (until I face a race condition bug, I would hate my life by then). I'm trying my best to work out a clean architecture for this project and maintaining a readable & scalable code base as far as i can (it might far from perfect right now).
@@ -17,11 +17,12 @@ Why a new half working operating systems? you might ask, And the answer: because
 - Concurrency in terms of Threads & Processes.
 - Basic Windows PE loader
 - Task Synchronization (Spinlocks, Semaphores and Mutex)
-- Inter-process communication (using pipes)
+- Inter-process communication (using pipes & sockets)
 - Virtual File System.
 - User Space.
 - PIC Driver.
 - Keyboard Driver.
+- A Shell & basic commands like cd, ls, cat...
 
 ## Building CyanOS
 #### Requirements

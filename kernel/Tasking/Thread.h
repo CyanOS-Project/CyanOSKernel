@@ -9,10 +9,10 @@
 #include <UniquePointer.h>
 
 enum class ThreadState {
-	RUNNABLE,
-	BLOCKED_SLEEP,
-	BLOCKED_QUEUE,
-	SUSPENDED,
+	Ready,
+	BlockedSleep,
+	BlockedQueue,
+	Suspended,
 };
 enum class ThreadPrivilege { Kernel, User };
 

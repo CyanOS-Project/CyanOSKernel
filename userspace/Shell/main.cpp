@@ -13,7 +13,8 @@ int main(int argc, const char* argv[])
 	working_directory = new String("/tar/bin");
 	printf("Welcome To CyanOS\n");
 	printf("Version 0.1 Alpha\n");
-	printf("$> ");
+	printf(working_directory->c_str());
+	printf(" $> ");
 
 	char c;
 	const size_t max = 1000;
@@ -25,7 +26,8 @@ int main(int argc, const char* argv[])
 				buff[index] = 0;
 				printf("\n");
 				execute_command(buff);
-				printf("$> ");
+				printf(working_directory->c_str());
+				printf(" $> ");
 				index = 0;
 			} else if (c == '\b') {
 				if (index > 0) {
@@ -118,7 +120,7 @@ void command_cd(const ArgumentParser& arguments)
 	String new_path = [&]() {
 		if (arguments[1] == ".." || arguments[1] == "-") {
 			auto cwd_view = PathView(*working_directory);
-			if (cwd_view.count() > 1) {
+			if (cwd_view.count() <= 1) {
 				return *working_directory;
 			} else {
 				return cwd_view.sub_path(0, -2).full_path();

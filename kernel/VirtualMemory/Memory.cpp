@@ -17,7 +17,7 @@ void Memory::setup_stage2()
 
 void Memory::setup_page_fault_handler()
 {
-	ISR::register_isr_handler(page_fault_handler, IRQ_NUMBER::PF);
+	ISR::register_isr_handler(page_fault_handler, IRQ_Number::PF);
 }
 
 void dump_memory(void* addr, size_t size)

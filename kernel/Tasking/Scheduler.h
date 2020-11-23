@@ -7,8 +7,8 @@
 #include <Types.h>
 
 enum class ScheduleType {
-	FORCED,
-	TIMED,
+	Forced,
+	Timed,
 };
 
 class Scheduler

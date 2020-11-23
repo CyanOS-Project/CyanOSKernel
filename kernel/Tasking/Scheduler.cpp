@@ -29,7 +29,7 @@ void Scheduler::schedule(ISRContextFrame& current_context, ScheduleType type)
 
 	ASSERT(Thread::current);
 
-	if (type == ScheduleType::TIMED) {
+	if (type == ScheduleType::Timed) {
 		wake_up_sleepers();
 	}
 
@@ -86,5 +86,5 @@ void Scheduler::switch_page_directory(uintptr_t page_directory)
 
 void Scheduler::schedule_handler(ISRContextFrame& frame)
 {
-	schedule(frame, ScheduleType::FORCED);
+	schedule(frame, ScheduleType::Forced);
 }

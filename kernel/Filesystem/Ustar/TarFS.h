@@ -13,13 +13,13 @@
 #define TAR_ALIGNMENT      512
 #define TAR_OCTAL_SIZE_LEN 12
 enum USTARFileType {
-	NORMAL = '0',
-	HARD_LINK = '1',
-	SYMBOLIC_LINK = '2',
-	CHARACTER_DEVICE = '3',
-	BLOCK_DEVICE = '4',
-	DIRECTORY = '5',
-	NAMED_PIPE = '6'
+	Normal = '0',
+	HardLink = '1',
+	SymbolicLink = '2',
+	CharacterDevice = '3',
+	BlockDevice = '4',
+	Directory = '5',
+	NamedPipe = '6'
 };
 
 struct TarHeader {                 /* byte offset */

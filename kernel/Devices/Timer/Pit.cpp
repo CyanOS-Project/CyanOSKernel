@@ -17,7 +17,7 @@ void PIT::setup()
 
 void PIT::pit_handler(ISRContextFrame& frame)
 {
-	Scheduler::schedule(frame, ScheduleType::TIMED);
+	Scheduler::schedule(frame, ScheduleType::Timed);
 	ticks++;
 	PIC::acknowledge_pic(PIC_PIT);
 }

@@ -23,7 +23,7 @@ TarFS::~TarFS() {}
 INode& TarFS::add_child_node(INode& parent, const StringView& name, char type, const size_t size, char* data)
 {
 	NodeType node_type;
-	if (type == USTARFileType::DIRECTORY) {
+	if (type == USTARFileType::Directory) {
 		node_type = NodeType::Folder;
 	} else {
 		node_type = NodeType::File;
@@ -58,9 +58,9 @@ void TarFS::parse_ustar(size_t size)
 		    path[-1],                           //
 		    tar_parser->typeflag,               //
 		    octal_to_decimal(tar_parser->size), //
-		    tar_parser->typeflag != USTARFileType::DIRECTORY ? reinterpret_cast<char*>(tar_parser + 1) : nullptr);
+		    tar_parser->typeflag != USTARFileType::Directory ? reinterpret_cast<char*>(tar_parser + 1) : nullptr);
 
-		if (tar_parser->typeflag == USTARFileType::DIRECTORY) {
+		if (tar_parser->typeflag == USTARFileType::Directory) {
 			directories.queue(&new_node);
 		}
 		const uintptr_t aligned_size = align_to(octal_to_decimal(tar_parser->size), TAR_ALIGNMENT, false);

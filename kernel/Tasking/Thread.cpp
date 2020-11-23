@@ -42,7 +42,7 @@ Thread& Thread::create_init_thread(Process& process)
 Thread::Thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv) :
     m_tid{reserve_tid()},
     m_parent{process},
-    m_state{ThreadState::RUNNABLE},
+    m_state{ThreadState::Ready},
     m_privilege{priv},
     m_blocker{nullptr}
 {
@@ -64,7 +64,7 @@ Thread::Thread(Process& process, thread_function address, uintptr_t argument, Th
 	m_kernel_stack_start = uintptr_t(thread_kernel_stack);
 	m_kernel_stack_end = m_kernel_stack_start + STACK_SIZE;
 	m_kernel_stack_pointer = stack_pointer;
-	m_state = ThreadState::RUNNABLE;
+	m_state = ThreadState::Ready;
 
 	if (current && (m_parent.pid() != Thread::current->m_parent.pid())) {
 		Memory::switch_page_directory(m_parent.page_directory());
@@ -92,7 +92,7 @@ void Thread::wake_up_from_queue()
 	ScopedLock local_lock(global_lock);
 
 	ready_threads->push_back(*this);
-	m_state = ThreadState::RUNNABLE;
+	m_state = ThreadState::Ready;
 	m_blocker = nullptr;
 }
 
@@ -102,7 +102,7 @@ void Thread::wake_up_from_sleep()
 
 	sleeping_threads->remove(*this);
 	ready_threads->push_back(*this);
-	m_state = ThreadState::RUNNABLE;
+	m_state = ThreadState::Ready;
 }
 
 void Thread::block(WaitQueue& blocker)
@@ -110,7 +110,7 @@ void Thread::block(WaitQueue& blocker)
 	ScopedLock local_lock(global_lock);
 
 	ready_threads->remove(*this);
-	m_state = ThreadState::BLOCKED_QUEUE;
+	m_state = ThreadState::BlockedQueue;
 	m_blocker = &blocker;
 }
 
@@ -137,26 +137,26 @@ size_t Thread::reserve_tid()
 void Thread::terminate()
 {
 	switch (m_state) {
-		case ThreadState::RUNNABLE: {
+		case ThreadState::Ready: {
 			ScopedLock local_lock(global_lock);
 
 			ready_threads->remove(*this);
 			break;
 		}
-		case ThreadState::BLOCKED_SLEEP: {
+		case ThreadState::BlockedSleep: {
 			ScopedLock local_lock(global_lock);
 
 			sleeping_threads->remove(*this);
 			break;
 		}
-		case ThreadState::BLOCKED_QUEUE: {
+		case ThreadState::BlockedQueue: {
 			ASSERT(m_blocker);
 			ScopedLock local_lock(global_lock);
 
 			m_blocker->terminate_blocked_thread(*this);
 			break;
 		}
-		case ThreadState::SUSPENDED: {
+		case ThreadState::Suspended: {
 			ASSERT_NOT_REACHABLE();
 			break;
 		}
@@ -170,7 +170,7 @@ void Thread::sleep(size_t ms)
 	ScopedLock local_lock(global_lock);
 
 	current->m_sleep_ticks = PIT::ticks + ms;
-	current->m_state = ThreadState::BLOCKED_SLEEP;
+	current->m_state = ThreadState::BlockedSleep;
 	ready_threads->remove(*current);
 	sleeping_threads->push_back(*current);
 

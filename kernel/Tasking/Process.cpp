@@ -54,7 +54,7 @@ Process::Process(StringView name, PathView path, StringView argument, ProcessPri
     m_page_directory{Memory::create_new_virtual_space()},
     m_descriptor_references{0},
     m_parent{nullptr},
-    m_state{ProcessState::Active},
+    m_state{ProcessState::Ready},
     m_handles{},
     m_threads{},
     m_pib{nullptr}

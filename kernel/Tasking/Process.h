@@ -14,7 +14,7 @@
 #include <UniquePointer.h>
 
 enum class ProcessState {
-	Active,
+	Ready,
 	Blocked,
 	Suspended,
 	Zombie,
