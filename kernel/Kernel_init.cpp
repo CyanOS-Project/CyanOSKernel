@@ -41,7 +41,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	PIC::setup();
 	PIT::setup();
 	Scheduler::setup();
-	info() << "\bDone!";
+	info() << "Done!";
 
 	info() << "Setting up file systems... ";
 	VFS::setup();
@@ -49,19 +49,19 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	VFS::mount(PipeFS::alloc("pipes"));
 	VFS::mount(DeviceFS::alloc("devices"));
 	VFS::mount(SocketFS::alloc("sockets"));
-	info() << "\bDone!";
+	info() << "Done!";
 
 	info() << "Setting up devices... ";
 	DeviceFS::add_device(Keyboard::alloc("keyboard"));
 	DeviceFS::add_device(Console::alloc("console"));
-	info() << "\bDone!";
+	info() << "Done!";
 
 	info() << "Starting the system process...";
 	Process& proc = Process::create_virtual_process("system", ProcessPrivilege::User);
 	Thread::create_init_thread(proc); // It will just continue here.
 	Thread::yield();
 	Thread::create_thread(proc, idle, 0, ThreadPrivilege::Kernel);
-	info() << "\bDone!";
+	info() << "Done!";
 
 	info() << "CyanOS is ready!";
 	Process::create_new_process("/tar/bin/shell", "", ProcessPrivilege::User);
