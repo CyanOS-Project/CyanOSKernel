@@ -1,4 +1,5 @@
 #pragma once
+#include "TypeTraits.h"
 #include "Types.h"
 
 // Credits: some of these function are partially copied from cppreference.com.
@@ -42,16 +43,6 @@ inline size_t align_to(size_t num, size_t alignment, bool align_zero = true)
 	else
 		return num + alignment - (num % alignment);
 }
-
-template <typename T> struct RemoveReference {
-	typedef T Type;
-};
-template <class T> struct RemoveReference<T&> {
-	typedef T Type;
-};
-template <class T> struct RemoveReference<T&&> {
-	typedef T Type;
-};
 
 template <typename T> constexpr T&& move(T& t)
 {
