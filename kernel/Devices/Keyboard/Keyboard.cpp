@@ -16,8 +16,7 @@ Keyboard::Keyboard(const StringView& name) :
     FSNode{name, 0, 0, NodeType::Device, 1024},
     m_lock{},
     m_wait_queue{},
-    m_buffer{1024},
-    pressed_keys{false, false, false}
+    m_buffer{1024}
 {
 	ASSERT(current_instance == nullptr);
 
@@ -64,16 +63,15 @@ bool Keyboard::can_read(FileDescription&)
 void Keyboard::enqueue_keystoke(unsigned char data)
 {
 	ScopedLock local_lock(m_lock);
-	if (data == 0x2A) // SHIFT Pressed
-	{
-		pressed_keys[0] = 1;
-	} else if (data == 0xAA) { // SHIFT Released
-		pressed_keys[0] = 0;
+	if (data == key_pressed(SHIFT_KEY)) { // SHIFT Pressed
+		is_shift_pressed = true;
+	} else if (data == key_released(SHIFT_KEY)) { // SHIFT Released
+		is_shift_pressed = false;
 	} else if ((data & 0x80) == 0) {
 		if (m_buffer.is_full()) {
 			m_buffer.dequeue(); // memory is full get rid of old keyboard strokes.
 		}
-		m_buffer.queue(asccode[data][pressed_keys[0]]);
+		m_buffer.queue(asccode[data][static_cast<int>(is_shift_pressed)]);
 		m_wait_queue.wake_up_all();
 	}
 }
@@ -81,6 +79,17 @@ void Keyboard::enqueue_keystoke(unsigned char data)
 void Keyboard::keyboard_driver_handler(ISRContextFrame& frame)
 {
 	UNUSED(frame);
+	ASSERT(current_instance);
 	current_instance->enqueue_keystoke(in8(KBD_DATA_PORT));
 	PIC::acknowledge_pic(PIC_PIT);
+}
+
+constexpr char Keyboard::key_pressed(char key)
+{
+	return key;
+}
+
+constexpr char Keyboard::key_released(char key)
+{
+	return key | 0x80;
 }
