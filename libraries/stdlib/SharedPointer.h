@@ -26,8 +26,7 @@ template <typename T> class SharedPointer
 		check_and_delete_object();
 		m_storage = other.m_storage;
 		m_reference_count = other.m_reference_count;
-		other.m_storage = nullptr;
-		other.m_reference_count = nullptr;
+		other.check_and_delete_object();
 		return *this;
 	}
 
@@ -65,6 +64,9 @@ template <typename T> class SharedPointer
 	size_t* m_reference_count = nullptr;
 	void check_and_delete_object()
 	{
+		ASSERT(m_storage);
+		ASSERT(m_reference_count);
+
 		size_t tmp_ref_count = *m_reference_count;
 		if (tmp_ref_count == 0) {
 			delete m_storage;
