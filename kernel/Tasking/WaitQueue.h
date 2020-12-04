@@ -27,6 +27,7 @@ class WaitQueue
 		checker_lock.release();
 
 		Thread::yield();
+		checker_lock.acquire();
 	}
 	template <typename T, typename L> void wait_on_event(T checker, ScopedLock<L>& checker_lock)
 	{
