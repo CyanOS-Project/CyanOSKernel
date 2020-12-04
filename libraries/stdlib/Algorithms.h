@@ -44,16 +44,6 @@ inline size_t align_to(size_t num, size_t alignment, bool align_zero = true)
 		return num + alignment - (num % alignment);
 }
 
-template <typename T> constexpr T&& move(T& t)
-{
-	return static_cast<T&&>(t);
-}
-
-template <class T> constexpr T&& forward(typename RemoveReference<T>::Type& param)
-{
-	return static_cast<T&&>(param);
-}
-
 template <typename T> T& swap(const T& a, const T& b)
 {
 	T c(move(a));
