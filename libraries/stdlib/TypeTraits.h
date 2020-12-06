@@ -12,17 +12,17 @@ template <class T> struct RemoveReference_t<T&&> {
 
 template <class T> using RemoveReference = typename RemoveReference_t<T>::type;
 
-template <typename T>[[nodiscard]] constexpr RemoveReference<T>&& move(T&& t)
+template <typename T>[[nodiscard]] constexpr decltype(auto) move(T&& t)
 {
 	return static_cast<RemoveReference<T>&&>(t);
 }
 
-template <class T>[[nodiscard]] constexpr T&& forward(RemoveReference<T>& param)
+template <class T>[[nodiscard]] constexpr decltype(auto) forward(RemoveReference<T>& param)
 {
 	return static_cast<T&&>(param);
 }
 
-template <class T>[[nodiscard]] constexpr T&& forward(typename RemoveReference_t<T>::type&& param)
+template <class T>[[nodiscard]] constexpr decltype(auto) forward(RemoveReference<T>&& param)
 {
 	return static_cast<T&&>(param);
 }

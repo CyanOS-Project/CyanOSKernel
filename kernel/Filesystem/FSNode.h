@@ -28,7 +28,7 @@ class FSNode
 	{
 	}
 
-	virtual ~FSNode() {}
+	virtual ~FSNode() = default;
 	virtual Result<void> open(UNUSEDARG FileDescription&) { return ResultError(ERROR_INVALID_OPERATION); }
 	virtual Result<void> close(UNUSEDARG FileDescription&) { return ResultError(ERROR_INVALID_OPERATION); }
 	virtual bool can_read(UNUSEDARG FileDescription&) { return false; }
