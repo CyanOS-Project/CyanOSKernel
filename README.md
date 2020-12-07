@@ -1,4 +1,4 @@
-# CyanOS: A Hobbyist Operating System [![Build Status]
+# CyanOS: A Hobbyist Operating System
 
 ## What's is this ?
 It's a x86 monolithic preemptive kernel operating system, coded in C++ 17 and few lines of x86 Assembly.
