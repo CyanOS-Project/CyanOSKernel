@@ -1,9 +1,4 @@
-
-<p align="center">
-  <img width="400" height="80" src="https://i.imgur.com/KVBFGI0.png">
-</p>
-
-# CyanOS: A Hobbyist Operating System [![Build Status](https://travis-ci.com/AymenSekhri/CyanOS.svg?branch=master)](https://travis-ci.com/AymenSekhri/CyanOS)
+# CyanOS: A Hobbyist Operating System [![Build Status]
 
 ## What's is this ?
 It's a x86 monolithic preemptive kernel operating system, coded in C++ 17 and few lines of x86 Assembly.
