@@ -1,7 +1,6 @@
 
 #include "../Systemcalls/Systemcalls.h"
 #include "../Types.h"
-#include <stdlib.h>
 
 extern "C" int main(int argc, const char* argv[]);
 
