@@ -17,6 +17,6 @@ script:
   - sudo ln -sf /usr/bin/clang-10 /usr/bin/clang
   - sudo ln -sf /usr/bin/clang++-10 /usr/bin/clang++
   - mkdir build && cd build
-  - cmake .. -G "Unix Makefiles" -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_COMPILER=clang++10
+  - cmake .. -G "Unix Makefiles" -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_COMPILER=clang++-10
   - make
   - make test
