@@ -16,6 +16,7 @@ before_install:
 script:
   - sudo ln -sf /usr/bin/clang-10 /usr/bin/clang
   - sudo ln -sf /usr/bin/clang++-10 /usr/bin/clang++
+  - which clang
   - clang -v
   - clang-10 -v
   - mkdir build && cd build
