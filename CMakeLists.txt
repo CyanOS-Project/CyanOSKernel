@@ -8,7 +8,16 @@ enable_language(ASM_NASM)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(CyanOS VERSION 0.1.0)
 
+# Unit Tests
+enable_testing()
+add_subdirectory("googletest")
+add_subdirectory("test")
+include(CTest)
+set(CPACK_PROJECT_NAME ${PROJECT_NAME})
+set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
+include(CPack)
 
+# Building the kernel
 SET(KERNEL_EXE "kernel.bin")
 SET(KERNEL_IMAGE "${CMAKE_CURRENT_BINARY_DIR}/kernel.img")
 SET(BINS_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/bin")
