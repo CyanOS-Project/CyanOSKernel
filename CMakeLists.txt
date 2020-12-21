@@ -9,7 +9,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(CyanOS VERSION 0.1.0)
 
 # Unit Tests
-if (UNIX)
+
+# googletest doesn't compile for windows under "Generic" toolchain somehow!
+if(NOT ${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
     enable_testing()
     add_subdirectory("googletest")
     add_subdirectory("test")
@@ -17,7 +19,8 @@ if (UNIX)
     set(CPACK_PROJECT_NAME ${PROJECT_NAME})
     set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
     include(CPack)
-endif (UNIX)
+endif()
+
 
 # Building the kernel
 SET(KERNEL_EXE "kernel.bin")
