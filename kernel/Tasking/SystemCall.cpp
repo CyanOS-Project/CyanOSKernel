@@ -251,12 +251,27 @@ Result<int> VirtualFree(void* address, size_t size)
 	return 0;
 }
 
-Result<int> QueryProcessList() {}
+Result<int> QueryProcessList()
+{
+	return ERROR_ACCESS_DENIED;
+}
 
-Result<int> QueryThreadList() {}
+Result<int> QueryThreadList()
+{
+	return ERROR_ACCESS_DENIED;
+}
 
-Result<int> QuerySystemInformation() {}
+Result<int> QuerySystemInformation()
+{
+	return ERROR_ACCESS_DENIED;
+}
 
-Result<int> QueryProcessInformation() {}
+Result<int> QueryProcessInformation()
+{
+	return ERROR_ACCESS_DENIED;
+}
 
-Result<int> QueryThreadInformation() {}
+Result<int> QueryThreadInformation()
+{
+	return ERROR_ACCESS_DENIED;
+}

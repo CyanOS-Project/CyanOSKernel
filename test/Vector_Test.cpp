@@ -130,7 +130,6 @@ TEST(Vector_Test, Splicing)
 
 TEST(Vector_Test, Capacity)
 {
-
 	Vector<TestStruct> list(4, 5);
 	EXPECT_EQ(list.capacity(), 4);
 	EXPECT_EQ(list.size(), 0);

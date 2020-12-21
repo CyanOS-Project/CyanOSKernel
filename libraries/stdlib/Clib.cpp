@@ -15,6 +15,14 @@ void memset(void* dest, char value, unsigned int len)
 		_dest[i] = value;
 }
 
+unsigned strlen(const char* str)
+{
+	unsigned len = 0;
+	while ((str[len]))
+		len++;
+	return len;
+}
+
 bool memcmp(const void* source, const void* dest, unsigned int len)
 {
 	char* _dest = (char*)dest;
@@ -48,14 +56,6 @@ int strcpy(char* dst, const char* src)
 	while ((dst[i] = src[i]))
 		i++;
 	return i;
-}
-
-unsigned strlen(const char* str)
-{
-	unsigned len = 0;
-	while ((str[len]))
-		len++;
-	return len;
 }
 
 int toupper(char* str)
