@@ -19,6 +19,7 @@ script:
   - which ls
   - sudo ln -sf /usr/bin/clang-10 /usr/bin/clang
   - sudo ln -sf /usr/bin/clang++-10 /usr/bin/clang++
+  - export PATH="/usr/bin/:$PATH"
   - which clang
   - which clang-10
   - mkdir build && cd build
