@@ -14,15 +14,10 @@ before_install:
   - export CXX=/usr/bin/clang++-10
 
 script:
-  - which clang
-  - which clang-10
-  - which ls
   - sudo ln -sf /usr/bin/clang-10 /usr/bin/clang
   - sudo ln -sf /usr/bin/clang++-10 /usr/bin/clang++
-  - export PATH="/usr/bin/:$PATH"
-  - which clang
-  - which clang-10
+  - export PATH="/usr/bin:$PATH"
   - mkdir build && cd build
-  - cmake .. -G "Unix Makefiles" -DCMAKE_C_COMPILER=clang-10 -DCMAKE_CXX_COMPILER=clang++-10
+  - cmake .. -G "Unix Makefiles" -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
   - make
   - make test
