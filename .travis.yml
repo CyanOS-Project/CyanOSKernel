@@ -14,6 +14,9 @@ before_install:
   - export CXX=/usr/bin/clang++-10
 
 script:
+  - which clang
+  - which clang-10
+  - which ls
   - sudo ln -sf /usr/bin/clang-10 /usr/bin/clang
   - sudo ln -sf /usr/bin/clang++-10 /usr/bin/clang++
   - mkdir build && cd build
