@@ -1,1 +1,0 @@
-generate_user_bin("tests"  "systemlib")
