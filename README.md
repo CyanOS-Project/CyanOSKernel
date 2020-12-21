@@ -1,4 +1,5 @@
-# CyanOS: A Hobbyist Operating System [![Build Status](https://travis-ci.com/AymenSekhri/CyanOS.svg?branch=master)](https://travis-ci.com/AymenSekhri/CyanOS)
+
+# CyanOS [![Build Status](https://travis-ci.com/AymenSekhri/CyanOS.svg?branch=master)](https://travis-ci.com/AymenSekhri/CyanOS) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/c4b645ecc8a04bad9784f98846e93368)](https://app.codacy.com/gh/AymenSekhri/CyanOS?utm_source=github.com&utm_medium=referral&utm_content=AymenSekhri/CyanOS&utm_campaign=Badge_Grade)
 
 ## What's is this ?
 It's a x86 monolithic preemptive kernel, coded in C++ 17 and few lines of x86 Assembly.
