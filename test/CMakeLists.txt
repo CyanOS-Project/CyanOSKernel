@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.0.0)
 include_directories("../libraries")
 
+
 add_compile_definitions("__UNIT_TESTS")
 SET(This "tests")
 file(GLOB SOURCES_TESTS CONFIGURE_DEPENDS "./*_Test.cpp")

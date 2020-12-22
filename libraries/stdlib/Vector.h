@@ -45,7 +45,7 @@ template <class T> class Vector
 		friend Vector<T>;
 	};
 
-	void realloc(size_t new_size);
+	void realloc(size_t new_size); // FIXME: no need for two functions.
 	void realloc(size_t new_size, size_t skip);
 
   public:
@@ -150,6 +150,7 @@ Vector<T>::Vector(size_t reserved_size, size_t allocation_steps) :
 template <class T> Vector<T>::~Vector()
 {
 	clear();
+	delete[] m_storage;
 }
 
 template <class T> void Vector<T>::realloc(size_t size)
@@ -194,7 +195,7 @@ template <class T> void Vector<T>::realloc(size_t size, size_t skip_index)
 		new_storage[i + 1] = move(m_storage[i]);
 	}
 
-	delete m_storage;
+	delete[] m_storage;
 
 	m_storage = new_storage;
 	m_capacity = size;
