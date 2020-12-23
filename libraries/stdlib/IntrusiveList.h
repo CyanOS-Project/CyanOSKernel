@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Algorithms.h"
+#include "Rule5.h"
 #include "Types.h"
 #ifdef __UNIT_TESTS
 	#include <assert.h>
@@ -13,6 +14,10 @@ template <typename T> class IntrusiveList;
 // Inherit from this class to use it in IntrusiveList
 template <typename T> class IntrusiveListNode
 {
+  public:
+	IntrusiveListNode() = default;
+
+  private:
 	T* next = nullptr;
 	T* prev = nullptr;
 	IntrusiveList<T>* owner = nullptr;
@@ -46,14 +51,11 @@ template <typename T> class IntrusiveList
 	  private:
 		T* m_node = nullptr;
 	};
+	NON_COPYABLE(IntrusiveList);
+	NON_MOVABLE(IntrusiveList);
 	IntrusiveList() = default;
 	~IntrusiveList() = default;
-	IntrusiveList(const IntrusiveList&) = delete;
-	IntrusiveList(IntrusiveList&&) = delete;
-	IntrusiveList& operator=(const IntrusiveList&) = delete;
-	IntrusiveList& operator=(IntrusiveList&&) = delete;
 
-	template <typename... U> T& emplace_back(U&&... u);
 	T& push_back(T& node);
 	T& pop_front();
 	T& remove(T& node);
@@ -137,13 +139,6 @@ template <typename T> void IntrusiveList<T>::append_node(T& node)
 		m_tail = &node;
 	}
 	m_count++;
-}
-
-template <typename T> template <typename... U> T& IntrusiveList<T>::emplace_back(U&&... u)
-{
-	T& node = *new T{forward<U>(u)...};
-	append_node(node);
-	return node;
 }
 
 template <typename T> T& IntrusiveList<T>::push_back(T& node)

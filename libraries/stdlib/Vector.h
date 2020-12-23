@@ -47,6 +47,7 @@ template <class T> class Vector
 
 	void realloc(size_t new_size); // FIXME: no need for two functions.
 	void realloc(size_t new_size, size_t skip);
+	void destruct_used_objects();
 
   public:
 	NON_COPYABLE(Vector);
@@ -149,35 +150,29 @@ Vector<T>::Vector(size_t reserved_size, size_t allocation_steps) :
 
 template <class T> Vector<T>::~Vector()
 {
-	clear();
-	delete[] m_storage;
+	destruct_used_objects();
+	::operator delete(m_storage);
 }
 
 template <class T> void Vector<T>::realloc(size_t size)
 {
 	if (!m_storage) {
-		m_storage = reinterpret_cast<T*>(new char[size * sizeof(T)]);
+		m_storage = reinterpret_cast<T*>(operator new(size * sizeof(T)));
 	} else if (size > m_capacity) {
-		T* new_storage = reinterpret_cast<T*>(new char[size * sizeof(T)]);
+		T* new_storage = reinterpret_cast<T*>(operator new(size * sizeof(T)));
 		for (size_t i = 0; i < m_count; i++) {
 			new_storage[i] = move(m_storage[i]);
 		}
 
-		delete[] m_storage;
+		destruct_used_objects();
+		operator delete(m_storage);
 
 		m_storage = new_storage;
 	} else if (size < m_capacity) {
 		// FIXME:shrink ?
 		ASSERT_NOT_REACHABLE();
-	} else {
 	}
 	m_capacity = size;
-}
-
-template <class T> void Vector<T>::reserve(size_t size)
-{
-	ASSERT(size > m_capacity);
-	realloc(size);
 }
 
 // realloc and moves all old storage to the new one but make space for one element at index skip_index.
@@ -186,7 +181,7 @@ template <class T> void Vector<T>::realloc(size_t size, size_t skip_index)
 	ASSERT(size > m_capacity);
 	ASSERT(skip_index < m_capacity);
 
-	T* new_storage = reinterpret_cast<T*>(new char[size * sizeof(T)]);
+	T* new_storage = reinterpret_cast<T*>(operator new(size * sizeof(T)));
 	for (size_t i = 0; i < skip_index; i++) {
 		new_storage[i] = move(m_storage[i]);
 	}
@@ -195,17 +190,29 @@ template <class T> void Vector<T>::realloc(size_t size, size_t skip_index)
 		new_storage[i + 1] = move(m_storage[i]);
 	}
 
-	delete[] m_storage;
+	destruct_used_objects();
+	operator delete(m_storage);
 
 	m_storage = new_storage;
 	m_capacity = size;
 }
 
-template <class T> void Vector<T>::clear()
+template <class T> void Vector<T>::destruct_used_objects()
 {
 	for (size_t i = 0; i < m_count; i++) {
 		m_storage[i].~T();
 	}
+}
+
+template <class T> void Vector<T>::reserve(size_t size)
+{
+	ASSERT(size > m_capacity);
+	realloc(size);
+}
+
+template <class T> void Vector<T>::clear()
+{
+	destruct_used_objects();
 	// FIXME: shrink ?
 	m_count = 0;
 }
@@ -312,7 +319,7 @@ template <class T> template <class Predicate> bool Vector<T>::contains(Predicate
 
 template <class T> void Vector<T>::pop_back()
 {
-	erase(m_count);
+	erase(m_count - 1);
 }
 
 template <class T> void Vector<T>::pop_front()

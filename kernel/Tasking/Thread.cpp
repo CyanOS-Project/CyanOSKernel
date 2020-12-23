@@ -25,7 +25,7 @@ Thread& Thread::create_thread(Process& process, thread_function address, uintptr
 {
 	ScopedLock local_lock(global_lock);
 
-	Thread& new_thread = ready_threads->emplace_back(process, address, argument, priv);
+	Thread& new_thread = ready_threads->push_back(*new Thread(process, address, argument, priv));
 	process.list_new_thread(new_thread);
 
 	return new_thread;
