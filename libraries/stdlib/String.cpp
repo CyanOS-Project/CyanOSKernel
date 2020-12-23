@@ -43,9 +43,11 @@ String::String(String&& other)
 
 String::String(const String& other)
 {
-	m_size = other.m_size;
-	m_data = new char[m_size + 1];
-	memcpy(m_data, other.m_data, m_size + 1);
+	if (&other != this) {
+		m_size = other.m_size;
+		m_data = new char[m_size + 1];
+		memcpy(m_data, other.m_data, m_size + 1);
+	}
 }
 
 String& String::operator=(String&& other)

@@ -17,7 +17,8 @@
 template <size_t bitmap_size> class Bitmap
 {
   private:
-	uint8_t m_bitmap_data[(bitmap_size / 8) + 1];
+	static constexpr size_t bitmap_buffer_size = (bitmap_size / 8) + 1;
+	uint8_t m_bitmap_data[bitmap_buffer_size];
 	static_assert(bitmap_size <= MAX_BITMAP_SIZE);
 
   public:
@@ -37,7 +38,7 @@ template <size_t bitmap_size> class Bitmap
 
 template <size_t bitmap_size> Bitmap<bitmap_size>::Bitmap()
 {
-	memset(m_bitmap_data, 0, sizeof(bitmap_size / 8));
+	memset(m_bitmap_data, 0, bitmap_buffer_size);
 }
 
 template <size_t bitmap_size> Bitmap<bitmap_size>::~Bitmap() {}
