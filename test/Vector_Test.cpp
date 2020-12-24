@@ -32,10 +32,6 @@ TEST(Vector_Test, Inserting)
 
 	vec.insert(++vec.begin(), TestStruct2(4, 4));
 
-	for (auto&& i : vec) {
-		printf("%d %d\n", i.a, i.b);
-	}
-
 	EXPECT_TRUE(vec[0] == TestStruct2(2, 2));
 	EXPECT_TRUE(vec[1] == TestStruct2(4, 4));
 	EXPECT_TRUE(vec[2] == TestStruct2(1, 1));

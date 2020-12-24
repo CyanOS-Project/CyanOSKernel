@@ -4,33 +4,34 @@
 
 #include <gtest/gtest.h>
 #include <stdlib/Bitmap.h>
-/*
+
 TEST(Bitmap_Test, SearchForUsed)
 {
-    Bitmap bm(10);
-    EXPECT_EQ(bm.find_first_used(5), BITMAP_NO_BITS_LEFT);
-    bm.set_used(2);
-    EXPECT_EQ(bm.find_first_used(5), BITMAP_NO_BITS_LEFT);
-    bm.set_used(3, 4);
-    EXPECT_EQ(bm.find_first_used(5), 2);
-    bm.set_unused(2, 5);
-    EXPECT_EQ(bm.find_first_used(5), BITMAP_NO_BITS_LEFT);
-    bm.set_used(3);
-    bm.set_used(6);
-    EXPECT_EQ(bm.find_first_used(4), BITMAP_NO_BITS_LEFT);
+	Bitmap<10> bm;
+	EXPECT_EQ(bm.find_first_set_range(1), BITMAP_NO_BITS_LEFT);
+	EXPECT_EQ(bm.find_first_clear_range(10), 0);
+	bm.set(2);
+	EXPECT_EQ(bm.find_first_set_range(5), BITMAP_NO_BITS_LEFT);
+	bm.set_range(3, 4);
+	EXPECT_EQ(bm.find_first_set_range(5), 2);
+	bm.clear_range(2, 5);
+	EXPECT_EQ(bm.find_first_set_range(5), BITMAP_NO_BITS_LEFT);
+	bm.set(3);
+	bm.set(6);
+	EXPECT_EQ(bm.find_first_set_range(4), BITMAP_NO_BITS_LEFT);
 }
 
 TEST(Bitmap_Test, SearchForUnused)
 {
-    Bitmap bm(10);
-    EXPECT_EQ(bm.find_first_unused(5), 0);
-    bm.set_used(2);
-    EXPECT_EQ(bm.find_first_unused(5), 3);
-    bm.set_used(3, 4);
-    EXPECT_EQ(bm.find_first_unused(5), BITMAP_NO_BITS_LEFT);
-    bm.set_unused(2, 5);
-    EXPECT_EQ(bm.find_first_unused(5), 0);
-    bm.set_used(3);
-    bm.set_used(6);
-    EXPECT_EQ(bm.find_first_unused(4), BITMAP_NO_BITS_LEFT);
-}*/
+	Bitmap<10> bm;
+	EXPECT_EQ(bm.find_first_clear_range(5), 0);
+	bm.set(2);
+	EXPECT_EQ(bm.find_first_clear_range(5), 3);
+	bm.set_range(3, 4);
+	EXPECT_EQ(bm.find_first_clear_range(5), BITMAP_NO_BITS_LEFT);
+	bm.clear_range(2, 5);
+	EXPECT_EQ(bm.find_first_clear_range(5), 0);
+	bm.set(3);
+	bm.set(6);
+	EXPECT_EQ(bm.find_first_clear_range(4), BITMAP_NO_BITS_LEFT);
+}
