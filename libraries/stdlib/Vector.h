@@ -52,7 +52,7 @@ template <class T> class Vector
   public:
 	NON_COPYABLE(Vector);
 	NON_MOVABLE(Vector);
-	explicit Vector(size_t reserved_size = 0, size_t allocation_steps = 1);
+	explicit Vector(size_t reserved_size = 1, size_t allocation_steps = 1);
 	~Vector();
 
 	Iterator begin();

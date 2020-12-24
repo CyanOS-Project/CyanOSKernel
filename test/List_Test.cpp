@@ -4,10 +4,10 @@
 #include <gtest/gtest.h>
 #include <stdlib/List.h>
 
-struct TestStruct {
+struct TestStruct3 {
 	int a;
 	int b;
-	bool operator==(const TestStruct& other) const
+	bool operator==(const TestStruct3& other) const
 	{
 		if (a != other.a)
 			return false;
@@ -19,8 +19,8 @@ struct TestStruct {
 
 TEST(List_Test, Iteration)
 {
-	TestStruct raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
-	List<TestStruct> list;
+	TestStruct3 raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
+	List<TestStruct3> list;
 	for (size_t i = 0; i < 3; i++) {
 		list.push_back(raw_list[i]);
 	}
@@ -37,8 +37,8 @@ TEST(List_Test, Iteration)
 
 TEST(List_Test, Erasing)
 {
-	TestStruct raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
-	List<TestStruct> list;
+	TestStruct3 raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
+	List<TestStruct3> list;
 	for (size_t i = 0; i < 3; i++) {
 		list.push_back(raw_list[i]);
 	}
@@ -73,10 +73,10 @@ TEST(List_Test, Erasing)
 
 TEST(List_Test, Splicing)
 {
-	TestStruct raw_list1[] = {{1, 2}, {3, 4}, {5, 6}};
-	TestStruct raw_list2[] = {{10, 20}, {30, 40}, {50, 60}, {70, 80}};
-	List<TestStruct> list1;
-	List<TestStruct> list2;
+	TestStruct3 raw_list1[] = {{1, 2}, {3, 4}, {5, 6}};
+	TestStruct3 raw_list2[] = {{10, 20}, {30, 40}, {50, 60}, {70, 80}};
+	List<TestStruct3> list1;
+	List<TestStruct3> list2;
 	for (size_t i = 0; i < 3; i++) {
 		list1.push_back(raw_list1[i]);
 	}
@@ -109,23 +109,23 @@ TEST(List_Test, Splicing)
 
 TEST(List_Test, Inserting)
 {
-	List<TestStruct> list;
+	List<TestStruct3> list;
 	list.emplace_back(1, 1);
 	list.emplace_front(2, 2);
 	list.emplace_back(3, 3);
-	EXPECT_TRUE(list[0] == TestStruct({2, 2}));
-	EXPECT_TRUE(list[1] == TestStruct({1, 1}));
-	EXPECT_TRUE(list[2] == TestStruct({3, 3}));
+	EXPECT_TRUE(list[0] == TestStruct3({2, 2}));
+	EXPECT_TRUE(list[1] == TestStruct3({1, 1}));
+	EXPECT_TRUE(list[2] == TestStruct3({3, 3}));
 	EXPECT_EQ(list.size(), 3);
 
-	list.insert(++list.begin(), TestStruct({4, 4}));
+	list.insert(++list.begin(), TestStruct3({4, 4}));
 
-	EXPECT_TRUE(list[0] == TestStruct({2, 2}));
-	EXPECT_TRUE(list[1] == TestStruct({1, 1}));
-	EXPECT_TRUE(list[2] == TestStruct({4, 4}));
-	EXPECT_TRUE(list[3] == TestStruct({3, 3}));
+	EXPECT_TRUE(list[0] == TestStruct3({2, 2}));
+	EXPECT_TRUE(list[1] == TestStruct3({1, 1}));
+	EXPECT_TRUE(list[2] == TestStruct3({4, 4}));
+	EXPECT_TRUE(list[3] == TestStruct3({3, 3}));
 	EXPECT_EQ(list.size(), 4);
 
-	EXPECT_TRUE(list.head() == TestStruct({2, 2}));
-	EXPECT_TRUE(list.tail() == TestStruct({3, 3}));
+	EXPECT_TRUE(list.head() == TestStruct3({2, 2}));
+	EXPECT_TRUE(list.tail() == TestStruct3({3, 3}));
 }

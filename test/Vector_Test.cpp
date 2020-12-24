@@ -4,13 +4,12 @@
 #include <gtest/gtest.h>
 #include <stdlib/Vector.h>
 
-struct TestStruct {
+struct TestStruct2 {
 	int a;
 	int b;
-	TestStruct(int t_a, int t_b) : a{t_a}, b{t_b} {}
-	bool operator==(const TestStruct& other) const
+	TestStruct2(int t_a, int t_b) : a{t_a}, b{t_b} {}
+	bool operator==(const TestStruct2& other) const
 	{
-		printf("Operator== %d,%d == %d,%d\n", a, b, other.a, other.b);
 		if (a != other.a)
 			return false;
 		if (b != other.b)
@@ -21,32 +20,36 @@ struct TestStruct {
 
 TEST(Vector_Test, Inserting)
 {
-	Vector<TestStruct> vec;
+	Vector<TestStruct2> vec;
 	vec.emplace_back(1, 1);
 	vec.emplace_front(2, 2);
 	vec.emplace_back(3, 3);
 
-	EXPECT_TRUE(vec[0] == TestStruct(2, 2));
-	EXPECT_TRUE(vec[1] == TestStruct(1, 1));
-	EXPECT_TRUE(vec[2] == TestStruct(3, 3));
+	EXPECT_TRUE(vec[0] == TestStruct2(2, 2));
+	EXPECT_TRUE(vec[1] == TestStruct2(1, 1));
+	EXPECT_TRUE(vec[2] == TestStruct2(3, 3));
 	EXPECT_EQ(vec.size(), 3);
 
-	vec.insert(++vec.begin(), TestStruct(4, 4));
+	vec.insert(++vec.begin(), TestStruct2(4, 4));
 
-	EXPECT_TRUE(vec[0] == TestStruct(2, 2));
-	EXPECT_TRUE(vec[1] == TestStruct(4, 4));
-	EXPECT_TRUE(vec[2] == TestStruct(1, 1));
-	EXPECT_TRUE(vec[3] == TestStruct(3, 3));
+	for (auto&& i : vec) {
+		printf("%d %d\n", i.a, i.b);
+	}
+
+	EXPECT_TRUE(vec[0] == TestStruct2(2, 2));
+	EXPECT_TRUE(vec[1] == TestStruct2(4, 4));
+	EXPECT_TRUE(vec[2] == TestStruct2(1, 1));
+	EXPECT_TRUE(vec[3] == TestStruct2(3, 3));
 	EXPECT_EQ(vec.size(), 4);
 
-	EXPECT_TRUE(vec.head() == TestStruct(2, 2));
-	EXPECT_TRUE(vec.tail() == TestStruct(3, 3));
+	EXPECT_TRUE(vec.head() == TestStruct2(2, 2));
+	EXPECT_TRUE(vec.tail() == TestStruct2(3, 3));
 }
 
 TEST(Vector_Test, Iteration)
 {
-	TestStruct raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
-	Vector<TestStruct> vec;
+	TestStruct2 raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
+	Vector<TestStruct2> vec;
 	for (size_t i = 0; i < 3; i++) {
 		vec.push_back(raw_list[i]);
 	}
@@ -63,8 +66,8 @@ TEST(Vector_Test, Iteration)
 
 TEST(Vector_Test, Erasing)
 {
-	TestStruct raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
-	Vector<TestStruct> vec;
+	TestStruct2 raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
+	Vector<TestStruct2> vec;
 	for (size_t i = 0; i < 3; i++) {
 		vec.push_back(raw_list[i]);
 	}
@@ -99,10 +102,10 @@ TEST(Vector_Test, Erasing)
 
 TEST(Vector_Test, Splicing)
 {
-	TestStruct raw_list1[] = {{1, 2}, {3, 4}, {5, 6}};
-	TestStruct raw_list2[] = {{10, 20}, {30, 40}, {50, 60}, {70, 80}};
-	Vector<TestStruct> list1;
-	Vector<TestStruct> list2;
+	TestStruct2 raw_list1[] = {{1, 2}, {3, 4}, {5, 6}};
+	TestStruct2 raw_list2[] = {{10, 20}, {30, 40}, {50, 60}, {70, 80}};
+	Vector<TestStruct2> list1;
+	Vector<TestStruct2> list2;
 	for (size_t i = 0; i < 3; i++) {
 		list1.push_back(raw_list1[i]);
 	}
@@ -133,7 +136,7 @@ TEST(Vector_Test, Splicing)
 
 TEST(Vector_Test, Capacity)
 {
-	Vector<TestStruct> list(4, 5);
+	Vector<TestStruct2> list(4, 5);
 	EXPECT_EQ(list.capacity(), 4);
 	EXPECT_EQ(list.size(), 0);
 
