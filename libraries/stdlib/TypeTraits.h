@@ -9,8 +9,15 @@ template <class T> struct RemoveReference_t<T&> {
 template <class T> struct RemoveReference_t<T&&> {
 	using type = T;
 };
-
 template <class T> using RemoveReference = typename RemoveReference_t<T>::type;
+
+template <class T> struct RemoveConst_t {
+	using type = T;
+};
+template <class T> struct RemoveConst_t<const T> {
+	using type = T;
+};
+template <class T> using RemoveConst = typename RemoveConst_t<T>::type;
 
 template <typename T>[[nodiscard]] constexpr decltype(auto) move(T&& t)
 {
