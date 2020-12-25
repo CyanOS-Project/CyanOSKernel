@@ -40,6 +40,7 @@ template <typename T> class IntrusiveList
 	  public:
 		BaseIterator(T* node);
 		BaseIterator(const BaseIterator& other);
+		operator BaseIterator<const RemoveConst<Type>>();
 		~BaseIterator() = default;
 		bool operator==(const BaseIterator& other) const;
 		bool operator!=(const BaseIterator& other) const;
@@ -198,6 +199,12 @@ template <typename T>
 template <typename P>
 IntrusiveList<T>::template BaseIterator<P>::BaseIterator(const BaseIterator<P>& other) : m_node{other.m_node}
 {
+}
+template <typename T>
+template <typename P>
+IntrusiveList<T>::template BaseIterator<P>::operator BaseIterator<const RemoveConst<P>>()
+{
+	return BaseIterator<const RemoveConst<P>>{m_node};
 }
 
 template <typename T>
