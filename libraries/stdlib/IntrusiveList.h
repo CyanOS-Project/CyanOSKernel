@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Algorithms.h"
+#include "Iterators.h"
 #include "Rule5.h"
 #include "TypeTraits.h"
 #include "Types.h"
@@ -35,7 +36,7 @@ template <typename T> class IntrusiveList
 	void remove_node(T& node);
 	void append_node(T& node);
 
-	template <typename Type> class BaseIterator
+	template <typename Type> class BaseIterator : public ForwardIterator<BaseIterator<Type>>
 	{
 	  public:
 		BaseIterator(T* node);
@@ -48,8 +49,9 @@ template <typename T> class IntrusiveList
 		BaseIterator operator++(int);
 		BaseIterator& operator--();
 		BaseIterator operator--(int);
-		BaseIterator operator+(int) const;
-		BaseIterator operator-(int) const;
+		// FIXME: Delete this.
+		/*BaseIterator operator+(int) const;
+		BaseIterator operator-(int) const;*/
 		Type& operator*();
 		Type* operator->();
 
@@ -162,7 +164,11 @@ template <typename T> typename IntrusiveList<T>::ConstIterator IntrusiveList<T>:
 
 template <typename T> typename IntrusiveList<T>::Iterator IntrusiveList<T>::find(T& node) const
 {
-	return Iterator{&node};
+	if (node.owner == this) {
+		return Iterator{&node};
+	} else {
+		return end();
+	}
 }
 
 template <typename T> T& IntrusiveList<T>::first() const
@@ -271,39 +277,40 @@ typename IntrusiveList<T>::template BaseIterator<P> IntrusiveList<T>::template B
 	}
 }
 
-template <typename T>
+// FIXME: delete this.
+/*template <typename T>
 template <typename P>
 typename IntrusiveList<T>::template BaseIterator<P> IntrusiveList<T>::template BaseIterator<P>::operator+(int num) const
 {
-	if (num == 0) {
-		return *this;
-	} else {
-		auto curr = m_node;
-		if (num > 0) {
-			while (curr && num) {
-				curr = curr->next;
-				num--;
-			}
-		} else {
-			while (curr && num) {
-				curr = curr->prev;
-				num++;
-			}
-		}
-		if (!num) {
-			return BaseIterator(curr);
-		} else {
-			return BaseIterator(nullptr);
-		}
-	}
+    if (num == 0) {
+        return *this;
+    } else {
+        auto curr = m_node;
+        if (num > 0) {
+            while (curr && num) {
+                curr = curr->next;
+                num--;
+            }
+        } else {
+            while (curr && num) {
+                curr = curr->prev;
+                num++;
+            }
+        }
+        if (!num) {
+            return BaseIterator(curr);
+        } else {
+            return BaseIterator(nullptr);
+        }
+    }
 }
 
 template <typename T>
 template <typename P>
 typename IntrusiveList<T>::template BaseIterator<P> IntrusiveList<T>::template BaseIterator<P>::operator-(int num) const
 {
-	return operator+(-num);
-}
+    return operator+(-num);
+}*/
 
 template <typename T> template <typename P> P& IntrusiveList<T>::template BaseIterator<P>::operator*()
 {
