@@ -74,6 +74,7 @@ String& String::operator=(const String& other)
 
 String& String::operator=(const char* str)
 {
+	cleanup();
 	m_size = strlen(str);
 	m_data = new char[m_size + 1];
 	ASSERT(m_data);
