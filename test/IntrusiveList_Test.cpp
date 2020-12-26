@@ -13,6 +13,8 @@ struct Int : public IntrusiveListNode<Int> {
 
 TEST(IntrusiveList_Test, Iteration)
 {
+	// FIXME: end()-1 should give last element not end(); also test convertion from Iterator to ConstIterator.
+
 	Int raw_list[] = {0, 1, 2, 3, 4, 5};
 	IntrusiveList<Int> list1;
 	for (auto&& i : raw_list) {

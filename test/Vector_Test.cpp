@@ -4,153 +4,300 @@
 #include <gtest/gtest.h>
 #include <stdlib/Vector.h>
 
-struct TestStruct2 {
-	int a;
-	int b;
-	TestStruct2(int t_a, int t_b) : a{t_a}, b{t_b} {}
-	bool operator==(const TestStruct2& other) const
-	{
-		if (a != other.a)
-			return false;
-		if (b != other.b)
-			return false;
-		return true;
-	}
-};
-
-TEST(Vector_Test, Inserting)
-{
-	Vector<TestStruct2> vec;
-	vec.emplace_back(1, 1);
-	vec.emplace_front(2, 2);
-	vec.emplace_back(3, 3);
-
-	EXPECT_TRUE(vec[0] == TestStruct2(2, 2));
-	EXPECT_TRUE(vec[1] == TestStruct2(1, 1));
-	EXPECT_TRUE(vec[2] == TestStruct2(3, 3));
-	EXPECT_EQ(vec.size(), 3);
-
-	vec.insert(++vec.begin(), TestStruct2(4, 4));
-
-	EXPECT_TRUE(vec[0] == TestStruct2(2, 2));
-	EXPECT_TRUE(vec[1] == TestStruct2(4, 4));
-	EXPECT_TRUE(vec[2] == TestStruct2(1, 1));
-	EXPECT_TRUE(vec[3] == TestStruct2(3, 3));
-	EXPECT_EQ(vec.size(), 4);
-
-	EXPECT_TRUE(vec.head() == TestStruct2(2, 2));
-	EXPECT_TRUE(vec.tail() == TestStruct2(3, 3));
-}
-
 TEST(Vector_Test, Iteration)
 {
-	TestStruct2 raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
-	Vector<TestStruct2> vec;
-	for (size_t i = 0; i < 3; i++) {
-		vec.push_back(raw_list[i]);
-	}
+	Vector<int> vec;
+	auto get_last_itr = [&vec]() {
+		auto itr = vec.begin();
+		auto tmp = itr;
+		while (++tmp != vec.end()) {
+			itr = tmp;
+		}
+		return itr;
+	};
+
+	vec.push_back(0);
+	vec.push_back(1);
+	vec.push_back(2);
 
 	EXPECT_EQ(vec.size(), 3);
 	EXPECT_FALSE(vec.is_empty());
 
-	size_t index = 0;
-	for (auto&& i : vec) {
-		EXPECT_TRUE(i == raw_list[index]);
-		index++;
-	}
+	auto itr = vec.begin();
+	EXPECT_EQ(*itr++, 0);
+	EXPECT_EQ(*itr++, 1);
+	EXPECT_EQ(*itr++, 2);
+	EXPECT_EQ(itr, vec.end());
+
+	itr = vec.begin();
+	EXPECT_EQ(*itr, 0);
+	EXPECT_EQ(*++itr, 1);
+	EXPECT_EQ(*++itr, 2);
+	EXPECT_EQ(*itr, 2);
+	EXPECT_EQ(++itr, vec.end());
+
+	itr = get_last_itr();
+	EXPECT_EQ(*itr--, 2);
+	EXPECT_EQ(*itr--, 1);
+	EXPECT_EQ(*itr, 0);
+	EXPECT_EQ(itr, vec.begin());
+
+	itr = get_last_itr();
+	EXPECT_EQ(*--itr, 1);
+	EXPECT_EQ(*--itr, 0);
+	EXPECT_EQ(itr, vec.begin());
+
+	itr = vec.begin();
+	EXPECT_EQ(itr + 0, vec.begin());
+	EXPECT_EQ(*(itr + 0), 0);
+	EXPECT_EQ(*(itr + 1), 1);
+	EXPECT_EQ(*(itr + 2), 2);
+	EXPECT_EQ(itr + 3, vec.end());
+
+	itr = vec.begin();
+	EXPECT_EQ(*(vec.begin() += 0), 0);
+	EXPECT_EQ(*(vec.begin() += 1), 1);
+	EXPECT_EQ(*(vec.begin() += 2), 2);
+	EXPECT_EQ((vec.begin() += 3), vec.end());
+
+	itr = get_last_itr();
+	EXPECT_EQ(itr + 1, vec.end());
+	EXPECT_EQ(*(itr - 0), 2);
+	EXPECT_EQ(*(itr - 1), 1);
+	EXPECT_EQ(*(itr - 2), 0);
+
+	EXPECT_EQ(*(get_last_itr() -= 0), 2);
+	EXPECT_EQ(*(get_last_itr() -= 1), 1);
+	EXPECT_EQ(*(get_last_itr() -= 2), 0);
+
+	EXPECT_EQ(*(vec.begin() + 0), vec[0]);
+	EXPECT_EQ(*(vec.begin() + 1), vec[1]);
+	EXPECT_EQ(*(vec.begin() + 2), vec[2]);
+}
+
+TEST(Vector_Test, Inserting)
+{
+	Vector<int> vec1;
+	vec1.push_back(1);
+	vec1.push_back(2);
+	vec1.push_back(3);
+	EXPECT_EQ(vec1.size(), 3);
+	EXPECT_EQ(*(vec1.begin() + 0), 1);
+	EXPECT_EQ(*(vec1.begin() + 1), 2);
+	EXPECT_EQ(*(vec1.begin() + 2), 3);
+
+	Vector<int> vec2;
+	vec2.push_front(1);
+	vec2.push_front(2);
+	vec2.push_front(3);
+	EXPECT_EQ(vec2.size(), 3);
+	EXPECT_EQ(*(vec2.begin() + 0), 3);
+	EXPECT_EQ(*(vec2.begin() + 1), 2);
+	EXPECT_EQ(*(vec2.begin() + 2), 1);
+
+	Vector<int> vec3;
+	vec3.emplace_back(1);
+	vec3.emplace_back(2);
+	vec3.emplace_back(3);
+	EXPECT_EQ(vec3.size(), 3);
+	EXPECT_EQ(*(vec3.begin() + 0), 1);
+	EXPECT_EQ(*(vec3.begin() + 1), 2);
+	EXPECT_EQ(*(vec3.begin() + 2), 3);
+
+	Vector<int> vec4;
+	vec4.emplace_front(1);
+	vec4.emplace_front(2);
+	vec4.emplace_front(3);
+	EXPECT_EQ(vec4.size(), 3);
+	EXPECT_EQ(*(vec4.begin() + 0), 3);
+	EXPECT_EQ(*(vec4.begin() + 1), 2);
+	EXPECT_EQ(*(vec4.begin() + 2), 1);
+
+	Vector<int> vec5;
+	vec5.push_back(1);
+	vec5.push_back(2);
+	vec5.push_back(3);
+	EXPECT_EQ(vec5.size(), 3);
+	EXPECT_EQ(*(vec5.begin() + 0), 1);
+	EXPECT_EQ(*(vec5.begin() + 1), 2);
+	EXPECT_EQ(*(vec5.begin() + 2), 3);
+
+	vec5.insert(vec5.begin(), 4);
+	EXPECT_EQ(vec5.size(), 4);
+	EXPECT_EQ(*(vec5.begin() + 0), 4);
+	EXPECT_EQ(*(vec5.begin() + 1), 1);
+	EXPECT_EQ(*(vec5.begin() + 2), 2);
+	EXPECT_EQ(*(vec5.begin() + 3), 3);
+
+	vec5.insert(vec5.begin() + 1, 5);
+	EXPECT_EQ(vec5.size(), 5);
+	EXPECT_EQ(*(vec5.begin() + 0), 4);
+	EXPECT_EQ(*(vec5.begin() + 1), 5);
+	EXPECT_EQ(*(vec5.begin() + 2), 1);
+	EXPECT_EQ(*(vec5.begin() + 3), 2);
+	EXPECT_EQ(*(vec5.begin() + 4), 3);
+
+	vec5.insert(vec5.end(), 6);
+	EXPECT_EQ(vec5.size(), 6);
+	EXPECT_EQ(*(vec5.begin() + 0), 4);
+	EXPECT_EQ(*(vec5.begin() + 1), 5);
+	EXPECT_EQ(*(vec5.begin() + 2), 1);
+	EXPECT_EQ(*(vec5.begin() + 3), 2);
+	EXPECT_EQ(*(vec5.begin() + 4), 3);
+	EXPECT_EQ(*(vec5.begin() + 5), 6);
 }
 
 TEST(Vector_Test, Erasing)
 {
-	TestStruct2 raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
-	Vector<TestStruct2> vec;
-	for (size_t i = 0; i < 3; i++) {
-		vec.push_back(raw_list[i]);
-	}
+	Vector<int> vec1;
+	vec1.push_back(1);
+	vec1.push_back(2);
+	vec1.push_back(3);
+	vec1.push_back(4);
 
-	EXPECT_EQ(vec.size(), 3);
-	EXPECT_FALSE(vec.is_empty());
+	EXPECT_EQ(vec1.size(), 4); // [1, 2, 3, 4]
+	EXPECT_EQ(*(vec1.begin() + 0), 1);
+	EXPECT_EQ(*(vec1.begin() + 1), 2);
+	EXPECT_EQ(*(vec1.begin() + 2), 3);
+	EXPECT_EQ(*(vec1.begin() + 3), 4);
+	EXPECT_EQ(vec1.begin() + 4, vec1.end());
 
-	vec.erase(vec.begin() + 1);
-	EXPECT_EQ(vec.size(), 2);
-	EXPECT_TRUE(vec[0] == raw_list[0]);
-	EXPECT_TRUE(vec[1] == raw_list[2]);
+	vec1.pop_front();
+	EXPECT_EQ(vec1.size(), 3); // [2, 3, 4]
+	EXPECT_EQ(*(vec1.begin() + 0), 2);
+	EXPECT_EQ(*(vec1.begin() + 1), 3);
+	EXPECT_EQ(*(vec1.begin() + 2), 4);
+	EXPECT_EQ(vec1.begin() + 3, vec1.end());
 
-	vec.erase(vec.begin() + 1);
-	EXPECT_EQ(vec.size(), 1);
-	EXPECT_TRUE(vec[0] == raw_list[0]);
+	vec1.pop_front();
+	EXPECT_EQ(vec1.size(), 2); // [3, 4]
+	EXPECT_EQ(*(vec1.begin() + 0), 3);
+	EXPECT_EQ(*(vec1.begin() + 1), 4);
+	EXPECT_EQ(vec1.begin() + 2, vec1.end());
 
-	vec.erase(vec.begin());
-	EXPECT_EQ(vec.size(), 0);
-	EXPECT_TRUE(vec.is_empty());
+	vec1.erase(vec1.begin() + 1);
+	EXPECT_EQ(vec1.size(), 1); // [3]
+	EXPECT_EQ(*(vec1.begin() + 0), 3);
+	EXPECT_EQ(vec1.begin() + 1, vec1.end());
 
-	for (size_t i = 0; i < 3; i++) {
-		vec.push_back(raw_list[i]);
-	}
-	EXPECT_EQ(vec.size(), 3);
-	EXPECT_FALSE(vec.is_empty());
+	vec1.erase(vec1.begin());
+	EXPECT_EQ(vec1.size(), 0); // []
+	EXPECT_EQ(vec1.begin(), vec1.end());
 
-	vec.clear();
+	vec1.push_back(1);
+	vec1.push_back(2);
+	vec1.push_back(3);
+	vec1.push_back(4);
+	vec1.erase(vec1.begin() + 1);
+	EXPECT_EQ(vec1.size(), 3); // [1, 3, 4]
+	EXPECT_EQ(*(vec1.begin() + 0), 1);
+	EXPECT_EQ(*(vec1.begin() + 1), 3);
+	EXPECT_EQ(*(vec1.begin() + 2), 4);
+	EXPECT_EQ(vec1.begin() + 3, vec1.end());
 
-	EXPECT_EQ(vec.size(), 0);
-	EXPECT_TRUE(vec.is_empty());
+	vec1.erase(vec1.begin() + 1);
+	EXPECT_EQ(vec1.size(), 2); // [1, 4]
+	EXPECT_EQ(*(vec1.begin() + 0), 1);
+	EXPECT_EQ(*(vec1.begin() + 1), 4);
+	EXPECT_EQ(vec1.begin() + 2, vec1.end());
+
+	vec1.clear();
+	EXPECT_EQ(vec1.size(), 0); // []
+	EXPECT_EQ(vec1.begin(), vec1.end());
+
+	vec1.push_back(2);
+	vec1.push_back(1);
+	vec1.push_back(2);
+	vec1.push_back(3);
+	vec1.push_back(2);
+	vec1.push_back(4);
+	vec1.remove_if([&](auto& i) { return i == 2; });
+	EXPECT_EQ(vec1.size(), 3); // [1, 3, 4]
+	EXPECT_EQ(*(vec1.begin() + 0), 1);
+	EXPECT_EQ(*(vec1.begin() + 1), 3);
+	EXPECT_EQ(*(vec1.begin() + 2), 4);
 }
 
 TEST(Vector_Test, Splicing)
 {
-	TestStruct2 raw_list1[] = {{1, 2}, {3, 4}, {5, 6}};
-	TestStruct2 raw_list2[] = {{10, 20}, {30, 40}, {50, 60}, {70, 80}};
-	Vector<TestStruct2> list1;
-	Vector<TestStruct2> list2;
-	for (size_t i = 0; i < 3; i++) {
-		list1.push_back(raw_list1[i]);
-	}
-	for (size_t i = 0; i < 4; i++) {
-		list2.push_back(raw_list2[i]);
-	}
+	Vector<int> vec1;
+	vec1.push_back(1);
+	vec1.push_back(2);
+	vec1.push_back(3);
+	vec1.push_back(4);
 
-	EXPECT_EQ(list1.size(), 3);
-	EXPECT_EQ(list2.size(), 4);
-	EXPECT_FALSE(list1.is_empty());
-	EXPECT_FALSE(list2.is_empty());
+	Vector<int> vec2;
+	vec2.push_back(5);
+	vec2.push_back(6);
+	vec2.push_back(7);
+	vec2.push_back(8);
+	// vec1: [1, 2, 3, 4] vec2: [5, 6, 7, 8]
+	vec1.splice(vec2, vec1.begin() + 1, vec2.begin() + 2);
+	// vec1: [1, 3, 4] vec2: [5, 6, 2, 7, 8]
+	EXPECT_EQ(vec1.size(), 3);
+	EXPECT_EQ(vec2.size(), 5);
+	EXPECT_EQ(*(vec1.begin() + 0), 1);
+	EXPECT_EQ(*(vec1.begin() + 1), 3);
+	EXPECT_EQ(*(vec1.begin() + 2), 4);
+	EXPECT_EQ(*(vec2.begin() + 0), 5);
+	EXPECT_EQ(*(vec2.begin() + 1), 6);
+	EXPECT_EQ(*(vec2.begin() + 2), 2);
+	EXPECT_EQ(*(vec2.begin() + 3), 7);
+	EXPECT_EQ(*(vec2.begin() + 4), 8);
 
-	list2.splice(list1, list2.begin());
-
-	EXPECT_EQ(list1.size(), 4);
-	EXPECT_EQ(list2.size(), 3);
-	EXPECT_TRUE(list1[3] == raw_list2[0]);
-
-	auto itr{list2.begin()};
-	list2.splice(list1, itr + 2);
-
-	EXPECT_EQ(list1.size(), 5);
-	EXPECT_EQ(list2.size(), 2);
-	EXPECT_TRUE(list1[4] == raw_list2[3]);
-	EXPECT_FALSE(list1.is_empty());
-	EXPECT_FALSE(list2.is_empty());
+	vec2.splice(vec1, vec2.end() - 1, vec1.begin());
+	// vec1: [8, 1, 3, 4] vec2: [5, 6, 2, 7]
+	EXPECT_EQ(vec1.size(), 4);
+	EXPECT_EQ(vec2.size(), 4);
+	EXPECT_EQ(*(vec1.begin() + 0), 8);
+	EXPECT_EQ(*(vec1.begin() + 1), 1);
+	EXPECT_EQ(*(vec1.begin() + 2), 3);
+	EXPECT_EQ(*(vec1.begin() + 3), 4);
+	EXPECT_EQ(*(vec2.begin() + 0), 5);
+	EXPECT_EQ(*(vec2.begin() + 1), 6);
+	EXPECT_EQ(*(vec2.begin() + 2), 2);
+	EXPECT_EQ(*(vec2.begin() + 3), 7);
 }
 
 TEST(Vector_Test, Capacity)
 {
-	Vector<TestStruct2> list(4, 5);
+	Vector<int> list(4, 5);
 	EXPECT_EQ(list.capacity(), 4);
 	EXPECT_EQ(list.size(), 0);
 
-	list.emplace_back(1, 1);
-	list.emplace_back(1, 1);
-	list.emplace_back(1, 1);
+	list.push_back(1);
+	list.push_back(1);
+	list.push_back(1);
 	EXPECT_EQ(list.capacity(), 4);
 	EXPECT_EQ(list.size(), 3);
 
-	list.emplace_back(1, 1);
+	list.push_back(1);
 	EXPECT_EQ(list.capacity(), 4);
 	EXPECT_EQ(list.size(), 4);
 
-	list.emplace_back(1, 1);
+	list.push_back(1);
 	EXPECT_EQ(list.capacity(), 9);
 	EXPECT_EQ(list.size(), 5);
 
 	list.erase(list.begin() + 1);
 	EXPECT_EQ(list.capacity(), 9);
 	EXPECT_EQ(list.size(), 4);
+
+	list.reserve(5);
+	EXPECT_EQ(list.capacity(), 9);
+	EXPECT_EQ(list.size(), 4);
+
+	list.reserve(10);
+	EXPECT_EQ(list.capacity(), 10);
+	EXPECT_EQ(list.size(), 4);
+
+	for (size_t i = 0; i < 6; i++) {
+		list.push_back(1);
+	}
+	EXPECT_EQ(list.capacity(), 10);
+	EXPECT_EQ(list.size(), 10);
+
+	list.push_back(1);
+	EXPECT_EQ(list.capacity(), 15);
+	EXPECT_EQ(list.size(), 11);
 }

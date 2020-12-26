@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Algorithms.h"
+#include "Iterators.h"
 #include "New.h"
 #include "Rule5.h"
 #include "Types.h"
@@ -20,58 +21,66 @@ template <class T> class Vector
 	size_t m_count;
 	size_t m_capacity;
 	size_t m_allocation_steps;
-	class Iterator
+	template <typename Type> class BaseIterator : public RandomAccessIterator<BaseIterator<Type>>
 	{
-	  private:
-		T* m_storage;
-		size_t m_current;
 
 	  public:
-		Iterator(T* storage, size_t index);
-		explicit Iterator(T* storage);
-		Iterator(const Iterator& other);
-		void operator=(const Vector<T>::Iterator& other);
-		~Iterator() = default;
-
-		Iterator operator++(int);
-		Iterator& operator++();
-		Iterator operator+(int);
-		Iterator operator-(int);
-		bool operator!=(const Vector<T>::Iterator& other) const;
-		bool operator==(const Vector<T>::Iterator& other) const;
+		BaseIterator(const BaseIterator& other);
+		~BaseIterator() = default;
+		void operator=(const BaseIterator& other);
+		operator BaseIterator<const RemoveConst<Type>>();
+		BaseIterator operator++(int);
+		BaseIterator& operator++();
+		BaseIterator operator--(int);
+		BaseIterator& operator--();
+		BaseIterator operator+(int) const;
+		BaseIterator operator-(int) const;
+		BaseIterator& operator+=(int);
+		BaseIterator& operator-=(int);
+		bool operator!=(const BaseIterator& other) const;
+		bool operator==(const BaseIterator& other) const;
 		T* operator->();
 		T& operator*();
 
 		friend Vector<T>;
+
+	  private:
+		T* m_storage;
+		size_t m_current;
+		BaseIterator(T* storage, size_t index);
 	};
 
-	void realloc(size_t new_size); // FIXME: no need for two functions.
-	void realloc(size_t new_size, size_t skip);
+	void realloc(size_t new_size);
+	void realloc_with_free_spot(size_t new_size, size_t free_spot_index);
+	void make_free_spot(size_t free_spot_index);
 	void destruct_used_objects();
 
   public:
 	NON_COPYABLE(Vector);
 	NON_MOVABLE(Vector);
+	using ConstIterator = BaseIterator<const T>;
+	using Iterator = BaseIterator<T>;
+
 	explicit Vector(size_t reserved_size = 1, size_t allocation_steps = 1);
 	~Vector();
 
-	Iterator begin();
-	Iterator end();
-	void reserve(size_t size);
+	Iterator begin() const;
+	Iterator end() const;
+	ConstIterator cbegin() const;
+	ConstIterator cend() const;
 	template <typename... U> T& emplace_back(U&&... u);
 	template <typename... U> T& emplace_front(U&&... u);
-	T& push_back(const T& new_data);
-	T& push_front(const T& new_data);
-	T& push_back(T&& new_data);
-	T& push_front(T&& new_data);
+	template <typename U> T& insert(Iterator node, U&& new_node);
+	template <typename U> T& push_back(U&& new_data);
+	template <typename U> T& push_front(U&& new_data);
 	void pop_back();
 	void pop_front();
-	void insert(const Iterator& node, const T& new_node);
-	void erase(const Iterator&);
+	void erase(Iterator);
+	void reserve(size_t size);
 	template <class Predicate> bool remove_if(Predicate predicate);
 	template <class Predicate> bool contains(Predicate predicate);
 	void clear();
-	void splice(Vector<T>& list, const Iterator& itr);
+	void splice(Vector<T>& destination_list, Iterator from, Iterator to);
 	bool is_empty() const;
 	size_t size() const;
 	size_t capacity() const;
@@ -80,64 +89,6 @@ template <class T> class Vector
 	T& operator[](size_t index) const;
 };
 
-template <class T> Vector<T>::Iterator::Iterator(T* storage, size_t index) : m_storage{storage}, m_current{index} {}
-
-template <class T>
-Vector<T>::Iterator::Iterator(const Iterator& other) : m_storage{other.m_storage}, m_current{other.m_current}
-{
-}
-
-template <class T> Vector<T>::Iterator::Iterator(T* storage) : m_storage{storage}, m_current{0} {}
-
-template <class T> typename Vector<T>::Iterator Vector<T>::Iterator::operator++(int arg)
-{
-	UNUSED(arg);
-	Iterator old{*this};
-	m_current++;
-	return old;
-}
-
-template <class T> typename Vector<T>::Iterator Vector<T>::Iterator::operator+(int arg)
-{
-	return Iterator{m_storage, m_current + arg};
-}
-
-template <class T> typename Vector<T>::Iterator Vector<T>::Iterator::operator-(int arg)
-{
-	return Iterator{m_storage, m_current - arg};
-}
-
-template <class T> typename Vector<T>::Iterator& Vector<T>::Iterator::operator++()
-{
-	m_current++;
-	return *this;
-}
-
-template <class T> bool Vector<T>::Iterator::operator!=(const Vector<T>::Iterator& other) const
-{
-	return m_current != other.m_current;
-}
-
-template <class T> bool Vector<T>::Iterator::operator==(const Vector<T>::Iterator& other) const
-{
-	return m_current == other.m_current && m_storage == other.m_storage;
-}
-
-template <class T> void Vector<T>::Iterator::operator=(const Vector<T>::Iterator& other)
-{
-	m_current = other->m_current;
-}
-
-template <class T> T& Vector<T>::Iterator::operator*()
-{
-	return m_storage[m_current];
-}
-
-template <class T> T* Vector<T>::Iterator::operator->()
-{
-	return &m_storage[m_current];
-}
-
 template <class T>
 Vector<T>::Vector(size_t reserved_size, size_t allocation_steps) :
     m_storage{nullptr},
@@ -145,6 +96,8 @@ Vector<T>::Vector(size_t reserved_size, size_t allocation_steps) :
     m_capacity{0},
     m_allocation_steps{allocation_steps}
 {
+	ASSERT(reserved_size);
+	ASSERT(allocation_steps);
 	realloc(reserved_size);
 }
 
@@ -156,45 +109,52 @@ template <class T> Vector<T>::~Vector()
 
 template <class T> void Vector<T>::realloc(size_t size)
 {
-	if (!m_storage) {
-		m_storage = reinterpret_cast<T*>(operator new(size * sizeof(T)));
-	} else if (size > m_capacity) {
-		T* new_storage = reinterpret_cast<T*>(operator new(size * sizeof(T)));
+	ASSERT(size);
+	T* new_storage = nullptr;
+	if (size > m_capacity) {
+		new_storage = reinterpret_cast<T*>(operator new(size * sizeof(T)));
 		for (size_t i = 0; i < m_count; i++) {
 			new_storage[i] = move(m_storage[i]);
 		}
-
-		destruct_used_objects();
-		operator delete(m_storage);
-
-		m_storage = new_storage;
-	} else if (size < m_capacity) {
+	} else {
 		// FIXME:shrink ?
 		ASSERT_NOT_REACHABLE();
 	}
-	m_capacity = size;
-}
-
-// realloc and moves all old storage to the new one but make space for one element at index skip_index.
-template <class T> void Vector<T>::realloc(size_t size, size_t skip_index)
-{
-	ASSERT(size > m_capacity);
-	ASSERT(skip_index < m_capacity);
-
-	T* new_storage = reinterpret_cast<T*>(operator new(size * sizeof(T)));
-	for (size_t i = 0; i < skip_index; i++) {
-		new_storage[i] = move(m_storage[i]);
-	}
-
-	for (size_t i = skip_index; i < m_count; i++) {
-		new_storage[i + 1] = move(m_storage[i]);
-	}
-
 	destruct_used_objects();
 	operator delete(m_storage);
-
-	m_storage = new_storage;
 	m_capacity = size;
+	m_storage = new_storage;
+}
+
+template <class T> void Vector<T>::realloc_with_free_spot(size_t size, size_t free_spot_index)
+{
+	ASSERT(size);
+	ASSERT(free_spot_index <= m_count);
+	T* new_storage = nullptr;
+	if (size > m_capacity) {
+		new_storage = reinterpret_cast<T*>(operator new(size * sizeof(T)));
+		for (size_t i = 0; i < free_spot_index; i++) {
+			new_storage[i] = move(m_storage[i]);
+		}
+
+		for (size_t i = free_spot_index; i < m_count; i++) {
+			new_storage[i + 1] = move(m_storage[i]);
+		}
+	} else {
+		// FIXME:shrink ?
+		ASSERT_NOT_REACHABLE();
+	}
+	destruct_used_objects();
+	operator delete(m_storage);
+	m_capacity = size;
+	m_storage = new_storage;
+}
+
+template <class T> void Vector<T>::make_free_spot(size_t free_spot_index)
+{
+	for (int i = m_count; i >= free_spot_index + 1; i--) {
+		m_storage[i] = move(m_storage[i - 1]);
+	}
 }
 
 template <class T> void Vector<T>::destruct_used_objects()
@@ -206,8 +166,9 @@ template <class T> void Vector<T>::destruct_used_objects()
 
 template <class T> void Vector<T>::reserve(size_t size)
 {
-	ASSERT(size > m_capacity);
-	realloc(size);
+	if (m_capacity < size) {
+		realloc(size);
+	}
 }
 
 template <class T> void Vector<T>::clear()
@@ -217,18 +178,28 @@ template <class T> void Vector<T>::clear()
 	m_count = 0;
 }
 
-template <class T> void Vector<T>::splice(Vector<T>& list, const Iterator& itr)
+template <class T> void Vector<T>::splice(Vector<T>& destination_list, Iterator from, Iterator to)
 {
-	list.push_back(m_storage[itr.m_current]);
-	erase(itr);
+	destination_list.insert(to, *from);
+	erase(from);
 }
 
-template <class T> typename Vector<T>::Iterator Vector<T>::begin()
+template <class T> typename Vector<T>::ConstIterator Vector<T>::cbegin() const
 {
-	return Iterator(m_storage);
+	return ConstIterator(m_storage, 0);
 }
 
-template <class T> typename Vector<T>::Iterator Vector<T>::end()
+template <class T> typename Vector<T>::ConstIterator Vector<T>::cend() const
+{
+	return ConstIterator(m_storage, m_count);
+}
+
+template <class T> typename Vector<T>::Iterator Vector<T>::begin() const
+{
+	return Iterator(m_storage, 0);
+}
+
+template <class T> typename Vector<T>::Iterator Vector<T>::end() const
 {
 	return Iterator(m_storage, m_count);
 }
@@ -246,51 +217,34 @@ template <class T> template <typename... U> T& Vector<T>::emplace_back(U&&... u)
 template <class T> template <typename... U> T& Vector<T>::emplace_front(U&&... u)
 {
 	if (m_capacity == m_count) {
-		realloc(m_capacity + m_allocation_steps, 0);
+		realloc_with_free_spot(m_capacity + m_allocation_steps, 0);
 	}
 	new (&m_storage[0]) T{forward<U>(u)...};
 	m_count++;
 	return m_storage[m_count - 1];
 }
 
-template <class T> T& Vector<T>::push_back(const T& new_data)
+template <class T> template <typename U> T& Vector<T>::insert(Iterator pos, U&& new_data)
 {
-	if (m_capacity == m_count) {
-		realloc(m_capacity + m_allocation_steps);
+	ASSERT(m_storage);
+	if (m_count == m_capacity) {
+		realloc_with_free_spot(m_capacity + m_allocation_steps, pos.m_current);
+	} else {
+		make_free_spot(pos.m_current);
 	}
-	m_storage[m_count] = new_data;
+	m_storage[pos.m_current] = forward<U>(new_data);
 	m_count++;
-	return m_storage[m_count - 1];
+	return m_storage[pos.m_current];
 }
 
-template <class T> T& Vector<T>::push_front(const T& new_data)
+template <class T> template <typename U> T& Vector<T>::push_back(U&& new_data)
 {
-	if (m_capacity == m_count) {
-		realloc(m_capacity + m_allocation_steps, 0);
-	}
-	m_storage[0] = new_data;
-	m_count++;
-	return m_storage[m_count - 1];
+	return insert(end(), forward<T>(new_data));
 }
 
-template <class T> T& Vector<T>::push_back(T&& new_data)
+template <class T> template <typename U> T& Vector<T>::push_front(U&& new_data)
 {
-	if (m_capacity == m_count) {
-		realloc(m_capacity + m_allocation_steps);
-	}
-	m_storage[m_count] = move(new_data);
-	m_count++;
-	return m_storage[m_count - 1];
-}
-
-template <class T> T& Vector<T>::push_front(T&& new_data)
-{
-	if (m_capacity == m_count) {
-		realloc(m_capacity + m_allocation_steps, 0);
-	}
-	m_storage[0] = move(new_data);
-	m_count++;
-	return m_storage[m_count - 1];
+	return insert(begin(), forward<T>(new_data));
 }
 
 template <class T> template <class Predicate> bool Vector<T>::remove_if(Predicate predicate)
@@ -319,25 +273,15 @@ template <class T> template <class Predicate> bool Vector<T>::contains(Predicate
 
 template <class T> void Vector<T>::pop_back()
 {
-	erase(m_count - 1);
+	erase(end() - 1);
 }
 
 template <class T> void Vector<T>::pop_front()
 {
-	erase(0);
+	erase(begin());
 }
 
-template <class T> void Vector<T>::insert(const Iterator& pos, const T& new_data)
-{
-	ASSERT(m_storage);
-	if (m_count == m_capacity) {
-		realloc(m_capacity + m_allocation_steps, pos.m_current);
-	}
-	m_storage[pos.m_current] = new_data;
-	m_count++;
-}
-
-template <class T> void Vector<T>::erase(const Iterator& itr)
+template <class T> void Vector<T>::erase(Iterator itr)
 {
 	ASSERT(m_storage);
 	for (size_t i = itr.m_current; i < m_count - 1; i++) {
@@ -379,4 +323,124 @@ template <class T> size_t Vector<T>::size() const
 template <class T> size_t Vector<T>::capacity() const
 {
 	return m_capacity;
+}
+
+template <typename T>
+template <typename P>
+Vector<T>::template BaseIterator<P>::BaseIterator(T* storage, size_t index) : m_storage{storage}, m_current{index}
+{
+}
+
+template <typename T>
+template <typename P>
+Vector<T>::template BaseIterator<P>::BaseIterator(const BaseIterator& other) :
+    m_storage{other.m_storage},
+    m_current{other.m_current}
+{
+}
+
+template <typename T>
+template <typename P>
+Vector<T>::template BaseIterator<P>::operator BaseIterator<const RemoveConst<P>>()
+{
+	return BaseIterator<const RemoveConst<P>>{m_storage, m_current};
+}
+
+template <typename T>
+template <typename P>
+void Vector<T>::template BaseIterator<P>::operator=(const BaseIterator<P>& other)
+{
+	m_current = other.m_current;
+	m_storage = other.m_storage;
+}
+
+template <typename T>
+template <typename P>
+typename Vector<T>::template BaseIterator<P> Vector<T>::template BaseIterator<P>::operator++(int arg)
+{
+	UNUSED(arg);
+	auto old{*this};
+	m_current++;
+	return old;
+}
+
+template <typename T>
+template <typename P>
+typename Vector<T>::template BaseIterator<P>& Vector<T>::template BaseIterator<P>::operator++()
+{
+	m_current++;
+	return *this;
+}
+
+template <typename T>
+template <typename P>
+typename Vector<T>::template BaseIterator<P> Vector<T>::template BaseIterator<P>::operator--(int arg)
+{
+	UNUSED(arg);
+	auto old{*this};
+	m_current--;
+	return old;
+}
+
+template <typename T>
+template <typename P>
+typename Vector<T>::template BaseIterator<P>& Vector<T>::template BaseIterator<P>::operator--()
+{
+	m_current--;
+	return *this;
+}
+
+template <typename T>
+template <typename P>
+typename Vector<T>::template BaseIterator<P>& Vector<T>::template BaseIterator<P>::operator+=(int arg)
+{
+	m_current += arg;
+	return *this;
+}
+
+template <typename T>
+template <typename P>
+typename Vector<T>::template BaseIterator<P>& Vector<T>::template BaseIterator<P>::operator-=(int arg)
+{
+	return *this += -arg;
+}
+
+template <typename T>
+template <typename P>
+typename Vector<T>::template BaseIterator<P> Vector<T>::template BaseIterator<P>::operator+(int arg) const
+{
+	auto new_itr = *this;
+	return new_itr += arg;
+}
+
+template <typename T>
+template <typename P>
+typename Vector<T>::template BaseIterator<P> Vector<T>::template BaseIterator<P>::operator-(int arg) const
+{
+	auto new_itr = *this;
+	return new_itr -= arg;
+}
+
+template <typename T>
+template <typename P>
+bool Vector<T>::template BaseIterator<P>::operator!=(const BaseIterator<P>& other) const
+{
+	return m_current != other.m_current;
+}
+
+template <typename T>
+template <typename P>
+bool Vector<T>::template BaseIterator<P>::operator==(const BaseIterator<P>& other) const
+{
+	return m_current == other.m_current && m_storage == other.m_storage;
+}
+
+template <typename T> template <typename P> T& Vector<T>::template BaseIterator<P>::operator*()
+{
+	return m_storage[m_current];
+}
+
+template <typename T> template <typename P> T* Vector<T>::template BaseIterator<P>::operator->()
+{
+	return &m_storage[m_current];
 }

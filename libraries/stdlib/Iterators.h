@@ -29,5 +29,7 @@ template <typename T> struct RandomAccessIterator : public BidirectionalIterator
 	{
 		static_assert(sizeof(decltype(DeclareValue<T>() + 0)), "!");
 		static_assert(sizeof(decltype(DeclareValue<T>() - 0)), "!");
+		static_assert(sizeof(decltype(DeclareValue<T>() += 0)), "!");
+		static_assert(sizeof(decltype(DeclareValue<T>() -= 0)), "!");
 	}
 };

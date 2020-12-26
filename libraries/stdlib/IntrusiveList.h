@@ -39,24 +39,24 @@ template <typename T> class IntrusiveList
 	template <typename Type> class BaseIterator : public ForwardIterator<BaseIterator<Type>>
 	{
 	  public:
-		BaseIterator(T* node);
 		BaseIterator(const BaseIterator& other);
-		operator BaseIterator<const RemoveConst<Type>>();
 		~BaseIterator() = default;
+		BaseIterator& operator=(const BaseIterator& other);
+		operator BaseIterator<const RemoveConst<Type>>();
 		bool operator==(const BaseIterator& other) const;
 		bool operator!=(const BaseIterator& other) const;
 		BaseIterator& operator++();
 		BaseIterator operator++(int);
 		BaseIterator& operator--();
 		BaseIterator operator--(int);
-		// FIXME: Delete this.
-		/*BaseIterator operator+(int) const;
-		BaseIterator operator-(int) const;*/
 		Type& operator*();
 		Type* operator->();
 
+		friend IntrusiveList<T>;
+
 	  private:
 		T* m_node = nullptr;
+		BaseIterator(T* node);
 	};
 
   public:
@@ -206,6 +206,16 @@ template <typename P>
 IntrusiveList<T>::template BaseIterator<P>::BaseIterator(const BaseIterator<P>& other) : m_node{other.m_node}
 {
 }
+
+template <typename T>
+template <typename P>
+typename IntrusiveList<T>::template BaseIterator<P>& IntrusiveList<T>::template BaseIterator<P>::operator=(
+    const BaseIterator<P>& other)
+{
+	m_node = other.m_node;
+	return *this;
+}
+
 template <typename T>
 template <typename P>
 IntrusiveList<T>::template BaseIterator<P>::operator BaseIterator<const RemoveConst<P>>()
