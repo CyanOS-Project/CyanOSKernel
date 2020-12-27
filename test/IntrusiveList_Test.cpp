@@ -54,44 +54,29 @@ TEST(IntrusiveList_Test, Iteration)
 	EXPECT_EQ(*itr--, 3);
 	EXPECT_EQ(*itr--, 2);
 	EXPECT_EQ(*itr--, 1);
-	EXPECT_EQ(*itr--, 0);
-	EXPECT_EQ(itr, list1.end());
+	EXPECT_EQ(*itr, 0);
 	itr = get_last_itr();
 	EXPECT_EQ(*--itr, 4);
 	EXPECT_EQ(*--itr, 3);
 	EXPECT_EQ(*--itr, 2);
 	EXPECT_EQ(*--itr, 1);
 	EXPECT_EQ(*--itr, 0);
-	EXPECT_EQ(--itr, list1.end());
 
-	// If you get to end(), you can't come back by ++ or --.
-	// end() that is after the last element.
+	// If you get to end(), you can come back by operator--.
 	itr = get_last_itr();
 	EXPECT_EQ(++itr, list1.end());
 	EXPECT_EQ(++itr, list1.end());
-	EXPECT_EQ(--itr, list1.end());
-	EXPECT_EQ(--itr, list1.end());
+	EXPECT_NE(--itr, list1.end()); // Not Equal
+	EXPECT_EQ(*itr, 5);
+	EXPECT_EQ(*--itr, 4);
 
 	itr = get_last_itr();
 	EXPECT_EQ(*(itr++), 5);
 	EXPECT_EQ(itr++, list1.end());
-	EXPECT_EQ(itr, list1.end());
 	EXPECT_EQ(itr--, list1.end());
-	EXPECT_EQ(itr, list1.end());
-
-	// end() that is before the first element.
-	itr = list1.begin();
-	EXPECT_EQ(--itr, list1.end());
-	EXPECT_EQ(--itr, list1.end());
-	EXPECT_EQ(++itr, list1.end());
-	EXPECT_EQ(++itr, list1.end());
-
-	itr = list1.begin();
-	EXPECT_EQ(*(itr--), 0);
-	EXPECT_EQ(itr--, list1.end());
-	EXPECT_EQ(itr, list1.end());
-	EXPECT_EQ(itr++, list1.end());
-	EXPECT_EQ(itr, list1.end());
+	EXPECT_NE(itr, list1.end());
+	EXPECT_EQ(*itr--, 5);
+	EXPECT_EQ(*itr, 4);
 }
 
 TEST(IntrusiveList_Test, Removing)
@@ -104,6 +89,8 @@ TEST(IntrusiveList_Test, Removing)
 	// [0, 1, 2, 3, 4, 5].
 	auto itr = list1.begin();
 	EXPECT_EQ(list1.size(), 6);
+	EXPECT_EQ(list1.first(), 0);
+	EXPECT_EQ(list1.last(), 5);
 	EXPECT_EQ(*itr, 0);
 	EXPECT_EQ(*++itr, 1);
 	EXPECT_EQ(*++itr, 2);
@@ -115,6 +102,8 @@ TEST(IntrusiveList_Test, Removing)
 	// [0, 1, 3, 4, 5].
 	itr = list1.begin();
 	EXPECT_EQ(list1.size(), 5);
+	EXPECT_EQ(list1.first(), 0);
+	EXPECT_EQ(list1.last(), 5);
 	EXPECT_EQ(*itr, 0);
 	EXPECT_EQ(*++itr, 1);
 	EXPECT_EQ(*++itr, 3);
@@ -125,6 +114,8 @@ TEST(IntrusiveList_Test, Removing)
 	// [0, 1, 3, 4].
 	itr = list1.begin();
 	EXPECT_EQ(list1.size(), 4);
+	EXPECT_EQ(list1.first(), 0);
+	EXPECT_EQ(list1.last(), 4);
 	EXPECT_EQ(*itr, 0);
 	EXPECT_EQ(*++itr, 1);
 	EXPECT_EQ(*++itr, 3);
@@ -134,6 +125,8 @@ TEST(IntrusiveList_Test, Removing)
 	// [1, 3, 4].
 	itr = list1.begin();
 	EXPECT_EQ(list1.size(), 3);
+	EXPECT_EQ(list1.first(), 1);
+	EXPECT_EQ(list1.last(), 4);
 	EXPECT_EQ(*itr, 1);
 	EXPECT_EQ(*++itr, 3);
 	EXPECT_EQ(*++itr, 4);
@@ -142,11 +135,27 @@ TEST(IntrusiveList_Test, Removing)
 	list1.remove(raw_list[4]);
 	// [3].
 	itr = list1.begin();
+	EXPECT_EQ(list1.first(), 3);
+	EXPECT_EQ(list1.last(), 3);
 	EXPECT_EQ(list1.size(), 1);
 	EXPECT_EQ(*itr, 3);
 	// []
 	list1.remove(raw_list[3]);
 	EXPECT_EQ(list1.size(), 0);
+
+	for (auto&& i : raw_list) {
+		list1.push_back(i);
+	}
+	// [0, 1, 2, 3, 4, 5]
+
+	EXPECT_EQ(list1.pop_front(), 0);
+	EXPECT_EQ(list1.pop_front(), 1);
+	EXPECT_EQ(list1.pop_front(), 2);
+	EXPECT_EQ(list1.pop_front(), 3);
+	EXPECT_EQ(list1.pop_front(), 4);
+	EXPECT_EQ(list1.pop_front(), 5);
+	EXPECT_EQ(list1.size(), 0);
+	EXPECT_EQ(list1.begin(), list1.end());
 }
 
 TEST(IntrusiveList_Test, MovingBetweenLists)
@@ -228,13 +237,13 @@ TEST(IntrusiveList_Test, Finding)
 	EXPECT_EQ(*list2.find(raw_list[1]), 1);
 	EXPECT_EQ(*list2.find(raw_list[3]), 3);
 	EXPECT_EQ(*list2.find(raw_list[5]), 5);
-	EXPECT_EQ(list2.find(raw_list[0]), list1.end());
-	EXPECT_EQ(list2.find(raw_list[2]), list1.end());
-	EXPECT_EQ(list2.find(raw_list[4]), list1.end());
+	EXPECT_EQ(list2.find(raw_list[0]), list2.end());
+	EXPECT_EQ(list2.find(raw_list[2]), list2.end());
+	EXPECT_EQ(list2.find(raw_list[4]), list2.end());
 
 	list2.remove(raw_list[1]);
 	list1.push_back(raw_list[1]);
 
 	EXPECT_EQ(*list1.find(raw_list[1]), 1);
-	EXPECT_EQ(list2.find(raw_list[1]), list1.end());
+	EXPECT_EQ(list2.find(raw_list[1]), list2.end());
 }
