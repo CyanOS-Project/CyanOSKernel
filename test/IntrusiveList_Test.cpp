@@ -21,7 +21,7 @@ TEST(IntrusiveList_Test, Iteration)
 		list1.push_back(i);
 	}
 	auto get_last_itr = [&list1]() {
-		auto itr = list1.begin();
+		auto itr = list1.cbegin();
 		auto tmp = itr;
 		while (++tmp != list1.end()) {
 			itr = tmp;
@@ -29,16 +29,21 @@ TEST(IntrusiveList_Test, Iteration)
 		return itr;
 	};
 
-	auto itr = list1.begin();
+	EXPECT_TRUE(list1.cbegin() == list1.begin());
+	EXPECT_TRUE(list1.cend() == list1.cend());
+	auto constant_iterator = list1.cbegin();
+	constant_iterator = list1.begin();
+
+	auto itr = list1.cbegin();
 	EXPECT_EQ(*itr++, 0);
 	EXPECT_EQ(*itr++, 1);
 	EXPECT_EQ(*itr++, 2);
 	EXPECT_EQ(*itr++, 3);
 	EXPECT_EQ(*itr++, 4);
 	EXPECT_EQ(*itr++, 5);
-	EXPECT_EQ(itr, list1.end());
+	EXPECT_EQ(itr, list1.cend());
 
-	itr = list1.begin();
+	itr = list1.cbegin();
 	EXPECT_EQ(*itr, 0);
 	EXPECT_EQ(*++itr, 1);
 	EXPECT_EQ(*++itr, 2);
@@ -46,7 +51,7 @@ TEST(IntrusiveList_Test, Iteration)
 	EXPECT_EQ(*++itr, 4);
 	EXPECT_EQ(*++itr, 5);
 	EXPECT_EQ(*itr, 5);
-	EXPECT_EQ(++itr, list1.end());
+	EXPECT_EQ(++itr, list1.cend());
 
 	itr = get_last_itr();
 	EXPECT_EQ(*itr--, 5);
@@ -64,17 +69,17 @@ TEST(IntrusiveList_Test, Iteration)
 
 	// If you get to end(), you can come back by operator--.
 	itr = get_last_itr();
-	EXPECT_EQ(++itr, list1.end());
-	EXPECT_EQ(++itr, list1.end());
-	EXPECT_NE(--itr, list1.end()); // Not Equal
+	EXPECT_EQ(++itr, list1.cend());
+	EXPECT_EQ(++itr, list1.cend());
+	EXPECT_NE(--itr, list1.cend()); // Not Equal
 	EXPECT_EQ(*itr, 5);
 	EXPECT_EQ(*--itr, 4);
 
 	itr = get_last_itr();
 	EXPECT_EQ(*(itr++), 5);
-	EXPECT_EQ(itr++, list1.end());
-	EXPECT_EQ(itr--, list1.end());
-	EXPECT_NE(itr, list1.end());
+	EXPECT_EQ(itr++, list1.cend());
+	EXPECT_EQ(itr--, list1.cend());
+	EXPECT_NE(itr, list1.cend());
 	EXPECT_EQ(*itr--, 5);
 	EXPECT_EQ(*itr, 4);
 }
@@ -87,7 +92,7 @@ TEST(IntrusiveList_Test, Removing)
 		list1.push_back(i);
 	}
 	// [0, 1, 2, 3, 4, 5].
-	auto itr = list1.begin();
+	auto itr = list1.cbegin();
 	EXPECT_EQ(list1.size(), 6);
 	EXPECT_EQ(list1.first(), 0);
 	EXPECT_EQ(list1.last(), 5);
@@ -100,7 +105,7 @@ TEST(IntrusiveList_Test, Removing)
 
 	list1.remove(raw_list[2]);
 	// [0, 1, 3, 4, 5].
-	itr = list1.begin();
+	itr = list1.cbegin();
 	EXPECT_EQ(list1.size(), 5);
 	EXPECT_EQ(list1.first(), 0);
 	EXPECT_EQ(list1.last(), 5);
@@ -112,7 +117,7 @@ TEST(IntrusiveList_Test, Removing)
 
 	list1.remove(raw_list[5]);
 	// [0, 1, 3, 4].
-	itr = list1.begin();
+	itr = list1.cbegin();
 	EXPECT_EQ(list1.size(), 4);
 	EXPECT_EQ(list1.first(), 0);
 	EXPECT_EQ(list1.last(), 4);
@@ -123,7 +128,7 @@ TEST(IntrusiveList_Test, Removing)
 
 	list1.remove(raw_list[0]);
 	// [1, 3, 4].
-	itr = list1.begin();
+	itr = list1.cbegin();
 	EXPECT_EQ(list1.size(), 3);
 	EXPECT_EQ(list1.first(), 1);
 	EXPECT_EQ(list1.last(), 4);
@@ -134,7 +139,7 @@ TEST(IntrusiveList_Test, Removing)
 	list1.remove(raw_list[1]);
 	list1.remove(raw_list[4]);
 	// [3].
-	itr = list1.begin();
+	itr = list1.cbegin();
 	EXPECT_EQ(list1.first(), 3);
 	EXPECT_EQ(list1.last(), 3);
 	EXPECT_EQ(list1.size(), 1);
@@ -155,7 +160,7 @@ TEST(IntrusiveList_Test, Removing)
 	EXPECT_EQ(list1.pop_front(), 4);
 	EXPECT_EQ(list1.pop_front(), 5);
 	EXPECT_EQ(list1.size(), 0);
-	EXPECT_EQ(list1.begin(), list1.end());
+	EXPECT_EQ(list1.cbegin(), list1.cend());
 }
 
 TEST(IntrusiveList_Test, MovingBetweenLists)
@@ -173,8 +178,8 @@ TEST(IntrusiveList_Test, MovingBetweenLists)
 
 	// List1: 0, 2, 4
 	// List2: 1, 3, 5
-	auto itr1 = list1.begin();
-	auto itr2 = list2.begin();
+	auto itr1 = list1.cbegin();
+	auto itr2 = list2.cbegin();
 	EXPECT_EQ(*itr1++, 0);
 	EXPECT_EQ(*itr1++, 2);
 	EXPECT_EQ(*itr1++, 4);
@@ -186,8 +191,8 @@ TEST(IntrusiveList_Test, MovingBetweenLists)
 	list1.push_back(raw_list[1]);
 	// List1: 0, 2, 4, 1
 	// List2: 3, 5
-	itr1 = list1.begin();
-	itr2 = list2.begin();
+	itr1 = list1.cbegin();
+	itr2 = list2.cbegin();
 	EXPECT_EQ(list1.size(), 4);
 	EXPECT_EQ(list2.size(), 2);
 	EXPECT_EQ(*itr1++, 0);
@@ -203,8 +208,8 @@ TEST(IntrusiveList_Test, MovingBetweenLists)
 	// List2: 3, 5, 0
 	EXPECT_EQ(list1.size(), 3);
 	EXPECT_EQ(list2.size(), 3);
-	itr1 = list1.begin();
-	itr2 = list2.begin();
+	itr1 = list1.cbegin();
+	itr2 = list2.cbegin();
 	EXPECT_EQ(*itr1++, 2);
 	EXPECT_EQ(*itr1++, 4);
 	EXPECT_EQ(*itr1++, 1);

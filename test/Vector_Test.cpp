@@ -8,9 +8,9 @@ TEST(Vector_Test, Iteration)
 {
 	Vector<int> vec;
 	auto get_last_itr = [&vec]() {
-		auto itr = vec.begin();
+		auto itr = vec.cbegin();
 		auto tmp = itr;
-		while (++tmp != vec.end()) {
+		while (++tmp != vec.cend()) {
 			itr = tmp;
 		}
 		return itr;
@@ -20,48 +20,53 @@ TEST(Vector_Test, Iteration)
 	vec.push_back(1);
 	vec.push_back(2);
 
+	EXPECT_TRUE(vec.cbegin() == vec.begin());
+	EXPECT_TRUE(vec.cend() == vec.end());
+	auto constant_iterator = vec.cbegin();
+	constant_iterator = vec.begin();
+
 	EXPECT_EQ(vec.size(), 3);
 	EXPECT_FALSE(vec.is_empty());
 
-	auto itr = vec.begin();
+	auto itr = vec.cbegin();
 	EXPECT_EQ(*itr++, 0);
 	EXPECT_EQ(*itr++, 1);
 	EXPECT_EQ(*itr++, 2);
-	EXPECT_EQ(itr, vec.end());
+	EXPECT_EQ(itr, vec.cend());
 
-	itr = vec.begin();
+	itr = vec.cbegin();
 	EXPECT_EQ(*itr, 0);
 	EXPECT_EQ(*++itr, 1);
 	EXPECT_EQ(*++itr, 2);
 	EXPECT_EQ(*itr, 2);
-	EXPECT_EQ(++itr, vec.end());
+	EXPECT_EQ(++itr, vec.cend());
 
 	itr = get_last_itr();
 	EXPECT_EQ(*itr--, 2);
 	EXPECT_EQ(*itr--, 1);
 	EXPECT_EQ(*itr, 0);
-	EXPECT_EQ(itr, vec.begin());
+	EXPECT_EQ(itr, vec.cbegin());
 
 	itr = get_last_itr();
 	EXPECT_EQ(*--itr, 1);
 	EXPECT_EQ(*--itr, 0);
-	EXPECT_EQ(itr, vec.begin());
+	EXPECT_EQ(itr, vec.cbegin());
 
-	itr = vec.begin();
-	EXPECT_EQ(itr + 0, vec.begin());
+	itr = vec.cbegin();
+	EXPECT_EQ(itr + 0, vec.cbegin());
 	EXPECT_EQ(*(itr + 0), 0);
 	EXPECT_EQ(*(itr + 1), 1);
 	EXPECT_EQ(*(itr + 2), 2);
-	EXPECT_EQ(itr + 3, vec.end());
+	EXPECT_EQ(itr + 3, vec.cend());
 
-	itr = vec.begin();
-	EXPECT_EQ(*(vec.begin() += 0), 0);
-	EXPECT_EQ(*(vec.begin() += 1), 1);
-	EXPECT_EQ(*(vec.begin() += 2), 2);
-	EXPECT_EQ((vec.begin() += 3), vec.end());
+	itr = vec.cbegin();
+	EXPECT_EQ(*(vec.cbegin() += 0), 0);
+	EXPECT_EQ(*(vec.cbegin() += 1), 1);
+	EXPECT_EQ(*(vec.cbegin() += 2), 2);
+	EXPECT_EQ((vec.cbegin() += 3), vec.cend());
 
 	itr = get_last_itr();
-	EXPECT_EQ(itr + 1, vec.end());
+	EXPECT_EQ(itr + 1, vec.cend());
 	EXPECT_EQ(*(itr - 0), 2);
 	EXPECT_EQ(*(itr - 1), 1);
 	EXPECT_EQ(*(itr - 2), 0);
@@ -70,9 +75,9 @@ TEST(Vector_Test, Iteration)
 	EXPECT_EQ(*(get_last_itr() -= 1), 1);
 	EXPECT_EQ(*(get_last_itr() -= 2), 0);
 
-	EXPECT_EQ(*(vec.begin() + 0), vec[0]);
-	EXPECT_EQ(*(vec.begin() + 1), vec[1]);
-	EXPECT_EQ(*(vec.begin() + 2), vec[2]);
+	EXPECT_EQ(*(vec.cbegin() + 0), vec[0]);
+	EXPECT_EQ(*(vec.cbegin() + 1), vec[1]);
+	EXPECT_EQ(*(vec.cbegin() + 2), vec[2]);
 }
 
 TEST(Vector_Test, Inserting)
@@ -82,69 +87,69 @@ TEST(Vector_Test, Inserting)
 	vec1.push_back(2);
 	vec1.push_back(3);
 	EXPECT_EQ(vec1.size(), 3);
-	EXPECT_EQ(*(vec1.begin() + 0), 1);
-	EXPECT_EQ(*(vec1.begin() + 1), 2);
-	EXPECT_EQ(*(vec1.begin() + 2), 3);
+	EXPECT_EQ(*(vec1.cbegin() + 0), 1);
+	EXPECT_EQ(*(vec1.cbegin() + 1), 2);
+	EXPECT_EQ(*(vec1.cbegin() + 2), 3);
 
 	Vector<int> vec2;
 	vec2.push_front(1);
 	vec2.push_front(2);
 	vec2.push_front(3);
 	EXPECT_EQ(vec2.size(), 3);
-	EXPECT_EQ(*(vec2.begin() + 0), 3);
-	EXPECT_EQ(*(vec2.begin() + 1), 2);
-	EXPECT_EQ(*(vec2.begin() + 2), 1);
+	EXPECT_EQ(*(vec2.cbegin() + 0), 3);
+	EXPECT_EQ(*(vec2.cbegin() + 1), 2);
+	EXPECT_EQ(*(vec2.cbegin() + 2), 1);
 
 	Vector<int> vec3;
 	vec3.emplace_back(1);
 	vec3.emplace_back(2);
 	vec3.emplace_back(3);
 	EXPECT_EQ(vec3.size(), 3);
-	EXPECT_EQ(*(vec3.begin() + 0), 1);
-	EXPECT_EQ(*(vec3.begin() + 1), 2);
-	EXPECT_EQ(*(vec3.begin() + 2), 3);
+	EXPECT_EQ(*(vec3.cbegin() + 0), 1);
+	EXPECT_EQ(*(vec3.cbegin() + 1), 2);
+	EXPECT_EQ(*(vec3.cbegin() + 2), 3);
 
 	Vector<int> vec4;
 	vec4.emplace_front(1);
 	vec4.emplace_front(2);
 	vec4.emplace_front(3);
 	EXPECT_EQ(vec4.size(), 3);
-	EXPECT_EQ(*(vec4.begin() + 0), 3);
-	EXPECT_EQ(*(vec4.begin() + 1), 2);
-	EXPECT_EQ(*(vec4.begin() + 2), 1);
+	EXPECT_EQ(*(vec4.cbegin() + 0), 3);
+	EXPECT_EQ(*(vec4.cbegin() + 1), 2);
+	EXPECT_EQ(*(vec4.cbegin() + 2), 1);
 
 	Vector<int> vec5;
 	vec5.push_back(1);
 	vec5.push_back(2);
 	vec5.push_back(3);
 	EXPECT_EQ(vec5.size(), 3);
-	EXPECT_EQ(*(vec5.begin() + 0), 1);
-	EXPECT_EQ(*(vec5.begin() + 1), 2);
-	EXPECT_EQ(*(vec5.begin() + 2), 3);
+	EXPECT_EQ(*(vec5.cbegin() + 0), 1);
+	EXPECT_EQ(*(vec5.cbegin() + 1), 2);
+	EXPECT_EQ(*(vec5.cbegin() + 2), 3);
 
 	vec5.insert(vec5.begin(), 4);
 	EXPECT_EQ(vec5.size(), 4);
-	EXPECT_EQ(*(vec5.begin() + 0), 4);
-	EXPECT_EQ(*(vec5.begin() + 1), 1);
-	EXPECT_EQ(*(vec5.begin() + 2), 2);
-	EXPECT_EQ(*(vec5.begin() + 3), 3);
+	EXPECT_EQ(*(vec5.cbegin() + 0), 4);
+	EXPECT_EQ(*(vec5.cbegin() + 1), 1);
+	EXPECT_EQ(*(vec5.cbegin() + 2), 2);
+	EXPECT_EQ(*(vec5.cbegin() + 3), 3);
 
 	vec5.insert(vec5.begin() + 1, 5);
 	EXPECT_EQ(vec5.size(), 5);
-	EXPECT_EQ(*(vec5.begin() + 0), 4);
-	EXPECT_EQ(*(vec5.begin() + 1), 5);
-	EXPECT_EQ(*(vec5.begin() + 2), 1);
-	EXPECT_EQ(*(vec5.begin() + 3), 2);
-	EXPECT_EQ(*(vec5.begin() + 4), 3);
+	EXPECT_EQ(*(vec5.cbegin() + 0), 4);
+	EXPECT_EQ(*(vec5.cbegin() + 1), 5);
+	EXPECT_EQ(*(vec5.cbegin() + 2), 1);
+	EXPECT_EQ(*(vec5.cbegin() + 3), 2);
+	EXPECT_EQ(*(vec5.cbegin() + 4), 3);
 
 	vec5.insert(vec5.end(), 6);
 	EXPECT_EQ(vec5.size(), 6);
-	EXPECT_EQ(*(vec5.begin() + 0), 4);
-	EXPECT_EQ(*(vec5.begin() + 1), 5);
-	EXPECT_EQ(*(vec5.begin() + 2), 1);
-	EXPECT_EQ(*(vec5.begin() + 3), 2);
-	EXPECT_EQ(*(vec5.begin() + 4), 3);
-	EXPECT_EQ(*(vec5.begin() + 5), 6);
+	EXPECT_EQ(*(vec5.cbegin() + 0), 4);
+	EXPECT_EQ(*(vec5.cbegin() + 1), 5);
+	EXPECT_EQ(*(vec5.cbegin() + 2), 1);
+	EXPECT_EQ(*(vec5.cbegin() + 3), 2);
+	EXPECT_EQ(*(vec5.cbegin() + 4), 3);
+	EXPECT_EQ(*(vec5.cbegin() + 5), 6);
 }
 
 TEST(Vector_Test, Erasing)
@@ -156,33 +161,33 @@ TEST(Vector_Test, Erasing)
 	vec1.push_back(4);
 
 	EXPECT_EQ(vec1.size(), 4); // [1, 2, 3, 4]
-	EXPECT_EQ(*(vec1.begin() + 0), 1);
-	EXPECT_EQ(*(vec1.begin() + 1), 2);
-	EXPECT_EQ(*(vec1.begin() + 2), 3);
-	EXPECT_EQ(*(vec1.begin() + 3), 4);
-	EXPECT_EQ(vec1.begin() + 4, vec1.end());
+	EXPECT_EQ(*(vec1.cbegin() + 0), 1);
+	EXPECT_EQ(*(vec1.cbegin() + 1), 2);
+	EXPECT_EQ(*(vec1.cbegin() + 2), 3);
+	EXPECT_EQ(*(vec1.cbegin() + 3), 4);
+	EXPECT_EQ(vec1.cbegin() + 4, vec1.cend());
 
 	vec1.pop_front();
 	EXPECT_EQ(vec1.size(), 3); // [2, 3, 4]
-	EXPECT_EQ(*(vec1.begin() + 0), 2);
-	EXPECT_EQ(*(vec1.begin() + 1), 3);
-	EXPECT_EQ(*(vec1.begin() + 2), 4);
-	EXPECT_EQ(vec1.begin() + 3, vec1.end());
+	EXPECT_EQ(*(vec1.cbegin() + 0), 2);
+	EXPECT_EQ(*(vec1.cbegin() + 1), 3);
+	EXPECT_EQ(*(vec1.cbegin() + 2), 4);
+	EXPECT_EQ(vec1.cbegin() + 3, vec1.cend());
 
 	vec1.pop_front();
 	EXPECT_EQ(vec1.size(), 2); // [3, 4]
-	EXPECT_EQ(*(vec1.begin() + 0), 3);
-	EXPECT_EQ(*(vec1.begin() + 1), 4);
-	EXPECT_EQ(vec1.begin() + 2, vec1.end());
+	EXPECT_EQ(*(vec1.cbegin() + 0), 3);
+	EXPECT_EQ(*(vec1.cbegin() + 1), 4);
+	EXPECT_EQ(vec1.cbegin() + 2, vec1.cend());
 
 	vec1.erase(vec1.begin() + 1);
 	EXPECT_EQ(vec1.size(), 1); // [3]
-	EXPECT_EQ(*(vec1.begin() + 0), 3);
-	EXPECT_EQ(vec1.begin() + 1, vec1.end());
+	EXPECT_EQ(*(vec1.cbegin() + 0), 3);
+	EXPECT_EQ(vec1.cbegin() + 1, vec1.cend());
 
 	vec1.erase(vec1.begin());
 	EXPECT_EQ(vec1.size(), 0); // []
-	EXPECT_EQ(vec1.begin(), vec1.end());
+	EXPECT_EQ(vec1.cbegin(), vec1.cend());
 
 	vec1.push_back(1);
 	vec1.push_back(2);
@@ -190,20 +195,20 @@ TEST(Vector_Test, Erasing)
 	vec1.push_back(4);
 	vec1.erase(vec1.begin() + 1);
 	EXPECT_EQ(vec1.size(), 3); // [1, 3, 4]
-	EXPECT_EQ(*(vec1.begin() + 0), 1);
-	EXPECT_EQ(*(vec1.begin() + 1), 3);
-	EXPECT_EQ(*(vec1.begin() + 2), 4);
-	EXPECT_EQ(vec1.begin() + 3, vec1.end());
+	EXPECT_EQ(*(vec1.cbegin() + 0), 1);
+	EXPECT_EQ(*(vec1.cbegin() + 1), 3);
+	EXPECT_EQ(*(vec1.cbegin() + 2), 4);
+	EXPECT_EQ(vec1.cbegin() + 3, vec1.cend());
 
 	vec1.erase(vec1.begin() + 1);
 	EXPECT_EQ(vec1.size(), 2); // [1, 4]
-	EXPECT_EQ(*(vec1.begin() + 0), 1);
-	EXPECT_EQ(*(vec1.begin() + 1), 4);
-	EXPECT_EQ(vec1.begin() + 2, vec1.end());
+	EXPECT_EQ(*(vec1.cbegin() + 0), 1);
+	EXPECT_EQ(*(vec1.cbegin() + 1), 4);
+	EXPECT_EQ(vec1.cbegin() + 2, vec1.cend());
 
 	vec1.clear();
 	EXPECT_EQ(vec1.size(), 0); // []
-	EXPECT_EQ(vec1.begin(), vec1.end());
+	EXPECT_EQ(vec1.cbegin(), vec1.cend());
 
 	vec1.push_back(2);
 	vec1.push_back(1);
@@ -213,9 +218,9 @@ TEST(Vector_Test, Erasing)
 	vec1.push_back(4);
 	vec1.remove_if([&](auto& i) { return i == 2; });
 	EXPECT_EQ(vec1.size(), 3); // [1, 3, 4]
-	EXPECT_EQ(*(vec1.begin() + 0), 1);
-	EXPECT_EQ(*(vec1.begin() + 1), 3);
-	EXPECT_EQ(*(vec1.begin() + 2), 4);
+	EXPECT_EQ(*(vec1.cbegin() + 0), 1);
+	EXPECT_EQ(*(vec1.cbegin() + 1), 3);
+	EXPECT_EQ(*(vec1.cbegin() + 2), 4);
 }
 
 TEST(Vector_Test, Splicing)
@@ -236,27 +241,27 @@ TEST(Vector_Test, Splicing)
 	// vec1: [1, 3, 4] vec2: [5, 6, 2, 7, 8]
 	EXPECT_EQ(vec1.size(), 3);
 	EXPECT_EQ(vec2.size(), 5);
-	EXPECT_EQ(*(vec1.begin() + 0), 1);
-	EXPECT_EQ(*(vec1.begin() + 1), 3);
-	EXPECT_EQ(*(vec1.begin() + 2), 4);
-	EXPECT_EQ(*(vec2.begin() + 0), 5);
-	EXPECT_EQ(*(vec2.begin() + 1), 6);
-	EXPECT_EQ(*(vec2.begin() + 2), 2);
-	EXPECT_EQ(*(vec2.begin() + 3), 7);
-	EXPECT_EQ(*(vec2.begin() + 4), 8);
+	EXPECT_EQ(*(vec1.cbegin() + 0), 1);
+	EXPECT_EQ(*(vec1.cbegin() + 1), 3);
+	EXPECT_EQ(*(vec1.cbegin() + 2), 4);
+	EXPECT_EQ(*(vec2.cbegin() + 0), 5);
+	EXPECT_EQ(*(vec2.cbegin() + 1), 6);
+	EXPECT_EQ(*(vec2.cbegin() + 2), 2);
+	EXPECT_EQ(*(vec2.cbegin() + 3), 7);
+	EXPECT_EQ(*(vec2.cbegin() + 4), 8);
 
 	vec2.splice(vec1, vec2.end() - 1, vec1.begin());
 	// vec1: [8, 1, 3, 4] vec2: [5, 6, 2, 7]
 	EXPECT_EQ(vec1.size(), 4);
 	EXPECT_EQ(vec2.size(), 4);
-	EXPECT_EQ(*(vec1.begin() + 0), 8);
-	EXPECT_EQ(*(vec1.begin() + 1), 1);
-	EXPECT_EQ(*(vec1.begin() + 2), 3);
-	EXPECT_EQ(*(vec1.begin() + 3), 4);
-	EXPECT_EQ(*(vec2.begin() + 0), 5);
-	EXPECT_EQ(*(vec2.begin() + 1), 6);
-	EXPECT_EQ(*(vec2.begin() + 2), 2);
-	EXPECT_EQ(*(vec2.begin() + 3), 7);
+	EXPECT_EQ(*(vec1.cbegin() + 0), 8);
+	EXPECT_EQ(*(vec1.cbegin() + 1), 1);
+	EXPECT_EQ(*(vec1.cbegin() + 2), 3);
+	EXPECT_EQ(*(vec1.cbegin() + 3), 4);
+	EXPECT_EQ(*(vec2.cbegin() + 0), 5);
+	EXPECT_EQ(*(vec2.cbegin() + 1), 6);
+	EXPECT_EQ(*(vec2.cbegin() + 2), 2);
+	EXPECT_EQ(*(vec2.cbegin() + 3), 7);
 }
 
 TEST(Vector_Test, Capacity)
