@@ -63,13 +63,13 @@ template <typename T> class IntrusiveList
 		IntrusiveListNode<T>* m_node = nullptr;
 		friend class IntrusiveList<T>;
 	};
-	static_assert(is_ForwardIterator<BaseIterator<T>>, "Not valid Forward Iterator.");
 
   public:
 	NON_COPYABLE(IntrusiveList);
 	NON_MOVABLE(IntrusiveList);
 	using ConstIterator = BaseIterator<const T>;
 	using Iterator = BaseIterator<T>;
+	static_assert(validate_BidirectionalIterator<Iterator, ConstIterator>, "Not valid Bidirectional Iterator.");
 
 	IntrusiveList();
 	~IntrusiveList() = default;

@@ -48,7 +48,6 @@ template <class T> class Vector
 		size_t m_current;
 		BaseIterator(T* storage, size_t index);
 	};
-	static_assert(is_RandomAccessIterator<BaseIterator<T>>, "Not valid Random Access Iterator.");
 
 	void realloc(size_t new_size);
 	void realloc_with_free_spot(size_t new_size, size_t free_spot_index);
@@ -60,6 +59,7 @@ template <class T> class Vector
 	NON_MOVABLE(Vector);
 	using ConstIterator = BaseIterator<const T>;
 	using Iterator = BaseIterator<T>;
+	static_assert(validate_RandomAccessIterator<Iterator, ConstIterator>, "Not valid Random Access Iterator.");
 
 	explicit Vector(size_t reserved_size = 1, size_t allocation_steps = 1);
 	~Vector();

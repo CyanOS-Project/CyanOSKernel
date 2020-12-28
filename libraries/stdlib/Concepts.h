@@ -82,9 +82,26 @@ template <typename T> concept Subscriptable = requires(T x, int a)
 	x[a];
 };
 
+template <typename From, typename To> concept Convertable_to = requires(From x)
+{
+	static_cast<To>(x);
+};
+
 template <typename T>
 concept is_ForwardIterator = Incrementable<T>&& EqualityComparable<T>&& Dereferenceable<T>&& MemberDereferenceable<T>;
 
 template <typename T> concept is_BidirectionalIteratorIterator = is_ForwardIterator<T>&& Decrementable<T>;
 
 template <typename T> concept is_RandomAccessIterator = is_BidirectionalIteratorIterator<T>&& Decrementable<T>;
+
+template <typename MutableIterator, typename ConstIterator>
+concept validate_ForwardIterator = is_ForwardIterator<MutableIterator>&& is_ForwardIterator<ConstIterator>&&
+    Convertable_to<MutableIterator, ConstIterator>;
+
+template <typename MutableIterator, typename ConstIterator>
+concept validate_BidirectionalIterator = is_BidirectionalIteratorIterator<MutableIterator>&&
+    is_BidirectionalIteratorIterator<ConstIterator>&& Convertable_to<MutableIterator, ConstIterator>;
+
+template <typename MutableIterator, typename ConstIterator>
+concept validate_RandomAccessIterator = is_RandomAccessIterator<MutableIterator>&&
+    is_RandomAccessIterator<ConstIterator>&& Convertable_to<MutableIterator, ConstIterator>;
