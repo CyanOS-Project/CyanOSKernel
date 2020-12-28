@@ -70,6 +70,7 @@ template <class T> class Vector
 	ConstIterator cend() const;
 	template <typename... U> T& emplace_back(U&&... u);
 	template <typename... U> T& emplace_front(U&&... u);
+	template <typename... U> T& emplace(Iterator node, U&&... u);
 	template <typename U> T& insert(Iterator node, U&& new_node);
 	template <typename U> T& push_back(U&& new_data);
 	template <typename U> T& push_front(U&& new_data);
@@ -152,7 +153,7 @@ template <class T> void Vector<T>::realloc_with_free_spot(size_t size, size_t fr
 
 template <class T> void Vector<T>::make_free_spot(size_t free_spot_index)
 {
-	for (int i = m_count; i >= free_spot_index + 1; i--) {
+	for (size_t i = m_count; i >= free_spot_index + 1; i--) {
 		m_storage[i] = move(m_storage[i - 1]);
 	}
 }
@@ -204,24 +205,17 @@ template <class T> typename Vector<T>::Iterator Vector<T>::end() const
 	return Iterator(m_storage, m_count);
 }
 
-template <class T> template <typename... U> T& Vector<T>::emplace_back(U&&... u)
+template <class T> template <typename... U> T& Vector<T>::emplace(Iterator pos, U&&... u)
 {
-	if (m_capacity == m_count) {
-		realloc(m_capacity + m_allocation_steps);
+	ASSERT(m_storage);
+	if (m_count == m_capacity) {
+		realloc_with_free_spot(m_capacity + m_allocation_steps, pos.m_current);
+	} else {
+		make_free_spot(pos.m_current);
 	}
-	new (&m_storage[m_count]) T{forward<U>(u)...};
+	new (&m_storage[pos.m_current]) T{forward<U>(u)...};
 	m_count++;
-	return m_storage[m_count - 1];
-}
-
-template <class T> template <typename... U> T& Vector<T>::emplace_front(U&&... u)
-{
-	if (m_capacity == m_count) {
-		realloc_with_free_spot(m_capacity + m_allocation_steps, 0);
-	}
-	new (&m_storage[0]) T{forward<U>(u)...};
-	m_count++;
-	return m_storage[m_count - 1];
+	return m_storage[pos.m_current];
 }
 
 template <class T> template <typename U> T& Vector<T>::insert(Iterator pos, U&& new_data)
@@ -235,6 +229,16 @@ template <class T> template <typename U> T& Vector<T>::insert(Iterator pos, U&& 
 	m_storage[pos.m_current] = forward<U>(new_data);
 	m_count++;
 	return m_storage[pos.m_current];
+}
+
+template <class T> template <typename... U> T& Vector<T>::emplace_back(U&&... u)
+{
+	return emplace(end(), forward<U>(u)...);
+}
+
+template <class T> template <typename... U> T& Vector<T>::emplace_front(U&&... u)
+{
+	return emplace(begin(), forward<U>(u)...);
 }
 
 template <class T> template <typename U> T& Vector<T>::push_back(U&& new_data)

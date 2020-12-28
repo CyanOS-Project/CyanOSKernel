@@ -82,6 +82,21 @@ TEST(Vector_Test, Iteration)
 
 TEST(Vector_Test, Inserting)
 {
+	Vector<int> vec0;
+	vec0.emplace(vec0.begin(), 4);     // [4]
+	vec0.emplace(vec0.begin(), 1);     // [1, 4]
+	vec0.emplace(vec0.begin() + 1, 2); // [1, 2, 4]
+	vec0.emplace(vec0.begin() + 2, 3); // [1, 2, 3, 4]
+	vec0.emplace(vec0.end(), 6);       // [1, 2, 3, 4, 6]
+	vec0.emplace(vec0.end() - 1, 5);   // [1, 2, 3, 4, 5, 6]
+	EXPECT_EQ(vec0.size(), 6);
+	EXPECT_EQ(*(vec0.cbegin() + 0), 1);
+	EXPECT_EQ(*(vec0.cbegin() + 1), 2);
+	EXPECT_EQ(*(vec0.cbegin() + 2), 3);
+	EXPECT_EQ(*(vec0.cbegin() + 3), 4);
+	EXPECT_EQ(*(vec0.cbegin() + 4), 5);
+	EXPECT_EQ(*(vec0.cbegin() + 5), 6);
+
 	Vector<int> vec1;
 	vec1.push_back(1);
 	vec1.push_back(2);
@@ -270,23 +285,39 @@ TEST(Vector_Test, Capacity)
 	EXPECT_EQ(list.capacity(), 4);
 	EXPECT_EQ(list.size(), 0);
 
-	list.push_back(1);
-	list.push_back(1);
-	list.push_back(1);
+	list.push_front(1);
+	list.push_front(2);
+	list.push_front(3);
 	EXPECT_EQ(list.capacity(), 4);
 	EXPECT_EQ(list.size(), 3);
+	EXPECT_EQ(*(list.cbegin() + 0), 3);
+	EXPECT_EQ(*(list.cbegin() + 1), 2);
+	EXPECT_EQ(*(list.cbegin() + 2), 1);
 
-	list.push_back(1);
+	list.insert(list.begin() + 2, 5);
 	EXPECT_EQ(list.capacity(), 4);
 	EXPECT_EQ(list.size(), 4);
+	EXPECT_EQ(*(list.cbegin() + 0), 3);
+	EXPECT_EQ(*(list.cbegin() + 1), 2);
+	EXPECT_EQ(*(list.cbegin() + 2), 5);
+	EXPECT_EQ(*(list.cbegin() + 3), 1);
 
-	list.push_back(1);
+	list.insert(list.end() - 1, 6);
 	EXPECT_EQ(list.capacity(), 9);
 	EXPECT_EQ(list.size(), 5);
+	EXPECT_EQ(*(list.cbegin() + 0), 3);
+	EXPECT_EQ(*(list.cbegin() + 1), 2);
+	EXPECT_EQ(*(list.cbegin() + 2), 5);
+	EXPECT_EQ(*(list.cbegin() + 3), 6);
+	EXPECT_EQ(*(list.cbegin() + 4), 1);
 
 	list.erase(list.begin() + 1);
 	EXPECT_EQ(list.capacity(), 9);
 	EXPECT_EQ(list.size(), 4);
+	EXPECT_EQ(*(list.cbegin() + 0), 3);
+	EXPECT_EQ(*(list.cbegin() + 1), 5);
+	EXPECT_EQ(*(list.cbegin() + 2), 6);
+	EXPECT_EQ(*(list.cbegin() + 3), 1);
 
 	list.reserve(5);
 	EXPECT_EQ(list.capacity(), 9);
