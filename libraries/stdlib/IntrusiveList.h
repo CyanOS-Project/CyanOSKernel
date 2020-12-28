@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Algorithms.h"
-#include "Iterators.h"
+#include "Concepts.h"
 #include "Rule5.h"
 #include "TypeTraits.h"
 #include "Types.h"
@@ -42,7 +42,7 @@ template <typename T> class IntrusiveList
 	void append_node(IntrusiveListNode<T>& node);
 	bool is_valid_node(const IntrusiveListNode<T>& node) const;
 
-	template <typename Type> class BaseIterator : public ForwardIterator<BaseIterator<Type>>
+	template <typename Type> class BaseIterator
 	{
 	  public:
 		BaseIterator(const BaseIterator& other);
@@ -63,6 +63,7 @@ template <typename T> class IntrusiveList
 		IntrusiveListNode<T>* m_node = nullptr;
 		friend class IntrusiveList<T>;
 	};
+	static_assert(is_ForwardIterator<BaseIterator<T>>, "Not valid Forward Iterator.");
 
   public:
 	NON_COPYABLE(IntrusiveList);

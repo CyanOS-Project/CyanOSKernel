@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Algorithms.h"
-#include "Iterators.h"
+#include "Concepts.h"
 #include "New.h"
 #include "Rule5.h"
 #include "Types.h"
@@ -21,7 +21,7 @@ template <class T> class Vector
 	size_t m_count;
 	size_t m_capacity;
 	size_t m_allocation_steps;
-	template <typename Type> class BaseIterator : public RandomAccessIterator<BaseIterator<Type>>
+	template <typename Type> class BaseIterator
 	{
 
 	  public:
@@ -41,7 +41,6 @@ template <class T> class Vector
 		bool operator==(const BaseIterator& other) const;
 		T* operator->();
 		T& operator*();
-
 		friend Vector<T>;
 
 	  private:
@@ -49,6 +48,7 @@ template <class T> class Vector
 		size_t m_current;
 		BaseIterator(T* storage, size_t index);
 	};
+	static_assert(is_RandomAccessIterator<BaseIterator<T>>, "Not valid Random Access Iterator.");
 
 	void realloc(size_t new_size);
 	void realloc_with_free_spot(size_t new_size, size_t free_spot_index);
