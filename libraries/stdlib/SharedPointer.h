@@ -51,13 +51,19 @@ template <typename T> class SharedPointer
 
 	T* operator->() { return m_storage; }
 
-	bool operator==(const SharedPointer& other) { return (m_storage == other.m_storage); }
+	T* ptr() { return m_storage; }
 
-	bool operator!=(const SharedPointer& other) { return (m_storage != other.m_storage); }
+	const T& operator*() const { return *m_storage; }
 
-	T* get() { return m_storage; }
+	const T* operator->() const { return m_storage; }
 
-	size_t use_count() { return *m_reference_count; }
+	const T* ptr() { return m_storage; }
+
+	bool operator==(const SharedPointer& other) const { return (m_storage == other.m_storage); }
+
+	bool operator!=(const SharedPointer& other) const { return (m_storage != other.m_storage); }
+
+	size_t reference_count() const { return *m_reference_count; }
 
   private:
 	T* m_storage = nullptr;

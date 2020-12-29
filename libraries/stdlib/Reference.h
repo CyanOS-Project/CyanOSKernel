@@ -10,7 +10,7 @@ template <typename T> class Reference
 	Reference(const Reference&);
 	Reference& operator=(Reference&&);
 	Reference& operator=(const Reference&);
-	~Reference();
+	~Reference = default;
 	T& value();
 	T* ptr();
 	T& operator*();
@@ -50,8 +50,6 @@ template <typename T> Reference<T>& Reference<T>::operator=(Reference<T>&& other
 	ASSERT(other.m_storage);
 	m_storage = move(other.m_storage);
 }
-
-template <typename T> Reference<T>::~Reference() {}
 
 template <typename T> T& Reference<T>::value()
 {
