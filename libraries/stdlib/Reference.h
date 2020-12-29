@@ -10,7 +10,7 @@ template <typename T> class Reference
 	Reference(const Reference&);
 	Reference& operator=(Reference&&);
 	Reference& operator=(const Reference&);
-	~Reference = default;
+	~Reference() = default;
 	T& value();
 	T* ptr();
 	T& operator*();
