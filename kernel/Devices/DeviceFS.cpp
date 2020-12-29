@@ -23,7 +23,7 @@ DeviceFS::~DeviceFS() {}
 Result<void> DeviceFS::add_device(UniquePointer<FSNode>&& new_device)
 {
 	// ScopedLock local_lock(m_lock);
-	if (children->contains([&](UniquePointer<FSNode>& device) {
+	if (children->contains([&](const UniquePointer<FSNode>& device) {
 		    if (device->m_name == new_device->m_name)
 			    return true;
 		    return false;

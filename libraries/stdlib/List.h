@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Algorithms.h"
+#include "Concepts.h"
 #include "Rule5.h"
 #include "Types.h"
 
@@ -14,197 +15,94 @@
 template <class T> class List
 {
   private:
-	struct Node {
-		T data;
+	struct Node;
+	struct ShallowNode {
 		Node *next, *prev;
+		ShallowNode() : next{nullptr}, prev{nullptr} {}
 	};
+	struct Node : ShallowNode {
+		T data;
+		Node(const T& d) : data{d} {};
+		Node(T&& d) : data{move(d)} {};
+		template <typename... U> Node(U&&... u) : data{forward<U>(u)...} {};
+	};
+	mutable ShallowNode m_shallow_ending_node;
+	Node* const m_ending_node = static_cast<Node*>(&m_shallow_ending_node);
 	Node* m_head;
 	Node* m_tail;
 	size_t m_count;
-	void remove_node(Node& new_node);
-	void append_node(Node& new_node, Node* node);
-	void prepend_node(Node& new_node, Node* node);
-	class Iterator
+	void unlink_node(Node& new_node);
+	void link_node(Node& new_node, Node& node);
+
+	template <typename Type> class BaseIterator
 	{
-	  private:
-		Node* m_current;
-
 	  public:
-		Iterator(Node* t_head, size_t index);
-		explicit Iterator(Node* t_list);
-		Iterator(const Iterator& other);
-		void operator=(const List<T>::Iterator& other);
-		~Iterator() = default;
-
-		Iterator operator++(int);
-		Iterator& operator++();
-		bool operator!=(const List<T>::Iterator& other) const;
-		bool operator==(const List<T>::Iterator& other) const;
-		T* operator->();
+		BaseIterator(const BaseIterator& other);
+		BaseIterator(List<T>::Node* node);
+		~BaseIterator() = default;
+		BaseIterator& operator=(const BaseIterator& other);
+		operator BaseIterator<const RemoveConst<Type>>();
+		bool operator==(const BaseIterator& other) const;
+		bool operator!=(const BaseIterator& other) const;
+		BaseIterator& operator++();
+		BaseIterator operator++(int);
+		BaseIterator& operator--();
+		BaseIterator operator--(int);
 		T& operator*();
+		T* operator->();
+
+	  private:
+		Node* m_node;
+		List<T>* owner;
 		friend List<T>;
 	};
 
   public:
 	NON_COPYABLE(List);
 	NON_MOVABLE(List);
+	using ConstIterator = BaseIterator<const T>;
+	using Iterator = BaseIterator<T>;
+	static_assert(validate_BidirectionalIterator<Iterator, ConstIterator>, "Not valid Bidirectional Iterator.");
+
 	List();
 	~List();
-
 	Iterator begin();
 	Iterator end();
-	Iterator find(T& element);                                        // TODO: do unit test
-	template <class Predicate> Iterator find_if(Predicate predicate); // TODO: do unit test
-
+	ConstIterator cbegin() const;
+	ConstIterator cend() const;
 	template <typename... U> T& emplace_back(U&&... u);
 	template <typename... U> T& emplace_front(U&&... u);
-	T& push_back(const T& new_data);
-	T& push_front(const T& new_data);
-	T& push_back(T&& new_data);
-	T& push_front(T&& new_data);
+	template <typename... U> T& emplace(Iterator node, U&&... u);
+	template <typename U> T& insert(Iterator node, U&& new_node);
+	template <typename U> T& push_back(U&& new_data);
+	template <typename U> T& push_front(U&& new_data);
 	void pop_back();
 	void pop_front();
-	void insert(const Iterator& node, const T& new_node);
-	void remove(const Iterator&);
+	void remove(Iterator);
 	template <class Predicate> bool remove_if(Predicate predicate);
+	void splice(List<T>& list, Iterator itr);
+	ConstIterator find(const T& element) const;
+	Iterator find(const T& element);
+	template <class Predicate> ConstIterator find_if(Predicate predicate) const;
+	template <class Predicate> Iterator find_if(Predicate predicate);
 	template <class Predicate> bool contains(Predicate predicate);
 	void clear();
-	void splice(List<T>& list, const Iterator& itr);
 	bool is_empty() const;
 	size_t size() const;
-	T& head() const;
-	T& tail() const;
-	T& operator[](size_t index) const;
+	T& first();
+	const T& first() const;
+	T& last();
+	const T& last() const;
+	T& operator[](int);
 };
 
-template <class T> List<T>::Iterator::Iterator(Node* t_head, size_t index) : m_current{t_head}
+template <class T> List<T>::List() : m_shallow_ending_node{}, m_head{m_ending_node}, m_tail{m_ending_node}, m_count{0}
 {
-	while (index--) {
-		m_current = m_current->next;
-	}
 }
-
-template <class T> List<T>::Iterator::Iterator(const Iterator& other) : m_current{other.m_current} {}
-
-template <class T> List<T>::Iterator::Iterator(Node* t_node) : m_current{t_node} {}
-
-template <class T> typename List<T>::Iterator List<T>::Iterator::operator++(int arg)
-{
-	UNUSED(arg);
-	Iterator old{*this};
-	m_current = m_current->next;
-	return old;
-}
-
-template <class T> typename List<T>::Iterator& List<T>::Iterator::operator++()
-{
-	m_current = m_current->next;
-	return *this;
-}
-
-template <class T> bool List<T>::Iterator::operator!=(const List<T>::Iterator& other) const
-{
-	return m_current != other.m_current;
-}
-
-template <class T> bool List<T>::Iterator::operator==(const List<T>::Iterator& other) const
-{
-	return m_current == other.m_current;
-}
-
-template <class T> void List<T>::Iterator::operator=(const List<T>::Iterator& other)
-{
-	m_current = other->m_current;
-}
-
-template <class T> T& List<T>::Iterator::operator*()
-{
-	return m_current->data;
-}
-
-template <class T> T* List<T>::Iterator::operator->()
-{
-	return &m_current->data;
-}
-
-template <class T> List<T>::List() : m_head{nullptr}, m_tail{nullptr}, m_count{0} {}
 
 template <class T> List<T>::~List()
 {
 	clear();
-}
-
-template <class T> void List<T>::clear()
-{
-	Node* node_iterator = m_head;
-	while (node_iterator) {
-		Node* next = node_iterator->next;
-		delete node_iterator;
-		node_iterator = next;
-	}
-	m_head = nullptr;
-	m_count = 0;
-}
-
-template <class T> void List<T>::splice(List<T>& list, const Iterator& itr)
-{
-	remove_node(*itr.m_current);
-	list.append_node(*itr.m_current, list.m_tail);
-}
-
-template <class T> void List<T>::remove_node(Node& node)
-{
-	if ((m_head == &node) && (m_tail == &node)) {
-		m_head = m_tail = nullptr;
-	} else if (m_head == &node) {
-		m_head = node.next;
-		node.next->prev = nullptr;
-	} else if (m_tail == &node) {
-		m_tail = node.prev;
-		node.prev->next = nullptr;
-	} else {
-		node.prev->next = node.next;
-		node.next->prev = node.prev;
-	}
-	m_count--;
-}
-
-template <class T> void List<T>::append_node(Node& new_node, Node* node)
-{
-	if (!m_head) {
-		new_node.prev = nullptr;
-		new_node.next = nullptr;
-		m_head = m_tail = &new_node;
-	} else {
-		new_node.prev = node;
-		new_node.next = node->next;
-		if (node->next) {
-			node->next->prev = &new_node;
-		} else {
-			m_tail = &new_node;
-		}
-		node->next = &new_node;
-	}
-	m_count++;
-}
-
-template <class T> void List<T>::prepend_node(Node& new_node, Node* node)
-{
-	if (!m_head) {
-		new_node.prev = nullptr;
-		new_node.next = nullptr;
-		m_head = m_tail = &new_node;
-	} else {
-		new_node.prev = node->prev;
-		new_node.next = node;
-		if (node->prev) {
-			node->prev->next = &new_node;
-		} else {
-			m_head = &new_node;
-		}
-		node->prev = &new_node;
-	}
-	m_count++;
 }
 
 template <class T> typename List<T>::Iterator List<T>::begin()
@@ -214,41 +112,68 @@ template <class T> typename List<T>::Iterator List<T>::begin()
 
 template <class T> typename List<T>::Iterator List<T>::end()
 {
-	return Iterator(nullptr);
+	return Iterator(m_ending_node);
 }
 
-template <class T> typename List<T>::Iterator List<T>::find(T& element)
+template <class T> typename List<T>::ConstIterator List<T>::cbegin() const
 {
-	for (auto i = begin(); i != end(); i++) {
-		if (&element == &*i) {
-			return i;
-		}
-	}
-	return end();
+	return ConstIterator(m_head);
 }
 
-template <class T> template <class Predicate> typename List<T>::Iterator List<T>::find_if(Predicate predicate)
+template <class T> typename List<T>::ConstIterator List<T>::cend() const
 {
-	for (auto i = begin(); i != end(); i++) {
-		if (predicate(*i)) {
-			return i;
-		}
-	}
-	return end();
+	return ConstIterator(m_ending_node);
+}
+
+template <class T> template <typename... U> T& List<T>::emplace(Iterator itr, U&&... u)
+{
+	Node* new_node = new Node{forward<U>(u)...};
+	link_node(*new_node, *itr.m_node);
+	return new_node->data;
+}
+
+template <class T> template <typename U> T& List<T>::insert(Iterator pos, U&& new_data)
+{
+	Node* new_node = new Node{forward<U>(new_data)};
+	link_node(*new_node, *pos.m_node);
+	return new_node->data;
 }
 
 template <class T> template <typename... U> T& List<T>::emplace_back(U&&... u)
 {
-	Node* new_node = new Node{T{forward<U>(u)...}, nullptr, nullptr}; // FIXME: remove T{}
-	append_node(*new_node, m_tail);
-	return new_node->data;
+	return emplace(end(), forward<U>(u)...);
 }
 
 template <class T> template <typename... U> T& List<T>::emplace_front(U&&... u)
 {
-	Node* new_node = new Node{T{forward<U>(u)...}, nullptr, nullptr};
-	prepend_node(*new_node, m_head);
-	return new_node->data;
+	return emplace(begin(), forward<U>(u)...);
+}
+
+template <class T> template <typename U> T& List<T>::push_back(U&& new_data)
+{
+	return insert(end(), forward<U>(new_data));
+}
+
+template <class T> template <typename U> T& List<T>::push_front(U&& new_data)
+{
+	return insert(begin(), forward<U>(new_data));
+}
+
+template <class T> void List<T>::remove(Iterator itr)
+{
+	ASSERT(itr.m_node);
+	unlink_node(*itr.m_node);
+	delete itr.m_node;
+}
+
+template <class T> void List<T>::pop_back()
+{
+	remove(--end());
+}
+
+template <class T> void List<T>::pop_front()
+{
+	remove(begin());
 }
 
 template <class T> template <class Predicate> bool List<T>::remove_if(Predicate predicate)
@@ -265,9 +190,35 @@ template <class T> template <class Predicate> bool List<T>::remove_if(Predicate 
 	return is_removed;
 }
 
+template <class T> void List<T>::splice(List<T>& list, const Iterator itr)
+{
+	unlink_node(*itr.m_node);
+	list.link_node(*itr.m_node, *list.m_ending_node);
+}
+
+template <class T> typename List<T>::Iterator List<T>::find(const T& element)
+{
+	for (auto i = begin(); i != end(); i++) {
+		if (element == *i) {
+			return i;
+		}
+	}
+	return end();
+}
+
+template <class T> template <class Predicate> typename List<T>::Iterator List<T>::find_if(Predicate predicate)
+{
+	for (auto i = begin(); i != end(); i++) {
+		if (predicate(*i)) {
+			return i;
+		}
+	}
+	return end();
+}
+
 template <class T> template <class Predicate> bool List<T>::contains(Predicate predicate)
 {
-	for (auto&& i : *this) {
+	for (const auto& i : *this) {
 		if (predicate(i)) {
 			return true;
 		}
@@ -275,78 +226,24 @@ template <class T> template <class Predicate> bool List<T>::contains(Predicate p
 	return false;
 }
 
-template <class T> T& List<T>::push_back(const T& new_data)
+template <class T> T& List<T>::first()
 {
-	Node* new_node = new Node{new_data, nullptr, nullptr};
-	append_node(*new_node, m_tail);
-	return new_node->data;
+	return *begin();
 }
 
-template <class T> T& List<T>::push_front(const T& new_data)
+template <class T> T& List<T>::last()
 {
-	Node* new_node = new Node{new_data, nullptr, nullptr};
-	prepend_node(*new_node, m_head);
-	return new_node->data;
+	return *(--end());
 }
 
-template <class T> T& List<T>::push_back(T&& new_data)
+template <class T> const T& List<T>::first() const
 {
-	Node* new_node = new Node{move(new_data), nullptr, nullptr};
-	append_node(*new_node, m_tail);
-	return new_node->data;
+	return *begin();
 }
 
-template <class T> T& List<T>::push_front(T&& new_data)
+template <class T> const T& List<T>::last() const
 {
-	Node* new_node = new Node{move(new_data), nullptr, nullptr};
-	prepend_node(*new_node, m_head);
-	return new_node->data;
-}
-
-template <class T> void List<T>::pop_back()
-{
-	ASSERT(m_tail);
-	remove_node(*m_tail);
-	delete m_tail;
-}
-
-template <class T> void List<T>::pop_front()
-{
-	ASSERT(m_head);
-	remove_node(*m_head);
-	delete m_head;
-}
-
-template <class T> void List<T>::insert(const Iterator& pos, const T& new_data)
-{
-	Node* new_node = new Node{new_data, nullptr, nullptr};
-	append_node(*new_node, pos.m_current);
-}
-
-template <class T> void List<T>::remove(const Iterator& itr)
-{
-	ASSERT(itr.m_current);
-	remove_node(*itr.m_current);
-	delete itr.m_current;
-}
-
-template <class T> T& List<T>::head() const
-{
-	ASSERT(m_head);
-	return m_head->data;
-}
-
-template <class T> T& List<T>::tail() const
-{
-	ASSERT(m_head);
-	return m_tail->data;
-}
-
-template <class T> T& List<T>::operator[](size_t index) const
-{
-	ASSERT(index < m_count);
-	Iterator itr(m_head, index);
-	return *itr;
+	return *(--end());
 }
 
 template <class T> bool List<T>::is_empty() const
@@ -357,4 +254,168 @@ template <class T> bool List<T>::is_empty() const
 template <class T> size_t List<T>::size() const
 {
 	return m_count;
+}
+
+template <class T> void List<T>::clear()
+{
+	Node* curr = m_head;
+	while (curr != m_ending_node) {
+		Node* next = curr->next;
+		delete curr;
+		curr = next;
+	}
+	m_tail = m_head = m_ending_node;
+	m_count = 0;
+}
+
+// FIXME: Delete this operator!!
+
+template <class T> T& List<T>::operator[](int num)
+{
+	auto itr = begin();
+	while (num--) {
+		++itr;
+	}
+	return *itr;
+}
+
+template <class T> void List<T>::unlink_node(Node& node)
+{
+	if ((m_head == &node) && (m_tail == &node)) {
+		m_head = m_tail = m_ending_node;
+	} else if (m_head == &node) {
+		m_head = node.next;
+		node.next->prev = nullptr;
+	} else if (m_tail == &node) {
+		m_tail = node.prev;
+		node.prev->next = m_ending_node;
+		m_ending_node->prev = node.prev;
+	} else {
+		node.prev->next = node.next;
+		node.next->prev = node.prev;
+	}
+	m_count--;
+}
+
+template <class T> void List<T>::link_node(Node& new_node, Node& old_node)
+{
+	if (m_count == 0) {
+		new_node.prev = nullptr;
+		new_node.next = m_ending_node;
+		m_ending_node->prev = &new_node;
+		m_head = m_tail = &new_node;
+	} else if (&old_node == m_head) {
+		new_node.prev = nullptr;
+		new_node.next = m_head;
+		m_head->prev = &new_node;
+		m_head = &new_node;
+	} else if (&old_node == m_ending_node) {
+		new_node.prev = m_ending_node->prev;
+		new_node.next = m_ending_node;
+		m_ending_node->prev->next = &new_node;
+		m_ending_node->prev = &new_node;
+		m_tail = &new_node;
+	} else {
+		new_node.prev = old_node.prev;
+		new_node.next = &old_node;
+		old_node.prev->next = &new_node;
+		old_node.prev = &new_node;
+	}
+	m_count++;
+}
+
+template <typename T>
+template <typename P>
+List<T>::template BaseIterator<P>::BaseIterator(typename List<T>::Node* node) : m_node{node}
+{
+	ASSERT(m_node);
+}
+
+template <typename T>
+template <typename P>
+List<T>::template BaseIterator<P>::BaseIterator(const BaseIterator<P>& other) : m_node{other.m_node}
+{
+	ASSERT(m_node);
+}
+
+template <typename T>
+template <typename P>
+typename List<T>::template BaseIterator<P>& List<T>::template BaseIterator<P>::operator=(const BaseIterator<P>& other)
+{
+	m_node = other.m_node;
+	ASSERT(m_node);
+	return *this;
+}
+
+template <typename T>
+template <typename P>
+List<T>::template BaseIterator<P>::operator BaseIterator<const RemoveConst<P>>()
+{
+	return BaseIterator<const RemoveConst<P>>{m_node};
+}
+
+template <typename T>
+template <typename P>
+bool List<T>::template BaseIterator<P>::operator==(const BaseIterator<P>& other) const
+{
+	return m_node == other.m_node;
+}
+
+template <typename T>
+template <typename P>
+bool List<T>::template BaseIterator<P>::operator!=(const BaseIterator<P>& other) const
+{
+	return m_node != other.m_node;
+}
+
+template <typename T>
+template <typename P>
+typename List<T>::template BaseIterator<P>& List<T>::template BaseIterator<P>::operator++()
+{
+	m_node = m_node->next;
+	ASSERT(m_node);
+	return *this;
+}
+
+template <typename T>
+template <typename P>
+typename List<T>::template BaseIterator<P> List<T>::template BaseIterator<P>::operator++(int)
+{
+	BaseIterator old(*this);
+	m_node = m_node->next;
+	ASSERT(m_node);
+	return old;
+}
+
+template <typename T>
+template <typename P>
+typename List<T>::template BaseIterator<P>& List<T>::template BaseIterator<P>::operator--()
+{
+	m_node = m_node->prev;
+	ASSERT(m_node);
+	return *this;
+}
+
+template <typename T>
+template <typename P>
+typename List<T>::template BaseIterator<P> List<T>::template BaseIterator<P>::operator--(int)
+{
+	BaseIterator old(*this);
+	m_node = m_node->prev;
+	ASSERT(m_node);
+	return old;
+}
+
+template <typename T> template <typename P> T& List<T>::template BaseIterator<P>::operator*()
+{
+	// ASSERT(m_node->owner);
+	// ASSERT(m_node->owner->is_valid_node(*m_node));
+	return m_node->data;
+}
+
+template <typename T> template <typename P> T* List<T>::template BaseIterator<P>::operator->()
+{
+	// ASSERT(m_node->owner);
+	// ASSERT(m_node->owner->is_valid_node(*m_node));
+	return &m_node->data;
 }

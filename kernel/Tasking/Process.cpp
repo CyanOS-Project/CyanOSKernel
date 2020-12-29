@@ -262,5 +262,11 @@ size_t Process::reserve_pid()
 void Process::cleanup()
 {
 	warn() << "Process " << m_pid << " is freed from memory.";
-	processes->remove(processes->find(*this));
+	processes->remove(processes->find_if([this](auto& process) {
+		if (&process == this) {
+			return true;
+		} else {
+			return false;
+		}
+	}));
 }

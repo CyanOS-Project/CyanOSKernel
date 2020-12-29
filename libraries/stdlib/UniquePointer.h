@@ -30,12 +30,14 @@ template <typename T> class UniquePointer
 	~UniquePointer() { destroy(); }
 
 	T& operator*() { return *m_storage; }
-
 	T* operator->() { return m_storage; }
+	T* ptr() { return m_storage; }
+	const T& operator*() const { return *m_storage; }
+	const T* operator->() const { return m_storage; }
+	const T* ptr() const { return m_storage; }
 
-	bool operator==(const UniquePointer& other) { return (m_storage == other.m_storage); }
-
-	bool operator!=(const UniquePointer& other) { return (m_storage != other.m_storage); }
+	bool operator==(const UniquePointer& other) const { return (m_storage == other.m_storage); }
+	bool operator!=(const UniquePointer& other) const { return (m_storage != other.m_storage); }
 
 	T* release()
 	{
@@ -49,8 +51,6 @@ template <typename T> class UniquePointer
 		destroy();
 		return tmp;
 	}
-
-	T* ptr() { return m_storage; }
 
   private:
 	T* m_storage;

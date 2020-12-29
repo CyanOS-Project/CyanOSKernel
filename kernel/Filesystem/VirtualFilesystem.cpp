@@ -18,7 +18,7 @@ void VFS::setup()
 
 Result<void> VFS::mount(UniquePointer<FSNode>&& new_fs_root)
 {
-	if (fs_roots->contains([&](UniquePointer<FSNode>& node) {
+	if (fs_roots->contains([&](const UniquePointer<FSNode>& node) {
 		    if (node->m_name == new_fs_root->m_name)
 			    return true;
 		    return false;

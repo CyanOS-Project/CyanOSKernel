@@ -28,8 +28,8 @@ Result<FSNode&> Socket::accept()
 	m_server_wait_queue.wait_on_event([&]() { return !m_pending_connections.size(); }, local_lock);
 
 	Connection& new_connection = m_connections.emplace_back("");
-	m_pending_connections.head().is_accepted = true;
-	m_pending_connections.head().connection = &new_connection;
+	m_pending_connections.first().is_accepted = true;
+	m_pending_connections.last().connection = &new_connection;
 	m_connections_wait_queue.wake_up();
 
 	return new_connection;

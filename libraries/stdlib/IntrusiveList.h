@@ -36,7 +36,7 @@ template <typename T> class IntrusiveList
 	size_t m_count = 0;
 	IntrusiveListNode<T>* m_head;
 	IntrusiveListNode<T>* m_tail;
-	mutable IntrusiveListNode<T> ending_node;
+	mutable IntrusiveListNode<T> m_ending_node;
 
 	void remove_node(IntrusiveListNode<T>& node);
 	void append_node(IntrusiveListNode<T>& node);
@@ -89,9 +89,9 @@ template <typename T> class IntrusiveList
 };
 template <typename T>
 IntrusiveList<T>::IntrusiveList() :
-    m_head{&ending_node},
-    m_tail{&ending_node},
-    ending_node{&ending_node, &ending_node, this}
+    m_head{&m_ending_node},
+    m_tail{&m_ending_node},
+    m_ending_node{&m_ending_node, &m_ending_node, this}
 {
 }
 
@@ -103,7 +103,7 @@ template <typename T> T& IntrusiveList<T>::push_back(T& node)
 
 template <typename T> T& IntrusiveList<T>::pop_front()
 {
-	ASSERT(m_head != &ending_node);
+	ASSERT(m_head != &m_ending_node);
 
 	auto node = m_head;
 	remove_node(*node);
@@ -125,7 +125,7 @@ template <typename T> typename IntrusiveList<T>::Iterator IntrusiveList<T>::begi
 
 template <typename T> typename IntrusiveList<T>::Iterator IntrusiveList<T>::end() const
 {
-	return Iterator(&ending_node);
+	return Iterator(&m_ending_node);
 }
 
 template <typename T> typename IntrusiveList<T>::ConstIterator IntrusiveList<T>::cbegin() const
@@ -135,7 +135,7 @@ template <typename T> typename IntrusiveList<T>::ConstIterator IntrusiveList<T>:
 
 template <typename T> typename IntrusiveList<T>::ConstIterator IntrusiveList<T>::cend() const
 {
-	return ConstIterator(&ending_node);
+	return ConstIterator(&m_ending_node);
 }
 
 template <typename T> typename IntrusiveList<T>::Iterator IntrusiveList<T>::find(T& node) const
@@ -149,13 +149,13 @@ template <typename T> typename IntrusiveList<T>::Iterator IntrusiveList<T>::find
 
 template <typename T> T& IntrusiveList<T>::first() const
 {
-	ASSERT(m_head != &ending_node);
+	ASSERT(m_head != &m_ending_node);
 	return *static_cast<T*>(m_head);
 }
 
 template <typename T> T& IntrusiveList<T>::last() const
 {
-	ASSERT(m_tail != &ending_node);
+	ASSERT(m_tail != &m_ending_node);
 	return *static_cast<T*>(m_tail);
 }
 
@@ -174,13 +174,13 @@ template <typename T> void IntrusiveList<T>::remove_node(IntrusiveListNode<T>& n
 	ASSERT(is_valid_node(node));
 
 	if ((m_head == &node) && (m_tail == &node)) {
-		m_head = m_tail = &ending_node;
+		m_head = m_tail = &m_ending_node;
 	} else if (m_head == &node) {
 		m_head = node.next;
 		node.next->prev = nullptr;
 	} else if (m_tail == &node) {
 		m_tail = node.prev;
-		node.prev->next = &ending_node;
+		node.prev->next = &m_ending_node;
 	} else {
 		node.prev->next = node.next;
 		node.next->prev = node.prev;
@@ -194,16 +194,16 @@ template <typename T> void IntrusiveList<T>::append_node(IntrusiveListNode<T>& n
 	ASSERT(node.owner == nullptr);
 
 	node.owner = this;
-	if (m_head == &ending_node) {
+	if (m_head == &m_ending_node) {
 		node.prev = nullptr;
-		node.next = &ending_node;
+		node.next = &m_ending_node;
 		m_head = m_tail = &node;
 	} else {
 		node.prev = m_tail;
-		node.next = &ending_node;
+		node.next = &m_ending_node;
 		m_tail->next = &node;
 		m_tail = &node;
-		ending_node.prev = m_tail;
+		m_ending_node.prev = m_tail;
 	}
 	m_count++;
 }
@@ -301,41 +301,6 @@ typename IntrusiveList<T>::template BaseIterator<P> IntrusiveList<T>::template B
 	ASSERT(m_node);
 	return old;
 }
-
-// FIXME: delete this.
-/*template <typename T>
-template <typename P>
-typename IntrusiveList<T>::template BaseIterator<P> IntrusiveList<T>::template BaseIterator<P>::operator+(int num) const
-{
-    if (num == 0) {
-        return *this;
-    } else {
-        auto curr = m_node;
-        if (num > 0) {
-            while (curr && num) {
-                curr = curr->next;
-                num--;
-            }
-        } else {
-            while (curr && num) {
-                curr = curr->prev;
-                num++;
-            }
-        }
-        if (!num) {
-            return BaseIterator(curr);
-        } else {
-            return BaseIterator(nullptr);
-        }
-    }
-}
-
-template <typename T>
-template <typename P>
-typename IntrusiveList<T>::template BaseIterator<P> IntrusiveList<T>::template BaseIterator<P>::operator-(int num) const
-{
-    return operator+(-num);
-}*/
 
 template <typename T> template <typename P> P& IntrusiveList<T>::template BaseIterator<P>::operator*()
 {

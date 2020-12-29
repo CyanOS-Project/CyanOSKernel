@@ -1,131 +1,260 @@
 #ifdef __STRICT_ANSI__
 	#undef __STRICT_ANSI__
 #endif
+
 #include <gtest/gtest.h>
 #include <stdlib/List.h>
 
-struct TestStruct3 {
-	int a;
-	int b;
-	bool operator==(const TestStruct3& other) const
-	{
-		if (a != other.a)
-			return false;
-		if (b != other.b)
-			return false;
-		return true;
+auto get_iterator_at_pos = [](List<int>& lst, int pos) {
+	auto itr = lst.begin();
+	while (pos--) {
+		itr++;
 	}
+	return itr;
 };
 
 TEST(List_Test, Iteration)
 {
-	TestStruct3 raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
-	List<TestStruct3> list;
-	for (size_t i = 0; i < 3; i++) {
-		list.push_back(raw_list[i]);
-	}
+	// TODO: check two versions of find const/non-const
+	List<int> list1;
+	auto get_last_itr = [&list1]() {
+		auto itr = list1.cbegin();
+		auto tmp = itr;
+		while (++tmp != list1.end()) {
+			itr = tmp;
+		}
+		return itr;
+	};
 
-	EXPECT_EQ(list.size(), 3);
-	EXPECT_FALSE(list.is_empty());
+	list1.push_back(0);
+	list1.push_back(1);
+	list1.push_back(2);
+	list1.push_back(3);
+	list1.push_back(4);
+	list1.push_back(5);
 
-	size_t index = 0;
-	for (auto&& i : list) {
-		EXPECT_TRUE(i == raw_list[index]);
-		index++;
-	}
+	EXPECT_TRUE(list1.cbegin() == list1.begin());
+	EXPECT_TRUE(list1.cend() == list1.cend());
+	auto constant_iterator = list1.cbegin();
+	constant_iterator = list1.begin();
+
+	auto itr = list1.cbegin();
+	EXPECT_EQ(*itr++, 0);
+	EXPECT_EQ(*itr++, 1);
+	EXPECT_EQ(*itr++, 2);
+	EXPECT_EQ(*itr++, 3);
+	EXPECT_EQ(*itr++, 4);
+	EXPECT_EQ(*itr++, 5);
+	EXPECT_EQ(itr, list1.cend());
+
+	itr = list1.cbegin();
+	EXPECT_EQ(*itr, 0);
+	EXPECT_EQ(*++itr, 1);
+	EXPECT_EQ(*++itr, 2);
+	EXPECT_EQ(*++itr, 3);
+	EXPECT_EQ(*++itr, 4);
+	EXPECT_EQ(*++itr, 5);
+	EXPECT_EQ(*itr, 5);
+	EXPECT_EQ(++itr, list1.cend());
+
+	itr = get_last_itr();
+	EXPECT_EQ(*itr--, 5);
+	EXPECT_EQ(*itr--, 4);
+	EXPECT_EQ(*itr--, 3);
+	EXPECT_EQ(*itr--, 2);
+	EXPECT_EQ(*itr--, 1);
+	EXPECT_EQ(*itr, 0);
+	itr = get_last_itr();
+	EXPECT_EQ(*--itr, 4);
+	EXPECT_EQ(*--itr, 3);
+	EXPECT_EQ(*--itr, 2);
+	EXPECT_EQ(*--itr, 1);
+	EXPECT_EQ(*--itr, 0);
+
+	// If you get to end(), you can come back by operator--.
+	itr = get_last_itr();
+	EXPECT_EQ(++itr, list1.cend());
+	EXPECT_NE(--itr, list1.cend()); // Not Equal
+	EXPECT_EQ(*itr, 5);
+	EXPECT_EQ(*--itr, 4);
+
+	itr = get_last_itr();
+	EXPECT_EQ(*(itr++), 5);
+	EXPECT_EQ(itr, list1.cend());
+	EXPECT_EQ(itr--, list1.cend());
+	EXPECT_NE(itr, list1.cend());
+	EXPECT_EQ(*itr--, 5);
+	EXPECT_EQ(*itr, 4);
 }
 
-TEST(List_Test, Erasing)
+TEST(List_Test, Removing)
 {
-	TestStruct3 raw_list[] = {{1, 2}, {3, 4}, {5, 6}};
-	List<TestStruct3> list;
-	for (size_t i = 0; i < 3; i++) {
-		list.push_back(raw_list[i]);
-	}
+	int raw_list[] = {0, 1, 2, 3, 4, 5};
+	List<int> list1;
 
-	EXPECT_EQ(list.size(), 3);
-	EXPECT_FALSE(list.is_empty());
+	list1.push_back(0);
+	list1.push_back(1);
+	list1.push_back(2);
+	list1.push_back(3);
+	list1.push_back(4);
+	list1.push_back(5);
+	// [0, 1, 2, 3, 4, 5].
+	auto itr = list1.cbegin();
+	EXPECT_EQ(list1.size(), 6);
+	EXPECT_EQ(list1.first(), 0);
+	EXPECT_EQ(list1.last(), 5);
+	EXPECT_EQ(*itr, 0);
+	EXPECT_EQ(*++itr, 1);
+	EXPECT_EQ(*++itr, 2);
+	EXPECT_EQ(*++itr, 3);
+	EXPECT_EQ(*++itr, 4);
+	EXPECT_EQ(*++itr, 5);
 
-	list.remove(++list.begin());
-	EXPECT_EQ(list.size(), 2);
-	EXPECT_TRUE(list[0] == raw_list[0]);
-	EXPECT_TRUE(list[1] == raw_list[2]);
+	list1.remove(get_iterator_at_pos(list1, 2));
+	// [0, 1, 3, 4, 5].
+	itr = list1.cbegin();
+	EXPECT_EQ(list1.size(), 5);
+	EXPECT_EQ(list1.first(), 0);
+	EXPECT_EQ(list1.last(), 5);
+	EXPECT_EQ(*itr, 0);
+	EXPECT_EQ(*++itr, 1);
+	EXPECT_EQ(*++itr, 3);
+	EXPECT_EQ(*++itr, 4);
+	EXPECT_EQ(*++itr, 5);
 
-	list.remove(++list.begin());
-	EXPECT_EQ(list.size(), 1);
-	EXPECT_TRUE(list[0] == raw_list[0]);
+	list1.remove(get_iterator_at_pos(list1, 4));
+	// [0, 1, 3, 4].
+	itr = list1.cbegin();
+	EXPECT_EQ(list1.size(), 4);
+	EXPECT_EQ(list1.first(), 0);
+	EXPECT_EQ(list1.last(), 4);
+	EXPECT_EQ(*itr, 0);
+	EXPECT_EQ(*++itr, 1);
+	EXPECT_EQ(*++itr, 3);
+	EXPECT_EQ(*++itr, 4);
 
-	list.remove(list.begin());
-	EXPECT_EQ(list.size(), 0);
-	EXPECT_TRUE(list.is_empty());
-
-	for (size_t i = 0; i < 3; i++) {
-		list.push_back(raw_list[i]);
-	}
-	EXPECT_EQ(list.size(), 3);
-	EXPECT_FALSE(list.is_empty());
-
-	list.clear();
-
-	EXPECT_EQ(list.size(), 0);
-	EXPECT_TRUE(list.is_empty());
-}
-
-TEST(List_Test, Splicing)
-{
-	TestStruct3 raw_list1[] = {{1, 2}, {3, 4}, {5, 6}};
-	TestStruct3 raw_list2[] = {{10, 20}, {30, 40}, {50, 60}, {70, 80}};
-	List<TestStruct3> list1;
-	List<TestStruct3> list2;
-	for (size_t i = 0; i < 3; i++) {
-		list1.push_back(raw_list1[i]);
-	}
-	for (size_t i = 0; i < 4; i++) {
-		list2.push_back(raw_list2[i]);
-	}
-
+	list1.remove(get_iterator_at_pos(list1, 0));
+	// [1, 3, 4].
+	itr = list1.cbegin();
 	EXPECT_EQ(list1.size(), 3);
-	EXPECT_EQ(list2.size(), 4);
-	EXPECT_FALSE(list1.is_empty());
-	EXPECT_FALSE(list2.is_empty());
+	EXPECT_EQ(list1.first(), 1);
+	EXPECT_EQ(list1.last(), 4);
+	EXPECT_EQ(*itr, 1);
+	EXPECT_EQ(*++itr, 3);
+	EXPECT_EQ(*++itr, 4);
+
+	list1.remove(get_iterator_at_pos(list1, 0));
+	list1.remove(get_iterator_at_pos(list1, 1));
+	// [3].
+	itr = list1.cbegin();
+	EXPECT_EQ(list1.first(), 3);
+	EXPECT_EQ(list1.last(), 3);
+	EXPECT_EQ(list1.size(), 1);
+	EXPECT_EQ(*itr, 3);
+	// []
+	list1.remove(get_iterator_at_pos(list1, 0));
+	EXPECT_EQ(list1.size(), 0);
+
+	for (auto&& i : raw_list) {
+		list1.push_back(i);
+	}
+	// [0, 1, 2, 3, 4, 5]
+	list1.pop_front();
+	list1.pop_front();
+	list1.pop_front();
+	list1.pop_front();
+	list1.pop_front();
+	list1.pop_front();
+
+	EXPECT_EQ(list1.size(), 0);
+	EXPECT_EQ(list1.cbegin(), list1.cend());
+}
+
+TEST(List_Test, MovingBetweenLists)
+{
+	int raw_list[] = {0, 1, 2, 3, 4, 5};
+	List<int> list1;
+	List<int> list2;
+
+	list1.push_back(raw_list[0]);
+	list1.push_back(raw_list[2]);
+	list1.push_back(raw_list[4]);
+
+	list2.push_back(raw_list[1]);
+	list2.push_back(raw_list[3]);
+	list2.push_back(raw_list[5]);
+
+	// List1: 0, 2, 4
+	// List2: 1, 3, 5
+	auto itr1 = list1.cbegin();
+	auto itr2 = list2.cbegin();
+	EXPECT_EQ(*itr1++, 0);
+	EXPECT_EQ(*itr1++, 2);
+	EXPECT_EQ(*itr1++, 4);
+	EXPECT_EQ(*itr2++, 1);
+	EXPECT_EQ(*itr2++, 3);
+	EXPECT_EQ(*itr2++, 5);
 
 	list2.splice(list1, list2.begin());
-
+	// List1: 0, 2, 4, 1
+	// List2: 3, 5
+	itr1 = list1.cbegin();
+	itr2 = list2.cbegin();
 	EXPECT_EQ(list1.size(), 4);
-	EXPECT_EQ(list2.size(), 3);
-	EXPECT_TRUE(list1[3] == raw_list2[0]);
-
-	auto itr{list2.begin()};
-	itr++;
-	itr++;
-	list2.splice(list1, itr);
-
-	EXPECT_EQ(list1.size(), 5);
 	EXPECT_EQ(list2.size(), 2);
-	EXPECT_TRUE(list1[4] == raw_list2[3]);
-	EXPECT_FALSE(list1.is_empty());
-	EXPECT_FALSE(list2.is_empty());
+	EXPECT_EQ(*itr1++, 0);
+	EXPECT_EQ(*itr1++, 2);
+	EXPECT_EQ(*itr1++, 4);
+	EXPECT_EQ(*itr1++, 1);
+	EXPECT_EQ(*itr2++, 3);
+	EXPECT_EQ(*itr2++, 5);
+
+	list1.splice(list2, get_iterator_at_pos(list1, 0));
+	// List1: 2, 4, 1
+	// List2: 3, 5, 0
+	EXPECT_EQ(list1.size(), 3);
+	EXPECT_EQ(list2.size(), 3);
+	itr1 = list1.cbegin();
+	itr2 = list2.cbegin();
+	EXPECT_EQ(*itr1++, 2);
+	EXPECT_EQ(*itr1++, 4);
+	EXPECT_EQ(*itr1++, 1);
+	EXPECT_EQ(*itr2++, 3);
+	EXPECT_EQ(*itr2++, 5);
+	EXPECT_EQ(*itr2++, 0);
 }
 
-TEST(List_Test, Inserting)
+TEST(List_Test, Finding)
 {
-	List<TestStruct3> list;
-	list.emplace_back(1, 1);
-	list.emplace_front(2, 2);
-	list.emplace_back(3, 3);
-	EXPECT_TRUE(list[0] == TestStruct3({2, 2}));
-	EXPECT_TRUE(list[1] == TestStruct3({1, 1}));
-	EXPECT_TRUE(list[2] == TestStruct3({3, 3}));
-	EXPECT_EQ(list.size(), 3);
+	int raw_list[] = {0, 1, 2, 3, 4, 5};
+	List<int> list1;
+	List<int> list2;
+	list1.push_back(raw_list[0]);
+	list1.push_back(raw_list[2]);
+	list1.push_back(raw_list[4]);
 
-	list.insert(++list.begin(), TestStruct3({4, 4}));
+	list2.push_back(raw_list[1]);
+	list2.push_back(raw_list[3]);
+	list2.push_back(raw_list[5]);
 
-	EXPECT_TRUE(list[0] == TestStruct3({2, 2}));
-	EXPECT_TRUE(list[1] == TestStruct3({1, 1}));
-	EXPECT_TRUE(list[2] == TestStruct3({4, 4}));
-	EXPECT_TRUE(list[3] == TestStruct3({3, 3}));
-	EXPECT_EQ(list.size(), 4);
+	// List1: 0, 2, 4
+	// List2: 1, 3, 5
+	EXPECT_EQ(*list1.find(raw_list[0]), 0);
+	EXPECT_EQ(*list1.find(raw_list[2]), 2);
+	EXPECT_EQ(*list1.find(raw_list[4]), 4);
+	EXPECT_EQ(list1.find(raw_list[1]), list1.end());
+	EXPECT_EQ(list1.find(raw_list[3]), list1.end());
+	EXPECT_EQ(list1.find(raw_list[5]), list1.end());
+	EXPECT_EQ(*list2.find(raw_list[1]), 1);
+	EXPECT_EQ(*list2.find(raw_list[3]), 3);
+	EXPECT_EQ(*list2.find(raw_list[5]), 5);
+	EXPECT_EQ(list2.find(raw_list[0]), list2.end());
+	EXPECT_EQ(list2.find(raw_list[2]), list2.end());
+	EXPECT_EQ(list2.find(raw_list[4]), list2.end());
 
-	EXPECT_TRUE(list.head() == TestStruct3({2, 2}));
-	EXPECT_TRUE(list.tail() == TestStruct3({3, 3}));
+	list2.remove(get_iterator_at_pos(list2, 0));
+	list1.push_back(raw_list[1]);
+
+	EXPECT_EQ(*list1.find(raw_list[1]), 1);
+	EXPECT_EQ(list2.find(raw_list[1]), list2.end());
 }

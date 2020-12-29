@@ -277,7 +277,7 @@ template <class T> template <class Predicate> bool Vector<T>::contains(Predicate
 
 template <class T> void Vector<T>::pop_back()
 {
-	erase(end() - 1);
+	erase(--end());
 }
 
 template <class T> void Vector<T>::pop_front()
