@@ -38,9 +38,8 @@ template <class T> class List
 	{
 	  public:
 		BaseIterator(const BaseIterator& other);
-		BaseIterator(List<T>::Node* node);
-		~BaseIterator() = default;
 		BaseIterator& operator=(const BaseIterator& other);
+		~BaseIterator() = default;
 		operator BaseIterator<const RemoveConst<U>>();
 		bool operator==(const BaseIterator& other) const;
 		bool operator!=(const BaseIterator& other) const;
@@ -54,17 +53,21 @@ template <class T> class List
 	  private:
 		Node* m_node;
 		List<T>* owner;
+		BaseIterator(List<T>::Node* node);
+
 		friend List<T>;
 	};
 
   public:
-	NON_COPYABLE(List);
-	NON_MOVABLE(List);
 	using ConstIterator = BaseIterator<const T>;
 	using Iterator = BaseIterator<T>;
 	static_assert(validate_BidirectionalIterator<Iterator, ConstIterator>, "Not valid Bidirectional Iterator.");
 
 	List();
+	List(const List&);
+	List(List&&);
+	List& operator=(const List&);
+	List& operator=(List&&);
 	~List();
 	Iterator begin();
 	Iterator end();
@@ -98,6 +101,52 @@ template <class T> class List
 
 template <class T> List<T>::List() : m_shallow_ending_node{}, m_head{m_ending_node}, m_tail{m_ending_node}, m_count{0}
 {
+}
+
+template <class T>
+List<T>::List(const List<T>& other) : m_shallow_ending_node{}, m_head{m_ending_node}, m_tail{m_ending_node}, m_count{0}
+{
+	for (auto i = other.cbegin(); i != other.cend(); ++i) {
+		push_back(*i);
+	}
+}
+
+template <class T>
+List<T>::List(List<T>&& other) :
+    m_shallow_ending_node{},
+    m_head{other.m_head},
+    m_tail{other.m_tail},
+    m_count{other.m_count}
+{
+	m_tail->next = m_ending_node;
+	other.m_head = other.m_tail = nullptr;
+	other.m_count = 0;
+}
+
+template <class T> List<T>& List<T>::operator=(const List<T>& other)
+{
+	if (&other != this) {
+		clear();
+		for (auto i = other.cbegin(); i != other.cend(); ++i) {
+			push_back(*i);
+		}
+	}
+	return *this;
+}
+
+template <class T> List<T>& List<T>::operator=(List<T>&& other)
+{
+	if (&other != this) {
+		clear();
+		m_head = other.m_head;
+		m_tail = other.m_tail;
+		m_count = other.m_count;
+		m_tail->next = m_ending_node;
+
+		other.m_head = other.m_tail = nullptr;
+		other.m_count = 0;
+	}
+	return *this;
 }
 
 template <class T> List<T>::~List()
@@ -259,7 +308,7 @@ template <class T> size_t List<T>::size() const
 template <class T> void List<T>::clear()
 {
 	Node* curr = m_head;
-	while (curr != m_ending_node) {
+	while (curr && curr != m_ending_node) {
 		Node* next = curr->next;
 		delete curr;
 		curr = next;

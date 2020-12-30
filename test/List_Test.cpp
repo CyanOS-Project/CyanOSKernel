@@ -258,3 +258,52 @@ TEST(List_Test, Finding)
 	EXPECT_EQ(*list1.find(raw_list[1]), 1);
 	EXPECT_EQ(list2.find(raw_list[1]), list2.end());
 }
+
+TEST(List_Test, MovingAndCopying)
+{
+	List<int> list1;
+	list1.push_back(1);
+	list1.push_back(2);
+	list1.push_back(3);
+	list1.push_back(4);
+
+	List<int> list2 = list1;
+	EXPECT_EQ(list1.size(), 4);
+	EXPECT_EQ(list2.size(), 4);
+	EXPECT_EQ(list1[0], 1);
+	EXPECT_EQ(list1[1], 2);
+	EXPECT_EQ(list1[2], 3);
+	EXPECT_EQ(list1[3], 4);
+	EXPECT_EQ(list2[0], 1);
+	EXPECT_EQ(list2[1], 2);
+	EXPECT_EQ(list2[2], 3);
+	EXPECT_EQ(list2[3], 4);
+
+	List<int> list3 = move(list1);
+	EXPECT_EQ(list3.size(), 4);
+	EXPECT_EQ(list3[0], 1);
+	EXPECT_EQ(list3[1], 2);
+	EXPECT_EQ(list3[2], 3);
+	EXPECT_EQ(list3[3], 4);
+
+	List<int> list4;
+	list4 = list3;
+	EXPECT_EQ(list3.size(), 4);
+	EXPECT_EQ(list3[0], 1);
+	EXPECT_EQ(list3[1], 2);
+	EXPECT_EQ(list3[2], 3);
+	EXPECT_EQ(list3[3], 4);
+	EXPECT_EQ(list4.size(), 4);
+	EXPECT_EQ(list4[0], 1);
+	EXPECT_EQ(list4[1], 2);
+	EXPECT_EQ(list4[2], 3);
+	EXPECT_EQ(list4[3], 4);
+
+	List<int> list5;
+	list5 = move(list4);
+	EXPECT_EQ(list5.size(), 4);
+	EXPECT_EQ(list5[0], 1);
+	EXPECT_EQ(list5[1], 2);
+	EXPECT_EQ(list5[2], 3);
+	EXPECT_EQ(list5[3], 4);
+}

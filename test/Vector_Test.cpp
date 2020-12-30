@@ -337,3 +337,58 @@ TEST(Vector_Test, Capacity)
 	EXPECT_EQ(list.capacity(), 15);
 	EXPECT_EQ(list.size(), 11);
 }
+
+TEST(Vector_Test, MovingAndCopying)
+{
+	Vector<int> vec1;
+	vec1.push_back(1);
+	vec1.push_back(2);
+	vec1.push_back(3);
+	vec1.push_back(4);
+
+	Vector<int> vec2 = vec1;
+	EXPECT_EQ(vec1.capacity(), 4);
+	EXPECT_EQ(vec1.size(), 4);
+	EXPECT_EQ(vec2.capacity(), 4);
+	EXPECT_EQ(vec2.size(), 4);
+	EXPECT_EQ(vec1[0], 1);
+	EXPECT_EQ(vec1[1], 2);
+	EXPECT_EQ(vec1[2], 3);
+	EXPECT_EQ(vec1[3], 4);
+	EXPECT_EQ(vec2[0], 1);
+	EXPECT_EQ(vec2[1], 2);
+	EXPECT_EQ(vec2[2], 3);
+	EXPECT_EQ(vec2[3], 4);
+
+	Vector<int> vec3 = move(vec1);
+	EXPECT_EQ(vec3.capacity(), 4);
+	EXPECT_EQ(vec3.size(), 4);
+	EXPECT_EQ(vec3[0], 1);
+	EXPECT_EQ(vec3[1], 2);
+	EXPECT_EQ(vec3[2], 3);
+	EXPECT_EQ(vec3[3], 4);
+
+	Vector<int> vec4;
+	vec4 = vec3;
+	EXPECT_EQ(vec3.capacity(), 4);
+	EXPECT_EQ(vec3.size(), 4);
+	EXPECT_EQ(vec3[0], 1);
+	EXPECT_EQ(vec3[1], 2);
+	EXPECT_EQ(vec3[2], 3);
+	EXPECT_EQ(vec3[3], 4);
+	EXPECT_EQ(vec4.capacity(), 4);
+	EXPECT_EQ(vec4.size(), 4);
+	EXPECT_EQ(vec4[0], 1);
+	EXPECT_EQ(vec4[1], 2);
+	EXPECT_EQ(vec4[2], 3);
+	EXPECT_EQ(vec4[3], 4);
+
+	Vector<int> vec5;
+	vec5 = move(vec4);
+	EXPECT_EQ(vec5.capacity(), 4);
+	EXPECT_EQ(vec5.size(), 4);
+	EXPECT_EQ(vec5[0], 1);
+	EXPECT_EQ(vec5[1], 2);
+	EXPECT_EQ(vec5[2], 3);
+	EXPECT_EQ(vec5[3], 4);
+}

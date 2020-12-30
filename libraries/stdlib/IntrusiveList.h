@@ -33,7 +33,7 @@ template <typename T> class IntrusiveListNode
 template <typename T> class IntrusiveList
 {
   private:
-	size_t m_count = 0;
+	size_t m_count;
 	IntrusiveListNode<T>* m_head;
 	IntrusiveListNode<T>* m_tail;
 	mutable IntrusiveListNode<T> m_ending_node;
@@ -46,9 +46,8 @@ template <typename T> class IntrusiveList
 	{
 	  public:
 		BaseIterator(const BaseIterator& other);
-		BaseIterator(IntrusiveListNode<T>* node);
-		~BaseIterator() = default;
 		BaseIterator& operator=(const BaseIterator& other);
+		~BaseIterator() = default;
 		operator BaseIterator<const RemoveConst<U>>();
 		bool operator==(const BaseIterator& other) const;
 		bool operator!=(const BaseIterator& other) const;
@@ -61,17 +60,19 @@ template <typename T> class IntrusiveList
 
 	  private:
 		IntrusiveListNode<T>* m_node = nullptr;
+		BaseIterator(IntrusiveListNode<T>* node);
 		friend class IntrusiveList<T>;
 	};
 
   public:
 	NON_COPYABLE(IntrusiveList);
-	NON_MOVABLE(IntrusiveList);
 	using ConstIterator = BaseIterator<const T>;
 	using Iterator = BaseIterator<T>;
 	static_assert(validate_BidirectionalIterator<Iterator, ConstIterator>, "Not valid Bidirectional Iterator.");
 
 	IntrusiveList();
+	IntrusiveList(IntrusiveList&&);
+	IntrusiveList& operator=(IntrusiveList&&);
 	~IntrusiveList() = default;
 
 	T& push_back(T& node);
@@ -89,10 +90,32 @@ template <typename T> class IntrusiveList
 };
 template <typename T>
 IntrusiveList<T>::IntrusiveList() :
+    m_count{0},
     m_head{&m_ending_node},
     m_tail{&m_ending_node},
     m_ending_node{&m_ending_node, &m_ending_node, this}
 {
+}
+
+template <typename T>
+IntrusiveList<T>::IntrusiveList(IntrusiveList<T>&& other) :
+    m_count{other.m_count},
+    m_head{other.m_head},
+    m_tail{other.m_tail},
+    m_ending_node{&m_ending_node, &m_ending_node, this}
+{
+	m_tail->next = &m_ending_node;
+}
+
+template <typename T> IntrusiveList<T>& IntrusiveList<T>::operator=(IntrusiveList<T>&& other)
+{
+	if (&other != this) {
+		m_count = other.m_count;
+		m_head = other.m_head;
+		m_tail = other.m_tail;
+		m_tail->next = &m_ending_node;
+	}
+	return *this;
 }
 
 template <typename T> T& IntrusiveList<T>::push_back(T& node)

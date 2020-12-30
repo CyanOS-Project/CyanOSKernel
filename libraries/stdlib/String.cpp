@@ -43,32 +43,31 @@ String::String(String&& other)
 
 String::String(const String& other)
 {
-	if (&other != this) {
-		m_size = other.m_size;
-		m_data = new char[m_size + 1];
-		memcpy(m_data, other.m_data, m_size + 1);
-	}
+	m_size = other.m_size;
+	m_data = new char[m_size + 1];
+	memcpy(m_data, other.m_data, m_size + 1);
 }
 
 String& String::operator=(String&& other)
 {
-	ASSERT(this != &other);
-
-	cleanup();
-	m_size = other.m_size;
-	m_data = other.m_data;
-	other.m_data = nullptr;
+	if (&other != this) {
+		cleanup();
+		m_size = other.m_size;
+		m_data = other.m_data;
+		other.m_data = nullptr;
+	}
 	return *this;
 }
 
 String& String::operator=(const String& other)
 {
 	// FIXME: Optimize this, if other.m_size is less than m_size, no need for allocating memory.
-	ASSERT(this != &other);
-	cleanup();
-	m_size = other.m_size;
-	m_data = new char[m_size + 1];
-	memcpy(m_data, other.m_data, m_size + 1);
+	if (&other != this) {
+		cleanup();
+		m_size = other.m_size;
+		m_data = new char[m_size + 1];
+		memcpy(m_data, other.m_data, m_size + 1);
+	}
 	return *this;
 }
 

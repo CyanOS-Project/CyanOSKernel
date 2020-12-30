@@ -50,18 +50,21 @@ template <class T> class Vector
 	};
 
 	void realloc(size_t new_size);
+	void copy_storage(T*, size_t);
 	void realloc_with_free_spot(size_t new_size, size_t free_spot_index);
 	void make_free_spot(size_t free_spot_index);
 	void destruct_used_objects();
 
   public:
-	NON_COPYABLE(Vector);
-	NON_MOVABLE(Vector);
 	using ConstIterator = BaseIterator<const T>;
 	using Iterator = BaseIterator<T>;
 	static_assert(validate_RandomAccessIterator<Iterator, ConstIterator>, "Not valid Random Access Iterator.");
 
 	explicit Vector(size_t reserved_size = 1, size_t allocation_steps = 1);
+	Vector(const Vector&);
+	Vector(Vector&&);
+	Vector& operator=(const Vector&);
+	Vector& operator=(Vector&&);
 	~Vector();
 
 	Iterator begin() const;
@@ -85,9 +88,12 @@ template <class T> class Vector
 	bool is_empty() const;
 	size_t size() const;
 	size_t capacity() const;
-	T& head() const;
-	T& tail() const;
-	T& operator[](size_t index) const;
+	const T& head() const;
+	const T& tail() const;
+	const T& operator[](size_t index) const;
+	T& head();
+	T& tail();
+	T& operator[](size_t index);
 };
 
 template <class T>
@@ -102,10 +108,68 @@ Vector<T>::Vector(size_t reserved_size, size_t allocation_steps) :
 	realloc(reserved_size);
 }
 
+template <class T>
+Vector<T>::Vector(const Vector& other) :
+    m_storage{other.m_storage},
+    m_count{other.m_count},
+    m_capacity{other.m_capacity},
+    m_allocation_steps{other.m_allocation_steps}
+{
+	m_storage = reinterpret_cast<T*>(operator new(m_count * sizeof(T)));
+	copy_storage(other.m_storage, m_count);
+}
+
+template <class T>
+Vector<T>::Vector(Vector&& other) :
+    m_storage{other.m_storage},
+    m_count{other.m_count},
+    m_capacity{other.m_capacity},
+    m_allocation_steps{other.m_allocation_steps}
+{
+	other.m_storage = nullptr;
+	other.m_count = 0;
+}
+
+template <class T> Vector<T>& Vector<T>::operator=(const Vector& other)
+{
+	if (&other != this) {
+		destruct_used_objects();
+		operator delete(m_storage);
+		m_storage = reinterpret_cast<T*>(operator new(other.m_count * sizeof(T)));
+		m_count = other.m_count;
+		m_capacity = other.m_capacity;
+		m_allocation_steps = other.m_allocation_steps;
+		copy_storage(other.m_storage, m_count);
+	}
+	return *this;
+}
+
+template <class T> Vector<T>& Vector<T>::operator=(Vector&& other)
+{
+	if (&other != this) {
+		destruct_used_objects();
+		operator delete(m_storage);
+		m_count = other.m_count;
+		m_capacity = other.m_capacity;
+		m_allocation_steps = other.m_allocation_steps;
+		m_storage = other.m_storage;
+		other.m_storage = nullptr;
+		other.m_count = 0;
+	}
+	return *this;
+}
+
 template <class T> Vector<T>::~Vector()
 {
 	destruct_used_objects();
-	::operator delete(m_storage);
+	operator delete(m_storage);
+}
+
+template <class T> void Vector<T>::copy_storage(T* other_storage, size_t size)
+{
+	for (size_t i = 0; i < size; i++) {
+		m_storage[i] = move(other_storage[i]);
+	}
 }
 
 template <class T> void Vector<T>::realloc(size_t size)
@@ -295,19 +359,38 @@ template <class T> void Vector<T>::erase(Iterator itr)
 	m_count--;
 }
 
-template <class T> T& Vector<T>::head() const
+template <class T> const T& Vector<T>::head() const
 {
 	ASSERT(m_storage);
 	return m_storage[0];
 }
 
-template <class T> T& Vector<T>::tail() const
+template <class T> T& Vector<T>::head()
+{
+	ASSERT(m_storage);
+	return m_storage[0];
+}
+
+template <class T> T& Vector<T>::tail()
 {
 	ASSERT(m_storage);
 	return m_storage[m_count - 1];
 }
 
-template <class T> T& Vector<T>::operator[](size_t index) const
+template <class T> const T& Vector<T>::tail() const
+{
+	ASSERT(m_storage);
+	return m_storage[m_count - 1];
+}
+
+template <class T> T& Vector<T>::operator[](size_t index)
+{
+	ASSERT(index < m_count);
+	ASSERT(m_storage);
+	return m_storage[index];
+}
+
+template <class T> const T& Vector<T>::operator[](size_t index) const
 {
 	ASSERT(index < m_count);
 	ASSERT(m_storage);

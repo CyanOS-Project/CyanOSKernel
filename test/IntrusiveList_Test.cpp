@@ -4,6 +4,7 @@
 
 #include <gtest/gtest.h>
 #include <stdlib/IntrusiveList.h>
+#include <stdlib/TypeTraits.h>
 
 struct Int : public IntrusiveListNode<Int> {
 	int x;
@@ -250,4 +251,36 @@ TEST(IntrusiveList_Test, Finding)
 
 	EXPECT_EQ(*list1.find(raw_list[1]), 1);
 	EXPECT_EQ(list2.find(raw_list[1]), list2.end());
+}
+
+TEST(IntrusiveList_Test, MovingAndCopying)
+{
+	Int raw_list1[] = {1, 2, 3, 4};
+	IntrusiveList<Int> list1;
+	list1.push_back(raw_list1[0]);
+	list1.push_back(raw_list1[1]);
+	list1.push_back(raw_list1[2]);
+	list1.push_back(raw_list1[3]);
+
+	IntrusiveList<Int> list2 = move(list1);
+	auto itr = list2.cbegin();
+	EXPECT_EQ(list1.size(), 4);
+	EXPECT_EQ(*itr++, 1);
+	EXPECT_EQ(*itr++, 2);
+	EXPECT_EQ(*itr++, 3);
+	EXPECT_EQ(*itr++, 4);
+
+	IntrusiveList<Int> list3;
+	Int raw_list2[] = {5, 6, 7};
+	list3.push_back(raw_list2[0]);
+	list3.push_back(raw_list2[1]);
+	list3.push_back(raw_list2[2]);
+
+	list3 = move(list2);
+	auto itr2 = list2.cbegin();
+	EXPECT_EQ(list1.size(), 4);
+	EXPECT_EQ(*itr2++, 1);
+	EXPECT_EQ(*itr2++, 2);
+	EXPECT_EQ(*itr2++, 3);
+	EXPECT_EQ(*itr2++, 4);
 }
