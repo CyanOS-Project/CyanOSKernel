@@ -105,6 +105,8 @@ IntrusiveList<T>::IntrusiveList(IntrusiveList<T>&& other) :
     m_ending_node{&m_ending_node, &m_ending_node, this}
 {
 	m_tail->next = &m_ending_node;
+	other.m_head = other.m_tail = nullptr;
+	other.m_count = 0;
 }
 
 template <typename T> IntrusiveList<T>& IntrusiveList<T>::operator=(IntrusiveList<T>&& other)
@@ -114,6 +116,8 @@ template <typename T> IntrusiveList<T>& IntrusiveList<T>::operator=(IntrusiveLis
 		m_head = other.m_head;
 		m_tail = other.m_tail;
 		m_tail->next = &m_ending_node;
+		other.m_head = other.m_tail = nullptr;
+		other.m_count = 0;
 	}
 	return *this;
 }

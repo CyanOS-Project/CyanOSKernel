@@ -264,7 +264,7 @@ TEST(IntrusiveList_Test, MovingAndCopying)
 
 	IntrusiveList<Int> list2 = move(list1);
 	auto itr = list2.cbegin();
-	EXPECT_EQ(list1.size(), 4);
+	EXPECT_EQ(list2.size(), 4);
 	EXPECT_EQ(*itr++, 1);
 	EXPECT_EQ(*itr++, 2);
 	EXPECT_EQ(*itr++, 3);
@@ -277,10 +277,10 @@ TEST(IntrusiveList_Test, MovingAndCopying)
 	list3.push_back(raw_list2[2]);
 
 	list3 = move(list2);
-	auto itr2 = list2.cbegin();
-	EXPECT_EQ(list1.size(), 4);
-	EXPECT_EQ(*itr2++, 1);
-	EXPECT_EQ(*itr2++, 2);
-	EXPECT_EQ(*itr2++, 3);
-	EXPECT_EQ(*itr2++, 4);
+	auto itr3 = list3.cbegin();
+	EXPECT_EQ(list3.size(), 4);
+	EXPECT_EQ(*itr3++, 1);
+	EXPECT_EQ(*itr3++, 2);
+	EXPECT_EQ(*itr3++, 3);
+	EXPECT_EQ(*itr3++, 4);
 }
