@@ -34,14 +34,14 @@ template <class T> class List
 	void unlink_node(Node& new_node);
 	void link_node(Node& new_node, Node& node);
 
-	template <typename Type> class BaseIterator
+	template <typename U> class BaseIterator
 	{
 	  public:
 		BaseIterator(const BaseIterator& other);
 		BaseIterator(List<T>::Node* node);
 		~BaseIterator() = default;
 		BaseIterator& operator=(const BaseIterator& other);
-		operator BaseIterator<const RemoveConst<Type>>();
+		operator BaseIterator<const RemoveConst<U>>();
 		bool operator==(const BaseIterator& other) const;
 		bool operator!=(const BaseIterator& other) const;
 		BaseIterator& operator++();
@@ -325,22 +325,22 @@ template <class T> void List<T>::link_node(Node& new_node, Node& old_node)
 }
 
 template <typename T>
-template <typename P>
-List<T>::template BaseIterator<P>::BaseIterator(typename List<T>::Node* node) : m_node{node}
+template <typename U>
+List<T>::template BaseIterator<U>::BaseIterator(typename List<T>::Node* node) : m_node{node}
 {
 	ASSERT(m_node);
 }
 
 template <typename T>
-template <typename P>
-List<T>::template BaseIterator<P>::BaseIterator(const BaseIterator<P>& other) : m_node{other.m_node}
+template <typename U>
+List<T>::template BaseIterator<U>::BaseIterator(const BaseIterator<U>& other) : m_node{other.m_node}
 {
 	ASSERT(m_node);
 }
 
 template <typename T>
-template <typename P>
-typename List<T>::template BaseIterator<P>& List<T>::template BaseIterator<P>::operator=(const BaseIterator<P>& other)
+template <typename U>
+typename List<T>::template BaseIterator<U>& List<T>::template BaseIterator<U>::operator=(const BaseIterator<U>& other)
 {
 	m_node = other.m_node;
 	ASSERT(m_node);
@@ -348,29 +348,29 @@ typename List<T>::template BaseIterator<P>& List<T>::template BaseIterator<P>::o
 }
 
 template <typename T>
-template <typename P>
-List<T>::template BaseIterator<P>::operator BaseIterator<const RemoveConst<P>>()
+template <typename U>
+List<T>::template BaseIterator<U>::operator BaseIterator<const RemoveConst<U>>()
 {
-	return BaseIterator<const RemoveConst<P>>{m_node};
+	return BaseIterator<const RemoveConst<U>>{m_node};
 }
 
 template <typename T>
-template <typename P>
-bool List<T>::template BaseIterator<P>::operator==(const BaseIterator<P>& other) const
+template <typename U>
+bool List<T>::template BaseIterator<U>::operator==(const BaseIterator<U>& other) const
 {
 	return m_node == other.m_node;
 }
 
 template <typename T>
-template <typename P>
-bool List<T>::template BaseIterator<P>::operator!=(const BaseIterator<P>& other) const
+template <typename U>
+bool List<T>::template BaseIterator<U>::operator!=(const BaseIterator<U>& other) const
 {
 	return m_node != other.m_node;
 }
 
 template <typename T>
-template <typename P>
-typename List<T>::template BaseIterator<P>& List<T>::template BaseIterator<P>::operator++()
+template <typename U>
+typename List<T>::template BaseIterator<U>& List<T>::template BaseIterator<U>::operator++()
 {
 	m_node = m_node->next;
 	ASSERT(m_node);
@@ -378,8 +378,8 @@ typename List<T>::template BaseIterator<P>& List<T>::template BaseIterator<P>::o
 }
 
 template <typename T>
-template <typename P>
-typename List<T>::template BaseIterator<P> List<T>::template BaseIterator<P>::operator++(int)
+template <typename U>
+typename List<T>::template BaseIterator<U> List<T>::template BaseIterator<U>::operator++(int)
 {
 	BaseIterator old(*this);
 	m_node = m_node->next;
@@ -388,8 +388,8 @@ typename List<T>::template BaseIterator<P> List<T>::template BaseIterator<P>::op
 }
 
 template <typename T>
-template <typename P>
-typename List<T>::template BaseIterator<P>& List<T>::template BaseIterator<P>::operator--()
+template <typename U>
+typename List<T>::template BaseIterator<U>& List<T>::template BaseIterator<U>::operator--()
 {
 	m_node = m_node->prev;
 	ASSERT(m_node);
@@ -397,8 +397,8 @@ typename List<T>::template BaseIterator<P>& List<T>::template BaseIterator<P>::o
 }
 
 template <typename T>
-template <typename P>
-typename List<T>::template BaseIterator<P> List<T>::template BaseIterator<P>::operator--(int)
+template <typename U>
+typename List<T>::template BaseIterator<U> List<T>::template BaseIterator<U>::operator--(int)
 {
 	BaseIterator old(*this);
 	m_node = m_node->prev;
@@ -406,14 +406,14 @@ typename List<T>::template BaseIterator<P> List<T>::template BaseIterator<P>::op
 	return old;
 }
 
-template <typename T> template <typename P> T& List<T>::template BaseIterator<P>::operator*()
+template <typename T> template <typename U> T& List<T>::template BaseIterator<U>::operator*()
 {
 	// ASSERT(m_node->owner);
 	// ASSERT(m_node->owner->is_valid_node(*m_node));
 	return m_node->data;
 }
 
-template <typename T> template <typename P> T* List<T>::template BaseIterator<P>::operator->()
+template <typename T> template <typename U> T* List<T>::template BaseIterator<U>::operator->()
 {
 	// ASSERT(m_node->owner);
 	// ASSERT(m_node->owner->is_valid_node(*m_node));

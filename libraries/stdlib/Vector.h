@@ -21,14 +21,14 @@ template <class T> class Vector
 	size_t m_count;
 	size_t m_capacity;
 	size_t m_allocation_steps;
-	template <typename Type> class BaseIterator
+	template <typename U> class BaseIterator
 	{
 
 	  public:
 		BaseIterator(const BaseIterator& other);
 		~BaseIterator() = default;
 		void operator=(const BaseIterator& other);
-		operator BaseIterator<const RemoveConst<Type>>();
+		operator BaseIterator<const RemoveConst<U>>();
 		BaseIterator operator++(int);
 		BaseIterator& operator++();
 		BaseIterator operator--(int);
@@ -39,8 +39,8 @@ template <class T> class Vector
 		BaseIterator& operator-=(int);
 		bool operator!=(const BaseIterator& other) const;
 		bool operator==(const BaseIterator& other) const;
-		T* operator->();
-		T& operator*();
+		U* operator->();
+		U& operator*();
 		friend Vector<T>;
 
 	  private:
@@ -330,37 +330,37 @@ template <class T> size_t Vector<T>::capacity() const
 }
 
 template <typename T>
-template <typename P>
-Vector<T>::template BaseIterator<P>::BaseIterator(T* storage, size_t index) : m_storage{storage}, m_current{index}
+template <typename U>
+Vector<T>::template BaseIterator<U>::BaseIterator(T* storage, size_t index) : m_storage{storage}, m_current{index}
 {
 }
 
 template <typename T>
-template <typename P>
-Vector<T>::template BaseIterator<P>::BaseIterator(const BaseIterator& other) :
+template <typename U>
+Vector<T>::template BaseIterator<U>::BaseIterator(const BaseIterator& other) :
     m_storage{other.m_storage},
     m_current{other.m_current}
 {
 }
 
 template <typename T>
-template <typename P>
-Vector<T>::template BaseIterator<P>::operator BaseIterator<const RemoveConst<P>>()
+template <typename U>
+Vector<T>::template BaseIterator<U>::operator BaseIterator<const RemoveConst<U>>()
 {
-	return BaseIterator<const RemoveConst<P>>{m_storage, m_current};
+	return BaseIterator<const RemoveConst<U>>{m_storage, m_current};
 }
 
 template <typename T>
-template <typename P>
-void Vector<T>::template BaseIterator<P>::operator=(const BaseIterator<P>& other)
+template <typename U>
+void Vector<T>::template BaseIterator<U>::operator=(const BaseIterator<U>& other)
 {
 	m_current = other.m_current;
 	m_storage = other.m_storage;
 }
 
 template <typename T>
-template <typename P>
-typename Vector<T>::template BaseIterator<P> Vector<T>::template BaseIterator<P>::operator++(int arg)
+template <typename U>
+typename Vector<T>::template BaseIterator<U> Vector<T>::template BaseIterator<U>::operator++(int arg)
 {
 	UNUSED(arg);
 	auto old{*this};
@@ -369,16 +369,16 @@ typename Vector<T>::template BaseIterator<P> Vector<T>::template BaseIterator<P>
 }
 
 template <typename T>
-template <typename P>
-typename Vector<T>::template BaseIterator<P>& Vector<T>::template BaseIterator<P>::operator++()
+template <typename U>
+typename Vector<T>::template BaseIterator<U>& Vector<T>::template BaseIterator<U>::operator++()
 {
 	m_current++;
 	return *this;
 }
 
 template <typename T>
-template <typename P>
-typename Vector<T>::template BaseIterator<P> Vector<T>::template BaseIterator<P>::operator--(int arg)
+template <typename U>
+typename Vector<T>::template BaseIterator<U> Vector<T>::template BaseIterator<U>::operator--(int arg)
 {
 	UNUSED(arg);
 	auto old{*this};
@@ -387,64 +387,64 @@ typename Vector<T>::template BaseIterator<P> Vector<T>::template BaseIterator<P>
 }
 
 template <typename T>
-template <typename P>
-typename Vector<T>::template BaseIterator<P>& Vector<T>::template BaseIterator<P>::operator--()
+template <typename U>
+typename Vector<T>::template BaseIterator<U>& Vector<T>::template BaseIterator<U>::operator--()
 {
 	m_current--;
 	return *this;
 }
 
 template <typename T>
-template <typename P>
-typename Vector<T>::template BaseIterator<P>& Vector<T>::template BaseIterator<P>::operator+=(int arg)
+template <typename U>
+typename Vector<T>::template BaseIterator<U>& Vector<T>::template BaseIterator<U>::operator+=(int arg)
 {
 	m_current += arg;
 	return *this;
 }
 
 template <typename T>
-template <typename P>
-typename Vector<T>::template BaseIterator<P>& Vector<T>::template BaseIterator<P>::operator-=(int arg)
+template <typename U>
+typename Vector<T>::template BaseIterator<U>& Vector<T>::template BaseIterator<U>::operator-=(int arg)
 {
 	return *this += -arg;
 }
 
 template <typename T>
-template <typename P>
-typename Vector<T>::template BaseIterator<P> Vector<T>::template BaseIterator<P>::operator+(int arg) const
+template <typename U>
+typename Vector<T>::template BaseIterator<U> Vector<T>::template BaseIterator<U>::operator+(int arg) const
 {
 	auto new_itr = *this;
 	return new_itr += arg;
 }
 
 template <typename T>
-template <typename P>
-typename Vector<T>::template BaseIterator<P> Vector<T>::template BaseIterator<P>::operator-(int arg) const
+template <typename U>
+typename Vector<T>::template BaseIterator<U> Vector<T>::template BaseIterator<U>::operator-(int arg) const
 {
 	auto new_itr = *this;
 	return new_itr -= arg;
 }
 
 template <typename T>
-template <typename P>
-bool Vector<T>::template BaseIterator<P>::operator!=(const BaseIterator<P>& other) const
+template <typename U>
+bool Vector<T>::template BaseIterator<U>::operator!=(const BaseIterator<U>& other) const
 {
 	return m_current != other.m_current;
 }
 
 template <typename T>
-template <typename P>
-bool Vector<T>::template BaseIterator<P>::operator==(const BaseIterator<P>& other) const
+template <typename U>
+bool Vector<T>::template BaseIterator<U>::operator==(const BaseIterator<U>& other) const
 {
 	return m_current == other.m_current && m_storage == other.m_storage;
 }
 
-template <typename T> template <typename P> T& Vector<T>::template BaseIterator<P>::operator*()
+template <typename T> template <typename U> U& Vector<T>::template BaseIterator<U>::operator*()
 {
 	return m_storage[m_current];
 }
 
-template <typename T> template <typename P> T* Vector<T>::template BaseIterator<P>::operator->()
+template <typename T> template <typename U> U* Vector<T>::template BaseIterator<U>::operator->()
 {
 	return &m_storage[m_current];
 }
