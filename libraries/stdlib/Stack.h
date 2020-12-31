@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Algorithms.h"
+#include "New.h"
 #include "Types.h"
 #ifdef __UNIT_TESTS
 	#include <assert.h>
@@ -12,69 +13,127 @@ template <typename T> class Stack
 {
   private:
 	T* m_data;
-	size_t m_head;
 	size_t m_size;
-	const size_t m_capacity;
+	size_t m_capacity;
+
+	void destroy_used_objects();
 
   public:
 	explicit Stack(const size_t capacity);
-	void queue(const T&);
-	void queue(T&&);
-	T dequeue();
+	Stack(const Stack&);
+	Stack(Stack&&);
+	Stack& operator=(const Stack&);
+	Stack& operator=(Stack&&);
+	~Stack();
+
+	template <typename U> void push(U&&);
+	T pop();
 	T& back();
+	const T& back() const;
 	bool is_empty();
 	bool is_full();
 	size_t capacity();
 	size_t size();
 	size_t available_size();
-	~Stack();
 };
 
 template <typename T>
 Stack<T>::Stack(const size_t capacity) :
-    m_data{new T[capacity]}, //
-    m_head{0},
+    m_data{reinterpret_cast<T*>(operator new(sizeof(T) * capacity))},
     m_size{0},
     m_capacity{capacity}
 {
 }
 
-template <typename T> void Stack<T>::queue(const T& data_to_queue)
+template <typename T>
+Stack<T>::Stack(const Stack& other) :
+    m_data{reinterpret_cast<T*>(operator new(sizeof(T) * other.m_capacity))},
+    m_size{other.m_size},
+    m_capacity{other.m_capacity}
 {
-	ASSERT(!is_full());
-	m_data[m_head] = data_to_queue;
-	m_head++;
-	m_size++;
+	for (size_t i = 0; i < m_size; i++) {
+		new (&m_data[i]) T{other.m_data[i]};
+	}
 }
 
-template <typename T> void Stack<T>::queue(T&& data_to_queue)
+template <typename T>
+Stack<T>::Stack(Stack&& other) : m_data{other.m_data}, m_size{other.m_size}, m_capacity{other.m_capacity}
 {
-	ASSERT(!is_full());
-	m_data[m_head] = move(data_to_queue);
-	m_head++;
-	m_size++;
+	other.m_data = nullptr;
+	other.m_size = 0;
 }
 
-template <typename T> T Stack<T>::dequeue()
+template <typename T> Stack<T>& Stack<T>::operator=(const Stack& other)
+{
+	if (&other != this) {
+		if (m_capacity != other.m_capacity) {
+			destroy_used_objects();
+			operator delete(m_data);
+			m_data = reinterpret_cast<T*>(operator new(sizeof(T) * m_capacity));
+		} else {
+			destroy_used_objects();
+		}
+
+		m_size = other.m_size;
+		m_capacity = other.m_capacity;
+		for (size_t i = 0; i < m_size; i++) {
+			new (&m_data[i]) T{other.m_data[i]};
+		}
+	}
+	return *this;
+}
+
+template <typename T> Stack<T>& Stack<T>::operator=(Stack&& other)
+{
+	if (&other != this) {
+		destroy_used_objects();
+		operator delete(m_data);
+
+		m_size = other.m_size;
+		m_data = other.m_data;
+		m_capacity = other.m_capacity;
+
+		other.m_data = nullptr;
+		other.m_size = 0;
+	}
+	return *this;
+}
+
+template <typename T> template <typename U> void Stack<T>::push(U&& data_to_queue)
+{
+	ASSERT(!is_full());
+	new (&m_data[m_size++]) T{forward<U>(data_to_queue)};
+}
+
+template <typename T> T Stack<T>::pop()
 {
 	ASSERT(!is_empty());
-	T ret_data = move(m_data[m_head - 1]);
-	m_data[m_head - 1].~T();
-	m_head--;
+	T ret_data = move(m_data[m_size - 1]);
+	m_data[m_size - 1].~T();
 	m_size--;
 	return ret_data;
 }
 
 template <typename T> T& Stack<T>::back()
 {
-	return m_data[m_head - 1];
+	return m_data[m_size - 1];
+}
+
+template <typename T> const T& Stack<T>::back() const
+{
+	return m_data[m_size - 1];
+}
+
+template <typename T> void Stack<T>::destroy_used_objects()
+{
+	for (size_t i = 0; i < m_size; i++) {
+		m_data[i].~T();
+	}
 }
 
 template <typename T> Stack<T>::~Stack()
 {
-	for (size_t i = 0; i < m_head; i++) {
-		m_data[i].~T();
-	}
+	destroy_used_objects();
 	operator delete(m_data);
 }
 

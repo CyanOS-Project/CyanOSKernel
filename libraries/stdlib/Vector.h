@@ -50,7 +50,7 @@ template <class T> class Vector
 	};
 
 	void realloc(size_t new_size);
-	void copy_storage(T*, size_t);
+	void copy_storage(const T*, size_t);
 	void realloc_with_free_spot(size_t new_size, size_t free_spot_index);
 	void make_free_spot(size_t free_spot_index);
 	void destruct_used_objects();
@@ -132,10 +132,17 @@ Vector<T>::Vector(Vector&& other) :
 
 template <class T> Vector<T>& Vector<T>::operator=(const Vector& other)
 {
+	// FIXME: Should assignment of a container, assign the new values to the conflicted values or destroy them all
+	// then construct new value?
 	if (&other != this) {
-		destruct_used_objects();
-		operator delete(m_storage);
-		m_storage = reinterpret_cast<T*>(operator new(other.m_count * sizeof(T)));
+		if (m_capacity != other.m_capacity) {
+			destruct_used_objects();
+			operator delete(m_storage);
+			m_storage = reinterpret_cast<T*>(operator new(other.m_count * sizeof(T)));
+		} else {
+			destruct_used_objects();
+		}
+
 		m_count = other.m_count;
 		m_capacity = other.m_capacity;
 		m_allocation_steps = other.m_allocation_steps;
@@ -165,21 +172,21 @@ template <class T> Vector<T>::~Vector()
 	operator delete(m_storage);
 }
 
-template <class T> void Vector<T>::copy_storage(T* other_storage, size_t size)
+template <class T> void Vector<T>::copy_storage(const T* other_storage, size_t size)
 {
 	for (size_t i = 0; i < size; i++) {
-		m_storage[i] = move(other_storage[i]);
+		new (&m_storage[i]) T{other_storage[i]};
 	}
 }
 
-template <class T> void Vector<T>::realloc(size_t size)
+template <class T> void Vector<T>::realloc(size_t new_capacity)
 {
-	ASSERT(size);
+	ASSERT(new_capacity);
 	T* new_storage = nullptr;
-	if (size > m_capacity) {
-		new_storage = reinterpret_cast<T*>(operator new(size * sizeof(T)));
+	if (new_capacity > m_capacity) {
+		new_storage = reinterpret_cast<T*>(operator new(new_capacity * sizeof(T)));
 		for (size_t i = 0; i < m_count; i++) {
-			new_storage[i] = move(m_storage[i]);
+			new (&new_storage[i]) T{move(m_storage[i])};
 		}
 	} else {
 		// FIXME:shrink ?
@@ -187,23 +194,23 @@ template <class T> void Vector<T>::realloc(size_t size)
 	}
 	destruct_used_objects();
 	operator delete(m_storage);
-	m_capacity = size;
+	m_capacity = new_capacity;
 	m_storage = new_storage;
 }
 
-template <class T> void Vector<T>::realloc_with_free_spot(size_t size, size_t free_spot_index)
+template <class T> void Vector<T>::realloc_with_free_spot(size_t new_capacity, size_t free_spot_index)
 {
-	ASSERT(size);
+	ASSERT(new_capacity >= m_count + 1);
 	ASSERT(free_spot_index <= m_count);
 	T* new_storage = nullptr;
-	if (size > m_capacity) {
-		new_storage = reinterpret_cast<T*>(operator new(size * sizeof(T)));
+	if (new_capacity > m_capacity) {
+		new_storage = reinterpret_cast<T*>(operator new(new_capacity * sizeof(T)));
 		for (size_t i = 0; i < free_spot_index; i++) {
-			new_storage[i] = move(m_storage[i]);
+			new (&new_storage[i]) T{move(m_storage[i])};
 		}
 
 		for (size_t i = free_spot_index; i < m_count; i++) {
-			new_storage[i + 1] = move(m_storage[i]);
+			new (&new_storage[i + 1]) T{move(m_storage[i])};
 		}
 	} else {
 		// FIXME:shrink ?
@@ -211,7 +218,7 @@ template <class T> void Vector<T>::realloc_with_free_spot(size_t size, size_t fr
 	}
 	destruct_used_objects();
 	operator delete(m_storage);
-	m_capacity = size;
+	m_capacity = new_capacity;
 	m_storage = new_storage;
 }
 
@@ -220,6 +227,7 @@ template <class T> void Vector<T>::make_free_spot(size_t free_spot_index)
 	for (size_t i = m_count; i >= free_spot_index + 1; i--) {
 		m_storage[i] = move(m_storage[i - 1]);
 	}
+	m_storage[free_spot_index].~T();
 }
 
 template <class T> void Vector<T>::destruct_used_objects()
@@ -290,7 +298,7 @@ template <class T> template <typename U> T& Vector<T>::insert(Iterator pos, U&& 
 	} else {
 		make_free_spot(pos.m_current);
 	}
-	m_storage[pos.m_current] = forward<U>(new_data);
+	new (&m_storage[pos.m_current]) T{forward<U>(new_data)};
 	m_count++;
 	return m_storage[pos.m_current];
 }
@@ -352,6 +360,9 @@ template <class T> void Vector<T>::pop_front()
 template <class T> void Vector<T>::erase(Iterator itr)
 {
 	ASSERT(m_storage);
+
+	T tmp = move(m_storage[itr.m_current]); // not really used, it will be destructed at the end of the scope.
+	UNUSED(tmp);
 	for (size_t i = itr.m_current; i < m_count - 1; i++) {
 		m_storage[i] = move(m_storage[i + 1]);
 	}

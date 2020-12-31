@@ -36,7 +36,7 @@ void TarFS::parse_ustar(size_t size)
 {
 	TarHeader* tar_parser = m_tar_address;
 	Stack<INode*> directories(10);
-	directories.queue(this);
+	directories.push(this);
 
 	while (uintptr_t(tar_parser) < (uintptr_t(m_tar_address) + size)) {
 		if (!tar_parser->name[0])
@@ -45,11 +45,11 @@ void TarFS::parse_ustar(size_t size)
 
 		if (path.count() > 1) {
 			while (directories.back()->m_name != (path[-2]) && (directories.size() > 1)) {
-				directories.dequeue();
+				directories.pop();
 			}
 		} else {
 			while (directories.size() > 1) {
-				directories.dequeue();
+				directories.pop();
 			}
 		}
 
@@ -61,7 +61,7 @@ void TarFS::parse_ustar(size_t size)
 		    tar_parser->typeflag != USTARFileType::Directory ? reinterpret_cast<char*>(tar_parser + 1) : nullptr);
 
 		if (tar_parser->typeflag == USTARFileType::Directory) {
-			directories.queue(&new_node);
+			directories.push(&new_node);
 		}
 		const uintptr_t aligned_size = align_to(octal_to_decimal(tar_parser->size), TAR_ALIGNMENT, false);
 		tar_parser = (TarHeader*)(uintptr_t(tar_parser + 1) + aligned_size);
