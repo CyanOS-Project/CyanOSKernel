@@ -33,6 +33,25 @@ PathView::PathView(StringView working_dir, StringView relative_path) :
 	ASSERT(get_type(relative_path) != PathType::Absolute);
 }
 
+PathView::PathView(const PathView& other) :
+    m_type{other.m_type},
+    m_absolute_path{other.m_absolute_path},
+    m_relative_path{other.m_relative_path},
+    m_absolute_path_count{other.m_absolute_path_count},
+    m_relative_path_count{other.m_relative_path_count}
+{
+}
+
+PathView& PathView::operator=(const PathView& other)
+{
+	m_type = other.m_type;
+	m_absolute_path = other.m_absolute_path;
+	m_relative_path = other.m_relative_path;
+	m_absolute_path_count = other.m_absolute_path_count;
+	m_relative_path_count = other.m_relative_path_count;
+	return *this;
+}
+
 PathView::~PathView() {}
 
 void PathView::set_absolute_path(PathView path)

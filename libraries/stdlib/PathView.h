@@ -16,6 +16,8 @@ class PathView
 	PathView(StringView path);
 	PathView(const char* path);
 	PathView(StringView working_dir, StringView relative_path);
+	PathView(const PathView& path);
+	PathView& operator=(const PathView& path);
 	~PathView();
 	void set_absolute_path(PathView path);
 	size_t count() const;

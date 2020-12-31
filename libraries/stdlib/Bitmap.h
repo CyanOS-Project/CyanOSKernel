@@ -1,4 +1,5 @@
 #pragma once
+#include "Rule5.h"
 
 #ifdef __UNIT_TESTS
 	#include <assert.h>
@@ -22,18 +23,20 @@ template <size_t bitmap_size> class Bitmap
 	static_assert(bitmap_size <= MAX_BITMAP_SIZE);
 
   public:
+	NON_COPYABLE(Bitmap);
+	NON_MOVABLE(Bitmap);
 	Bitmap();
 	~Bitmap();
 	void set(size_t position);
 	void set_range(size_t position, size_t count);
 	void clear(size_t position);
 	void clear_range(size_t position, size_t count);
-	size_t find_first_set(size_t start_search = 0);
-	size_t find_first_set_range(size_t count, size_t start_search = 0);
-	size_t find_first_clear(size_t start_search = 0);
-	size_t find_first_clear_range(size_t count, size_t start_search = 0);
-	bool check_set(size_t position);
-	bool check_clear(size_t position);
+	size_t find_first_set(size_t start_search = 0) const;
+	size_t find_first_set_range(size_t count, size_t start_search = 0) const;
+	size_t find_first_clear(size_t start_search = 0) const;
+	size_t find_first_clear_range(size_t count, size_t start_search = 0) const;
+	bool check_set(size_t position) const;
+	bool check_clear(size_t position) const;
 };
 
 template <size_t bitmap_size> Bitmap<bitmap_size>::Bitmap()
@@ -79,7 +82,8 @@ template <size_t bitmap_size> void Bitmap<bitmap_size>::clear_range(size_t posit
 	}
 }
 
-template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_clear_range(size_t count, size_t start_search)
+template <size_t bitmap_size>
+size_t Bitmap<bitmap_size>::find_first_clear_range(size_t count, size_t start_search) const
 {
 	size_t remaining_count = count;
 	size_t bit_index = start_search;
@@ -101,7 +105,7 @@ template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_clear_range
 	return BITMAP_NO_BITS_LEFT;
 }
 
-template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_set_range(size_t count, size_t start_search)
+template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_set_range(size_t count, size_t start_search) const
 {
 	size_t remaining_count = count;
 	size_t bit_index = start_search;
@@ -122,22 +126,22 @@ template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_set_range(s
 	return BITMAP_NO_BITS_LEFT;
 }
 
-template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_clear(size_t start_search)
+template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_clear(size_t start_search) const
 {
 	return find_first_clear_range(1, start_search);
 }
 
-template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_set(size_t start_search)
+template <size_t bitmap_size> size_t Bitmap<bitmap_size>::find_first_set(size_t start_search) const
 {
 	return find_first_set_range(1, start_search);
 }
 
-template <size_t SIZE> bool Bitmap<SIZE>::check_set(size_t position)
+template <size_t SIZE> bool Bitmap<SIZE>::check_set(size_t position) const
 {
 	return CHECK_BIT(m_bitmap_data[position / 8], position % 8);
 }
 
-template <size_t SIZE> bool Bitmap<SIZE>::check_clear(size_t position)
+template <size_t SIZE> bool Bitmap<SIZE>::check_clear(size_t position) const
 {
 	return !CHECK_BIT(m_bitmap_data[position / 8], position % 8);
 }
