@@ -160,3 +160,46 @@ TEST(String_Test, SubString)
 	ASSERT_TRUE(str.substr(0, 5) == "Hello");
 	ASSERT_TRUE(str.substr(36, 9) == "martians!");
 }
+
+TEST(String_Test, Erasing)
+{
+	String str = "hello there!";
+
+	str.erase(0, 2);
+	ASSERT_EQ(str.length(), 10);
+	ASSERT_EQ(str, "llo there!");
+
+	str.erase(4, 3);
+	ASSERT_EQ(str.length(), 7);
+	ASSERT_EQ(str, "llo re!");
+
+	str.erase(6, 1);
+	ASSERT_EQ(str.length(), 6);
+	ASSERT_EQ(str, "llo re");
+}
+
+TEST(String_Test, ConditionalErasing)
+{
+	String str1 = "hello there!";
+	String str2 = str1;
+	String str3 = str1;
+
+	str1.erase_if([](char c) {
+		if (c == 'e')
+			return true;
+		else
+			return false;
+	});
+	ASSERT_EQ(str1.length(), 9);
+	ASSERT_EQ(str1, "hllo thr!");
+
+	int a = 0;
+	str2.erase_if([&a](char c) {
+		if (a++ % 2 == 0)
+			return true;
+		else
+			return false;
+	});
+	ASSERT_EQ(str2.length(), 6);
+	ASSERT_EQ(str2, "el hr!");
+}

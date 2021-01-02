@@ -2,10 +2,26 @@
 
 void memcpy(void* dest, const void* source, unsigned int len)
 {
-	char* _dest = (char*)dest;
-	char* _source = (char*)source;
+	char* _dest = static_cast<char*>(dest);
+	const char* _source = static_cast<const char*>(source);
 	for (size_t i = 0; i < len; i++)
 		_dest[i] = _source[i];
+}
+
+void memmove(void* dest, const void* source, unsigned int len)
+{
+	char* _dest = static_cast<char*>(dest);
+	const char* _source = static_cast<const char*>(source);
+
+	if (_source < _dest) {
+		_source += len;
+		_dest += len;
+		while (len--)
+			*--_dest = *--_source;
+	} else {
+		while (len--)
+			*_dest++ = *_source++;
+	}
 }
 
 void memset(void* dest, char value, unsigned int len)

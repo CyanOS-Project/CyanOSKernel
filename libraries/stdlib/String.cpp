@@ -223,9 +223,9 @@ String& String::insert(size_t pos, const char* str, size_t subpos, size_t sublen
 
 void String::erase(size_t pos, size_t len)
 {
-	ASSERT(pos <= m_size);
+	ASSERT(pos + len <= m_size);
 
-	memcpy(m_data + pos, m_data + pos + len, m_size - pos + len);
+	memmove(m_data + pos, m_data + pos + len, m_size - pos - len + 1);
 	m_size -= len;
 }
 
