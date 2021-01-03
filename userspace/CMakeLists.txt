@@ -8,7 +8,7 @@ SET(CMAKE_CXX_FLAGS  "--target=${triple} -march=i686 -Wall -Wextra --pedantic -f
 SET(CMAKE_EXE_LINKER_FLAGS  "--target=${triple} -march=i686 -nostdlib -Wl,-entry:__startup")
 
 include_directories("../libraries/stdlib")
-#add_subdirectory("Shell")
-#add_subdirectory("TestApp")
-#add_subdirectory("Cat")
+add_subdirectory("Shell")
+add_subdirectory("TestApp")
+add_subdirectory("Cat")
 

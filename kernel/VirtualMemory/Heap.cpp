@@ -20,9 +20,9 @@ void Heap::setup()
 
 void* Heap::kmalloc(size_t size)
 {
-	if (!size) {
+	if (!size)
 		return nullptr;
-	}
+
 	if (size <= 0x10) {
 		return slab_0x10.alloc();
 	} else if (size <= 0x20) {
@@ -40,6 +40,9 @@ void* Heap::kmalloc(size_t size)
 
 void Heap::kfree(void* address)
 {
+	if (!address)
+		return;
+
 	auto* block = reinterpret_cast<MemoryBlock<>*>(static_cast<char*>(address) - offsetof(MemoryBlock<>, data));
 	ASSERT(block);
 	ASSERT(block->slab_ptr);

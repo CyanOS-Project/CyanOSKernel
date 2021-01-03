@@ -20,9 +20,9 @@ void Heap::setup()
 
 void* Heap::malloc(size_t size)
 {
-	if (!size) {
+	if (!size)
 		return nullptr;
-	}
+
 	if (size <= 0x10) {
 		return slab_0x10.alloc();
 	} else if (size <= 0x20) {
@@ -40,6 +40,9 @@ void* Heap::malloc(size_t size)
 
 void Heap::free(void* address)
 {
+	if (!address)
+		return;
+
 	auto* block = reinterpret_cast<MemoryBlock<>*>(static_cast<char*>(address) - offsetof(MemoryBlock<>, data));
 	ASSERT(block);
 	ASSERT(block->slab_ptr);
@@ -95,21 +98,21 @@ void operator delete[](void* p)
 	return Heap::free(p);
 }
 
-void* operator new(size_t, void* p)
+void* operator new(size_t, void* p) noexcept
 {
 	return p;
 }
 
-void* operator new[](size_t, void* p)
+void* operator new[](size_t, void* p) noexcept
 {
 	return p;
 }
 
-void operator delete[](void* p, size_t)
+void operator delete[](void* p, size_t) noexcept
 {
 	Heap::free(p);
 }
-void operator delete(void* p, size_t)
+void operator delete(void* p, size_t) noexcept
 {
 	Heap::free(p);
 }

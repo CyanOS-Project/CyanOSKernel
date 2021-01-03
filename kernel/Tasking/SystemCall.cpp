@@ -235,13 +235,13 @@ Result<int> WaitSignal(Handle handle, int signal)
 
 Result<int> VirtualAlloc(void* address, size_t size, int flags)
 {
-	void* ret = nullptr;
+	void* ret_address = nullptr;
 	if (address) {
-		ret = valloc(address, size, flags | PAGE_USER);
+		ret_address = valloc(address, size, flags | PAGE_USER);
 	} else {
-		ret = valloc(size, flags | PAGE_USER);
+		ret_address = valloc(size, flags | PAGE_USER);
 	}
-	return reinterpret_cast<int>(ret);
+	return reinterpret_cast<int>(ret_address);
 }
 
 Result<int> VirtualFree(void* address, size_t size)
