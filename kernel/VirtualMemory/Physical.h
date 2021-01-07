@@ -20,7 +20,7 @@ class PhysicalMemory
 	static void free_pages(uintptr_t page_number, unsigned count);
 	static void set_free_pages(uintptr_t page_number, unsigned count);
 	static void set_used_pages(uintptr_t page_number, unsigned count);
-	static unsigned get_physical_memory_size();
+	static uintptr_t get_physical_memory_size();
 
   private:
 	static uintptr_t find_pages(uintptr_t start_page, size_t count);

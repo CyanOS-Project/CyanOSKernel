@@ -21,8 +21,8 @@
 
 #include <Types.h>
 
-#pragma clang diagnostic ignored "-Wgnu-anonymous-struct"
-#pragma clang diagnostic ignored "-Wnested-anon-types"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 
 #ifndef MULTIBOOT_HEADER
 	#define MULTIBOOT_HEADER 1
@@ -382,3 +382,5 @@ struct multiboot_tag_load_base_addr {
 	#endif /* ! ASM_FILE */
 
 #endif /* ! MULTIBOOT_HEADER */
+
+#pragma GCC diagnostic pop

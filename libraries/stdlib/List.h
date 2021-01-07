@@ -22,9 +22,9 @@ template <class T> class List
 	};
 	struct Node : ShallowNode {
 		T data;
-		Node(const T& d) : data{d} {};
-		Node(T&& d) : data{move(d)} {};
-		template <typename... U> Node(U&&... u) : data{forward<U>(u)...} {};
+		Node(const T& d) : data{d} {}
+		Node(T&& d) : data{move(d)} {}
+		template <typename... U> Node(U&&... u) : data{forward<U>(u)...} {}
 	};
 	mutable ShallowNode m_shallow_ending_node;
 	Node* const m_ending_node = static_cast<Node*>(&m_shallow_ending_node);
@@ -375,60 +375,54 @@ template <class T> void List<T>::link_node(Node& new_node, Node& old_node)
 
 template <typename T>
 template <typename U>
-List<T>::template BaseIterator<U>::BaseIterator(typename List<T>::Node* node) : m_node{node}
+List<T>::BaseIterator<U>::BaseIterator(typename List<T>::Node* node) : m_node{node}
 {
 	ASSERT(m_node);
 }
 
 template <typename T>
 template <typename U>
-List<T>::template BaseIterator<U>::BaseIterator(const BaseIterator<U>& other) : m_node{other.m_node}
+List<T>::BaseIterator<U>::BaseIterator(const BaseIterator<U>& other) : m_node{other.m_node}
 {
 	ASSERT(m_node);
 }
 
 template <typename T>
 template <typename U>
-typename List<T>::template BaseIterator<U>& List<T>::template BaseIterator<U>::operator=(const BaseIterator<U>& other)
+typename List<T>::BaseIterator<U>& List<T>::BaseIterator<U>::operator=(const BaseIterator<U>& other)
 {
 	m_node = other.m_node;
 	ASSERT(m_node);
 	return *this;
 }
 
-template <typename T>
-template <typename U>
-List<T>::template BaseIterator<U>::operator BaseIterator<const RemoveConst<U>>()
+template <typename T> template <typename U> List<T>::BaseIterator<U>::operator BaseIterator<const RemoveConst<U>>()
 {
 	return BaseIterator<const RemoveConst<U>>{m_node};
 }
 
 template <typename T>
 template <typename U>
-bool List<T>::template BaseIterator<U>::operator==(const BaseIterator<U>& other) const
+bool List<T>::BaseIterator<U>::operator==(const BaseIterator<U>& other) const
 {
 	return m_node == other.m_node;
 }
 
 template <typename T>
 template <typename U>
-bool List<T>::template BaseIterator<U>::operator!=(const BaseIterator<U>& other) const
+bool List<T>::BaseIterator<U>::operator!=(const BaseIterator<U>& other) const
 {
 	return m_node != other.m_node;
 }
 
-template <typename T>
-template <typename U>
-typename List<T>::template BaseIterator<U>& List<T>::template BaseIterator<U>::operator++()
+template <typename T> template <typename U> typename List<T>::BaseIterator<U>& List<T>::BaseIterator<U>::operator++()
 {
 	m_node = m_node->next;
 	ASSERT(m_node);
 	return *this;
 }
 
-template <typename T>
-template <typename U>
-typename List<T>::template BaseIterator<U> List<T>::template BaseIterator<U>::operator++(int)
+template <typename T> template <typename U> typename List<T>::BaseIterator<U> List<T>::BaseIterator<U>::operator++(int)
 {
 	BaseIterator old(*this);
 	m_node = m_node->next;
@@ -436,18 +430,14 @@ typename List<T>::template BaseIterator<U> List<T>::template BaseIterator<U>::op
 	return old;
 }
 
-template <typename T>
-template <typename U>
-typename List<T>::template BaseIterator<U>& List<T>::template BaseIterator<U>::operator--()
+template <typename T> template <typename U> typename List<T>::BaseIterator<U>& List<T>::BaseIterator<U>::operator--()
 {
 	m_node = m_node->prev;
 	ASSERT(m_node);
 	return *this;
 }
 
-template <typename T>
-template <typename U>
-typename List<T>::template BaseIterator<U> List<T>::template BaseIterator<U>::operator--(int)
+template <typename T> template <typename U> typename List<T>::BaseIterator<U> List<T>::BaseIterator<U>::operator--(int)
 {
 	BaseIterator old(*this);
 	m_node = m_node->prev;
@@ -455,14 +445,14 @@ typename List<T>::template BaseIterator<U> List<T>::template BaseIterator<U>::op
 	return old;
 }
 
-template <typename T> template <typename U> T& List<T>::template BaseIterator<U>::operator*()
+template <typename T> template <typename U> T& List<T>::BaseIterator<U>::operator*()
 {
 	// ASSERT(m_node->owner);
 	// ASSERT(m_node->owner->is_valid_node(*m_node));
 	return m_node->data;
 }
 
-template <typename T> template <typename U> T* List<T>::template BaseIterator<U>::operator->()
+template <typename T> template <typename U> T* List<T>::BaseIterator<U>::operator->()
 {
 	// ASSERT(m_node->owner);
 	// ASSERT(m_node->owner->is_valid_node(*m_node));

@@ -23,8 +23,8 @@ template <size_t bitmap_size> class Bitmap
 	static_assert(bitmap_size <= MAX_BITMAP_SIZE);
 
   public:
-	NON_COPYABLE(Bitmap);
-	NON_MOVABLE(Bitmap);
+	NON_COPYABLE(Bitmap)
+	NON_MOVABLE(Bitmap)
 	Bitmap();
 	~Bitmap();
 	void set(size_t position);

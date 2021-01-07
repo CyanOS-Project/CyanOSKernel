@@ -1,7 +1,7 @@
 section .text
 
-global _load_segments
-_load_segments:
+global load_segments
+load_segments:
 
 mov eax, [esp+16];
 mov fs, ax;

@@ -16,9 +16,11 @@ class Logger
 	~Logger();
 	Logger& operator<<(const char* str);
 	Logger& operator<<(const String& str);
-	Logger& operator<<(const char str);
+	Logger& operator<<(char str);
 	Logger& operator<<(int num);
 	Logger& operator<<(unsigned num);
+	Logger& operator<<(int32_t num);
+	Logger& operator<<(uint32_t num);
 	Logger& operator<<(uint64_t num);
 	Logger& operator<<(Hex num);
 	Logger& operator<<(void* ptr);

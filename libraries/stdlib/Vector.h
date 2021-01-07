@@ -425,28 +425,24 @@ template <class T> size_t Vector<T>::capacity() const
 
 template <typename T>
 template <typename U>
-Vector<T>::template BaseIterator<U>::BaseIterator(T* storage, size_t index) : m_storage{storage}, m_current{index}
+Vector<T>::BaseIterator<U>::BaseIterator(T* storage, size_t index) : m_storage{storage}, m_current{index}
 {
 }
 
 template <typename T>
 template <typename U>
-Vector<T>::template BaseIterator<U>::BaseIterator(const BaseIterator& other) :
+Vector<T>::BaseIterator<U>::BaseIterator(const BaseIterator& other) :
     m_storage{other.m_storage},
     m_current{other.m_current}
 {
 }
 
-template <typename T>
-template <typename U>
-Vector<T>::template BaseIterator<U>::operator BaseIterator<const RemoveConst<U>>()
+template <typename T> template <typename U> Vector<T>::BaseIterator<U>::operator BaseIterator<const RemoveConst<U>>()
 {
 	return BaseIterator<const RemoveConst<U>>{m_storage, m_current};
 }
 
-template <typename T>
-template <typename U>
-void Vector<T>::template BaseIterator<U>::operator=(const BaseIterator<U>& other)
+template <typename T> template <typename U> void Vector<T>::BaseIterator<U>::operator=(const BaseIterator<U>& other)
 {
 	m_current = other.m_current;
 	m_storage = other.m_storage;
@@ -454,7 +450,7 @@ void Vector<T>::template BaseIterator<U>::operator=(const BaseIterator<U>& other
 
 template <typename T>
 template <typename U>
-typename Vector<T>::template BaseIterator<U> Vector<T>::template BaseIterator<U>::operator++(int arg)
+typename Vector<T>::BaseIterator<U> Vector<T>::BaseIterator<U>::operator++(int arg)
 {
 	UNUSED(arg);
 	auto old{*this};
@@ -464,7 +460,7 @@ typename Vector<T>::template BaseIterator<U> Vector<T>::template BaseIterator<U>
 
 template <typename T>
 template <typename U>
-typename Vector<T>::template BaseIterator<U>& Vector<T>::template BaseIterator<U>::operator++()
+typename Vector<T>::BaseIterator<U>& Vector<T>::BaseIterator<U>::operator++()
 {
 	m_current++;
 	return *this;
@@ -472,7 +468,7 @@ typename Vector<T>::template BaseIterator<U>& Vector<T>::template BaseIterator<U
 
 template <typename T>
 template <typename U>
-typename Vector<T>::template BaseIterator<U> Vector<T>::template BaseIterator<U>::operator--(int arg)
+typename Vector<T>::BaseIterator<U> Vector<T>::BaseIterator<U>::operator--(int arg)
 {
 	UNUSED(arg);
 	auto old{*this};
@@ -482,7 +478,7 @@ typename Vector<T>::template BaseIterator<U> Vector<T>::template BaseIterator<U>
 
 template <typename T>
 template <typename U>
-typename Vector<T>::template BaseIterator<U>& Vector<T>::template BaseIterator<U>::operator--()
+typename Vector<T>::BaseIterator<U>& Vector<T>::BaseIterator<U>::operator--()
 {
 	m_current--;
 	return *this;
@@ -490,7 +486,7 @@ typename Vector<T>::template BaseIterator<U>& Vector<T>::template BaseIterator<U
 
 template <typename T>
 template <typename U>
-typename Vector<T>::template BaseIterator<U>& Vector<T>::template BaseIterator<U>::operator+=(int arg)
+typename Vector<T>::BaseIterator<U>& Vector<T>::BaseIterator<U>::operator+=(int arg)
 {
 	m_current += arg;
 	return *this;
@@ -498,14 +494,14 @@ typename Vector<T>::template BaseIterator<U>& Vector<T>::template BaseIterator<U
 
 template <typename T>
 template <typename U>
-typename Vector<T>::template BaseIterator<U>& Vector<T>::template BaseIterator<U>::operator-=(int arg)
+typename Vector<T>::BaseIterator<U>& Vector<T>::BaseIterator<U>::operator-=(int arg)
 {
 	return *this += -arg;
 }
 
 template <typename T>
 template <typename U>
-typename Vector<T>::template BaseIterator<U> Vector<T>::template BaseIterator<U>::operator+(int arg) const
+typename Vector<T>::BaseIterator<U> Vector<T>::BaseIterator<U>::operator+(int arg) const
 {
 	auto new_itr = *this;
 	return new_itr += arg;
@@ -513,7 +509,7 @@ typename Vector<T>::template BaseIterator<U> Vector<T>::template BaseIterator<U>
 
 template <typename T>
 template <typename U>
-typename Vector<T>::template BaseIterator<U> Vector<T>::template BaseIterator<U>::operator-(int arg) const
+typename Vector<T>::BaseIterator<U> Vector<T>::BaseIterator<U>::operator-(int arg) const
 {
 	auto new_itr = *this;
 	return new_itr -= arg;
@@ -521,24 +517,24 @@ typename Vector<T>::template BaseIterator<U> Vector<T>::template BaseIterator<U>
 
 template <typename T>
 template <typename U>
-bool Vector<T>::template BaseIterator<U>::operator!=(const BaseIterator<U>& other) const
+bool Vector<T>::BaseIterator<U>::operator!=(const BaseIterator<U>& other) const
 {
 	return m_current != other.m_current;
 }
 
 template <typename T>
 template <typename U>
-bool Vector<T>::template BaseIterator<U>::operator==(const BaseIterator<U>& other) const
+bool Vector<T>::BaseIterator<U>::operator==(const BaseIterator<U>& other) const
 {
 	return m_current == other.m_current && m_storage == other.m_storage;
 }
 
-template <typename T> template <typename U> U& Vector<T>::template BaseIterator<U>::operator*()
+template <typename T> template <typename U> U& Vector<T>::BaseIterator<U>::operator*()
 {
 	return m_storage[m_current];
 }
 
-template <typename T> template <typename U> U* Vector<T>::template BaseIterator<U>::operator->()
+template <typename T> template <typename U> U* Vector<T>::BaseIterator<U>::operator->()
 {
 	return &m_storage[m_current];
 }

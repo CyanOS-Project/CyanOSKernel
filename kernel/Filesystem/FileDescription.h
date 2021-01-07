@@ -10,8 +10,8 @@
 class FileDescription
 {
   public:
-	NON_MOVABLE(FileDescription);
-	NON_COPYABLE(FileDescription);
+	NON_MOVABLE(FileDescription)
+	NON_COPYABLE(FileDescription)
 
 	const NodeType m_type;
 	const OpenMode m_mode;

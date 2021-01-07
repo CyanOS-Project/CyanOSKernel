@@ -10,11 +10,6 @@ void Memory::setup()
 	PhysicalMemory::set_used_pages(GET_FRAME(KERNEL_PHYSICAL_ADDRESS), get_kernel_pages());
 }
 
-void Memory::setup_stage2()
-{
-	setup_page_fault_handler();
-}
-
 void Memory::setup_page_fault_handler()
 {
 	ISR::register_isr_handler(page_fault_handler, IRQ_Number::PF);
@@ -111,7 +106,7 @@ unsigned Memory::physical_memory_size()
 
 unsigned Memory::get_kernel_pages()
 {
-	uintptr_t kernel_size = uintptr_t(&KERNEL_END) - uintptr_t(&KERNEL_START) - 1;
+	uintptr_t kernel_size = uintptr_t(&_KERNEL_END) - uintptr_t(&_KERNEL_START) - 1;
 	return GET_PAGES(kernel_size);
 }
 

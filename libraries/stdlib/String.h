@@ -62,7 +62,7 @@ class String
 				i++;
 			}
 		}
-	};
+	}
 
 	static const size_t END;
 	static const size_t NOT_FOUND;

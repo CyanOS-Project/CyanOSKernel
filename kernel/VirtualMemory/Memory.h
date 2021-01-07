@@ -16,7 +16,7 @@ class Memory
   public:
 	static unsigned get_kernel_pages();
 	static void setup();
-	static void setup_stage2();
+	static void setup_page_fault_handler();
 	static void* alloc(uint32_t size, uint32_t flags);
 	static void* alloc(void* virtual_address, uint32_t size, uint32_t flags);
 	static void free(void* virtual_address, uint32_t size, uint32_t flags);
@@ -36,7 +36,6 @@ class Memory
 	static void _free_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
 	static void* _map_no_lock(uintptr_t physical_address, uint32_t size, uint32_t flags);
 	static void _unmap_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
-	static void setup_page_fault_handler();
 
 	friend class VirtualMemory;
 };
