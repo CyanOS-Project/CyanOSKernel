@@ -1,9 +1,7 @@
+extern "C" {
 
 #include "icxxabi.h"
-#include "Arch/x86/Panic.h"
-#include "Types.h"
-
-extern "C" {
+#include "../Types.h"
 
 atexitFuncEntry_t __atexitFuncs[ATEXIT_FUNC_MAX];
 uarch_t __atexitFuncCount = 0;
@@ -44,11 +42,11 @@ void __cxa_finalize(void* f)
 
 void __cxa_pure_virtual()
 {
-	PANIC("Virtual function has no implementation!");
+	// PANIC("Virtual function has no implementation!");
 }
 
 void atexit()
 {
-	PANIC("Exiting!");
+	// PANIC("Exiting!");
 }
 }

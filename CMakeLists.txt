@@ -62,7 +62,7 @@ get_property(__generated_bins GLOBAL PROPERTY generated_bins)
 add_custom_command(
         OUTPUT  ${OUTPUT_ISO}
         DEPENDS  ${KERNEL_EXE} ${__generated_bins}
-        COMMAND python ../build_tools/make_bootable_iso.py ${KERNEL_IMAGE} ${BINS_DIRECTORY} ${ROOT_DIRECTORY} ${OUTPUT_ISO}
+        COMMAND python3 ../build_tools/make_bootable_iso.py ${KERNEL_IMAGE} ${BINS_DIRECTORY} ${ROOT_DIRECTORY} ${OUTPUT_ISO}
         COMMENT "Creating ISO file..."
 )
 
