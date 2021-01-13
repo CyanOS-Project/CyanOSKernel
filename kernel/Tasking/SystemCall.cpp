@@ -6,7 +6,7 @@
 #include "VirtualMemory/Memory.h"
 #include <Algorithms.h>
 
-//#pragma GCC diagnostic ignored "-Wcast-function-type"
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 
 generic_syscall SystemCall::systemcalls_routines[] = {reinterpret_cast<generic_syscall>(OpenFile),
                                                       reinterpret_cast<generic_syscall>(ReadFile),

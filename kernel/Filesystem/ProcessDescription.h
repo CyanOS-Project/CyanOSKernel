@@ -7,8 +7,8 @@ class Process;
 class ProcessDescription
 {
   public:
-	NON_COPYABLE(ProcessDescription);
-	NON_MOVABLE(ProcessDescription);
+	NON_COPYABLE(ProcessDescription)
+	NON_MOVABLE(ProcessDescription)
 	static Result<UniquePointer<ProcessDescription>> open(size_t pid, int access);
 	~ProcessDescription();
 	Result<int> wait_signal();

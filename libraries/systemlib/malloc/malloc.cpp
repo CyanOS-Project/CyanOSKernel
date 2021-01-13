@@ -116,13 +116,3 @@ void operator delete(void* p, size_t) noexcept
 {
 	Heap::free(p);
 }
-
-extern "C" void __cxa_pure_virtual()
-{
-	// PANIC("Virtual function has no implementation!");
-}
-
-extern "C" void atexit()
-{
-	// PANIC("Exiting!");
-}

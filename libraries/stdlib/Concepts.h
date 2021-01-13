@@ -3,6 +3,7 @@
 template <class, class> constexpr bool is_equal = false;
 template <class T> constexpr bool is_equal<T, T> = true;
 template <typename T1, typename T2> concept EqualTo = is_equal<T1, T2>;
+template <typename T1, typename T2> concept NotEqualTo = !EqualTo<T1, T2>;
 
 template <class> constexpr bool is_ptr = false;
 template <class T> constexpr bool is_ptr<T*> = true;

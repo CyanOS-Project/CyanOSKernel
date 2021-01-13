@@ -15,11 +15,11 @@ __attribute__((section(".multiboot2"))) const volatile Mutiboot2_Header my_multi
                 .header_addr = VIR_TO_PHY((uint32_t)&my_multiboot2_header),
                 .load_addr = KERNEL_PHYSICAL_ADDRESS,
                 .load_end_addr = 0,
-                .bss_end_addr = VIR_TO_PHY(uint32_t(&KERNEL_END))},
+                .bss_end_addr = VIR_TO_PHY(uint32_t(&_KERNEL_END))},
     .entry = {.type = MULTIBOOT_HEADER_TAG_ENTRY_ADDRESS,
               .flags = 0,
               .size = sizeof(multiboot_header_tag_entry_address),
-              .entry_addr = VIR_TO_PHY((uint32_t)&kernel_boot_stage1)},
+              .entry_addr = VIR_TO_PHY((uint32_t)&_kernel_boot_stage1)},
     .mod_align = {.type = MULTIBOOT_HEADER_TAG_MODULE_ALIGN,
                   .flags = 0,
                   .size = sizeof(multiboot_header_tag_module_align)},
@@ -49,7 +49,7 @@ extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_inf
 	return;
 }
 
-const char* mmap_entry_type_text[] = {"Unknown"           //
+const char* mmap_entry_type_text[] = {"UNKNOWN"           //
                                       "AVAILABLE",        //
                                       "RESERVED",         //
                                       "ACPI_RECLAIMABLE", //
@@ -58,7 +58,7 @@ const char* mmap_entry_type_text[] = {"Unknown"           //
 
 BootloaderInfo parse_mbi(uintptr_t multiboot_info)
 {
-	BootloaderInfo bootloader_info_local;
+	BootloaderInfo bootloader_info_local{};
 
 	multiboot_tag* current_tag = (multiboot_tag*)(multiboot_info + sizeof(multiboot_tag_start));
 	while (current_tag->type != MULTIBOOT_TAG_TYPE_END) {

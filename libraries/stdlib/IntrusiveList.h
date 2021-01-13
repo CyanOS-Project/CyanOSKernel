@@ -65,7 +65,7 @@ template <typename T> class IntrusiveList
 	};
 
   public:
-	NON_COPYABLE(IntrusiveList);
+	NON_COPYABLE(IntrusiveList)
 	using ConstIterator = BaseIterator<const T>;
 	using Iterator = BaseIterator<T>;
 	static_assert(validate_BidirectionalIterator<Iterator, ConstIterator>, "Not valid Bidirectional Iterator.");
@@ -248,22 +248,21 @@ template <typename T> bool IntrusiveList<T>::is_valid_node(const IntrusiveListNo
 
 template <typename T>
 template <typename U>
-IntrusiveList<T>::template BaseIterator<U>::BaseIterator(IntrusiveListNode<T>* node) : m_node{node}
+IntrusiveList<T>::BaseIterator<U>::BaseIterator(IntrusiveListNode<T>* node) : m_node{node}
 {
 	ASSERT(m_node);
 }
 
 template <typename T>
 template <typename U>
-IntrusiveList<T>::template BaseIterator<U>::BaseIterator(const BaseIterator<U>& other) : m_node{other.m_node}
+IntrusiveList<T>::BaseIterator<U>::BaseIterator(const BaseIterator<U>& other) : m_node{other.m_node}
 {
 	ASSERT(m_node);
 }
 
 template <typename T>
 template <typename U>
-typename IntrusiveList<T>::template BaseIterator<U>& IntrusiveList<T>::template BaseIterator<U>::operator=(
-    const BaseIterator<U>& other)
+typename IntrusiveList<T>::BaseIterator<U>& IntrusiveList<T>::BaseIterator<U>::operator=(const BaseIterator<U>& other)
 {
 	m_node = other.m_node;
 	ASSERT(m_node);
@@ -272,28 +271,28 @@ typename IntrusiveList<T>::template BaseIterator<U>& IntrusiveList<T>::template 
 
 template <typename T>
 template <typename U>
-IntrusiveList<T>::template BaseIterator<U>::operator BaseIterator<const RemoveConst<U>>()
+IntrusiveList<T>::BaseIterator<U>::operator BaseIterator<const RemoveConst<U>>()
 {
 	return BaseIterator<const RemoveConst<U>>{m_node};
 }
 
 template <typename T>
 template <typename U>
-bool IntrusiveList<T>::template BaseIterator<U>::operator==(const BaseIterator<U>& other) const
+bool IntrusiveList<T>::BaseIterator<U>::operator==(const BaseIterator<U>& other) const
 {
 	return m_node == other.m_node;
 }
 
 template <typename T>
 template <typename U>
-bool IntrusiveList<T>::template BaseIterator<U>::operator!=(const BaseIterator<U>& other) const
+bool IntrusiveList<T>::BaseIterator<U>::operator!=(const BaseIterator<U>& other) const
 {
 	return m_node != other.m_node;
 }
 
 template <typename T>
 template <typename U>
-typename IntrusiveList<T>::template BaseIterator<U>& IntrusiveList<T>::template BaseIterator<U>::operator++()
+typename IntrusiveList<T>::BaseIterator<U>& IntrusiveList<T>::BaseIterator<U>::operator++()
 {
 	m_node = m_node->next;
 	ASSERT(m_node);
@@ -302,7 +301,7 @@ typename IntrusiveList<T>::template BaseIterator<U>& IntrusiveList<T>::template 
 
 template <typename T>
 template <typename U>
-typename IntrusiveList<T>::template BaseIterator<U> IntrusiveList<T>::template BaseIterator<U>::operator++(int)
+typename IntrusiveList<T>::BaseIterator<U> IntrusiveList<T>::BaseIterator<U>::operator++(int)
 {
 	BaseIterator old(*this);
 	m_node = m_node->next;
@@ -312,7 +311,7 @@ typename IntrusiveList<T>::template BaseIterator<U> IntrusiveList<T>::template B
 
 template <typename T>
 template <typename U>
-typename IntrusiveList<T>::template BaseIterator<U>& IntrusiveList<T>::template BaseIterator<U>::operator--()
+typename IntrusiveList<T>::BaseIterator<U>& IntrusiveList<T>::BaseIterator<U>::operator--()
 {
 	m_node = m_node->prev;
 	ASSERT(m_node);
@@ -321,7 +320,7 @@ typename IntrusiveList<T>::template BaseIterator<U>& IntrusiveList<T>::template 
 
 template <typename T>
 template <typename U>
-typename IntrusiveList<T>::template BaseIterator<U> IntrusiveList<T>::template BaseIterator<U>::operator--(int)
+typename IntrusiveList<T>::BaseIterator<U> IntrusiveList<T>::BaseIterator<U>::operator--(int)
 {
 	BaseIterator old(*this);
 	m_node = m_node->prev;
@@ -329,14 +328,14 @@ typename IntrusiveList<T>::template BaseIterator<U> IntrusiveList<T>::template B
 	return old;
 }
 
-template <typename T> template <typename U> U& IntrusiveList<T>::template BaseIterator<U>::operator*()
+template <typename T> template <typename U> U& IntrusiveList<T>::BaseIterator<U>::operator*()
 {
 	ASSERT(m_node->owner);
 	ASSERT(m_node->owner->is_valid_node(*m_node));
 	return *static_cast<U*>(m_node);
 }
 
-template <typename T> template <typename U> U* IntrusiveList<T>::template BaseIterator<U>::operator->()
+template <typename T> template <typename U> U* IntrusiveList<T>::BaseIterator<U>::operator->()
 {
 	ASSERT(m_node->owner);
 	ASSERT(m_node->owner->is_valid_node(*m_node));

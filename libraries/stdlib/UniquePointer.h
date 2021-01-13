@@ -7,7 +7,7 @@
 template <typename T> class UniquePointer
 {
   public:
-	NON_COPYABLE(UniquePointer);
+	NON_COPYABLE(UniquePointer)
 
 	template <class... Args> static UniquePointer<T> make_unique(Args&&... args)
 	{

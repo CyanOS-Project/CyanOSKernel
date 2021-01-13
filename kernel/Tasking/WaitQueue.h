@@ -8,8 +8,8 @@
 class WaitQueue
 {
   public:
-	NON_COPYABLE(WaitQueue);
-	NON_MOVABLE(WaitQueue);
+	NON_COPYABLE(WaitQueue)
+	NON_MOVABLE(WaitQueue)
 
 	WaitQueue();
 	~WaitQueue();

@@ -10,16 +10,7 @@ project(CyanOS VERSION 0.1.0)
 
 # Unit Tests
 
-# googletest doesn't compile for windows under "Generic" toolchain somehow!
-if(NOT ${CMAKE_HOST_SYSTEM_NAME} STREQUAL "Windows")
-    enable_testing()
-    add_subdirectory("googletest")
-    add_subdirectory("test")
-    include(CTest)
-    set(CPACK_PROJECT_NAME ${PROJECT_NAME})
-    set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})
-    include(CPack)
-endif()
+
 
 
 # Building the kernel
@@ -71,7 +62,7 @@ get_property(__generated_bins GLOBAL PROPERTY generated_bins)
 add_custom_command(
         OUTPUT  ${OUTPUT_ISO}
         DEPENDS  ${KERNEL_EXE} ${__generated_bins}
-        COMMAND python ../build_tools/make_bootable_iso.py ${KERNEL_IMAGE} ${BINS_DIRECTORY} ${ROOT_DIRECTORY} ${OUTPUT_ISO}
+        COMMAND python3 ../build_tools/make_bootable_iso.py ${KERNEL_IMAGE} ${BINS_DIRECTORY} ${ROOT_DIRECTORY} ${OUTPUT_ISO}
         COMMENT "Creating ISO file..."
 )
 

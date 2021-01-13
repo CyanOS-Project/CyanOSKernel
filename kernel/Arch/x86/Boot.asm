@@ -1,4 +1,4 @@
-extern _kernel_boot_stage2
+extern kernel_boot_stage2
 KERNEL_BASE equ 0xC0000000
 
 ; Stack
@@ -17,4 +17,4 @@ sub ecx, KERNEL_BASE
 mov esp, ecx
 push ebx
 push eax
-call _kernel_boot_stage2
+call kernel_boot_stage2

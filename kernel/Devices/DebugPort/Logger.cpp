@@ -31,7 +31,7 @@ Logger& Logger::operator<<(const String& str)
 	return *this;
 }
 
-Logger& Logger::operator<<(const char str)
+Logger& Logger::operator<<(char str)
 {
 	DebugPort::write(&str, m_color);
 	return *this;
@@ -64,6 +64,29 @@ Logger& Logger::operator<<(int num)
 }
 
 Logger& Logger::operator<<(unsigned num)
+{
+	char buf[11];
+	itoa(buf, num, 10);
+	toupper(buf);
+	DebugPort::write(buf, m_color);
+	return *this;
+}
+
+Logger& Logger::operator<<(int32_t num)
+{
+	char buf[11];
+	if (num < 0) {
+		num = 0 - num;
+		DebugPort::write("-", m_color);
+	}
+
+	itoa(buf, num, 10);
+	toupper(buf);
+	DebugPort::write(buf, m_color);
+	return *this;
+}
+
+Logger& Logger::operator<<(uint32_t num)
 {
 	char buf[11];
 	itoa(buf, num, 10);

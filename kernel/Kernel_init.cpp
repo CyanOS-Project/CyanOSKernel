@@ -36,14 +36,14 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	GDT::setup();
 	IDT::setup();
 
-	Memory::setup_stage2();
+	Memory::setup_page_fault_handler();
 	Heap::setup();
 	PIC::setup();
 	PIT::setup();
 	Scheduler::setup();
 	info() << "Done!";
 
-	info() << "Setting up file systems... ";
+	info() << "Setting up file systems... " << boot_info->ramdisk.start;
 	VFS::setup();
 	VFS::mount(TarFS::alloc("tar", reinterpret_cast<void*>(boot_info->ramdisk.start), boot_info->ramdisk.size));
 	VFS::mount(PipeFS::alloc("pipes"));

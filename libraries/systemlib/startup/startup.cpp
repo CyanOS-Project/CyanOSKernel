@@ -4,7 +4,7 @@
 
 extern "C" int main(int argc, const char* argv[]);
 
-extern "C" int __startup()
+extern "C" int startup()
 {
 	char *path, *arg;
 	asm("movl %%gs:0x4,%0" : "=r"(path));
