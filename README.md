@@ -24,17 +24,19 @@ Why a new half working operating systems? you might ask, And the answer: because
 #### Requirements
 ```
 sudo apt-get update
-sudo apt-get install gcc-multilib g++-multilib build-essential clang-10 nasm python3 cmake grub2 xorriso mtools qemu 
+sudo apt-get install gcc-multilib g++-multilib build-essential nasm python3 cmake grub2 xorriso mtools qemu 
 ```
-For Windows users, you can build and run the system on WSL1/WSL2 (Windows Subsystem for Linux). Or you can build it using [msys2](http://repo.msys2.org/distrib/x86_64/), [nasm](https://www.nasm.us/) and [CMake](https://cmake.org/download) and run it using [qemu](https://www.qemu.org/download/), though it still needs WSL to make a bootable ISO using `grub2-rescue` command.
+For Windows users, you can build and run the system on WSL1/WSL2 (Windows Subsystem for Linux).
 
 #### Building
+First, you need to build cross compiler gcc,  check out how in this (osdev wiki page)[https://wiki.osdev.org/GCC_Cross-Compiler].
+Then, Follow these commands:
 ```
 git clone --recursive https://github.com/AymenSekhri/CyanOS.git
 cd ./CyanOS
 mkdir build && cd build
 cmake .. -G "Unix Makefiles"
-make && make test
+make
 ```
 And you can boot up the OS in Qemu using:
 ```
