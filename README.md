@@ -29,7 +29,7 @@ sudo apt-get install gcc-multilib g++-multilib build-essential nasm python3 cmak
 For Windows users, you can build and run the system on WSL1/WSL2 (Windows Subsystem for Linux).
 
 #### Building
-First, you need to build cross compiler gcc,  check out how in this [osdev wiki page](https://wiki.osdev.org/GCC_Cross-Compiler).
+First, you need to build cross compiler gcc,  check out how in this [osdev wiki page](https://wiki.osdev.org/GCC_Cross-Compiler).<br>
 Then, Follow these commands:
 ```
 git clone --recursive https://github.com/AymenSekhri/CyanOS.git
