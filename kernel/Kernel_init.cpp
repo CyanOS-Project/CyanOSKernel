@@ -43,7 +43,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	Scheduler::setup();
 	info() << "Done!";
 
-	info() << "Setting up file systems... " << boot_info->ramdisk.start;
+	info() << "Setting up file systems... ";
 	VFS::setup();
 	VFS::mount(TarFS::alloc("tar", reinterpret_cast<void*>(boot_info->ramdisk.start), boot_info->ramdisk.size));
 	VFS::mount(PipeFS::alloc("pipes"));

@@ -13,9 +13,8 @@ SET(CMAKE_EXE_LINKER_FLAGS  "-Wl,-T${CMAKE_CURRENT_SOURCE_DIR}/linker.ld -nostdl
 
 add_compile_definitions("CYANOS_KENREL")
 
-file(GLOB_RECURSE SOURCES "*.cpp" "*.asm" "../stdlib/*.cpp" "../libraries/stdlib/*.cpp")
+file(GLOB_RECURSE SOURCES "*.cpp" "*.asm" "../libraries/stdlib/*.cpp")
 add_executable(${KERNEL_EXE} ${SOURCES})
-#target_link_libraries(${KERNEL_EXE} "stdlib")
 add_custom_command(
     TARGET ${KERNEL_EXE}
     POST_BUILD
