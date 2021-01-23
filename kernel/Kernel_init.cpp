@@ -26,7 +26,6 @@
 #include <Assert.h>
 #include <UniquePointer.h>
 
-void idle(uintptr_t);
 extern "C" void kernel_init(BootloaderInfo* boot_info)
 {
 	Logger::init();
@@ -35,9 +34,10 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	info() << "Setting up core components... ";
 	GDT::setup();
 	IDT::setup();
-
 	Memory::setup_page_fault_handler();
 	Heap::setup();
+
+	call_constrcutors();
 	PIC::setup();
 	PIT::setup();
 	Scheduler::setup();
@@ -78,5 +78,17 @@ void idle(uintptr_t)
 {
 	while (true) {
 		HLT();
+	}
+}
+
+void call_constrcutors()
+{
+	typedef void (*func)(void);
+	uintptr_t* constructor_array = &CONSTRUCTORS_ARRAY_START;
+	while (constructor_array != &CONSTRUCTORS_ARRAY_END && *constructor_array) {
+		info() << Hex(*constructor_array);
+		func constructor = (func)*constructor_array;
+		constructor();
+		constructor_array++;
 	}
 }

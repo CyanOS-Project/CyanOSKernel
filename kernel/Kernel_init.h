@@ -13,3 +13,5 @@ struct BootloaderInfo {
 };
 
 extern "C" void kernel_init(BootloaderInfo* boot_info);
+void call_constrcutors();
+void idle(uintptr_t);

@@ -8,8 +8,13 @@
 
 static String* working_directory;
 
+static String ss("hello");
+
 int main(int argc, const char* argv[])
 {
+	printf(ss.c_str());
+	ss = "sss";
+	printf(ss.c_str());
 	working_directory = new String("/tar/bin");
 	printf("Welcome To CyanOS\n");
 	printf("Version 0.1 Alpha\n");

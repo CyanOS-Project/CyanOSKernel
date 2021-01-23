@@ -21,7 +21,7 @@ SECTIONS
 		*(.rdata)
 
 		CONSTRUCTORS_ARRAY_START = .;
-		*(.rdata)
+		*(.ctors)
 		CONSTRUCTORS_ARRAY_END = .;
 	}
 	.bss 	ALIGN(4K) : AT(ADDR(.bss) - 0xC0000000)
