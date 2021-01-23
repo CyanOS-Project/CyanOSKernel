@@ -6,26 +6,19 @@
 #include <Assert.h>
 #include <ErrorCodes.h>
 
-List<UniquePointer<FSNode>>* VFS::fs_roots;
+List<UniquePointer<FSNode>> VFS::fs_roots;
 Spinlock VFS::lock;
-
-void VFS::setup()
-{
-	// lock the VFS and nodes.
-	fs_roots = new List<UniquePointer<FSNode>>;
-	lock.init();
-}
 
 Result<void> VFS::mount(UniquePointer<FSNode>&& new_fs_root)
 {
-	if (fs_roots->contains([&](const UniquePointer<FSNode>& node) {
+	if (fs_roots.contains([&](const UniquePointer<FSNode>& node) {
 		    if (node->m_name == new_fs_root->m_name)
 			    return true;
 		    return false;
 	    })) {
 		return ResultError(ERROR_FS_ALREADY_EXISTS);
 	}
-	fs_roots->push_back(move(new_fs_root));
+	fs_roots.push_back(move(new_fs_root));
 	return ResultError(ERROR_SUCCESS);
 }
 
@@ -120,7 +113,7 @@ Result<FSNode&> VFS::traverse_node(PathView path)
 	if (path_elements_count == 0)
 		return ResultError(ERROR_FILE_DOES_NOT_EXIST);
 
-	if (fs_roots->size() == 0)
+	if (fs_roots.size() == 0)
 		return ResultError(ERROR_NO_ROOT_NODE);
 
 	FSNode* current = get_root_node(path[0]);
@@ -138,7 +131,7 @@ Result<FSNode&> VFS::traverse_node(PathView path)
 
 FSNode* VFS::get_root_node(const StringView& root_name)
 {
-	for (auto&& i : *fs_roots) {
+	for (auto&& i : fs_roots) {
 		if (i->m_name == root_name) {
 			return i.ptr();
 		}

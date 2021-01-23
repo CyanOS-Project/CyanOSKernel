@@ -31,7 +31,6 @@ class Thread : public IntrusiveListNode<Thread>
 	static Thread& create_init_thread(Process& process);
 	static void sleep(size_t ms);
 	static void yield();
-	static void setup();
 	static size_t number_of_ready_threads();
 
 	void wake_up_from_queue();
@@ -45,8 +44,8 @@ class Thread : public IntrusiveListNode<Thread>
 
 	template <typename Callback> static void for_each_sleeping(Callback callback)
 	{
-		auto&& thread = Thread::sleeping_threads->begin();
-		while (thread != Thread::sleeping_threads->end()) {
+		auto&& thread = Thread::sleeping_threads.begin();
+		while (thread != Thread::sleeping_threads.end()) {
 			auto iterator_copy = thread++;
 			auto ret = callback(*iterator_copy);
 			if (ret == IterationDecision::Break) {
@@ -57,8 +56,8 @@ class Thread : public IntrusiveListNode<Thread>
 
 	template <typename Callback> static void for_each_ready(Callback callback)
 	{
-		auto&& thread = Thread::ready_threads->begin();
-		while (thread != Thread::ready_threads->end()) {
+		auto&& thread = Thread::ready_threads.begin();
+		while (thread != Thread::ready_threads.end()) {
 			auto iterator_copy = thread++;
 			auto ret = callback(*iterator_copy);
 			if (ret == IterationDecision::Break) {
@@ -72,10 +71,10 @@ class Thread : public IntrusiveListNode<Thread>
 		size_t tid;
 	};
 
-	static Bitmap<MAX_BITMAP_SIZE>* tid_bitmap;
-	static IntrusiveList<Thread>* ready_threads;
-	static IntrusiveList<Thread>* sleeping_threads;
-	static StaticSpinlock global_lock;
+	static Bitmap<MAX_BITMAP_SIZE> tid_bitmap;
+	static IntrusiveList<Thread> ready_threads;
+	static IntrusiveList<Thread> sleeping_threads;
+	static Spinlock global_lock;
 	static void thread_finishing();
 
 	const size_t m_tid;

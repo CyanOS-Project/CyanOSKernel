@@ -12,7 +12,6 @@ class FileDescription;
 class VFS
 {
   public:
-	static void setup();
 	static Result<void> mount(UniquePointer<FSNode>&& fs_root);
 	static Result<void> unmount();
 	static Result<void> remove();
@@ -26,7 +25,7 @@ class VFS
 	static PathView resolve_path(PathView path);
 
   private:
-	static List<UniquePointer<FSNode>>* fs_roots;
+	static List<UniquePointer<FSNode>> fs_roots;
 	static Spinlock lock;
 
 	static Result<FSNode&> traverse_node(PathView);

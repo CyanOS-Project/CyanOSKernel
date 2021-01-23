@@ -44,7 +44,6 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	info() << "Done!";
 
 	info() << "Setting up file systems... ";
-	VFS::setup();
 	VFS::mount(TarFS::alloc("tar", reinterpret_cast<void*>(boot_info->ramdisk.start), boot_info->ramdisk.size));
 	VFS::mount(PipeFS::alloc("pipes"));
 	VFS::mount(DeviceFS::alloc("devices"));
@@ -85,10 +84,11 @@ void call_constrcutors()
 {
 	typedef void (*func)(void);
 	uintptr_t* constructor_array = &CONSTRUCTORS_ARRAY_START;
+	int count = 0;
 	while (constructor_array != &CONSTRUCTORS_ARRAY_END && *constructor_array) {
-		info() << Hex(*constructor_array);
 		func constructor = (func)*constructor_array;
 		constructor();
 		constructor_array++;
+		count++;
 	}
 }

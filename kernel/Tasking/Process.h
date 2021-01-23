@@ -27,7 +27,6 @@ class Process
   public:
 	static Process& create_virtual_process(StringView name, ProcessPrivilege privilege);
 	static Process& create_new_process(PathView path, StringView argument, ProcessPrivilege privilege);
-	static void setup();
 	static Result<Process&> get_process_from_pid(size_t pid);
 
 	size_t pid();
@@ -55,9 +54,9 @@ class Process
 		char path_data[MAX_PATH_SIZE];
 		char argument_data[MAX_PATH_SIZE];
 	};
-	static Bitmap<MAX_BITMAP_SIZE>* pid_bitmap;
-	static List<Process>* processes;
-	static StaticSpinlock global_lock;
+	static Bitmap<MAX_BITMAP_SIZE> pid_bitmap;
+	static List<Process> processes;
+	static Spinlock global_lock;
 	static void initiate_process(uintptr_t pcb);
 
 	Spinlock m_lock;

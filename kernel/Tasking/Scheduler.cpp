@@ -10,15 +10,12 @@
 #include "VirtualMemory/Memory.h"
 #include <Assert.h>
 
-StaticSpinlock Scheduler::lock;
+Spinlock Scheduler::lock;
 
 void Scheduler::setup()
 {
-	lock.init();
 	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
 	SystemCall::setup();
-	Process::setup();
-	Thread::setup();
 }
 
 void Scheduler::schedule(ISRContextFrame& current_context, ScheduleType type)
@@ -48,9 +45,9 @@ Thread& Scheduler::select_next_thread()
 {
 	// Simple Round Robinson
 	ASSERT(Thread::number_of_ready_threads());
-	auto next_thread = ++Thread::ready_threads->find(*Thread::current);
-	if (next_thread == Thread::ready_threads->end()) {
-		return *Thread::ready_threads->begin();
+	auto next_thread = ++Thread::ready_threads.find(*Thread::current);
+	if (next_thread == Thread::ready_threads.end()) {
+		return *Thread::ready_threads.begin();
 	} else {
 		return *next_thread;
 	}

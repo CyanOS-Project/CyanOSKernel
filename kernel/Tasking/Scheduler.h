@@ -18,7 +18,7 @@ class Scheduler
 	static void setup();
 
   private:
-	static StaticSpinlock lock;
+	static Spinlock lock;
 	static void load_context(ISRContextFrame& current_context, Thread& thread);
 	static void switch_page_directory(const uintptr_t page_directory);
 	static void save_context(const ISRContextFrame& current_context, Thread& thread);
