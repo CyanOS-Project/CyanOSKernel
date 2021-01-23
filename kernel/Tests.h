@@ -10,6 +10,7 @@
 #include "VirtualMemory/Memory.h"
 #include <ArgumentParser.h>
 #include <Bitmap.h>
+#include <ELFParser.h>
 #include <PathView.h>
 
 Semaphore* sem_lock;
@@ -269,4 +270,21 @@ void pathparser_test(uintptr_t arg)
 	PathView new_path("test2/test3.exe");
 	new_path.set_absolute_path(app_path.sub_path(0, -2));
 	warn() << new_path.full_path();
+}
+
+void test_elf()
+{
+
+	auto fd = FileDescription::open("/tar/bin/shell", OpenMode::OM_READ, OpenFlags::OF_OPEN_EXISTING);
+	if (fd.is_error()) {
+		err() << "error";
+		return;
+	}
+
+	FileInfo file_info;
+	fd.value()->file_query(file_info);
+
+	char* buff = static_cast<char*>(valloc(file_info.size, PAGE_READWRITE));
+	memset(buff, 0, file_info.size);
+	auto result = fd.value()->read(buff, file_info.size);
 }

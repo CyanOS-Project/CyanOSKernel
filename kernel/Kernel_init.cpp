@@ -63,6 +63,9 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	info() << "Done!";
 
 	info() << "CyanOS is ready!";
+
+	test_elf();
+
 	Process::create_new_process("/tar/bin/shell", "", ProcessPrivilege::User);
 
 	ENABLE_INTERRUPTS();

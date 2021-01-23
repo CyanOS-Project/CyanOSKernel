@@ -61,7 +61,6 @@ void parse_mbi(multiboot_tag_start* multiboot_info)
 
 	info() << "Kernel Start: " << Hex(uintptr_t(&KERNEL_START));
 	info() << "Kernel End  : " << Hex(uintptr_t(&KERNEL_END));
-	info() << "Kernel Aligned End  : " << Hex(align_to(VIR_TO_PHY(uint32_t(&KERNEL_END)), PAGE_SIZE));
 	info() << "Constructors Array Start: " << Hex(uintptr_t(&CONSTRUCTORS_ARRAY_START));
 	info() << "Constructors Array End  : " << Hex(uintptr_t(&CONSTRUCTORS_ARRAY_END));
 
