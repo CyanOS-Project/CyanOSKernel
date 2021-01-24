@@ -39,14 +39,25 @@ extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_inf
 {
 	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
 		HLT();
-	volatile uintptr_t tags_physical_addr = uintptr_t(boot_info);
-	volatile size_t tags_size = boot_info->total_size;
+	volatile Module ramdisk_module = get_ramdisk(boot_info);
 
 	Memory::setup();
 	Logger::init();
 
-	multiboot_tag_start* tags_addr = (multiboot_tag_start*)Memory::map(tags_physical_addr, tags_size, PAGE_READWRITE);
-	parse_mbi(tags_addr);
+	info() << "Kernel Start: " << Hex(uintptr_t(&KERNEL_START));
+	info() << "Kernel End  : " << Hex(uintptr_t(&KERNEL_END));
+	info() << "Constructors Array Start: " << Hex(uintptr_t(&CONSTRUCTORS_ARRAY_START));
+	info() << "Constructors Array End  : " << Hex(uintptr_t(&CONSTRUCTORS_ARRAY_END));
+
+	if (ramdisk_module.start) {
+		info() << "Ramdisk Start  : " << Hex(unsigned(ramdisk_module.start));
+		info() << "Ramdisk Size   : " << Hex(ramdisk_module.size);
+	} else {
+		warn() << "There is no ramdisk!";
+	}
+
+	bootloader_info.ramdisk.start = Memory::map(uintptr_t(ramdisk_module.start), ramdisk_module.size, PAGE_READWRITE);
+	bootloader_info.ramdisk.size = ramdisk_module.size;
 
 	uintptr_t new_stack = uintptr_t(valloc(STACK_SIZE, PAGE_READWRITE));
 	SET_STACK(new_stack + STACK_SIZE);
@@ -56,19 +67,28 @@ extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_inf
 	return;
 }
 
+#define PHYSICAL_MEM
+Module get_ramdisk(multiboot_tag_start* multiboot_info)
+{
+	multiboot_tag* current_tag = (multiboot_tag*)((char*)multiboot_info + sizeof(multiboot_tag_start));
+	while (current_tag->type != MULTIBOOT_TAG_TYPE_END) {
+		switch (current_tag->type) {
+			case MULTIBOOT_TAG_TYPE_MODULE: {
+				multiboot_tag_module* tag = (multiboot_tag_module*)current_tag;
+				if (!strcmp(tag->cmdline, (char*)(VIR_TO_PHY(uintptr_t("ramdisk"))))) {
+					return Module{(void*)tag->mod_start, tag->mod_end - tag->mod_start};
+				}
+				break;
+			}
+		}
+		current_tag = reinterpret_cast<multiboot_tag*>(uintptr_t(current_tag) +
+		                                               align_to(current_tag->size, MULTIBOOT_INFO_ALIGN));
+	}
+	return Module{nullptr, 0};
+}
+
 void parse_mbi(multiboot_tag_start* multiboot_info)
 {
-
-	info() << "Kernel Start: " << Hex(uintptr_t(&KERNEL_START));
-	info() << "Kernel End  : " << Hex(uintptr_t(&KERNEL_END));
-	info() << "Constructors Array Start: " << Hex(uintptr_t(&CONSTRUCTORS_ARRAY_START));
-	info() << "Constructors Array End  : " << Hex(uintptr_t(&CONSTRUCTORS_ARRAY_END));
-
-	info() << "Tags Start  : " << Hex(uintptr_t(multiboot_info));
-	info() << "Tags Size   : " << Hex(multiboot_info->total_size);
-
-	bootloader_info.tags = multiboot_info;
-
 	multiboot_tag* current_tag = (multiboot_tag*)((char*)multiboot_info + sizeof(multiboot_tag_start));
 	while (current_tag->type != MULTIBOOT_TAG_TYPE_END) {
 		switch (current_tag->type) {
@@ -79,7 +99,7 @@ void parse_mbi(multiboot_tag_start* multiboot_info)
 				info() << "\tSize: " << Hex(tag->mod_end);
 				if (!strcmp(tag->cmdline, "ramdisk")) {
 					bootloader_info.ramdisk.start =
-					    uintptr_t(Memory::map(tag->mod_start, tag->mod_end - tag->mod_start, PAGE_READWRITE));
+					    Memory::map(uintptr_t(tag->mod_start), tag->mod_end - tag->mod_start, PAGE_READWRITE);
 					bootloader_info.ramdisk.size = tag->mod_end - tag->mod_start;
 				}
 

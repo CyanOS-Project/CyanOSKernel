@@ -3,12 +3,11 @@
 #include <Types.h>
 
 struct Module {
-	uintptr_t start;
-	uintptr_t size;
+	void* start;
+	size_t size;
 };
 
 struct BootloaderInfo {
-	multiboot_tag_start* tags;
 	Module ramdisk;
 };
 

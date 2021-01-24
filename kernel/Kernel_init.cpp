@@ -28,7 +28,6 @@
 
 extern "C" void kernel_init(BootloaderInfo* boot_info)
 {
-	Logger::init();
 	Logger(DebugColor::Bright_Cyan) << "Welcome To CyanOS.";
 
 	info() << "Setting up core components... ";
@@ -44,7 +43,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	info() << "Done!";
 
 	info() << "Setting up file systems... ";
-	VFS::mount(TarFS::alloc("tar", reinterpret_cast<void*>(boot_info->ramdisk.start), boot_info->ramdisk.size));
+	VFS::mount(TarFS::alloc("tar", boot_info->ramdisk.start, boot_info->ramdisk.size));
 	VFS::mount(PipeFS::alloc("pipes"));
 	VFS::mount(DeviceFS::alloc("devices"));
 	VFS::mount(SocketFS::alloc("sockets"));
