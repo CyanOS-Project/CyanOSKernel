@@ -1,7 +1,7 @@
 #include "Process.h"
 #include "Arch/x86/Context.h"
 #include "Filesystem/VirtualFilesystem.h"
-#include "Loader/PE.h"
+#include "Loader/ELF.h"
 #include "ScopedLock.h"
 #include "Thread.h"
 #include "VirtualMemory/Memory.h"
@@ -207,19 +207,17 @@ Result<uintptr_t> Process::load_executable(PathView path)
 	}
 	FileInfo file_info;
 	fd.value()->file_query(file_info);
-	// FIXME: fix malloc to use more than 4096 bytes and use UniquePointer here.
-	char* buff = static_cast<char*>(valloc(file_info.size, PAGE_READWRITE));
-	memset(buff, 0, file_info.size);
-	auto result = fd.value()->read(buff, file_info.size);
+	// FIXME: use a Buffer data structure here.
+	auto buff = UniquePointer(new char[file_info.size]());
+	auto result = fd.value()->read(buff.ptr(), file_info.size);
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}
 
-	auto execable_entrypoint = PELoader::load(buff, file_info.size);
+	auto execable_entrypoint = ELFLoader::load(buff.ptr(), file_info.size);
 	if (execable_entrypoint.is_error()) {
 		return ResultError(execable_entrypoint.error());
 	}
-	Memory::free(buff, file_info.size, 0);
 	return execable_entrypoint.value();
 }
 

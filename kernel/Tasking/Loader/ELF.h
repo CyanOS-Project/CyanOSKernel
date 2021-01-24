@@ -1,14 +1,12 @@
+#include <ELFParser.h>
+#include <Result.h>
 #include <Types.h>
 
-class ELF
+class ELFLoader
 {
   private:
-	/* data */
+	static bool load_segments(const char* file, const ELFParser& elf);
+
   public:
-	ELF(/* args */);
-	~ELF();
+	static Result<uintptr_t> load(const char* file, size_t size);
 };
-
-ELF::ELF(/* args */) {}
-
-ELF::~ELF() {}

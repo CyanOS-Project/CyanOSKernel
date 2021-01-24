@@ -287,4 +287,28 @@ void test_elf()
 	char* buff = static_cast<char*>(valloc(file_info.size, PAGE_READWRITE));
 	memset(buff, 0, file_info.size);
 	auto result = fd.value()->read(buff, file_info.size);
+
+	ELFParser elf(buff, file_info.size);
+	if (!elf.is_valid()) {
+		info() << "Not valid ELF";
+		return;
+	}
+	info() << elf.elf_header().e_phoff;
+	info() << elf.elf_header().e_shoff;
+
+	info() << "Sections:";
+	for (size_t i = 0; i < elf.sections_number(); i++) {
+		info() << "Virtual Address: " << Hex(elf.section_header_by_index(i).sh_addr)
+		       << " Offset: " << Hex(elf.section_header_by_index(i).sh_offset)
+		       << " Raw Size: " << Hex(elf.section_header_by_index(i).sh_size)
+		       << " Name: " << elf.lookup_for_string(elf.section_header_by_index(i).sh_name);
+	}
+
+	info() << "Segments:";
+	for (size_t i = 0; i < elf.programs_number(); i++) {
+		info() << "Virtual Address: " << Hex(elf.program_header_by_index(i).p_vaddr)
+		       << " Raw Size: " << Hex(elf.program_header_by_index(i).p_memsz)
+		       << " Offset: " << Hex(elf.program_header_by_index(i).p_offset)
+		       << " Raw Size: " << Hex(elf.program_header_by_index(i).p_filesz);
+	}
 }
