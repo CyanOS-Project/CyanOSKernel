@@ -301,6 +301,7 @@ void test_elf()
 		info() << "Virtual Address: " << Hex(elf.section_header_by_index(i).sh_addr)
 		       << " Offset: " << Hex(elf.section_header_by_index(i).sh_offset)
 		       << " Raw Size: " << Hex(elf.section_header_by_index(i).sh_size)
+		       << " Type: " << Hex(elf.section_header_by_index(i).sh_type)
 		       << " Name: " << elf.lookup_for_string(elf.section_header_by_index(i).sh_name);
 	}
 

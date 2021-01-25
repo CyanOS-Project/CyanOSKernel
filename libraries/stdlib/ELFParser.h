@@ -1,3 +1,5 @@
+#pragma once
+
 #include "ELF.h"
 #include "StringView.h"
 #include "Types.h"
@@ -22,10 +24,12 @@ class ELFParser
 	const elf32_hdr& elf_header() const;
 	const elf32_phdr& program_header_by_index(size_t index) const;
 	const elf32_shdr& section_header_by_index(size_t index) const;
+	const elf32_shdr& section_header_by_name(StringView name) const;
+	const elf32_shdr& section_header_by_type(uint32_t type) const;
 	StringView lookup_for_string(size_t index_in_string_table) const;
 	size_t sections_number() const;
 	size_t programs_number() const;
-	size_t entry_point() const;
+	uintptr_t entry_point() const;
 	template <typename T> void for_each_program_header(T function) const {}
 	template <typename T> void for_each_section_header(T function) const {}
 };

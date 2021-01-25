@@ -7,6 +7,8 @@
 
 Result<UniquePointer<FileDescription>> FileDescription::open(PathView path, OpenMode mode, OpenFlags flags)
 {
+	// FIXME: Fail if there is someone already has a handle with writing permission.
+
 	auto node = VFS::get_node(path, mode, flags);
 	if (node.error()) {
 		return ResultError(node.error());

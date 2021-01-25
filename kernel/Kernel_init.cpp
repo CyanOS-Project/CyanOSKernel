@@ -86,11 +86,9 @@ void call_constrcutors()
 {
 	typedef void (*func)(void);
 	uintptr_t* constructor_array = &CONSTRUCTORS_ARRAY_START;
-	int count = 0;
-	while (constructor_array != &CONSTRUCTORS_ARRAY_END && *constructor_array) {
+	while (constructor_array != &CONSTRUCTORS_ARRAY_END && *constructor_array && *constructor_array != uintptr_t(-1)) {
 		func constructor = (func)*constructor_array;
 		constructor();
 		constructor_array++;
-		count++;
 	}
 }

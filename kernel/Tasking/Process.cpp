@@ -1,7 +1,6 @@
 #include "Process.h"
 #include "Arch/x86/Context.h"
 #include "Filesystem/VirtualFilesystem.h"
-#include "Loader/ELF.h"
 #include "ScopedLock.h"
 #include "Thread.h"
 #include "VirtualMemory/Memory.h"
@@ -197,7 +196,7 @@ void Process::descriptor_dereferenced()
 	}
 }
 
-Result<uintptr_t> Process::load_executable(PathView path)
+Result<ExecutableInformation> Process::load_executable(PathView path)
 {
 	ScopedLock local_lock(m_lock);
 
@@ -214,29 +213,32 @@ Result<uintptr_t> Process::load_executable(PathView path)
 		return ResultError(result.error());
 	}
 
-	auto execable_entrypoint = ELFLoader::load(buff.ptr(), file_info.size);
-	if (execable_entrypoint.is_error()) {
-		return ResultError(execable_entrypoint.error());
+	auto execable_info = ELFLoader::load(buff.ptr(), file_info.size);
+	if (execable_info.is_error()) {
+		return ResultError(execable_info.error());
 	}
-	return execable_entrypoint.value();
+	return execable_info.value();
 }
 
-void Process::initiate_process(uintptr_t __pcb)
+void Process::initiate_process(uintptr_t process)
 {
-	Process* pcb = reinterpret_cast<Process*>(__pcb);
+	Process* current_process = reinterpret_cast<Process*>(process);
 
-	auto&& executable_entrypoint = pcb->load_executable(pcb->m_path);
-	if (executable_entrypoint.is_error()) {
-		warn() << "couldn't load the process: \"" << pcb->m_path << "\" error: " << executable_entrypoint.error();
-		pcb->terminate(executable_entrypoint.error());
+	auto&& execable_info = current_process->load_executable(current_process->m_path);
+	if (execable_info.is_error()) {
+		warn() << "couldn't load the process: \"" << current_process->m_path << "\" error: " << execable_info.error();
+		current_process->terminate(execable_info.error());
 		return;
 	}
 
-	if (pcb->m_privilege_level == ProcessPrivilege::User) {
+	current_process->m_pib->constructors_array = execable_info.value().constructors_array;
+	current_process->m_pib->constructors_array_count = execable_info.value().constructors_array_count;
+
+	if (current_process->m_privilege_level == ProcessPrivilege::User) {
 		void* thread_user_stack = valloc(STACK_SIZE, PAGE_USER | PAGE_READWRITE);
 
-		Context::enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE - 4);
-	} else if (pcb->m_privilege_level == ProcessPrivilege::Kernel) {
+		Context::enter_usermode(execable_info.value().entry_point, uintptr_t(thread_user_stack) + STACK_SIZE - 4);
+	} else if (current_process->m_privilege_level == ProcessPrivilege::Kernel) {
 		ASSERT_NOT_REACHABLE(); // TODO: kernel process.
 	}
 

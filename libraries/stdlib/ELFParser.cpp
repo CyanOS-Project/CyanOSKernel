@@ -35,12 +35,41 @@ const elf32_hdr& ELFParser::elf_header() const
 
 const elf32_phdr& ELFParser::program_header_by_index(size_t index) const
 {
-	return m_program_headers_array[index];
+	if (index < m_sections_number) {
+		return m_program_headers_array[index];
+	} else {
+		return m_program_headers_array[SHN_UNDEF];
+	}
 }
 
 const elf32_shdr& ELFParser::section_header_by_index(size_t index) const
 {
-	return m_section_headers_array[index];
+	if (index < m_sections_number) {
+		return m_section_headers_array[index];
+	} else {
+		return m_section_headers_array[SHN_UNDEF];
+	}
+}
+const elf32_shdr& ELFParser::section_header_by_name(StringView name) const
+{
+	for (size_t i = 0; i < m_sections_number; i++) {
+		auto& section = section_header_by_index(i);
+		if (name == lookup_for_string(section.sh_name)) {
+			return section;
+		}
+	}
+	return m_section_headers_array[SHN_UNDEF];
+}
+
+const elf32_shdr& ELFParser::section_header_by_type(uint32_t type) const
+{
+	for (size_t i = 0; i < m_sections_number; i++) {
+		auto& section = section_header_by_index(i);
+		if (type == section.sh_type) {
+			return section;
+		}
+	}
+	return m_section_headers_array[SHN_UNDEF];
 }
 
 StringView ELFParser::lookup_for_string(size_t index_in_string_table) const

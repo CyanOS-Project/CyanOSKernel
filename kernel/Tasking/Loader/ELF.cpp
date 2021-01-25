@@ -2,7 +2,7 @@
 #include "VirtualMemory/Memory.h"
 #include <ErrorCodes.h>
 
-Result<uintptr_t> ELFLoader::load(const char* file, size_t size)
+Result<ExecutableInformation> ELFLoader::load(const char* file, size_t size)
 {
 	ELFParser elf(file, size);
 	if (!elf.is_valid()) {
@@ -13,8 +13,10 @@ Result<uintptr_t> ELFLoader::load(const char* file, size_t size)
 		// FIXME: memory leak if not all sections are loaded!
 		return ResultError(ERROR_LOADING_EXECUTABLE);
 	}
-
-	return elf.entry_point();
+	auto& init_array_section = elf.section_header_by_type(SHT_INIT_ARRAY);
+	return ExecutableInformation{.entry_point = elf.entry_point(),
+	                             .constructors_array = reinterpret_cast<uintptr_t*>(init_array_section.sh_addr),
+	                             .constructors_array_count = init_array_section.sh_size / sizeof(uintptr_t)};
 }
 
 bool ELFLoader::load_segments(const char* file, const ELFParser& elf)

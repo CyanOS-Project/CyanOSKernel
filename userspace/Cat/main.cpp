@@ -11,7 +11,7 @@ int main(int argc, const char* argv[])
 	}
 	int result = 0;
 
-	Handle fd = OpenFile(argv[2], OM_WRITE | OM_READ, OF_OPEN_EXISTING);
+	Handle fd = OpenFile(argv[1], OM_WRITE | OM_READ, OF_OPEN_EXISTING);
 	if ((result = GetLastError())) {
 		printf("Cannot open the file.\n");
 		return result;

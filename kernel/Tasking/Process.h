@@ -2,6 +2,8 @@
 
 #include "Arch/x86/Spinlock.h"
 #include "Filesystem/HandlesManager.h"
+#include "Loader/ELF.h"
+#include "ProcessDefinitions.h"
 #include "WaitQueue.h"
 #include <Bitmap.h>
 #include <List.h>
@@ -47,13 +49,6 @@ class Process
 	~Process();
 
   private:
-	struct UserProcessInformationBlock {
-		size_t pid;
-		char* path;
-		char* argument;
-		char path_data[MAX_PATH_SIZE];
-		char argument_data[MAX_PATH_SIZE];
-	};
 	static Bitmap<MAX_BITMAP_SIZE> pid_bitmap;
 	static List<Process> processes;
 	static Spinlock global_lock;
@@ -76,7 +71,7 @@ class Process
 	int m_return_status;
 
 	Process(StringView name, PathView path, StringView argument, ProcessPrivilege privilege);
-	Result<uintptr_t> load_executable(PathView path);
+	Result<ExecutableInformation> load_executable(PathView path);
 	size_t reserve_pid();
 	void cleanup();
 	friend class List<Process>;
