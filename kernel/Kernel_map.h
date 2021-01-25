@@ -6,5 +6,7 @@
 #define KERNEL_VIRTUAL_ADDRESS  (KERNEL_BASE + KERNEL_PHYSICAL_ADDRESS)
 #define VIR_TO_PHY(x)           (x - KERNEL_BASE)
 
-extern "C" uintptr_t _KERNEL_START;
-extern "C" uintptr_t _KERNEL_END;
+extern "C" uintptr_t KERNEL_START;
+extern "C" uintptr_t KERNEL_END;
+extern "C" uintptr_t CONSTRUCTORS_ARRAY_START;
+extern "C" uintptr_t CONSTRUCTORS_ARRAY_END;

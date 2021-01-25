@@ -7,6 +7,8 @@
 
 Result<UniquePointer<FileDescription>> FileDescription::open(PathView path, OpenMode mode, OpenFlags flags)
 {
+	// FIXME: Fail if there is someone already has a handle with writing permission.
+
 	auto node = VFS::get_node(path, mode, flags);
 	if (node.error()) {
 		return ResultError(node.error());
@@ -114,6 +116,7 @@ Result<void> FileDescription::dir_query(FileInfo& info)
 	return ResultError(ERROR_SUCCESS);
 }
 
+// FIXME: return a value directly!
 Result<void> FileDescription::file_query(FileInfo& info)
 {
 	memcpy(info.file_name, m_node.m_name.c_str(), m_node.m_name.length());

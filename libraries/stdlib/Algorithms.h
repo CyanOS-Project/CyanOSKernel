@@ -34,7 +34,7 @@ template <typename T> const T& min(const T& a, const T& b)
 	}
 }
 
-inline size_t align_to(size_t num, size_t alignment, bool align_zero = true)
+constexpr size_t align_to(size_t num, size_t alignment, bool align_zero = true)
 {
 	if (num == 0)
 		return align_zero ? alignment : 0;

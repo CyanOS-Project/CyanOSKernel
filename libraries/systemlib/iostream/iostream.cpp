@@ -19,6 +19,20 @@ void printf(const char* str)
 	}
 }
 
+void putchar(char c)
+{
+	if (con_fd == Handle(-1)) {
+		con_fd = OpenFile("/devices/console", 1, 1);
+		if (!con_fd) {
+			// crash here
+		}
+	}
+
+	if (!WriteFile(con_fd, &c, 1)) {
+		// crash here
+	}
+}
+
 char get_char()
 {
 	char c = 0;

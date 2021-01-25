@@ -1,41 +1,33 @@
 #include "Process.h"
 #include "Arch/x86/Context.h"
 #include "Filesystem/VirtualFilesystem.h"
-#include "Loader/PE.h"
 #include "ScopedLock.h"
 #include "Thread.h"
 #include "VirtualMemory/Memory.h"
 #include <Assert.h>
 
-List<Process>* Process::processes;
-Bitmap<MAX_BITMAP_SIZE>* Process::pid_bitmap;
-StaticSpinlock Process::global_lock;
-
-void Process::setup()
-{
-	pid_bitmap = new Bitmap<MAX_BITMAP_SIZE>;
-	processes = new List<Process>;
-	global_lock.init();
-}
+List<Process> Process::processes;
+Bitmap<MAX_BITMAP_SIZE> Process::pid_bitmap;
+Spinlock Process::global_lock;
 
 Process& Process::create_virtual_process(StringView name, ProcessPrivilege privilege)
 {
 	ScopedLock local_lock(global_lock);
-	auto& pcb = processes->emplace_back(name, "/", "", privilege);
+	auto& pcb = processes.emplace_back(name, "/", "", privilege);
 	return pcb;
 }
 
 Process& Process::create_new_process(PathView path, StringView argument, ProcessPrivilege privilege)
 {
 	ScopedLock local_lock(global_lock);
-	auto& pcb = processes->emplace_back(path[-1], path, argument, privilege);
+	auto& pcb = processes.emplace_back(path[-1], path, argument, privilege);
 	Thread::create_thread(pcb, initiate_process, uintptr_t(&pcb), ThreadPrivilege::Kernel);
 	return pcb;
 }
 
 Result<Process&> Process::get_process_from_pid(size_t pid)
 {
-	for (auto&& i : *processes) {
+	for (auto&& i : processes) {
 		if (i.m_pid == pid) {
 			return i;
 		}
@@ -79,8 +71,8 @@ Process::Process(StringView name, PathView path, StringView argument, ProcessPri
 
 Process::~Process()
 {
-	ASSERT(pid_bitmap->check_set(m_pid));
-	pid_bitmap->clear(m_pid);
+	ASSERT(pid_bitmap.check_set(m_pid));
+	pid_bitmap.clear(m_pid);
 
 	// free_page_direcotry(); FIXME: delete page directory.
 }
@@ -204,7 +196,7 @@ void Process::descriptor_dereferenced()
 	}
 }
 
-Result<uintptr_t> Process::load_executable(PathView path)
+Result<ExecutableInformation> Process::load_executable(PathView path)
 {
 	ScopedLock local_lock(m_lock);
 
@@ -214,38 +206,39 @@ Result<uintptr_t> Process::load_executable(PathView path)
 	}
 	FileInfo file_info;
 	fd.value()->file_query(file_info);
-	// FIXME: fix malloc to use more than 4096 bytes and use UniquePointer here.
-	char* buff = static_cast<char*>(valloc(file_info.size, PAGE_READWRITE));
-	memset(buff, 0, file_info.size);
-	auto result = fd.value()->read(buff, file_info.size);
+	// FIXME: use a Buffer data structure here.
+	auto buff = UniquePointer(new char[file_info.size]());
+	auto result = fd.value()->read(buff.ptr(), file_info.size);
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}
 
-	auto execable_entrypoint = PELoader::load(buff, file_info.size);
-	if (execable_entrypoint.is_error()) {
-		return ResultError(execable_entrypoint.error());
+	auto execable_info = ELFLoader::load(buff.ptr(), file_info.size);
+	if (execable_info.is_error()) {
+		return ResultError(execable_info.error());
 	}
-	Memory::free(buff, file_info.size, 0);
-	return execable_entrypoint.value();
+	return execable_info.value();
 }
 
-void Process::initiate_process(uintptr_t __pcb)
+void Process::initiate_process(uintptr_t process)
 {
-	Process* pcb = reinterpret_cast<Process*>(__pcb);
+	Process* current_process = reinterpret_cast<Process*>(process);
 
-	auto&& executable_entrypoint = pcb->load_executable(pcb->m_path);
-	if (executable_entrypoint.is_error()) {
-		warn() << "couldn't load the process: \"" << pcb->m_path << "\" error: " << executable_entrypoint.error();
-		pcb->terminate(executable_entrypoint.error());
+	auto&& execable_info = current_process->load_executable(current_process->m_path);
+	if (execable_info.is_error()) {
+		warn() << "couldn't load the process: \"" << current_process->m_path << "\" error: " << execable_info.error();
+		current_process->terminate(execable_info.error());
 		return;
 	}
 
-	if (pcb->m_privilege_level == ProcessPrivilege::User) {
+	current_process->m_pib->constructors_array = execable_info.value().constructors_array;
+	current_process->m_pib->constructors_array_count = execable_info.value().constructors_array_count;
+
+	if (current_process->m_privilege_level == ProcessPrivilege::User) {
 		void* thread_user_stack = valloc(STACK_SIZE, PAGE_USER | PAGE_READWRITE);
 
-		Context::enter_usermode(executable_entrypoint.value(), uintptr_t(thread_user_stack) + STACK_SIZE - 4);
-	} else if (pcb->m_privilege_level == ProcessPrivilege::Kernel) {
+		Context::enter_usermode(execable_info.value().entry_point, uintptr_t(thread_user_stack) + STACK_SIZE - 4);
+	} else if (current_process->m_privilege_level == ProcessPrivilege::Kernel) {
 		ASSERT_NOT_REACHABLE(); // TODO: kernel process.
 	}
 
@@ -254,15 +247,15 @@ void Process::initiate_process(uintptr_t __pcb)
 
 size_t Process::reserve_pid()
 {
-	size_t id = pid_bitmap->find_first_clear();
-	pid_bitmap->set(id);
+	size_t id = pid_bitmap.find_first_clear();
+	pid_bitmap.set(id);
 	return id;
 }
 
 void Process::cleanup()
 {
 	warn() << "Process " << m_pid << " is freed from memory.";
-	processes->remove(processes->find_if([this](auto& process) {
+	processes.remove(processes.find_if([this](auto& process) {
 		if (&process == this) {
 			return true;
 		} else {

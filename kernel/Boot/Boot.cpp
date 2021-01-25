@@ -4,7 +4,7 @@
 #include <Algorithms.h>
 
 BootloaderInfo bootloader_info;
-__attribute__((section(".multiboot2"))) const volatile Mutiboot2_Header my_multiboot2_header = {
+__attribute__((section(".multiboot2"))) static const volatile Mutiboot2_Header my_multiboot2_header = {
     .header = {.magic = MULTIBOOT2_HEADER_MAGIC,
                .architecture = MULTIBOOT_ARCHITECTURE_I386,
                .header_length = sizeof(Mutiboot2_Header),
@@ -13,9 +13,9 @@ __attribute__((section(".multiboot2"))) const volatile Mutiboot2_Header my_multi
                 .flags = 0,
                 .size = sizeof(multiboot_header_tag_address),
                 .header_addr = VIR_TO_PHY((uint32_t)&my_multiboot2_header),
-                .load_addr = KERNEL_PHYSICAL_ADDRESS,
+                .load_addr = unsigned(-1),
                 .load_end_addr = 0,
-                .bss_end_addr = VIR_TO_PHY(uint32_t(&_KERNEL_END))},
+                .bss_end_addr = VIR_TO_PHY(uint32_t(&KERNEL_END))},
     .entry = {.type = MULTIBOOT_HEADER_TAG_ENTRY_ADDRESS,
               .flags = 0,
               .size = sizeof(multiboot_header_tag_entry_address),
@@ -27,27 +27,6 @@ __attribute__((section(".multiboot2"))) const volatile Mutiboot2_Header my_multi
             .flags = 0,
             .size = sizeof(multiboot_header_tag)},
 };
-extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_info)
-{
-
-	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
-		HLT();
-	BootloaderInfo bootloader_info_local = parse_mbi((uintptr_t)boot_info);
-	Memory::setup();
-	// maping ramdisk to virtual memory
-	uintptr_t ustar_fs = reinterpret_cast<uintptr_t>(Memory::map(bootloader_info_local.ramdisk.start, //
-	                                                             bootloader_info_local.ramdisk.size,  //
-	                                                             PAGE_READWRITE));
-	bootloader_info_local.ramdisk.start = ustar_fs;
-	memcpy(&bootloader_info, &bootloader_info_local, sizeof(BootloaderInfo));
-	// Set new stack for high memory kernel.
-	uintptr_t new_stack = uintptr_t(valloc(STACK_SIZE, PAGE_READWRITE));
-
-	SET_STACK(new_stack + STACK_SIZE);
-	CALL(kernel_init, &bootloader_info)
-	ASSERT_NOT_REACHABLE();
-	return;
-}
 
 const char* mmap_entry_type_text[] = {"UNKNOWN"           //
                                       "AVAILABLE",        //
@@ -56,28 +35,83 @@ const char* mmap_entry_type_text[] = {"UNKNOWN"           //
                                       "NVS",              //
                                       "BAD_RAM"};
 
-BootloaderInfo parse_mbi(uintptr_t multiboot_info)
+extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_info)
 {
-	BootloaderInfo bootloader_info_local{};
+	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
+		HLT();
+	volatile Module ramdisk_module = get_ramdisk(boot_info);
 
-	multiboot_tag* current_tag = (multiboot_tag*)(multiboot_info + sizeof(multiboot_tag_start));
+	Memory::setup();
+	Logger::init();
+
+	info() << "Kernel Start: " << Hex(uintptr_t(&KERNEL_START));
+	info() << "Kernel End  : " << Hex(uintptr_t(&KERNEL_END));
+	info() << "Constructors Array Start: " << Hex(uintptr_t(&CONSTRUCTORS_ARRAY_START));
+	info() << "Constructors Array End  : " << Hex(uintptr_t(&CONSTRUCTORS_ARRAY_END));
+
+	if (ramdisk_module.start) {
+		info() << "Ramdisk Start  : " << Hex(unsigned(ramdisk_module.start));
+		info() << "Ramdisk Size   : " << Hex(ramdisk_module.size);
+	} else {
+		warn() << "There is no ramdisk!";
+	}
+
+	bootloader_info.ramdisk.start = Memory::map(uintptr_t(ramdisk_module.start), ramdisk_module.size, PAGE_READWRITE);
+	bootloader_info.ramdisk.size = ramdisk_module.size;
+
+	uintptr_t new_stack = uintptr_t(valloc(STACK_SIZE, PAGE_READWRITE));
+	SET_STACK(new_stack + STACK_SIZE);
+	CALL(kernel_init, &bootloader_info)
+
+	ASSERT_NOT_REACHABLE();
+	return;
+}
+
+#define PHYSICAL_MEM
+Module get_ramdisk(multiboot_tag_start* multiboot_info)
+{
+	multiboot_tag* current_tag = (multiboot_tag*)((char*)multiboot_info + sizeof(multiboot_tag_start));
 	while (current_tag->type != MULTIBOOT_TAG_TYPE_END) {
 		switch (current_tag->type) {
 			case MULTIBOOT_TAG_TYPE_MODULE: {
 				multiboot_tag_module* tag = (multiboot_tag_module*)current_tag;
-				// if (strcmp(tag->cmdline, "ramdisk") == 0) {
-				bootloader_info_local.ramdisk.start = tag->mod_start;
-				bootloader_info_local.ramdisk.size = tag->mod_end - tag->mod_start;
-				//}
+				if (!strcmp(tag->cmdline, (char*)(VIR_TO_PHY(uintptr_t("ramdisk"))))) {
+					return Module{(void*)tag->mod_start, tag->mod_end - tag->mod_start};
+				}
+				break;
+			}
+		}
+		current_tag = reinterpret_cast<multiboot_tag*>(uintptr_t(current_tag) +
+		                                               align_to(current_tag->size, MULTIBOOT_INFO_ALIGN));
+	}
+	return Module{nullptr, 0};
+}
+
+void parse_mbi(multiboot_tag_start* multiboot_info)
+{
+	multiboot_tag* current_tag = (multiboot_tag*)((char*)multiboot_info + sizeof(multiboot_tag_start));
+	while (current_tag->type != MULTIBOOT_TAG_TYPE_END) {
+		switch (current_tag->type) {
+			case MULTIBOOT_TAG_TYPE_MODULE: {
+				multiboot_tag_module* tag = (multiboot_tag_module*)current_tag;
+				info() << "Module: " << tag->cmdline;
+				info() << "\tStart: " << Hex(tag->mod_start);
+				info() << "\tSize: " << Hex(tag->mod_end);
+				if (!strcmp(tag->cmdline, "ramdisk")) {
+					bootloader_info.ramdisk.start =
+					    Memory::map(uintptr_t(tag->mod_start), tag->mod_end - tag->mod_start, PAGE_READWRITE);
+					bootloader_info.ramdisk.size = tag->mod_end - tag->mod_start;
+				}
+
 				break;
 			}
 			case MULTIBOOT_TAG_TYPE_MMAP: {
 				multiboot_tag_mmap* tag2 = (multiboot_tag_mmap*)current_tag;
 				size_t i = 0;
-				// info() << "Memory Map:\n";
+				info() << "Memory Map:";
 				while (tag2->entries[i].type != 0) {
-					// info() << "Addr: " << Hex(tag2->entries[i].addr) << " Size: " << tag2->entries[i].len
-					//       << " Type: " << mmap_entry_type_text[tag2->entries[i].type] << "\n";
+					info() << "\tAddr: " << Hex(tag2->entries[i].addr) << " Size: " << Hex(tag2->entries[i].len)
+					       << " Type: " << mmap_entry_type_text[tag2->entries[i].type];
 					i++;
 				}
 				break;
@@ -86,5 +120,4 @@ BootloaderInfo parse_mbi(uintptr_t multiboot_info)
 		current_tag = reinterpret_cast<multiboot_tag*>(uintptr_t(current_tag) +
 		                                               align_to(current_tag->size, MULTIBOOT_INFO_ALIGN));
 	}
-	return bootloader_info_local;
 }

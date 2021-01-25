@@ -26,26 +26,24 @@
 #include <Assert.h>
 #include <UniquePointer.h>
 
-void idle(uintptr_t);
 extern "C" void kernel_init(BootloaderInfo* boot_info)
 {
-	Logger::init();
 	Logger(DebugColor::Bright_Cyan) << "Welcome To CyanOS.";
 
 	info() << "Setting up core components... ";
 	GDT::setup();
 	IDT::setup();
-
 	Memory::setup_page_fault_handler();
 	Heap::setup();
+
+	call_constrcutors();
 	PIC::setup();
 	PIT::setup();
 	Scheduler::setup();
 	info() << "Done!";
 
-	info() << "Setting up file systems... " << boot_info->ramdisk.start;
-	VFS::setup();
-	VFS::mount(TarFS::alloc("tar", reinterpret_cast<void*>(boot_info->ramdisk.start), boot_info->ramdisk.size));
+	info() << "Setting up file systems... ";
+	VFS::mount(TarFS::alloc("tar", boot_info->ramdisk.start, boot_info->ramdisk.size));
 	VFS::mount(PipeFS::alloc("pipes"));
 	VFS::mount(DeviceFS::alloc("devices"));
 	VFS::mount(SocketFS::alloc("sockets"));
@@ -64,6 +62,9 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	info() << "Done!";
 
 	info() << "CyanOS is ready!";
+
+	test_elf();
+
 	Process::create_new_process("/tar/bin/shell", "", ProcessPrivilege::User);
 
 	ENABLE_INTERRUPTS();
@@ -78,5 +79,16 @@ void idle(uintptr_t)
 {
 	while (true) {
 		HLT();
+	}
+}
+
+void call_constrcutors()
+{
+	typedef void (*func)(void);
+	uintptr_t* constructor_array = &CONSTRUCTORS_ARRAY_START;
+	while (constructor_array != &CONSTRUCTORS_ARRAY_END && *constructor_array && *constructor_array != uintptr_t(-1)) {
+		func constructor = (func)*constructor_array;
+		constructor();
+		constructor_array++;
 	}
 }

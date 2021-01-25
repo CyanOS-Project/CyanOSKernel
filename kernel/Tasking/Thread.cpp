@@ -7,25 +7,17 @@
 #include "WaitQueue.h"
 #include <Assert.h>
 
-IntrusiveList<Thread>* Thread::ready_threads = nullptr;
-IntrusiveList<Thread>* Thread::sleeping_threads = nullptr;
 Thread* Thread::current = nullptr;
-Bitmap<MAX_BITMAP_SIZE>* Thread::tid_bitmap;
-StaticSpinlock Thread::global_lock;
-
-void Thread::setup()
-{
-	global_lock.init();
-	tid_bitmap = new Bitmap<MAX_BITMAP_SIZE>;
-	ready_threads = new IntrusiveList<Thread>;
-	sleeping_threads = new IntrusiveList<Thread>;
-}
+IntrusiveList<Thread> Thread::ready_threads;
+IntrusiveList<Thread> Thread::sleeping_threads;
+Bitmap<MAX_BITMAP_SIZE> Thread::tid_bitmap;
+Spinlock Thread::global_lock;
 
 Thread& Thread::create_thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv)
 {
 	ScopedLock local_lock(global_lock);
 
-	Thread& new_thread = ready_threads->push_back(*new Thread(process, address, argument, priv));
+	Thread& new_thread = ready_threads.push_back(*new Thread(process, address, argument, priv));
 	process.list_new_thread(new_thread);
 
 	return new_thread;
@@ -83,15 +75,15 @@ Thread::Thread(Process& process, thread_function address, uintptr_t argument, Th
 
 Thread::~Thread()
 {
-	ASSERT(tid_bitmap->check_set(m_tid));
-	tid_bitmap->clear(m_tid);
+	ASSERT(tid_bitmap.check_set(m_tid));
+	tid_bitmap.clear(m_tid);
 }
 
 void Thread::wake_up_from_queue()
 {
 	ScopedLock local_lock(global_lock);
 
-	ready_threads->push_back(*this);
+	ready_threads.push_back(*this);
 	m_state = ThreadState::Ready;
 	m_blocker = nullptr;
 }
@@ -100,8 +92,8 @@ void Thread::wake_up_from_sleep()
 {
 	ScopedLock local_lock(global_lock);
 
-	sleeping_threads->remove(*this);
-	ready_threads->push_back(*this);
+	sleeping_threads.remove(*this);
+	ready_threads.push_back(*this);
 	m_state = ThreadState::Ready;
 }
 
@@ -109,7 +101,7 @@ void Thread::block(WaitQueue& blocker)
 {
 	ScopedLock local_lock(global_lock);
 
-	ready_threads->remove(*this);
+	ready_threads.remove(*this);
 	m_state = ThreadState::BlockedQueue;
 	m_blocker = &blocker;
 }
@@ -129,8 +121,8 @@ void Thread::thread_finishing()
 
 size_t Thread::reserve_tid()
 {
-	size_t id = tid_bitmap->find_first_clear();
-	tid_bitmap->set(id);
+	size_t id = tid_bitmap.find_first_clear();
+	tid_bitmap.set(id);
 	return id;
 }
 
@@ -140,13 +132,13 @@ void Thread::terminate()
 		case ThreadState::Ready: {
 			ScopedLock local_lock(global_lock);
 
-			ready_threads->remove(*this);
+			ready_threads.remove(*this);
 			break;
 		}
 		case ThreadState::BlockedSleep: {
 			ScopedLock local_lock(global_lock);
 
-			sleeping_threads->remove(*this);
+			sleeping_threads.remove(*this);
 			break;
 		}
 		case ThreadState::BlockedQueue: {
@@ -171,8 +163,8 @@ void Thread::sleep(size_t ms)
 
 	current->m_sleep_ticks = PIT::ticks + ms;
 	current->m_state = ThreadState::BlockedSleep;
-	ready_threads->remove(*current);
-	sleeping_threads->push_back(*current);
+	ready_threads.remove(*current);
+	sleeping_threads.push_back(*current);
 
 	local_lock.release();
 
@@ -204,7 +196,7 @@ size_t Thread::number_of_ready_threads()
 {
 	ScopedLock local_lock(global_lock);
 
-	return ready_threads->size();
+	return ready_threads.size();
 }
 
 void Thread::cleanup()

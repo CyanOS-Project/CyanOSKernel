@@ -35,13 +35,13 @@ class Logger
 class dbg : public Logger
 {
   public:
-	dbg() : Logger{DebugColor::Green} {}
+	dbg() : Logger{DebugColor::Bright_Blue} {}
 };
 
 class info : public Logger
 {
   public:
-	info() : Logger{DebugColor::Bright_Blue} {}
+	info() : Logger{DebugColor::Green} {}
 };
 
 class warn : public Logger
