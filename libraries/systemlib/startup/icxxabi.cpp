@@ -33,7 +33,7 @@ void __cxa_finalize(void* f)
 	}
 
 	for (; i >= 0; i--) {
-		if (__atexitFuncs[i].destructorFunc == f) {
+		if (reinterpret_cast<void*>(__atexitFuncs[i].destructorFunc) == f) {
 			(*__atexitFuncs[i].destructorFunc)(__atexitFuncs[i].objPtr);
 			__atexitFuncs[i].destructorFunc = 0;
 		}

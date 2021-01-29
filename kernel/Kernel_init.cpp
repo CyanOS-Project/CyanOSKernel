@@ -5,6 +5,7 @@
 #include "Arch/x86/Paging.h"
 #include "Arch/x86/Panic.h"
 #include "Arch/x86/Pic.h"
+#include "Devices/Bus/PCI.h"
 #include "Devices/Console/Console.h"
 #include "Devices/DebugPort/DebugPort.h"
 #include "Devices/DebugPort/Logger.h"
@@ -63,7 +64,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 
 	info() << "CyanOS is ready!";
 
-	test_elf();
+	PCI::enumerate_pci_devices();
 
 	Process::create_new_process("/tar/bin/shell", "", ProcessPrivilege::User);
 
