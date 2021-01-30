@@ -24,6 +24,6 @@ class PhysicalMemory
 
   private:
 	static uintptr_t find_pages(uintptr_t start_page, size_t count);
-	static volatile uint8_t physical_memory_tracer[];
-	static volatile unsigned physical_memory_size;
+	static uint8_t physical_memory_tracer[];
+	static unsigned physical_memory_size;
 };

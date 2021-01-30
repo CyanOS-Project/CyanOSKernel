@@ -15,15 +15,20 @@ template <typename T> class UniquePointer
 	}
 
 	explicit UniquePointer(T* ptr) : m_storage{ptr} { ASSERT(m_storage); }
-
-	UniquePointer(UniquePointer&& other) : m_storage{other.m_storage} { other.m_storage = nullptr; }
+	UniquePointer(UniquePointer&& other) : m_storage{other.release()} {}
+	template <typename U> UniquePointer(UniquePointer<U>&& other) : m_storage{static_cast<T*>(other.release())} {}
 
 	UniquePointer& operator=(UniquePointer&& other)
 	{
 		ASSERT(this != &other);
-		delete m_storage;
-		m_storage = other.m_storage;
-		other.m_storage = nullptr;
+		reset(other.release());
+		return *this;
+	}
+
+	template <typename U> UniquePointer& operator=(UniquePointer<U>&& other)
+	{
+		ASSERT(this != &other);
+		reset(static_cast<T*>(other.release()));
 		return *this;
 	}
 
@@ -41,15 +46,15 @@ template <typename T> class UniquePointer
 
 	T* release()
 	{
+		T* tmp = m_storage;
 		m_storage = nullptr;
-		return m_storage;
+		return tmp;
 	}
 
-	T* reset()
+	void reset(T* new_ptr)
 	{
-		T* tmp = m_storage;
 		destroy();
-		return tmp;
+		m_storage = new_ptr;
 	}
 
   private:

@@ -10,6 +10,9 @@ static String working_directory{""};
 
 int main(int argc, const char* argv[])
 {
+	UNUSED(argc);
+	UNUSED(argv);
+
 	working_directory = "/tar/bin";
 	printf("Welcome To CyanOS\n");
 	printf("Version 0.1 Alpha\n");

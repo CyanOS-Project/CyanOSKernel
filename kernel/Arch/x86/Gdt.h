@@ -54,6 +54,7 @@ struct GDT_DESCRIPTOR {
 	uint16_t limit;
 	uint32_t base;
 };
+// FIXME: use normal bitmask instead of bit fields.
 struct GDT_ENTRY {
 	uint16_t lim0_15;
 	uint16_t base0_15;
