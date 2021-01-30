@@ -38,6 +38,7 @@
 #define PAGE_FLAGS_PSE           MASKABLE_PRAM(7)
 #define PAGE_FLAGS_GLOBAL        MASKABLE_PRAM(8)
 
+// FIXME: use normal bitmask instead of bit fields.
 typedef volatile struct PAGE_TABLE_ENTRY_t {
 	uint32_t present : 1;  // Page present in memory
 	uint32_t rw : 1;       // Read-only if clear, readwrite if set

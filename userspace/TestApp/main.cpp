@@ -4,6 +4,8 @@
 
 void main(int argc, const char* argv[])
 {
+	UNUSED(argc);
+
 	printf("Hello I'm cute child\n");
 	printf("My path is: ");
 	printf(argv[0]);
