@@ -1,75 +1,65 @@
 #include "PCI.h"
 #include "Arch/x86/Asm.h"
 #include "Devices/DebugPort/Logger.h"
+#include "PCIDevice.h"
 #include "PCIIdentification.h"
 
-void PCI::enumerate_pci_devices()
+void PCI::scan_function(Function<void(PCIDevice&)>& callback, uint8_t bus, uint8_t slot, uint8_t function)
 {
+	PCIDevice function_device{bus, slot, function};
+	if (function_device.does_exist()) {
+		callback(function_device);
+		if (PCIDevice{bus, slot, function}.header_type() == PCIDevice::HeaderType::PCIBridge) {
+			scan_bus(callback, PCIBridge{bus, slot, function}.secondary_bus_number());
+		}
+	}
+}
 
-	for (size_t i = 0; i < 256; i++) {
+void PCI::scan_slot(Function<void(PCIDevice&)>& callback, uint8_t bus, uint8_t slot)
+{
+	PCIDevice slot_device{bus, slot, 0};
 
-		for (size_t j = 0; j < 32; j++) {
-			for (size_t k = 0; k < 8; k++) {
-				uint32_t id = read_pci_word16(i, j, k, PCI_VENDOR_ID);
-				if (id != DEVICE_DOES_NOT_EXIST) {
-					info() << "----------------------------------------------------";
-					info() << "Class: "
-					       << PCI_id_to_string(read_pci_word8(i, j, k, PCI_CLASS),
-					                           read_pci_word8(i, j, k, PCI_SUBCLASS));
-					info() << "Vendor: " << PCI_vendor_to_string(read_pci_word16(i, j, k, PCI_VENDOR_ID));
-					info() << "Device: "
-					       << PCI_device_id_to_string(read_pci_word16(i, j, k, PCI_VENDOR_ID),
-					                                  read_pci_word16(i, j, k, PCI_DEVICE_ID));
-					info() << "Bus Number     : " << Hex(i);
-					info() << "Device Number  : " << Hex(j);
-					info() << "Function Number: " << Hex(k);
-					info() << "PCI_COMMAND    : " << Hex(read_pci_word16(i, j, k, PCI_COMMAND));
-					info() << "PCI_STATUS     : " << Hex(read_pci_word16(i, j, k, PCI_STATUS));
-					info() << "PCI_HEADER_TYPE: " << Hex(read_pci_word8(i, j, k, PCI_HEADER_TYPE));
-				}
+	if (slot_device.does_exist()) {
+		scan_function(callback, bus, slot, 0);
+		if (slot_device.has_multiple_functions()) {
+			for (size_t function = 1; function < 8; function++) {
+				scan_function(callback, bus, slot, function);
 			}
 		}
 	}
 }
 
-uint8_t PCI::read_pci_word8(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset)
+void PCI::scan_bus(Function<void(PCIDevice&)>& callback, uint8_t bus)
 {
-	uint32_t address = (bus << 16) | (device << 11) | (function << 8) | (offset & 0xFC) | (1 << 31);
-	out32(PCI_ADDRESS_PORT, address);
-	return in8(PCI_VALUE_PORT + (offset & 0x3));
+	for (size_t slot = 0; slot < 32; slot++) {
+		scan_slot(callback, bus, slot);
+	}
 }
 
-uint16_t PCI::read_pci_word16(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset)
+void PCI::scan_pci(Function<void(PCIDevice&)> callback)
 {
-	uint32_t address = (bus << 16) | (device << 11) | (function << 8) | (offset & 0xFC) | (1 << 31);
-	out32(PCI_ADDRESS_PORT, address);
-	return in16(PCI_VALUE_PORT + (offset & 0x2));
+	PCIDevice device(0, 0, 0);
+
+	if (device.has_multiple_functions()) {
+		for (size_t bus = 0; bus < 8; bus++) {
+			scan_bus(callback, bus);
+		}
+	} else {
+		scan_bus(callback, 0);
+	}
 }
 
-uint32_t PCI::read_pci_word32(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset)
+void PCI::enumerate_pci_devices()
 {
-	uint32_t address = (bus << 16) | (device << 11) | (function << 8) | (offset & 0xFC) | (1 << 31);
-	out32(PCI_ADDRESS_PORT, address);
-	return in32(PCI_VALUE_PORT);
-}
-
-void PCI::write_pci_word8(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset, uint8_t data)
-{
-	uint32_t address = (bus << 16) | (device << 11) | (function << 8) | (offset & 0xFC) | (1 << 31);
-	out32(PCI_ADDRESS_PORT, address);
-	out8(PCI_VALUE_PORT + (offset & 0x3), data);
-}
-
-void PCI::write_pci_word16(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset, uint16_t data)
-{
-	uint32_t address = (bus << 16) | (device << 11) | (function << 8) | (offset & 0xFC) | (1 << 31);
-	out32(PCI_ADDRESS_PORT, address);
-	out16(PCI_VALUE_PORT + (offset & 0x2), data);
-}
-
-void PCI::write_pci_word32(uint8_t bus, uint8_t device, uint8_t function, uint8_t offset, uint32_t data)
-{
-	uint32_t address = (bus << 16) | (device << 11) | (function << 8) | (offset & 0xFC) | (1 << 31);
-	out32(PCI_ADDRESS_PORT, address);
-	out32(PCI_VALUE_PORT, data);
+	scan_pci([](PCIDevice& device) {
+		info() << "----------------------------------------------------";
+		info() << "Class: " << PCI_id_to_string(device.device_class(), device.device_subclass());
+		info() << "Vendor: " << PCI_vendor_to_string(device.vendor_id());
+		info() << "Device: " << PCI_device_id_to_string(device.vendor_id(), device.device_id());
+		info() << "Bus Number     : " << Hex(device.bus());
+		info() << "Slot Number    : " << Hex(device.slot());
+		info() << "Function Number: " << Hex(device.function());
+		info() << "PCI_COMMAND    : " << Hex(device.command());
+		info() << "PCI_STATUS     : " << Hex(device.status());
+	});
 }
