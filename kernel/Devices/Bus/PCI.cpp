@@ -1,6 +1,7 @@
 #include "PCI.h"
 #include "Arch/x86/Asm.h"
 #include "Devices/DebugPort/Logger.h"
+#include "Devices/Ethernet/Intel_i217.h"
 #include "PCIDevice.h"
 #include "PCIIdentification.h"
 
@@ -52,14 +53,8 @@ void PCI::scan_pci(Function<void(PCIDevice&)> callback)
 void PCI::enumerate_pci_devices()
 {
 	scan_pci([](PCIDevice& device) {
-		info() << "----------------------------------------------------";
-		info() << "Class: " << PCI_id_to_string(device.device_class(), device.device_subclass());
-		info() << "Vendor: " << PCI_vendor_to_string(device.vendor_id());
-		info() << "Device: " << PCI_device_id_to_string(device.vendor_id(), device.device_id());
-		info() << "Bus Number     : " << Hex(device.bus());
-		info() << "Slot Number    : " << Hex(device.slot());
-		info() << "Function Number: " << Hex(device.function());
-		info() << "PCI_COMMAND    : " << Hex(device.command());
-		info() << "PCI_STATUS     : " << Hex(device.status());
+		if (device.device_id() == 0x100E) {
+			test_ethernet(GenericPCIDevice{device});
+		}
 	});
 }
