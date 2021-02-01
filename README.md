@@ -47,7 +47,7 @@ make run
 Add an issue, and I will be happy to answer you.
 
 ## Acknowledgement
-I would like to thank [Andreas Kling](https://github.com/awesomekling), I leant so much from his [youtube channel](https://www.youtube.com/c/AndreasKling/) and his great open source project [SerenityOS](https://github.com/SerenityOS/serenity).
+I would like to thank [Andreas Kling](https://github.com/awesomekling), I learned so much from his [youtube channel](https://www.youtube.com/c/AndreasKling/) and his great open source project [SerenityOS](https://github.com/SerenityOS/serenity).
 
 ## Useful resources
 * Operating Systems: Internals And Design Principles By William Stallings.
