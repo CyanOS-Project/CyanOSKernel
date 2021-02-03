@@ -46,5 +46,3 @@ class Memory
 
 void* valloc(void* virtual_address, uint32_t size, uint32_t flags);
 void vfree(void* virtual_address, uint32_t size, uint32_t flags);
-void* calloc(void* virtual_address, uint32_t size, uint32_t flags, uintptr_t* physical_page);
-void cfree(void* virtual_address, uint32_t size, uint32_t flags);

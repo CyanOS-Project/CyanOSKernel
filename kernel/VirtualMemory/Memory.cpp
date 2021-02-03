@@ -207,18 +207,3 @@ void vfree(void* virtual_address, uint32_t size, uint32_t flags)
 {
 	return Memory::free(virtual_address, size, flags);
 }
-
-void* calloc(void* virtual_address, uint32_t size, uint32_t flags, uintptr_t* physical_page)
-{
-	void* addr = Memory::alloc(virtual_address, size, flags);
-	if (physical_page) {
-		*physical_page = Paging::get_physical_page(uintptr_t(addr)) * PAGE_SIZE;
-	}
-
-	return addr;
-}
-
-void cfree(void* virtual_address, uint32_t size, uint32_t flags)
-{
-	return vfree(virtual_address, size, flags);
-}
