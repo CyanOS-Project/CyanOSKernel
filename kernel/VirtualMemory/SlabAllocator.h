@@ -47,7 +47,7 @@ template <size_t slab_size, size_t memory_size> class Slab
 
 inline void* request_memory_from_os(size_t size)
 {
-	void* address = valloc(size, PAGE_READWRITE);
+	void* address = valloc(0, size, PAGE_READWRITE);
 	return address;
 }
 

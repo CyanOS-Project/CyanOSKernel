@@ -59,7 +59,7 @@ extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_inf
 	bootloader_info.ramdisk.start = Memory::map(uintptr_t(ramdisk_module.start), ramdisk_module.size, PAGE_READWRITE);
 	bootloader_info.ramdisk.size = ramdisk_module.size;
 
-	uintptr_t new_stack = uintptr_t(valloc(STACK_SIZE, PAGE_READWRITE));
+	uintptr_t new_stack = uintptr_t(valloc(0, STACK_SIZE, PAGE_READWRITE));
 	SET_STACK(new_stack + STACK_SIZE);
 	CALL(kernel_init, &bootloader_info)
 
@@ -110,7 +110,7 @@ void parse_mbi(multiboot_tag_start* multiboot_info)
 				size_t i = 0;
 				info() << "Memory Map:";
 				while (tag2->entries[i].type != 0) {
-					info() << "\tAddr: " << Hex(tag2->entries[i].addr) << " Size: " << Hex(tag2->entries[i].len)
+					info() << "\tAddr: " << Hex64(tag2->entries[i].addr) << " Size: " << Hex64(tag2->entries[i].len)
 					       << " Type: " << mmap_entry_type_text[tag2->entries[i].type];
 					i++;
 				}

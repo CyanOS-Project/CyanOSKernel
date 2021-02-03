@@ -79,7 +79,7 @@ void test_pipe1(uintptr_t arg)
 
 		return;
 	}
-	char* buff = (char*)valloc(0xc00, PAGE_READWRITE);
+	char* buff = (char*)valloc(0, 0xc00, PAGE_READWRITE);
 	memset(buff, 0, 4096);
 	auto result = fd.value()->read(buff, 12);
 	dbg() << "got it, read";
@@ -99,7 +99,7 @@ void test_pipe2(uintptr_t arg)
 		HLT();
 		return;
 	}
-	char* buff = (char*)valloc(0xc00, PAGE_READWRITE);
+	char* buff = (char*)valloc(0, 0xc00, PAGE_READWRITE);
 	memset(buff, 0, 4096);
 	auto result = fd.value()->write(static_cast<const void*>("Hello there"), 12);
 	dbg() << "got it, write";
@@ -284,7 +284,7 @@ void test_elf()
 	FileInfo file_info;
 	fd.value()->file_query(file_info);
 
-	char* buff = static_cast<char*>(valloc(file_info.size, PAGE_READWRITE));
+	char* buff = static_cast<char*>(valloc(0, file_info.size, PAGE_READWRITE));
 	memset(buff, 0, file_info.size);
 	auto result = fd.value()->read(buff, file_info.size);
 

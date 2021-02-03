@@ -54,7 +54,7 @@ Process::Process(StringView name, PathView path, StringView argument, ProcessPri
 	Memory::switch_page_directory(m_page_directory);
 
 	m_pib = static_cast<UserProcessInformationBlock*>(
-	    valloc(sizeof(UserProcessInformationBlock), PAGE_USER | PAGE_READWRITE));
+	    valloc(0, sizeof(UserProcessInformationBlock), PAGE_USER | PAGE_READWRITE));
 
 	m_pib->pid = m_pid;
 	m_pib->path = m_pib->path_data;
@@ -235,7 +235,7 @@ void Process::initiate_process(uintptr_t process)
 	current_process->m_pib->constructors_array_count = execable_info.value().constructors_array_count;
 
 	if (current_process->m_privilege_level == ProcessPrivilege::User) {
-		void* thread_user_stack = valloc(STACK_SIZE, PAGE_USER | PAGE_READWRITE);
+		void* thread_user_stack = valloc(0, STACK_SIZE, PAGE_USER | PAGE_READWRITE);
 
 		Context::enter_usermode(execable_info.value().entry_point, uintptr_t(thread_user_stack) + STACK_SIZE - 4);
 	} else if (current_process->m_privilege_level == ProcessPrivilege::Kernel) {

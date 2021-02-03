@@ -14,10 +14,15 @@
 class Memory
 {
   public:
+	struct ContagiousMemoryBlock {
+		void* virtual_addr;
+		uintptr_t physical_addr;
+		size_t size;
+	};
+
 	static unsigned get_kernel_pages();
 	static void setup();
 	static void setup_page_fault_handler();
-	static void* alloc(uint32_t size, uint32_t flags);
 	static void* alloc(void* virtual_address, uint32_t size, uint32_t flags);
 	static void free(void* virtual_address, uint32_t size, uint32_t flags);
 	static void* map(uintptr_t physical_address, uint32_t size, uint32_t flags);
@@ -31,7 +36,6 @@ class Memory
 	static StaticSpinlock lock;
 	static void page_fault_handler(ISRContextFrame& isr_info);
 	static uint32_t parse_flags(uint32_t mem_flags);
-	static void* _alloc_no_lock(uint32_t size, uint32_t flags);
 	static void* _alloc_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
 	static void _free_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
 	static void* _map_no_lock(uintptr_t physical_address, uint32_t size, uint32_t flags);
@@ -41,5 +45,6 @@ class Memory
 };
 
 void* valloc(void* virtual_address, uint32_t size, uint32_t flags);
-void* valloc(uint32_t size, uint32_t flags);
 void vfree(void* virtual_address, uint32_t size, uint32_t flags);
+void* calloc(void* virtual_address, uint32_t size, uint32_t flags, uintptr_t* physical_page);
+void cfree(void* virtual_address, uint32_t size, uint32_t flags);
