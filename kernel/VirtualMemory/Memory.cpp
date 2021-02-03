@@ -207,3 +207,8 @@ void vfree(void* virtual_address, uint32_t size, uint32_t flags)
 {
 	return Memory::free(virtual_address, size, flags);
 }
+
+uintptr_t virtual_to_physical_address(void* virtual_address)
+{
+	return Paging::get_physical_page(uintptr_t(virtual_address)) * PAGE_SIZE;
+}
