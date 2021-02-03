@@ -7,6 +7,10 @@
 #include <Types.h>
 
 class Hex;
+class Hex8;
+class Hex16;
+class Hex32;
+class Hex64;
 
 class Logger
 {
@@ -21,8 +25,11 @@ class Logger
 	Logger& operator<<(unsigned num);
 	Logger& operator<<(int32_t num);
 	Logger& operator<<(uint32_t num);
-	Logger& operator<<(uint64_t num);
 	Logger& operator<<(Hex num);
+	Logger& operator<<(Hex8 num);
+	Logger& operator<<(Hex16 num);
+	Logger& operator<<(Hex32 num);
+	Logger& operator<<(Hex64 num);
 	Logger& operator<<(void* ptr);
 
   private:
@@ -59,9 +66,53 @@ class err : public Logger
 class Hex
 {
   private:
+	uint32_t m_data;
+	int m_size;
+
+  public:
+	Hex(uint8_t num) : m_data(num), m_size{1} {}
+	Hex(uint16_t num) : m_data(num), m_size{2} {}
+	Hex(uint32_t num) : m_data(num), m_size{4} {}
+	Hex(unsigned int num) : m_data(num), m_size{4} {}
+	friend class Logger;
+};
+
+class Hex8
+{
+  private:
 	int m_data;
 
   public:
-	Hex(int num) : m_data(num) {}
+	Hex8(uint8_t num) : m_data(num) {}
+	friend class Logger;
+};
+
+class Hex16
+{
+  private:
+	int m_data;
+
+  public:
+	Hex16(uint16_t num) : m_data(num) {}
+	friend class Logger;
+};
+
+class Hex32
+{
+  private:
+	int m_data;
+
+  public:
+	Hex32(uint32_t num) : m_data(num) {}
+	friend class Logger;
+};
+
+class Hex64
+{
+  private:
+	long int m_data;
+
+  public:
+	Hex64(uint64_t num) : m_data(num) {}
 	friend class Logger;
 };
