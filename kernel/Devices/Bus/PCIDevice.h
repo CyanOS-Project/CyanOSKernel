@@ -5,27 +5,33 @@
 class PCIDevice
 {
   private:
-	static constexpr uint16_t PCI_ADDRESS_PORT = 0xCF8;
-	static constexpr uint16_t PCI_VALUE_PORT = 0xCFC;
-	static constexpr uint16_t PCI_VENDOR_ID = 0x00;
-	static constexpr uint16_t PCI_DEVICE_ID = 0x02;
-	static constexpr uint16_t PCI_COMMAND = 0x04;
-	static constexpr uint16_t PCI_STATUS = 0x06;
-	static constexpr uint16_t PCI_REVISION_ID = 0x08;
-	static constexpr uint16_t PCI_PROG_IF = 0x09;
-	static constexpr uint16_t PCI_SUBCLASS = 0x0a;
-	static constexpr uint16_t PCI_CLASS = 0x0b;
-	static constexpr uint16_t PCI_CACHE_LINE_SIZE = 0x0c;
-	static constexpr uint16_t PCI_LATENCY_TIMER = 0x0d;
-	static constexpr uint16_t PCI_HEADER_TYPE = 0x0e;
-	static constexpr uint16_t PCI_BIST = 0x0f;
+	static constexpr uint16_t PCI_PORT_ADDRESS_PORT = 0xCF8;
+	static constexpr uint16_t PCI_PORT_VALUE_PORT = 0xCFC;
+	static constexpr uint16_t PCI_PORT_VENDOR_ID = 0x00;
+	static constexpr uint16_t PCI_PORT_DEVICE_ID = 0x02;
+	static constexpr uint16_t PCI_PORT_COMMAND = 0x04;
+	static constexpr uint16_t PCI_PORT_STATUS = 0x06;
+	static constexpr uint16_t PCI_PORT_REVISION_ID = 0x08;
+	static constexpr uint16_t PCI_PORT_PROG_IF = 0x09;
+	static constexpr uint16_t PCI_PORT_SUBCLASS = 0x0a;
+	static constexpr uint16_t PCI_PORT_CLASS = 0x0b;
+	static constexpr uint16_t PCI_PORT_CACHE_LINE_SIZE = 0x0c;
+	static constexpr uint16_t PCI_PORT_LATENCY_TIMER = 0x0d;
+	static constexpr uint16_t PCI_PORT_HEADER_TYPE = 0x0e;
+	static constexpr uint16_t PCI_PORT_BIST = 0x0f;
+
+	static constexpr uint32_t PCI_COMMAND_IO_SPACE = (1 << 0);
+	static constexpr uint32_t PCI_COMMAND_MEMORY_SPACE = (1 << 1);
+	static constexpr uint32_t PCI_COMMAND_BUS_MASTER = (1 << 2);
+	static constexpr uint32_t PCI_COMMAND_SPECIAL_CYCLES = (1 << 3);
+	static constexpr uint32_t PCI_COMMAND_INTERRUPT_DISABLE = (1 << 10);
 
 	static constexpr uint16_t DEVICE_DOES_NOT_EXIST = 0xffff;
 
 	uint8_t m_bus_number;
 	uint8_t m_slot_number;
 	uint8_t m_function_number;
-	void select_device(uint8_t offset) const;
+	void select_port(uint8_t offset) const;
 
   protected:
 	uint8_t read_config_word8(uint8_t offset) const;
@@ -55,17 +61,21 @@ class PCIDevice
 	HeaderType header_type() const;
 	bool has_multiple_functions() const;
 	uint8_t bist() const;
+	void enable_bus_mastering();
+	void disable_bus_mastering();
+	void enable_interrupts();
+	void disable_interrupts();
 };
 
 class PCIBridge : public PCIDevice
 {
   private:
-	static constexpr uint16_t PCI_BAR0 = 0x10;
-	static constexpr uint16_t PCI_BAR1 = 0x14;
-	static constexpr uint16_t PCI_PRIMARY_BUS_NUMBER = 0x18;
-	static constexpr uint16_t PCI_SECONDARY_BUS_NUMBER = 0x19;
-	static constexpr uint16_t PCI_SUBORDINATE_BUS_NUMBER = 0x1A;
-	static constexpr uint16_t PCI_SECONDARY_LATENCY_TIMER = 0x1B;
+	static constexpr uint16_t PCI_PORT_BAR0 = 0x10;
+	static constexpr uint16_t PCI_PORT_BAR1 = 0x14;
+	static constexpr uint16_t PCI_PORT_PRIMARY_BUS_NUMBER = 0x18;
+	static constexpr uint16_t PCI_PORT_SECONDARY_BUS_NUMBER = 0x19;
+	static constexpr uint16_t PCI_PORT_SUBORDINATE_BUS_NUMBER = 0x1A;
+	static constexpr uint16_t PCI_PORT_SECONDARY_LATENCY_TIMER = 0x1B;
 
   public:
 	PCIBridge(uint8_t bus_number, uint8_t slot_number, uint8_t function_number);
@@ -81,14 +91,14 @@ class PCIBridge : public PCIDevice
 class GenericPCIDevice : public PCIDevice
 {
   private:
-	static constexpr uint16_t PCI_BAR0 = 0x10;
-	static constexpr uint16_t PCI_BAR1 = 0x14;
-	static constexpr uint16_t PCI_BAR2 = 0x18;
-	static constexpr uint16_t PCI_BAR3 = 0x1C;
-	static constexpr uint16_t PCI_BAR4 = 0x20;
-	static constexpr uint16_t PCI_BAR5 = 0x24;
-	static constexpr uint16_t PCI_INTERRUPT_LINE = 0x3C;
-	static constexpr uint16_t PCI_INTERRUPT_PIN = 0x3D;
+	static constexpr uint16_t PCI_PORT_BAR0 = 0x10;
+	static constexpr uint16_t PCI_PORT_BAR1 = 0x14;
+	static constexpr uint16_t PCI_PORT_BAR2 = 0x18;
+	static constexpr uint16_t PCI_PORT_BAR3 = 0x1C;
+	static constexpr uint16_t PCI_PORT_BAR4 = 0x20;
+	static constexpr uint16_t PCI_PORT_BAR5 = 0x24;
+	static constexpr uint16_t PCI_PORT_INTERRUPT_LINE = 0x3C;
+	static constexpr uint16_t PCI_PORT_INTERRUPT_PIN = 0x3D;
 
   public:
 	GenericPCIDevice(uint8_t bus_number, uint8_t slot_number, uint8_t function_number);

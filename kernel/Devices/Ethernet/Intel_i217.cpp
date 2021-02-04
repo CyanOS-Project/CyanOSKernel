@@ -3,7 +3,7 @@
 #include "Devices/DebugPort/Logger.h"
 #include "VirtualMemory/Memory.h"
 
-uint8_t* ports = nullptr;
+static uint8_t* ports = nullptr;
 void writeCommand(uint16_t p_address, uint32_t p_value)
 {
 	*((uint32_t*)(ports + p_address)) = p_value;
@@ -43,6 +43,7 @@ void test_ethernet(const GenericPCIDevice& device)
 		info() << "There is eeprom";
 	}
 
+	info() << readCommand(0x5400);
 	uint8_t mac[6];
 	uint32_t temp;
 	temp = eepromRead(0);

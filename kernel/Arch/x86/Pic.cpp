@@ -15,8 +15,8 @@ void PIC::setup()
 	out8(PIC1_DATA, ICW4_BUF_MASTER);
 	out8(PIC2_DATA, ICW4_BUF_SLAVE);
 	// Mask
-	out8(PIC1_DATA, 0xFB); //	Activates IR 2 only.
-	out8(PIC2_DATA, 0xFF); //	Disable all IRs.
+	out8(PIC1_DATA, 0); //	Activates IR 2 only.
+	out8(PIC2_DATA, 0); //	Disable all IRs.
 }
 
 void PIC::enable_irq(uint8_t irq)
