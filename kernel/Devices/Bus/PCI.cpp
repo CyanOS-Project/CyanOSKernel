@@ -66,7 +66,7 @@ void PCI::enumerate_pci_devices()
 			info() << "PCI_COMMAND    : " << Hex(device.command());
 			info() << "PCI_STATUS     : " << Hex(device.status());
 
-			test_RTL8139_ethernet(GenericPCIDevice{device});
+			new RTL8139{GenericPCIDevice{device}};
 		}
 	});
 }

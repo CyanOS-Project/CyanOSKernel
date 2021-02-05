@@ -6,32 +6,29 @@
 #include "Tasking/Thread.h"
 #include "VirtualMemory/Memory.h"
 
-static uint16_t ports = 0;
-static void* tx_buffers[NUMBER_TX_BUFFERS]{};
-static uint8_t current_TX_buffer = 0;
-static constexpr uint16_t TSAD_array[NUMBER_TX_BUFFERS] = {0x20, 0x24, 0x28, 0x2C};
-static constexpr uint16_t TSD_array[NUMBER_TX_BUFFERS] = {0x10, 0x14, 0x18, 0x1C};
+static void irq_handler(ISRContextFrame& context);
+RTL8139* instance = nullptr;
 
-void turn_on()
+void RTL8139::turn_on()
 {
 	write_register8(RTL8139_PORT_CONFIG1, 0);
 }
 
-void software_rest()
+void RTL8139::software_rest()
 {
 	write_register8(RTL8139_PORT_CHIP_CMD, RTL8139_COMMAND_RESET);
 	while (read_register8(RTL8139_PORT_CHIP_CMD) & RTL8139_COMMAND_RESET) {
 	}
 }
 
-void setup_TX_buffers()
+void RTL8139::setup_TX_buffers()
 {
 	for (size_t i = 0; i < NUMBER_TX_BUFFERS; i++) {
-		tx_buffers[i] = valloc(0, MAX_TX_BUFFER_SIZE, PAGE_READWRITE | PAGE_CONTAGIOUS);
+		m_tx_buffers[i] = valloc(0, MAX_TX_BUFFER_SIZE, PAGE_READWRITE | PAGE_CONTAGIOUS);
 	}
 }
 
-void configure_rx()
+void RTL8139::configure_rx()
 {
 	write_register32(RTL8139_PORT_RX_CONFIG,
 	                 RTL8139_RX_CONFIG_ACCEPT_PHYSICAL_MATCH_PACKETS | RTL8139_RX_CONFIG_ACCEPT_PHYSICAL_MATCH_PACKETS |
@@ -39,7 +36,7 @@ void configure_rx()
 	                     RTL8139_RX_CONFIG_EEPROM_WRAP);
 }
 
-void configure_RX_TX()
+void RTL8139::configure_RX_TX()
 {
 	write_register16(RTL8139_PORT_INTR_MASK, RTL8139_INTERRUPT_MASK_RX_OK | RTL8139_INTERRUPT_MASK_TX_OK);
 
@@ -52,7 +49,7 @@ void configure_RX_TX()
 	write_register8(RTL8139_PORT_CHIP_CMD, RTL8139_COMMAND_RX_ENABLE | RTL8139_COMMAND_TX_ENABLE);
 }
 
-void rx_interrupt_handler(ISRContextFrame& context)
+void RTL8139::rx_tx_handler()
 {
 	info() << "Descriptors: " << Hex(read_register16(RTL8139_PORT_TX_SUMMARY));
 
@@ -68,24 +65,25 @@ void rx_interrupt_handler(ISRContextFrame& context)
 	write_register16(RTL8139_PORT_INTR_STATUS, status);
 }
 
-void send_packet(const void* data, size_t len)
+void RTL8139::send_packet(const void* data, size_t len)
 {
 	if (len > MAX_TX_BUFFER_SIZE) {
 		warn() << "Data too large to be sent!";
 		return;
 	}
 
-	memcpy(tx_buffers[current_TX_buffer], data, len);
-	write_register32(TSAD_array[current_TX_buffer], virtual_to_physical_address(tx_buffers[current_TX_buffer]));
-	write_register32(TSD_array[current_TX_buffer], len);
-	while (!(read_register32(TSD_array[current_TX_buffer]) & RTL8139_TX_STATUS_TOK)) {
+	memcpy(m_tx_buffers[m_current_TX_buffer], data, len);
+	write_register32(TSAD_array[m_current_TX_buffer], virtual_to_physical_address(m_tx_buffers[m_current_TX_buffer]));
+	write_register32(TSD_array[m_current_TX_buffer], len);
+	while (!(read_register32(TSD_array[m_current_TX_buffer]) & RTL8139_TX_STATUS_TOK)) {
 	}
-	current_TX_buffer = (current_TX_buffer + 1) % NUMBER_TX_BUFFERS;
+	m_current_TX_buffer = (m_current_TX_buffer + 1) % NUMBER_TX_BUFFERS;
 }
 
-void test_RTL8139_ethernet(GenericPCIDevice&& device)
+RTL8139::RTL8139(GenericPCIDevice&& device)
 {
-	ports = device.BAR0().address();
+	instance = this;
+	m_ports = device.BAR0().address();
 
 	info() << "Device MAC address: " << Hex(read_register8(0)) << " " << Hex(read_register8(1)) << " "
 	       << Hex(read_register8(2)) << " " << Hex(read_register8(3)) << " " << Hex(read_register8(4)) << " "
@@ -99,39 +97,46 @@ void test_RTL8139_ethernet(GenericPCIDevice&& device)
 	configure_RX_TX();
 	setup_TX_buffers();
 
-	ISR::register_hardware_interrupt_handler(rx_interrupt_handler, device.interrupt_line());
+	ISR::register_hardware_interrupt_handler(irq_handler, device.interrupt_line());
 
 	send_packet("hello there.", 10);
 	Thread::sleep(1000);
 	send_packet("hello there...", 25);
 }
 
-void write_register8(uint16_t address, uint8_t value)
+void RTL8139::write_register8(uint16_t address, uint8_t value)
 {
-	out8(ports + address, value);
+	out8(m_ports + address, value);
 }
 
-void write_register16(uint16_t address, uint16_t value)
+void RTL8139::write_register16(uint16_t address, uint16_t value)
 {
-	out16(ports + address, value);
+	out16(m_ports + address, value);
 }
 
-void write_register32(uint16_t address, uint32_t value)
+void RTL8139::write_register32(uint16_t address, uint32_t value)
 {
-	out32(ports + address, value);
+	out32(m_ports + address, value);
 }
 
-uint8_t read_register8(uint16_t address)
+uint8_t RTL8139::read_register8(uint16_t address)
 {
-	return in8(ports + address);
+	return in8(m_ports + address);
 }
 
-uint16_t read_register16(uint16_t address)
+uint16_t RTL8139::read_register16(uint16_t address)
 {
-	return in16(ports + address);
+	return in16(m_ports + address);
 }
 
-uint32_t read_register32(uint16_t address)
+uint32_t RTL8139::read_register32(uint16_t address)
 {
-	return in32(ports + address);
+	return in32(m_ports + address);
+}
+
+static void irq_handler(ISRContextFrame& context)
+{
+	UNUSED(context);
+	ASSERT(instance);
+	instance->rx_tx_handler();
 }
