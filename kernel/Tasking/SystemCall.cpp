@@ -29,7 +29,7 @@ unsigned SystemCall::syscalls_count = sizeof(systemcalls_routines) / sizeof(gene
 
 void SystemCall::setup()
 {
-	ISR::register_isr_handler(systemcall_handler, SYSCALL_IRQ);
+	ISR::register_software_interrupt_handler(systemcall_handler, SYSCALL_IRQ);
 }
 
 generic_syscall SystemCall::get_syscall_routine(unsigned syscall_num)

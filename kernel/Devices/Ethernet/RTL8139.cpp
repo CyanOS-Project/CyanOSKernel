@@ -3,6 +3,7 @@
 #include "Arch/x86/Isr.h"
 #include "Arch/x86/Pic.h"
 #include "Devices/DebugPort/Logger.h"
+#include "Tasking/Thread.h"
 #include "VirtualMemory/Memory.h"
 
 static uint16_t ports = 0;
@@ -53,9 +54,18 @@ void configure_RX_TX()
 
 void rx_interrupt_handler(ISRContextFrame& context)
 {
-	info() << "Interrupt: Data has been sent!";
-	PIC::acknowledge_pic(32 + 11);
-	write_register16(RTL8139_PORT_INTR_STATUS, RTL8139_STATUS_MASK_TX_OK | RTL8139_STATUS_MASK_RX_OK);
+	info() << "Descriptors: " << Hex(read_register16(RTL8139_PORT_TX_SUMMARY));
+
+	uint16_t status = read_register16(RTL8139_PORT_INTR_STATUS);
+	info() << "ISR status: " << status;
+	if (status & RTL8139_INTERRUPT_STATUS_TX_OK) {
+		info() << "Interrupt: Data has been sent!";
+	}
+	if (status & RTL8139_INTERRUPT_STATUS_RX_OK) {
+		info() << "Interrupt: Data has been received!";
+	}
+
+	write_register16(RTL8139_PORT_INTR_STATUS, status);
 }
 
 void send_packet(const void* data, size_t len)
@@ -68,9 +78,8 @@ void send_packet(const void* data, size_t len)
 	memcpy(tx_buffers[current_TX_buffer], data, len);
 	write_register32(TSAD_array[current_TX_buffer], virtual_to_physical_address(tx_buffers[current_TX_buffer]));
 	write_register32(TSD_array[current_TX_buffer], len);
-	while (!(read_register32(TSD_array[current_TX_buffer]) & (1 << 15))) {
+	while (!(read_register32(TSD_array[current_TX_buffer]) & RTL8139_TX_STATUS_TOK)) {
 	}
-
 	current_TX_buffer = (current_TX_buffer + 1) % NUMBER_TX_BUFFERS;
 }
 
@@ -82,7 +91,6 @@ void test_RTL8139_ethernet(GenericPCIDevice&& device)
 	       << Hex(read_register8(2)) << " " << Hex(read_register8(3)) << " " << Hex(read_register8(4)) << " "
 	       << Hex(read_register8(5)) << " ";
 
-	// bus mastering
 	device.enable_bus_mastering();
 	device.enable_interrupts();
 
@@ -91,13 +99,11 @@ void test_RTL8139_ethernet(GenericPCIDevice&& device)
 	configure_RX_TX();
 	setup_TX_buffers();
 
-	ISR::register_isr_handler(rx_interrupt_handler, 32 + device.interrupt_line());
+	ISR::register_hardware_interrupt_handler(rx_interrupt_handler, device.interrupt_line());
 
 	send_packet("hello there.", 10);
-	send_packet("hello there.", 10);
-	send_packet("hello there.", 10);
-	send_packet("hello there.", 10);
-	send_packet("hello there.", 10);
+	Thread::sleep(1000);
+	send_packet("hello there...", 25);
 }
 
 void write_register8(uint16_t address, uint8_t value)

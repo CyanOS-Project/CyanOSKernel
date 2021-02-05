@@ -38,7 +38,6 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	Heap::setup();
 
 	call_constrcutors();
-	PIC::setup();
 	PIT::setup();
 	Scheduler::setup();
 	info() << "Done!";

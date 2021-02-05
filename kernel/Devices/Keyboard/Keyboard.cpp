@@ -21,8 +21,7 @@ Keyboard::Keyboard(const StringView& name) :
 	ASSERT(current_instance == nullptr);
 
 	current_instance = this;
-	PIC::enable_irq(PIC_KEYBOARD);
-	ISR::register_isr_handler(keyboard_driver_handler, PIC_KEYBOARD + PIC1_IDT_OFFSET);
+	ISR::register_hardware_interrupt_handler(keyboard_driver_handler, PIC_KEYBOARD);
 }
 
 Keyboard::~Keyboard() {}
@@ -81,7 +80,6 @@ void Keyboard::keyboard_driver_handler(ISRContextFrame& frame)
 	UNUSED(frame);
 	ASSERT(current_instance);
 	current_instance->enqueue_keystoke(in8(KBD_DATA_PORT));
-	PIC::acknowledge_pic(PIC_PIT);
 }
 
 constexpr char Keyboard::key_pressed(char key)

@@ -1,11 +1,10 @@
 #include "Idt.h"
-
+#include "Pic.h"
 volatile IDT_DISCRIPTOR IDT::idt __attribute__((aligned(4)));
 volatile IDTEntry IDT::idt_entries[NUMBER_OF_IDT_ENTRIES] __attribute__((aligned(PAGE_SIZE)));
 
 void IDT::setup()
 {
-	ISR::initiate_isr_dispatcher_vector();
 	fill_idt((uint32_t)idt_entries, sizeof(IDTEntry) * NUMBER_OF_IDT_ENTRIES);
 
 	for (size_t i = 0; i < NUMBER_OF_IDT_ENTRIES; i++)
@@ -13,6 +12,7 @@ void IDT::setup()
 		               IDT_ENTRY_FLAGS::PRESENT | IDT_ENTRY_FLAGS::GATE_32 | IDT_ENTRY_FLAGS::INT_GATE |
 		                   IDT_ENTRY_FLAGS::RING3);
 	load_idt();
+	PIC::setup();
 }
 
 void IDT::fill_idt(uint32_t base, uint16_t limit)

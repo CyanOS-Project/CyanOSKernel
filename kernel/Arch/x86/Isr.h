@@ -61,14 +61,20 @@ enum IRQ_Number {
 	VE = 20
 };
 
-typedef void (*isr_function)(ISRContextFrame&);
+typedef void (*ISRFunction)(ISRContextFrame&);
+enum class ISRType { Hardware, Software };
+struct ISRHandler {
+	ISRFunction function;
+	ISRType type;
+};
+
 extern "C" uintptr_t isr_vector[];
 class ISR
 {
   public:
 	static void default_interrupt_handler(ISRContextFrame& info);
-	static void initiate_isr_dispatcher_vector();
-	static void register_isr_handler(isr_function address, uint8_t IRQ_Number);
+	static void register_software_interrupt_handler(ISRFunction address, uint8_t IRQ_Number);
+	static void register_hardware_interrupt_handler(ISRFunction address, uint8_t interrupt_line);
 
   private:
 	static const char* exception_messages[];

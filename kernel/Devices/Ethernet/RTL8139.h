@@ -65,10 +65,10 @@ static constexpr uint16_t RTL8139_INTERRUPT_MASK_RX_ERROR = (1 << 1);
 static constexpr uint16_t RTL8139_INTERRUPT_MASK_TX_OK = (1 << 2);
 static constexpr uint16_t RTL8139_INTERRUPT_MASK_TX_ERROR = (1 << 3);
 
-static constexpr uint16_t RTL8139_STATUS_MASK_RX_OK = (1 << 0);
-static constexpr uint16_t RTL8139_STATUS_MASK_RX_ERROR = (1 << 1);
-static constexpr uint16_t RTL8139_STATUS_MASK_TX_OK = (1 << 2);
-static constexpr uint16_t RTL8139_STATUS_MASK_TX_ERROR = (1 << 3);
+static constexpr uint16_t RTL8139_INTERRUPT_STATUS_RX_OK = (1 << 0);
+static constexpr uint16_t RTL8139_INTERRUPT_STATUS_RX_ERROR = (1 << 1);
+static constexpr uint16_t RTL8139_INTERRUPT_STATUS_TX_OK = (1 << 2);
+static constexpr uint16_t RTL8139_INTERRUPT_STATUS_TX_ERROR = (1 << 3);
 
 static constexpr uint32_t RTL8139_RX_CONFIG_ACCEPT_PHYSICAL_ADDRESS_PACKETS = (1 << 0);
 static constexpr uint32_t RTL8139_RX_CONFIG_ACCEPT_PHYSICAL_MATCH_PACKETS = (1 << 1);
@@ -78,6 +78,10 @@ static constexpr uint32_t RTL8139_RX_CONFIG_ACCEPT_RUNT_PACKETS = (1 << 4);
 static constexpr uint32_t RTL8139_RX_CONFIG_ACCEPT_ERROR_PACKETS = (1 << 5);
 static constexpr uint32_t RTL8139_RX_CONFIG_EEPROM_SELECT = (1 << 6);
 static constexpr uint32_t RTL8139_RX_CONFIG_EEPROM_WRAP = (1 << 6);
+
+static constexpr uint32_t RTL8139_TX_STATUS_OWN = (1 << 13);
+static constexpr uint32_t RTL8139_TX_STATUS_TUN = (1 << 14);
+static constexpr uint32_t RTL8139_TX_STATUS_TOK = (1 << 15);
 
 typedef struct TX_Descriptor {
 	uint32_t physical_addr;
