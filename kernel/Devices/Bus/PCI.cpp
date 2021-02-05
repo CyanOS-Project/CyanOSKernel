@@ -53,7 +53,7 @@ void PCI::scan_pci(Function<void(PCIDevice&)> callback)
 void PCI::enumerate_pci_devices()
 {
 	scan_pci([](PCIDevice& device) {
-		if (device.device_id() == 0x8139) {
+		if (device.vendor_id() == RTL8139::RTL8139_VENDOR_ID && device.device_id() == RTL8139::RTL8139_DEVICE_ID) {
 			info() << "----------------------------------------------------";
 			info() << "Class: " << PCI_id_to_string(device.device_class(), device.device_subclass());
 			info() << "Vendor: " << PCI_vendor_to_string(device.vendor_id());

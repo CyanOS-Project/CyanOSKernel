@@ -1,19 +1,23 @@
 #pragma once
 #include "Devices/Bus/PCIDevice.h"
+#include "Network/NetworkAdapter.h"
 #include "Types.h"
 
-class RTL8139
+class RTL8139 : public NetworkAdapter
 {
   public:
 	static constexpr uint16_t RTL8139_VENDOR_ID = 0x10EC;
 	static constexpr uint16_t RTL8139_DEVICE_ID = 0x8139;
 
 	RTL8139(GenericPCIDevice&& device);
+	~RTL8139();
+	void send_frame(const void* data, size_t size) override;
 	void rx_tx_handler();
 
   private:
 	static constexpr uint8_t NUMBER_TX_BUFFERS = 4;
 	static constexpr uint16_t MAX_TX_BUFFER_SIZE = 0x700;
+	static constexpr uint16_t MAX_RX_BUFFER_SIZE = 8192 + 1536 + 16;
 
 	static constexpr uint16_t RTL8139_PORT_MAG0 = 0x00;
 	static constexpr uint16_t RTL8139_PORT_MAR0 = 0x08;
@@ -78,16 +82,30 @@ class RTL8139
 	static constexpr uint16_t TSAD_array[NUMBER_TX_BUFFERS] = {0x20, 0x24, 0x28, 0x2C};
 	static constexpr uint16_t TSD_array[NUMBER_TX_BUFFERS] = {0x10, 0x14, 0x18, 0x1C};
 
-	uint16_t m_ports = 0;
-	void* m_tx_buffers[NUMBER_TX_BUFFERS]{};
-	uint8_t m_current_TX_buffer = 0;
+	static constexpr uint32_t RTL8139_RX_PACKET_HEADER_SIZE = 4;
+
+	static constexpr uint32_t RTL8139_RX_READ_POINTER_MASK = ~3;
+	static constexpr uint32_t RTL8139_RX_PAD = 0x10;
+
+	struct RxPacket {
+		uint16_t status;
+		uint16_t size;
+		uint8_t data[1];
+	};
+
+	uint16_t m_ports = {};
+	uint8_t m_current_tx_buffer = {};
+	void* m_tx_buffers[NUMBER_TX_BUFFERS] = {};
+	uint8_t* m_rx_buffer = {};
+	uint32_t m_current_rx_pointer = {};
 
 	void turn_on();
 	void software_rest();
-	void setup_TX_buffers();
-	void configure_rx();
-	void configure_RX_TX();
-	void send_packet(const void* data, size_t len);
+	void setup_tx();
+	void setup_rx();
+	void start();
+	void handle_rx();
+	void handle_tx();
 
 	void write_register8(uint16_t address, uint8_t value);
 	void write_register16(uint16_t address, uint16_t value);
