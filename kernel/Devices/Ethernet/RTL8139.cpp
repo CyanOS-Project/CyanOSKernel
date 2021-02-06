@@ -9,6 +9,23 @@
 static void irq_handler(ISRContextFrame& context);
 RTL8139* instance = nullptr;
 
+RTL8139::RTL8139(GenericPCIDevice&& device) : m_ports{device.BAR0().io_address()}
+{
+	m_mac = read_MAC();
+	instance = this;
+
+	device.enable_bus_mastering();
+	device.enable_interrupts();
+
+	turn_on();
+	software_rest();
+	start();
+	setup_tx();
+	setup_rx();
+
+	ISR::register_hardware_interrupt_handler(irq_handler, device.interrupt_line());
+}
+
 void RTL8139::turn_on()
 {
 	write_register8(RTL8139_PORT_CONFIG1, 0);
@@ -49,43 +66,27 @@ void RTL8139::start()
 	write_register8(RTL8139_PORT_CHIP_CMD, RTL8139_COMMAND_RX_ENABLE | RTL8139_COMMAND_TX_ENABLE);
 }
 
-void RTL8139::rx_tx_handler()
-{
-	info() << "Descriptors: " << Hex(read_register16(RTL8139_PORT_TX_SUMMARY));
-
-	uint16_t status = read_register16(RTL8139_PORT_INTR_STATUS);
-	info() << "ISR status: " << status;
-	if (status & RTL8139_INTERRUPT_STATUS_TX_OK) {
-		handle_tx();
-		info() << "Interrupt: Data has been sent!";
-	}
-	if (status & RTL8139_INTERRUPT_STATUS_RX_OK) {
-		handle_rx();
-		info() << "Interrupt: Data has been received!";
-	}
-
-	write_register16(RTL8139_PORT_INTR_STATUS, status);
-}
-
 void RTL8139::handle_rx()
 {
-	while (!(read_register8(RTL8139_PORT_CHIP_CMD) & RTL8139_COMMAND_BUFFER_EMPTY)) {
-		RxPacket* received_packet = reinterpret_cast<RxPacket*>(m_rx_buffer + m_current_rx_pointer);
+	// while (!(read_register8(RTL8139_PORT_CHIP_CMD) & RTL8139_COMMAND_BUFFER_EMPTY)) {
+	RxPacket* received_packet = reinterpret_cast<RxPacket*>(m_rx_buffer + m_current_rx_pointer);
+	if (received_packet->size != 0 || received_packet->status != 0) {
 		info() << "Received Packed: ";
 		info() << "Status: " << received_packet->status;
 		info() << "Size  : " << received_packet->size;
-
-		handle_received_frame(received_packet->data, received_packet->size);
-
-		if ((m_current_rx_pointer + received_packet->size + RTL8139_RX_PACKET_HEADER_SIZE) < MAX_RX_BUFFER_SIZE) {
-			m_current_rx_pointer =
-			    (received_packet->size + RTL8139_RX_PACKET_HEADER_SIZE + 3) & RTL8139_RX_READ_POINTER_MASK;
-		} else {
-			m_current_rx_pointer = 0; // FIXME: not sure about this.
-		}
-
-		write_register16(RTL8139_PORT_RX_BUF_PTR, m_current_rx_pointer - RTL8139_RX_PAD);
 	}
+
+	handle_received_ethernet_frame(received_packet->data, received_packet->size);
+
+	if ((m_current_rx_pointer + received_packet->size + RTL8139_RX_PACKET_HEADER_SIZE) < MAX_RX_BUFFER_SIZE) {
+		m_current_rx_pointer =
+		    (received_packet->size + RTL8139_RX_PACKET_HEADER_SIZE + 3) & RTL8139_RX_READ_POINTER_MASK;
+	} else {
+		m_current_rx_pointer = 0; // FIXME: not sure about this.
+	}
+
+	write_register16(RTL8139_PORT_RX_BUF_PTR, m_current_rx_pointer - RTL8139_RX_PAD);
+	//}
 }
 
 void RTL8139::handle_tx()
@@ -93,11 +94,37 @@ void RTL8139::handle_tx()
 	// FIXME: release waitqueues for descriptors here.
 }
 
-void RTL8139::send_frame(const void* data, size_t len)
+void RTL8139::rx_tx_handler()
+{
+	info() << "------------------------";
+	info() << "Descriptors: " << Hex(read_register16(RTL8139_PORT_TX_SUMMARY));
+
+	uint16_t status = read_register16(RTL8139_PORT_INTR_STATUS);
+	info() << "ISR status: " << status;
+	if (status & RTL8139_INTERRUPT_STATUS_TX_OK) {
+		info() << "Interrupt: Data has been sent!";
+		handle_tx();
+	}
+	if (status & RTL8139_INTERRUPT_STATUS_RX_OK) {
+		info() << "Interrupt: Data has been received!";
+		handle_rx();
+	}
+
+	write_register16(RTL8139_PORT_INTR_STATUS, status);
+}
+
+void RTL8139::send_ethernet_frame(const void* data, size_t len)
 {
 	if (len > MAX_TX_BUFFER_SIZE) {
 		warn() << "Data too large to be sent!";
 		return;
+	}
+	info() << "Sending frame with size: " << len;
+	{
+		info logger{};
+		for (size_t i = 0; i < len; i++) {
+			logger << Hex8(((uint8_t*)data)[i]) << " ";
+		}
 	}
 
 	memcpy(m_tx_buffers[m_current_tx_buffer], data, len);
@@ -107,29 +134,18 @@ void RTL8139::send_frame(const void* data, size_t len)
 	m_current_tx_buffer = (m_current_tx_buffer + 1) % NUMBER_TX_BUFFERS;
 }
 
-RTL8139::RTL8139(GenericPCIDevice&& device)
+MACAddress RTL8139::read_MAC()
 {
-	instance = this;
-	m_ports = device.BAR0().address();
-
-	info() << "Device MAC address: " << Hex(read_register8(0)) << " " << Hex(read_register8(1)) << " "
-	       << Hex(read_register8(2)) << " " << Hex(read_register8(3)) << " " << Hex(read_register8(4)) << " "
-	       << Hex(read_register8(5)) << " ";
-
-	device.enable_bus_mastering();
-	device.enable_interrupts();
-
-	turn_on();
-	software_rest();
-	start();
-	setup_tx();
-	setup_rx();
-
-	ISR::register_hardware_interrupt_handler(irq_handler, device.interrupt_line());
-
-	send_frame("hello there.", 10);
-	Thread::sleep(1000);
-	send_frame("hello there...", 25);
+	uint32_t mac1 = read_register32(0);
+	uint32_t mac2 = read_register32(4);
+	MACAddress mac{};
+	mac[0] = (mac1 & 0xFF);
+	mac[1] = (mac1 >> 8) & 0xFF;
+	mac[2] = (mac1 >> 16) & 0xFF;
+	mac[3] = (mac1 >> 24) & 0xFF;
+	mac[4] = (mac2 & 0xFF);
+	mac[5] = (mac2 >> 8) & 0xFF;
+	return mac;
 }
 
 void RTL8139::write_register8(uint16_t address, uint8_t value)

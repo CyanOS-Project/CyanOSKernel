@@ -1,9 +1,9 @@
 #pragma once
 #include "Devices/Bus/PCIDevice.h"
-#include "Network/NetworkAdapter.h"
+#include "Network/EthernetNetworkAdapter.h"
 #include "Types.h"
 
-class RTL8139 : public NetworkAdapter
+class RTL8139 : public EthernetNetworkAdapter
 {
   public:
 	static constexpr uint16_t RTL8139_VENDOR_ID = 0x10EC;
@@ -11,7 +11,6 @@ class RTL8139 : public NetworkAdapter
 
 	RTL8139(GenericPCIDevice&& device);
 	~RTL8139();
-	void send_frame(const void* data, size_t size) override;
 	void rx_tx_handler();
 
   private:
@@ -22,7 +21,13 @@ class RTL8139 : public NetworkAdapter
 	static constexpr uint16_t RTL8139_PORT_MAG0 = 0x00;
 	static constexpr uint16_t RTL8139_PORT_MAR0 = 0x08;
 	static constexpr uint16_t RTL8139_PORT_TX_STATUS0 = 0x10;
+	static constexpr uint16_t RTL8139_PORT_TX_STATUS1 = 0x14;
+	static constexpr uint16_t RTL8139_PORT_TX_STATUS2 = 0x18;
+	static constexpr uint16_t RTL8139_PORT_TX_STATUS3 = 0x1C;
 	static constexpr uint16_t RTL8139_PORT_TX_ADDR0 = 0x20;
+	static constexpr uint16_t RTL8139_PORT_TX_ADDR1 = 0x24;
+	static constexpr uint16_t RTL8139_PORT_TX_ADDR2 = 0x28;
+	static constexpr uint16_t RTL8139_PORT_TX_ADDR3 = 0x2C;
 	static constexpr uint16_t RTL8139_PORT_RX_BUF = 0x30;
 	static constexpr uint16_t RTL8139_PORT_RX_EARLY_CNT = 0x34;
 	static constexpr uint16_t RTL8139_PORT_RX_EARLY_STATUS = 0x36;
@@ -79,10 +84,10 @@ class RTL8139 : public NetworkAdapter
 	static constexpr uint32_t RTL8139_TX_STATUS_TUN = (1 << 14);
 	static constexpr uint32_t RTL8139_TX_STATUS_TOK = (1 << 15);
 
-	static constexpr uint16_t TSAD_array[NUMBER_TX_BUFFERS] = {0x20, 0x24, 0x28, 0x2C};
-	static constexpr uint16_t TSD_array[NUMBER_TX_BUFFERS] = {0x10, 0x14, 0x18, 0x1C};
-
-	static constexpr uint32_t RTL8139_RX_PACKET_HEADER_SIZE = 4;
+	static constexpr uint16_t TSD_array[NUMBER_TX_BUFFERS] = {RTL8139_PORT_TX_STATUS0, RTL8139_PORT_TX_STATUS1,
+	                                                          RTL8139_PORT_TX_STATUS2, RTL8139_PORT_TX_STATUS3};
+	static constexpr uint16_t TSAD_array[NUMBER_TX_BUFFERS] = {RTL8139_PORT_TX_ADDR0, RTL8139_PORT_TX_ADDR1,
+	                                                           RTL8139_PORT_TX_ADDR2, RTL8139_PORT_TX_ADDR3};
 
 	static constexpr uint32_t RTL8139_RX_READ_POINTER_MASK = ~3;
 	static constexpr uint32_t RTL8139_RX_PAD = 0x10;
@@ -92,8 +97,10 @@ class RTL8139 : public NetworkAdapter
 		uint16_t size;
 		uint8_t data[1];
 	};
+	static constexpr uint32_t RTL8139_RX_PACKET_HEADER_SIZE = offsetof(RxPacket, data);
 
 	uint16_t m_ports = {};
+
 	uint8_t m_current_tx_buffer = {};
 	void* m_tx_buffers[NUMBER_TX_BUFFERS] = {};
 	uint8_t* m_rx_buffer = {};
@@ -106,6 +113,8 @@ class RTL8139 : public NetworkAdapter
 	void start();
 	void handle_rx();
 	void handle_tx();
+	MACAddress read_MAC();
+	void send_ethernet_frame(const void* data, size_t size) override;
 
 	void write_register8(uint16_t address, uint8_t value);
 	void write_register16(uint16_t address, uint16_t value);

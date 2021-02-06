@@ -2,6 +2,7 @@
 #include "Arch/x86/Asm.h"
 #include "Devices/DebugPort/Logger.h"
 #include "Devices/Ethernet/RTL8139.h"
+#include "Network/ARP.h" //FIXME: remove this
 #include "PCIDevice.h"
 #include "PCIIdentification.h"
 
@@ -66,7 +67,9 @@ void PCI::enumerate_pci_devices()
 			info() << "PCI_COMMAND    : " << Hex(device.command());
 			info() << "PCI_STATUS     : " << Hex(device.status());
 
-			new RTL8139{GenericPCIDevice{device}};
+			auto* eth0 = new RTL8139{GenericPCIDevice{device}};
+			// eth0->send_frame(ProtocolType::ARP, MACAddress::Broadcast, "hello", 50);
+			ARP().send(*eth0);
 		}
 	});
 }

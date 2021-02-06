@@ -9,12 +9,12 @@ PCIBaseAddressRegister::PCIBaseAddressRegister(uint32_t value) : m_value{value}
 	}
 }
 
-PCIBaseAddressRegister::Type PCIBaseAddressRegister::type()
+PCIBaseAddressRegister::Type PCIBaseAddressRegister::type() const
 {
 	return m_type;
 }
 
-PCIBaseAddressRegister::Size PCIBaseAddressRegister::size()
+PCIBaseAddressRegister::Size PCIBaseAddressRegister::size() const
 {
 	if (m_type == Type::MemoryMapped) {
 		uint8_t size = (m_value & 0x6) >> 1;
@@ -30,11 +30,12 @@ PCIBaseAddressRegister::Size PCIBaseAddressRegister::size()
 	}
 }
 
-uint32_t PCIBaseAddressRegister::address()
+uint16_t PCIBaseAddressRegister::io_address() const
 {
-	if (m_type == Type::MemoryMapped) {
-		return m_value & 0xFFFFFFF0;
-	} else {
-		return m_value & 0xFFFFFFFC;
-	}
+	return m_value & 0xFFFFFFFC;
+}
+
+uint32_t PCIBaseAddressRegister::mmio_address() const
+{
+	return m_value & 0xFFFFFFF0;
 }
