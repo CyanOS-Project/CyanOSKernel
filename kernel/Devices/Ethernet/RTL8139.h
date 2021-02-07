@@ -65,6 +65,14 @@ class RTL8139 : public EthernetNetworkAdapter
 	static constexpr uint16_t RTL8139_INTERRUPT_MASK_RX_ERROR = (1 << 1);
 	static constexpr uint16_t RTL8139_INTERRUPT_MASK_TX_OK = (1 << 2);
 	static constexpr uint16_t RTL8139_INTERRUPT_MASK_TX_ERROR = (1 << 3);
+	static constexpr uint16_t RTL8139_INTERRUPT_MASK_BUFFER_OVERFLOW = (1 << 4);
+	static constexpr uint16_t RTL8139_INTERRUPT_MASK_PACKET_UNDERRUN = (1 << 5);
+	static constexpr uint16_t RTL8139_INTERRUPT_MASK_RX_FIFO_OVERFLOW = (1 << 6);
+	static constexpr uint16_t RTL8139_INTERRUPT_MASK_DESCRIPTOR_UNAVAILABLE = (1 << 7);
+	static constexpr uint16_t RTL8139_INTERRUPT_MASK_SOFTWARE_INTERRUPT = (1 << 8);
+	static constexpr uint16_t RTL8139_INTERRUPT_MASK_CABLE_LEN_CHANGE = (1 << 13);
+	static constexpr uint16_t RTL8139_INTERRUPT_MASK_TIMEOUT = (1 << 14);
+	static constexpr uint16_t RTL8139_INTERRUPT_MASK_SYSTEM_ERROR = (1 << 15);
 
 	static constexpr uint16_t RTL8139_INTERRUPT_STATUS_RX_OK = (1 << 0);
 	static constexpr uint16_t RTL8139_INTERRUPT_STATUS_RX_ERROR = (1 << 1);
