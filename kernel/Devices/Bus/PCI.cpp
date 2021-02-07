@@ -69,7 +69,9 @@ void PCI::enumerate_pci_devices()
 
 			auto* eth0 = new RTL8139{GenericPCIDevice{device}};
 			// eth0->send_frame(ProtocolType::ARP, MACAddress::Broadcast, "hello", 50);
-			ARP().send(*eth0);
+			ARP().test_send(*eth0);
+			ARP().test_send(*eth0);
+			ARP().test_send(*eth0);
 		}
 	});
 }

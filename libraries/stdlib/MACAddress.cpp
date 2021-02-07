@@ -1,6 +1,7 @@
 #include "MACAddress.h"
 
 MACAddress MACAddress::Broadcast = MACAddress{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+MACAddress MACAddress::Zero = MACAddress{0, 0, 0, 0, 0, 0};
 
 MACAddress::MACAddress(uint8_t* mac)
 {

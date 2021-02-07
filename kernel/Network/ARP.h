@@ -7,7 +7,7 @@ class ARP
 
   public:
 	ARP() = default;
-	void send(NetworkAdapter& network);
+	void test_send(NetworkAdapter& network);
 
   private:
 	enum class HardwareType { Ethernet = 0x1, IEEE802 = 0x6, ARCNET = 0x7 };

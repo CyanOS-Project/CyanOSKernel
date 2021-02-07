@@ -96,15 +96,15 @@ class RTL8139 : public EthernetNetworkAdapter
 		uint16_t status;
 		uint16_t size;
 		uint8_t data[1];
-	};
+	} __attribute__((packed));
 	static constexpr uint32_t RTL8139_RX_PACKET_HEADER_SIZE = offsetof(RxPacket, data);
 
-	uint16_t m_ports = {};
+	uint16_t m_ports = 0;
 
-	uint8_t m_current_tx_buffer = {};
+	uint8_t m_current_tx_buffer = 0;
 	void* m_tx_buffers[NUMBER_TX_BUFFERS] = {};
-	uint8_t* m_rx_buffer = {};
-	uint32_t m_current_rx_pointer = {};
+	uint8_t* m_rx_buffer = nullptr;
+	uint32_t m_current_rx_pointer = 0;
 
 	void turn_on();
 	void software_rest();

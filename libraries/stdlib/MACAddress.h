@@ -17,6 +17,7 @@ class MACAddress
 	void copy(uint8_t* data) const;
 
 	static MACAddress Broadcast;
+	static MACAddress Zero;
 
   private:
 	static constexpr uint8_t MAC_ELEMENTS_SIZE = 6;

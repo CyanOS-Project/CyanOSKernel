@@ -58,11 +58,14 @@ void RTL8139::setup_rx()
 	                                             RTL8139_RX_CONFIG_ACCEPT_MULTICAST_PACKETS |
 	                                             RTL8139_RX_CONFIG_ACCEPT_BROADCAST_PACKETS |
 	                                             RTL8139_RX_CONFIG_EEPROM_WRAP);
+	write_register16(RTL8139_PORT_RX_BUF_PTR, 0);
+	write_register32(RTL8139_PORT_RX_CONFIG, 0);
 }
 
 void RTL8139::start()
 {
-	write_register16(RTL8139_PORT_INTR_MASK, RTL8139_INTERRUPT_MASK_RX_OK | RTL8139_INTERRUPT_MASK_TX_OK);
+	write_register16(RTL8139_PORT_INTR_MASK, RTL8139_INTERRUPT_MASK_RX_OK | RTL8139_INTERRUPT_MASK_TX_OK |
+	                                             RTL8139_INTERRUPT_MASK_TX_ERROR | RTL8139_INTERRUPT_MASK_RX_ERROR);
 	write_register8(RTL8139_PORT_CHIP_CMD, RTL8139_COMMAND_RX_ENABLE | RTL8139_COMMAND_TX_ENABLE);
 }
 
@@ -70,11 +73,10 @@ void RTL8139::handle_rx()
 {
 	// while (!(read_register8(RTL8139_PORT_CHIP_CMD) & RTL8139_COMMAND_BUFFER_EMPTY)) {
 	RxPacket* received_packet = reinterpret_cast<RxPacket*>(m_rx_buffer + m_current_rx_pointer);
-	if (received_packet->size != 0 || received_packet->status != 0) {
-		info() << "Received Packed: ";
-		info() << "Status: " << received_packet->status;
-		info() << "Size  : " << received_packet->size;
-	}
+	info() << "Received Packed: ";
+	info() << "Status : " << received_packet->status;
+	info() << "Size   : " << received_packet->size;
+	info() << "Buf ptr: " << Hex(read_register16(RTL8139_PORT_RX_BUF_ADDR));
 
 	handle_received_ethernet_frame(received_packet->data, received_packet->size);
 
@@ -91,16 +93,17 @@ void RTL8139::handle_rx()
 
 void RTL8139::handle_tx()
 {
+	info() << "TX descriptors: " << Hex(read_register16(RTL8139_PORT_TX_SUMMARY));
 	// FIXME: release waitqueues for descriptors here.
 }
 
 void RTL8139::rx_tx_handler()
 {
 	info() << "------------------------";
-	info() << "Descriptors: " << Hex(read_register16(RTL8139_PORT_TX_SUMMARY));
 
 	uint16_t status = read_register16(RTL8139_PORT_INTR_STATUS);
-	info() << "ISR status: " << status;
+	warn() << "Network Interupt:";
+	info() << "ISR status : " << status;
 	if (status & RTL8139_INTERRUPT_STATUS_TX_OK) {
 		info() << "Interrupt: Data has been sent!";
 		handle_tx();
