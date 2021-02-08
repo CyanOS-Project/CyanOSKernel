@@ -8,10 +8,20 @@ class ARP
   public:
 	ARP() = default;
 	void test_send(NetworkAdapter& network);
+	void handle_arp_packet(const void* data, size_t size);
 
   private:
-	enum class HardwareType { Ethernet = 0x1, IEEE802 = 0x6, ARCNET = 0x7 };
-	enum class ARPCode { ARPRequest = 1, ARPReply = 2 };
+	enum class HardwareType
+	{
+		Ethernet = 0x1,
+		IEEE802 = 0x6,
+		ARCNET = 0x7
+	};
+	enum class ARPCode
+	{
+		Request = 1,
+		Reply = 2
+	};
 	static constexpr uint8_t MAC_ADDRESS_LENGTH = 0x6;
 	static constexpr uint8_t IP4_ADDRESS_LENGTH = 0x4;
 

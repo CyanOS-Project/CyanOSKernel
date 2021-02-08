@@ -2,6 +2,7 @@
 
 #include "Arch/x86/Spinlock.h"
 #include "DebugPort.h"
+#include <MACAddress.h>
 #include <String.h>
 #include <StringView.h>
 #include <Types.h>
@@ -31,6 +32,7 @@ class Logger
 	Logger& operator<<(Hex32 num);
 	Logger& operator<<(Hex64 num);
 	Logger& operator<<(void* ptr);
+	Logger& operator<<(const MACAddress& mac);
 
   private:
 	static StaticSpinlock lock;

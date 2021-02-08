@@ -5,7 +5,7 @@ class MACAddress
 {
   public:
 	MACAddress() = default;
-	MACAddress(uint8_t* mac);
+	MACAddress(const uint8_t* mac);
 	MACAddress(uint8_t mac0, uint8_t mac1, uint8_t mac2, uint8_t mac3, uint8_t mac4, uint8_t mac5);
 	MACAddress(const MACAddress&);
 	MACAddress& operator=(const MACAddress&);

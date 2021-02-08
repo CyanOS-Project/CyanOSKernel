@@ -5,6 +5,7 @@
 #include "Network/ARP.h" //FIXME: remove this
 #include "PCIDevice.h"
 #include "PCIIdentification.h"
+#include "Tasking/Thread.h"
 
 void PCI::scan_function(Function<void(PCIDevice&)>& callback, uint8_t bus, uint8_t slot, uint8_t function)
 {
@@ -66,7 +67,7 @@ void PCI::enumerate_pci_devices()
 			info() << "Function Number: " << Hex(device.function());
 			info() << "PCI_COMMAND    : " << Hex(device.command());
 			info() << "PCI_STATUS     : " << Hex(device.status());
-
+			// Thread::sleep(10000);
 			auto* eth0 = new RTL8139{GenericPCIDevice{device}};
 			// eth0->send_frame(ProtocolType::ARP, MACAddress::Broadcast, "hello", 50);
 			ARP().test_send(*eth0);

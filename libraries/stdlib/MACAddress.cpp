@@ -3,7 +3,7 @@
 MACAddress MACAddress::Broadcast = MACAddress{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 MACAddress MACAddress::Zero = MACAddress{0, 0, 0, 0, 0, 0};
 
-MACAddress::MACAddress(uint8_t* mac)
+MACAddress::MACAddress(const uint8_t* mac)
 {
 	for (size_t i = 0; i < MAC_ELEMENTS_SIZE; i++) {
 		m_mac[i] = mac[i];

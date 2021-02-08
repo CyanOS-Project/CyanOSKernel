@@ -14,8 +14,8 @@ RTL8139::RTL8139(GenericPCIDevice&& device) : m_ports{device.BAR0().io_address()
 	m_mac = read_MAC();
 	instance = this;
 
-	device.enable_bus_mastering();
 	device.enable_interrupts();
+	device.enable_bus_mastering();
 
 	turn_on();
 	software_rest();
@@ -56,32 +56,35 @@ void RTL8139::setup_rx()
 	write_register32(RTL8139_PORT_RX_CONFIG, RTL8139_RX_CONFIG_ACCEPT_PHYSICAL_MATCH_PACKETS |
 	                                             RTL8139_RX_CONFIG_ACCEPT_PHYSICAL_ADDRESS_PACKETS |
 	                                             RTL8139_RX_CONFIG_ACCEPT_MULTICAST_PACKETS |
-	                                             RTL8139_RX_CONFIG_ACCEPT_BROADCAST_PACKETS |
-	                                             RTL8139_RX_CONFIG_EEPROM_WRAP);
-	write_register16(RTL8139_PORT_RX_BUF_PTR, 0);
+	                                             RTL8139_RX_CONFIG_ACCEPT_BROADCAST_PACKETS | RTL8139_RX_CONFIG_WRAP |
+	                                             RTL8139_RX_CONFIG_MAX_DMA_BURST_SIZE_256);
+	// write_register16(RTL8139_PORT_RX_BUF_PTR, 0);
 }
 
 void RTL8139::start()
 {
+	write_register8(RTL8139_PORT_CHIP_CMD, RTL8139_COMMAND_RX_ENABLE | RTL8139_COMMAND_TX_ENABLE);
+
 	write_register16(RTL8139_PORT_INTR_MASK,
 	                 RTL8139_INTERRUPT_MASK_RX_OK | RTL8139_INTERRUPT_MASK_TX_OK | RTL8139_INTERRUPT_MASK_TX_ERROR |
 	                     RTL8139_INTERRUPT_MASK_RX_ERROR | RTL8139_INTERRUPT_MASK_BUFFER_OVERFLOW |
 	                     RTL8139_INTERRUPT_MASK_PACKET_UNDERRUN | RTL8139_INTERRUPT_MASK_RX_FIFO_OVERFLOW |
 	                     RTL8139_INTERRUPT_MASK_DESCRIPTOR_UNAVAILABLE | RTL8139_INTERRUPT_MASK_CABLE_LEN_CHANGE |
 	                     RTL8139_INTERRUPT_MASK_TIMEOUT | RTL8139_INTERRUPT_MASK_SYSTEM_ERROR);
-	write_register8(RTL8139_PORT_CHIP_CMD, RTL8139_COMMAND_RX_ENABLE | RTL8139_COMMAND_TX_ENABLE);
 }
 
 void RTL8139::handle_rx()
 {
 	// while (!(read_register8(RTL8139_PORT_CHIP_CMD) & RTL8139_COMMAND_BUFFER_EMPTY)) {
 	RxPacket* received_packet = reinterpret_cast<RxPacket*>(m_rx_buffer + m_current_rx_pointer);
-	info() << "Received Packed: ";
 	info() << "Status : " << received_packet->status;
-	info() << "Size   : " << received_packet->size;
-	info() << "Buf ptr: " << Hex(read_register16(RTL8139_PORT_RX_BUF_ADDR));
 
-	handle_received_ethernet_frame(received_packet->data, received_packet->size);
+	if (is_packet_ok(received_packet->status)) {
+		info() << "Size   : " << received_packet->size;
+		handle_received_ethernet_frame(received_packet->data, received_packet->size);
+	} else {
+		info() << "Invalid Packet.";
+	}
 
 	if ((m_current_rx_pointer + received_packet->size + RTL8139_RX_PACKET_HEADER_SIZE) < MAX_RX_BUFFER_SIZE) {
 		m_current_rx_pointer =
@@ -96,19 +99,19 @@ void RTL8139::handle_rx()
 
 void RTL8139::handle_tx()
 {
-	info() << "TX descriptors: " << Hex(read_register16(RTL8139_PORT_TX_SUMMARY));
+	// info() << "TX descriptors: " << Hex(read_register16(RTL8139_PORT_TX_SUMMARY));
 	// FIXME: release waitqueues for descriptors here.
 }
 
 void RTL8139::rx_tx_handler()
 {
-	info() << "------------------------";
+	info() << "---------------------------------------";
 
 	uint16_t status = read_register16(RTL8139_PORT_INTR_STATUS);
 	warn() << "Network Interupt:";
 	info() << "ISR status : " << status;
 	if (status & RTL8139_INTERRUPT_STATUS_TX_OK) {
-		info() << "Interrupt: Data has been sent!";
+		// info() << "Interrupt: Data has been sent!";
 		handle_tx();
 	}
 	if (status & RTL8139_INTERRUPT_STATUS_RX_OK) {
@@ -125,19 +128,27 @@ void RTL8139::send_ethernet_frame(const void* data, size_t len)
 		warn() << "Data too large to be sent!";
 		return;
 	}
-	info() << "Sending frame with size: " << len;
-	{
-		info logger{};
-		for (size_t i = 0; i < len; i++) {
-			logger << Hex8(((uint8_t*)data)[i]) << " ";
-		}
-	}
 
 	memcpy(m_tx_buffers[m_current_tx_buffer], data, len);
+	/*if (len < 60) {
+	    memset(reinterpret_cast<uint8_t*>(m_tx_buffers[m_current_tx_buffer]) + len, 0, 60 - len);
+	    len = 60;
+	}*/
+
+	info() << "Sending frame with size: " << len;
 	write_register32(TSD_array[m_current_tx_buffer], len);
 	while (!(read_register32(TSD_array[m_current_tx_buffer]) & RTL8139_TX_STATUS_TOK)) {
 	}
 	m_current_tx_buffer = (m_current_tx_buffer + 1) % NUMBER_TX_BUFFERS;
+}
+
+bool RTL8139::is_packet_ok(uint16_t status)
+{
+	if (status & RTL8139_RX_PACKET_STATUS_ROK) {
+		return true;
+	} else {
+		return false;
+	}
 }
 
 MACAddress RTL8139::read_MAC()

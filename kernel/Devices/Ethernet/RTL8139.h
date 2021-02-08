@@ -86,7 +86,10 @@ class RTL8139 : public EthernetNetworkAdapter
 	static constexpr uint32_t RTL8139_RX_CONFIG_ACCEPT_RUNT_PACKETS = (1 << 4);
 	static constexpr uint32_t RTL8139_RX_CONFIG_ACCEPT_ERROR_PACKETS = (1 << 5);
 	static constexpr uint32_t RTL8139_RX_CONFIG_EEPROM_SELECT = (1 << 6);
-	static constexpr uint32_t RTL8139_RX_CONFIG_EEPROM_WRAP = (1 << 6);
+	static constexpr uint32_t RTL8139_RX_CONFIG_WRAP = (1 << 7);
+	static constexpr uint32_t RTL8139_RX_CONFIG_MAX_DMA_BURST_SIZE_256 = (4 << 8);
+
+	static constexpr uint32_t RTL8139_RX_PACKET_STATUS_ROK = (1 << 0);
 
 	static constexpr uint32_t RTL8139_TX_STATUS_OWN = (1 << 13);
 	static constexpr uint32_t RTL8139_TX_STATUS_TUN = (1 << 14);
@@ -123,6 +126,7 @@ class RTL8139 : public EthernetNetworkAdapter
 	void handle_tx();
 	MACAddress read_MAC();
 	void send_ethernet_frame(const void* data, size_t size) override;
+	bool is_packet_ok(uint16_t);
 
 	void write_register8(uint16_t address, uint8_t value);
 	void write_register16(uint16_t address, uint16_t value);

@@ -167,3 +167,24 @@ Logger& Logger::operator<<(void* ptr)
 	DebugPort::write(buf, m_color);
 	return *this;
 }
+
+Logger& Logger::operator<<(const MACAddress& mac)
+{
+	uint8_t mac_data[6];
+	mac.copy(mac_data);
+	for (size_t i = 0; i < 6; i++) {
+		char buf[3];
+		itoa(buf, mac_data[i], 16);
+		toupper(buf);
+		size_t leading_zeros = sizeof(uint8_t) * 2 - strlen(buf);
+		for (size_t i = 0; i < leading_zeros; i++) {
+			DebugPort::write("0", m_color);
+		}
+		DebugPort::write(buf, m_color);
+
+		if (i != 5) {
+			DebugPort::write(":", m_color);
+		}
+	}
+	return *this;
+}
