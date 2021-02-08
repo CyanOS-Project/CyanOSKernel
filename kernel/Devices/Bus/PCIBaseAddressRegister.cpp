@@ -1,6 +1,6 @@
 #include "PCIBaseAddressRegister.h"
 
-PCIBaseAddressRegister::PCIBaseAddressRegister(uint32_t value) : m_value{value}
+PCIBaseAddressRegister::PCIBaseAddressRegister(u32 value) : m_value{value}
 {
 	if (m_value & 1) {
 		m_type = Type::IOMapped;
@@ -30,12 +30,12 @@ PCIBaseAddressRegister::Size PCIBaseAddressRegister::size() const
 	}
 }
 
-uint16_t PCIBaseAddressRegister::io_address() const
+u16 PCIBaseAddressRegister::io_address() const
 {
 	return m_value & 0xFFFFFFFC;
 }
 
-uint32_t PCIBaseAddressRegister::mmio_address() const
+u32 PCIBaseAddressRegister::mmio_address() const
 {
 	return m_value & 0xFFFFFFF0;
 }

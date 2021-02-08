@@ -26,7 +26,7 @@ class Logger
 	Logger& operator<<(int value);
 	Logger& operator<<(unsigned value);
 	Logger& operator<<(int32_t value);
-	Logger& operator<<(uint32_t value);
+	Logger& operator<<(u32 value);
 	Logger& operator<<(Hex value);
 	Logger& operator<<(Hex8 value);
 	Logger& operator<<(Hex16 value);
@@ -38,7 +38,7 @@ class Logger
 
   private:
 	static StaticSpinlock lock;
-	void print_hex(uint32_t value, uint8_t size = 0);
+	void print_hex(u32 value, u8 size = 0);
 	void print_unsigned(unsigned value);
 	void print_signed(int value);
 
@@ -73,13 +73,13 @@ class err : public Logger
 class Hex
 {
   private:
-	uint32_t m_data;
+	u32 m_data;
 	int m_size;
 
   public:
-	Hex(uint8_t value) : m_data(value), m_size{1} {}
-	Hex(uint16_t value) : m_data(value), m_size{2} {}
-	Hex(uint32_t value) : m_data(value), m_size{4} {}
+	Hex(u8 value) : m_data(value), m_size{1} {}
+	Hex(u16 value) : m_data(value), m_size{2} {}
+	Hex(u32 value) : m_data(value), m_size{4} {}
 	Hex(unsigned int value) : m_data(value), m_size{4} {}
 	friend class Logger;
 };
@@ -90,7 +90,7 @@ class Hex8
 	int m_data;
 
   public:
-	Hex8(uint8_t value) : m_data(value) {}
+	Hex8(u8 value) : m_data(value) {}
 	friend class Logger;
 };
 
@@ -100,7 +100,7 @@ class Hex16
 	int m_data;
 
   public:
-	Hex16(uint16_t value) : m_data(value) {}
+	Hex16(u16 value) : m_data(value) {}
 	friend class Logger;
 };
 
@@ -110,7 +110,7 @@ class Hex32
 	int m_data;
 
   public:
-	Hex32(uint32_t value) : m_data(value) {}
+	Hex32(u32 value) : m_data(value) {}
 	friend class Logger;
 };
 

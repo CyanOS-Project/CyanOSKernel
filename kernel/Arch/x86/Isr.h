@@ -17,29 +17,30 @@
 #define SYSCALL_IRQ  0x80
 
 struct RegistersContext {
-	uint32_t gs;
-	uint32_t fs;
-	uint32_t es;
-	uint32_t ds;
-	uint32_t edi;
-	uint32_t esi;
-	uint32_t ebp;
-	uint32_t esp;
-	uint32_t ebx;
-	uint32_t edx;
-	uint32_t ecx;
-	uint32_t eax;
+	u32 gs;
+	u32 fs;
+	u32 es;
+	u32 ds;
+	u32 edi;
+	u32 esi;
+	u32 ebp;
+	u32 esp;
+	u32 ebx;
+	u32 edx;
+	u32 ecx;
+	u32 eax;
 };
 struct ISRContextFrame {
-	uint32_t context_stack;
+	u32 context_stack;
 	RegistersContext registers;
-	uint32_t irq_number;
-	uint32_t error_code;
-	uint32_t eip, cs, eflags;
-	// uint32_t useresp, ss;
+	u32 irq_number;
+	u32 error_code;
+	u32 eip, cs, eflags;
+	// u32 useresp, ss;
 };
 
-enum IRQ_Number {
+enum IRQ_Number
+{
 	DE = 0,
 	DB = 1,
 	NMI = 2,
@@ -62,7 +63,11 @@ enum IRQ_Number {
 };
 
 typedef void (*ISRFunction)(ISRContextFrame&);
-enum class ISRType { Hardware, Software };
+enum class ISRType
+{
+	Hardware,
+	Software
+};
 struct ISRHandler {
 	ISRFunction function;
 	ISRType type;

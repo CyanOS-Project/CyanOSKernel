@@ -22,18 +22,18 @@ class ARP
 		Request = 1,
 		Reply = 2
 	};
-	static constexpr uint8_t MAC_ADDRESS_LENGTH = 0x6;
-	static constexpr uint8_t IP4_ADDRESS_LENGTH = 0x4;
+	static constexpr u8 MAC_ADDRESS_LENGTH = 0x6;
+	static constexpr u8 IP4_ADDRESS_LENGTH = 0x4;
 
 	struct ARPHeader {
-		uint16_t hardware_type;
-		uint16_t protocol_type;
-		uint8_t hardware_addr_len;
-		uint8_t protocol_addr_len;
-		uint16_t opcode;
-		uint8_t source_hw_addr[MAC_ADDRESS_LENGTH];
-		uint8_t source_protocol_addr[IP4_ADDRESS_LENGTH];
-		uint8_t destination_hw_addr[MAC_ADDRESS_LENGTH];
-		uint8_t destination_protocol_addr[IP4_ADDRESS_LENGTH];
+		u16 hardware_type;
+		u16 protocol_type;
+		u8 hardware_addr_len;
+		u8 protocol_addr_len;
+		u16 opcode;
+		u8 source_hw_addr[MAC_ADDRESS_LENGTH];
+		u8 source_protocol_addr[IP4_ADDRESS_LENGTH];
+		u8 destination_hw_addr[MAC_ADDRESS_LENGTH];
+		u8 destination_protocol_addr[IP4_ADDRESS_LENGTH];
 	} __attribute__((packed));
 };

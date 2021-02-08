@@ -55,7 +55,7 @@ Logger& Logger::operator<<(int32_t value)
 	return *this;
 }
 
-Logger& Logger::operator<<(uint32_t value)
+Logger& Logger::operator<<(u32 value)
 {
 	print_unsigned(value);
 	return *this;
@@ -102,13 +102,13 @@ Logger& Logger::operator<<(Hex64 value)
 Logger& Logger::operator<<(void* ptr)
 {
 	DebugPort::write("0x", m_color);
-	print_hex(uintptr_t(ptr), sizeof(uintptr_t));
+	print_hex(uptr(ptr), sizeof(uptr));
 	return *this;
 }
 
 Logger& Logger::operator<<(const MACAddress& mac)
 {
-	uint8_t mac_data[6];
+	u8 mac_data[6];
 	mac.copy(mac_data);
 	for (size_t i = 0; i < 6; i++) {
 		print_hex(mac_data[i], 1);
@@ -121,7 +121,7 @@ Logger& Logger::operator<<(const MACAddress& mac)
 
 Logger& Logger::operator<<(const IPv4Address& mac)
 {
-	uint8_t mac_data[6];
+	u8 mac_data[6];
 	mac.copy(mac_data);
 	for (size_t i = 0; i < 4; i++) {
 		print_unsigned(mac_data[i]);
@@ -132,7 +132,7 @@ Logger& Logger::operator<<(const IPv4Address& mac)
 	return *this;
 }
 
-void Logger::print_hex(uint32_t value, uint8_t size)
+void Logger::print_hex(u32 value, u8 size)
 {
 	char buf[9];
 	itoa(buf, value, 16);

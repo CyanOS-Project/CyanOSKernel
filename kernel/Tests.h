@@ -243,7 +243,7 @@ void test_ls(uintptr_t arg)
 void test_tid1(uintptr_t arg)
 {
 	UNUSED(arg);
-	uint32_t tid, pid;
+	u32 tid, pid;
 	char* exe_arg;
 	asm("movl %%fs:0x0,%0" : "=r"(tid));
 	asm("movl %%gs:0x0,%0" : "=r"(pid));
@@ -254,7 +254,7 @@ void test_tid1(uintptr_t arg)
 void test_tid2(uintptr_t arg)
 {
 	UNUSED(arg);
-	uint32_t tid, pid;
+	u32 tid, pid;
 	char* exe_arg;
 	asm("movl %%fs:0x0,%0" : "=r"(tid));
 	asm("movl %%gs:0x0,%0" : "=r"(pid));

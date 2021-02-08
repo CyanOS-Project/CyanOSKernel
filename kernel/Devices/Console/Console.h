@@ -6,9 +6,13 @@
 
 #define VGATEXTMODE_BUFFER 0x000B8000
 
-typedef enum { MODE_80H25V = 0 } TerminalMode;
+typedef enum
+{
+	MODE_80H25V = 0
+} TerminalMode;
 
-typedef enum {
+typedef enum
+{
 	VGA_COLOR_BLACK = 0,
 	VGA_COLOR_BLUE = 1,
 	VGA_COLOR_GREEN = 2,
@@ -40,7 +44,7 @@ class Console : public FSNode
 
   private:
 	Spinlock m_lock;
-	volatile uint16_t* m_video_ram = 0;
+	volatile u16* m_video_ram = 0;
 	int m_vPosition = 0, m_hPosition = 0;
 	uint8_t m_charColor = 0x0F;
 	static const size_t VGA_WIDTH = 80;
@@ -59,5 +63,5 @@ class Console : public FSNode
 	void insert_character(char str);
 	void insert_back_space();
 	uint8_t vga_entry_color(VGAColor fg, VGAColor bg);
-	uint16_t vga_entry(unsigned char uc, uint8_t color);
+	u16 vga_entry(unsigned char uc, uint8_t color);
 };

@@ -17,8 +17,8 @@ class EthernetNetworkAdapter : public NetworkAdapter
 	struct EthernetFrame {
 		uint8_t dst_mac_addr[6];
 		uint8_t src_mac_addr[6];
-		uint16_t type;
+		u16 type;
 		uint8_t data[1];
 	} __attribute__((packed));
-	static constexpr uint16_t ETHERNET_HEADER_SIZE = offsetof(EthernetFrame, data);
+	static constexpr u16 ETHERNET_HEADER_SIZE = offsetof(EthernetFrame, data);
 };

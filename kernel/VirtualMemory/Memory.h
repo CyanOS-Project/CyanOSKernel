@@ -23,10 +23,10 @@ class Memory
 	static unsigned get_kernel_pages();
 	static void setup();
 	static void setup_page_fault_handler();
-	static void* alloc(void* virtual_address, uint32_t size, uint32_t flags);
-	static void free(void* virtual_address, uint32_t size, uint32_t flags);
-	static void* map(uintptr_t physical_address, uint32_t size, uint32_t flags);
-	static void unmap(void* virtual_address, uint32_t size, uint32_t flags);
+	static void* alloc(void* virtual_address, u32 size, u32 flags);
+	static void free(void* virtual_address, u32 size, u32 flags);
+	static void* map(uintptr_t physical_address, u32 size, u32 flags);
+	static void unmap(void* virtual_address, u32 size, u32 flags);
 	static void switch_page_directory(uintptr_t physical_address);
 	static uintptr_t create_new_virtual_space();
 	static unsigned virtual_memory_size();
@@ -35,15 +35,15 @@ class Memory
   private:
 	static StaticSpinlock lock;
 	static void page_fault_handler(ISRContextFrame& isr_info);
-	static uint32_t parse_flags(uint32_t mem_flags);
-	static void* _alloc_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
-	static void _free_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
-	static void* _map_no_lock(uintptr_t physical_address, uint32_t size, uint32_t flags);
-	static void _unmap_no_lock(void* virtual_address, uint32_t size, uint32_t flags);
+	static u32 parse_flags(u32 mem_flags);
+	static void* _alloc_no_lock(void* virtual_address, u32 size, u32 flags);
+	static void _free_no_lock(void* virtual_address, u32 size, u32 flags);
+	static void* _map_no_lock(uintptr_t physical_address, u32 size, u32 flags);
+	static void _unmap_no_lock(void* virtual_address, u32 size, u32 flags);
 
 	friend class VirtualMemory;
 };
 
-void* valloc(void* virtual_address, uint32_t size, uint32_t flags);
-void vfree(void* virtual_address, uint32_t size, uint32_t flags);
+void* valloc(void* virtual_address, u32 size, u32 flags);
+void vfree(void* virtual_address, u32 size, u32 flags);
 uintptr_t virtual_to_physical_address(void* virtual_address);

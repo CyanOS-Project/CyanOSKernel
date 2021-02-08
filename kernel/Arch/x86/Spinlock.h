@@ -12,6 +12,6 @@ class StaticSpinlock
 	~StaticSpinlock() = default;
 
   private:
-	uint32_t m_value;
-	uint32_t m_eflags;
+	u32 m_value;
+	u32 m_eflags;
 };

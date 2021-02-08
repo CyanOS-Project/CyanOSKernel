@@ -3,14 +3,14 @@
 IPv4Address IPv4Address::Broadcast = IPv4Address{0xFF, 0xFF, 0xFF, 0xFF};
 IPv4Address IPv4Address::Zero = IPv4Address{0, 0, 0, 0};
 
-IPv4Address::IPv4Address(const uint8_t* ip)
+IPv4Address::IPv4Address(const u8* ip)
 {
 	for (size_t i = 0; i < IPv4_ELEMENTS_SIZE; i++) {
 		m_ip[i] = ip[i];
 	}
 }
 
-IPv4Address::IPv4Address(uint8_t ip0, uint8_t ip1, uint8_t ip2, uint8_t ip3)
+IPv4Address::IPv4Address(u8 ip0, u8 ip1, u8 ip2, u8 ip3)
 {
 	m_ip[0] = ip0;
 	m_ip[1] = ip1;
@@ -57,17 +57,17 @@ IPv4Address IPv4Address::mask(const IPv4Address& mask) const
 	return new_ip;
 }
 
-uint8_t& IPv4Address::operator[](uint8_t index)
+u8& IPv4Address::operator[](u8 index)
 {
 	return m_ip[index];
 }
 
-uint8_t IPv4Address::operator[](uint8_t index) const
+u8 IPv4Address::operator[](u8 index) const
 {
 	return m_ip[index];
 }
 
-void IPv4Address::copy(uint8_t* data) const
+void IPv4Address::copy(u8* data) const
 {
 	for (size_t i = 0; i < IPv4_ELEMENTS_SIZE; i++) {
 		data[i] = m_ip[i];

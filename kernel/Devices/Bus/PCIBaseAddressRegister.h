@@ -5,15 +5,24 @@ class PCIBaseAddressRegister
 {
 
   public:
-	enum class Type { MemoryMapped, IOMapped };
-	enum class Size { BAR32, BAR64, None };
-	PCIBaseAddressRegister(uint32_t value);
+	enum class Type
+	{
+		MemoryMapped,
+		IOMapped
+	};
+	enum class Size
+	{
+		BAR32,
+		BAR64,
+		None
+	};
+	PCIBaseAddressRegister(u32 value);
 	Type type() const;
 	Size size() const;
-	uint16_t io_address() const;
-	uint32_t mmio_address() const;
+	u16 io_address() const;
+	u32 mmio_address() const;
 
   private:
-	uint32_t m_value;
+	u32 m_value;
 	Type m_type;
 };

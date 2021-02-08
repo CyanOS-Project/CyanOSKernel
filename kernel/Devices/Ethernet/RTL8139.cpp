@@ -48,7 +48,7 @@ void RTL8139::setup_tx()
 
 void RTL8139::setup_rx()
 {
-	m_rx_buffer = reinterpret_cast<uint8_t*>(valloc(0, MAX_RX_BUFFER_SIZE, PAGE_READWRITE | PAGE_CONTAGIOUS));
+	m_rx_buffer = reinterpret_cast<u8*>(valloc(0, MAX_RX_BUFFER_SIZE, PAGE_READWRITE | PAGE_CONTAGIOUS));
 	write_register32(RTL8139_PORT_RX_BUF, virtual_to_physical_address(m_rx_buffer));
 	write_register32(RTL8139_PORT_RX_CONFIG, RTL8139_RX_CONFIG_ACCEPT_PHYSICAL_MATCH_PACKETS |
 	                                             RTL8139_RX_CONFIG_ACCEPT_PHYSICAL_ADDRESS_PACKETS |
@@ -103,7 +103,7 @@ void RTL8139::rx_tx_handler()
 {
 	info() << "---------------------------------------";
 
-	uint16_t status = read_register16(RTL8139_PORT_INTR_STATUS);
+	u16 status = read_register16(RTL8139_PORT_INTR_STATUS);
 	warn() << "Network Interupt:";
 	info() << "ISR status : " << status;
 	if (status & RTL8139_INTERRUPT_STATUS_TX_OK) {
@@ -135,7 +135,7 @@ void RTL8139::send_ethernet_frame(const void* data, size_t len)
 	m_current_tx_buffer = (m_current_tx_buffer + 1) % NUMBER_TX_BUFFERS;
 }
 
-bool RTL8139::is_packet_ok(uint16_t status)
+bool RTL8139::is_packet_ok(u16 status)
 {
 	if (status & RTL8139_RX_PACKET_STATUS_ROK) {
 		return true;
@@ -146,8 +146,8 @@ bool RTL8139::is_packet_ok(uint16_t status)
 
 MACAddress RTL8139::read_MAC()
 {
-	uint32_t mac1 = read_register32(0);
-	uint32_t mac2 = read_register32(4);
+	u32 mac1 = read_register32(0);
+	u32 mac2 = read_register32(4);
 	MACAddress mac{};
 	mac[0] = (mac1 & 0xFF);
 	mac[1] = (mac1 >> 8) & 0xFF;
@@ -158,32 +158,32 @@ MACAddress RTL8139::read_MAC()
 	return mac;
 }
 
-void RTL8139::write_register8(uint16_t address, uint8_t value)
+void RTL8139::write_register8(u16 address, u8 value)
 {
 	out8(m_ports + address, value);
 }
 
-void RTL8139::write_register16(uint16_t address, uint16_t value)
+void RTL8139::write_register16(u16 address, u16 value)
 {
 	out16(m_ports + address, value);
 }
 
-void RTL8139::write_register32(uint16_t address, uint32_t value)
+void RTL8139::write_register32(u16 address, u32 value)
 {
 	out32(m_ports + address, value);
 }
 
-uint8_t RTL8139::read_register8(uint16_t address)
+u8 RTL8139::read_register8(u16 address)
 {
 	return in8(m_ports + address);
 }
 
-uint16_t RTL8139::read_register16(uint16_t address)
+u16 RTL8139::read_register16(u16 address)
 {
 	return in16(m_ports + address);
 }
 
-uint32_t RTL8139::read_register32(uint16_t address)
+u32 RTL8139::read_register32(u16 address)
 {
 	return in32(m_ports + address);
 }

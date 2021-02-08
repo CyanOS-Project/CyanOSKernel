@@ -3,14 +3,14 @@
 MACAddress MACAddress::Broadcast = MACAddress{0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 MACAddress MACAddress::Zero = MACAddress{0, 0, 0, 0, 0, 0};
 
-MACAddress::MACAddress(const uint8_t* mac)
+MACAddress::MACAddress(const u8* mac)
 {
 	for (size_t i = 0; i < MAC_ELEMENTS_SIZE; i++) {
 		m_mac[i] = mac[i];
 	}
 }
 
-MACAddress::MACAddress(uint8_t mac0, uint8_t mac1, uint8_t mac2, uint8_t mac3, uint8_t mac4, uint8_t mac5)
+MACAddress::MACAddress(u8 mac0, u8 mac1, u8 mac2, u8 mac3, u8 mac4, u8 mac5)
 {
 	m_mac[0] = mac0;
 	m_mac[1] = mac1;
@@ -59,17 +59,17 @@ MACAddress MACAddress::mask(const MACAddress& mask) const
 	return new_mac;
 }
 
-uint8_t& MACAddress::operator[](uint8_t index)
+u8& MACAddress::operator[](u8 index)
 {
 	return m_mac[index];
 }
 
-uint8_t MACAddress::operator[](uint8_t index) const
+u8 MACAddress::operator[](u8 index) const
 {
 	return m_mac[index];
 }
 
-void MACAddress::copy(uint8_t* data) const
+void MACAddress::copy(u8* data) const
 {
 	for (size_t i = 0; i < MAC_ELEMENTS_SIZE; i++) {
 		data[i] = m_mac[i];

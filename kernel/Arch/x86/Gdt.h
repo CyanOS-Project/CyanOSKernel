@@ -51,13 +51,13 @@
 
 #pragma pack(1)
 struct GDT_DESCRIPTOR {
-	uint16_t limit;
-	uint32_t base;
+	u16 limit;
+	u32 base;
 };
 // FIXME: use normal bitmask instead of bit fields.
 struct GDT_ENTRY {
-	uint16_t lim0_15;
-	uint16_t base0_15;
+	u16 lim0_15;
+	u16 base0_15;
 	uint8_t base16_23;
 	uint8_t access;
 	uint8_t lim16_19 : 4;
@@ -65,52 +65,52 @@ struct GDT_ENTRY {
 	uint8_t base24_31;
 };
 struct TSS_ENTRY {
-	uint32_t prev_tss;
-	uint32_t esp0;
-	uint32_t ss0;
-	uint32_t esp1;
-	uint32_t ss1;
-	uint32_t esp2;
-	uint32_t ss2;
-	uint32_t cr3;
-	uint32_t eip;
-	uint32_t eflags;
-	uint32_t eax;
-	uint32_t ecx;
-	uint32_t edx;
-	uint32_t ebx;
-	uint32_t esp;
-	uint32_t ebp;
-	uint32_t esi;
-	uint32_t edi;
-	uint32_t es;
-	uint32_t cs;
-	uint32_t ss;
-	uint32_t ds;
-	uint32_t fs;
-	uint32_t gs;
-	uint32_t ldt;
-	uint16_t trap;
-	uint16_t iomap_base;
+	u32 prev_tss;
+	u32 esp0;
+	u32 ss0;
+	u32 esp1;
+	u32 ss1;
+	u32 esp2;
+	u32 ss2;
+	u32 cr3;
+	u32 eip;
+	u32 eflags;
+	u32 eax;
+	u32 ecx;
+	u32 edx;
+	u32 ebx;
+	u32 esp;
+	u32 ebp;
+	u32 esi;
+	u32 edi;
+	u32 es;
+	u32 cs;
+	u32 ss;
+	u32 ds;
+	u32 fs;
+	u32 gs;
+	u32 ldt;
+	u16 trap;
+	u16 iomap_base;
 };
 #pragma pack()
 
-extern "C" void load_segments(uint16_t cs, uint16_t ds, uint16_t fs, uint16_t gs);
+extern "C" void load_segments(u16 cs, u16 ds, u16 fs, u16 gs);
 
 class GDT
 {
   public:
 	static void setup();
-	static void setup_tss(uint32_t kernel_stack);
-	static void set_tss_stack(uint32_t kernel_stack);
-	static void load_fs(uint32_t address);
-	static void load_gs(uint32_t address);
+	static void setup_tss(u32 kernel_stack);
+	static void set_tss_stack(u32 kernel_stack);
+	static void load_fs(u32 address);
+	static void load_gs(u32 address);
 
   private:
-	static void fill_gdt(uint32_t base, uint16_t limit);
+	static void fill_gdt(u32 base, u16 limit);
 	static void load_gdt();
-	static void fill_gdt_entry(uint32_t gdt_entry, uint32_t base, uint32_t limit, uint8_t access, uint8_t flags);
-	static void load_tss(uint16_t tss);
+	static void fill_gdt_entry(u32 gdt_entry, u32 base, u32 limit, uint8_t access, uint8_t flags);
+	static void load_tss(u16 tss);
 
 	static volatile GDT_DESCRIPTOR gdt;
 	static volatile GDT_ENTRY gdt_entries[];

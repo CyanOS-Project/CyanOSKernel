@@ -12,14 +12,14 @@ __attribute__((section(".multiboot2"))) static const volatile Mutiboot2_Header m
     .address = {.type = MULTIBOOT_HEADER_TAG_ADDRESS,
                 .flags = 0,
                 .size = sizeof(multiboot_header_tag_address),
-                .header_addr = VIR_TO_PHY((uint32_t)&my_multiboot2_header),
+                .header_addr = VIR_TO_PHY((u32)&my_multiboot2_header),
                 .load_addr = unsigned(-1),
                 .load_end_addr = 0,
-                .bss_end_addr = VIR_TO_PHY(uint32_t(&KERNEL_END))},
+                .bss_end_addr = VIR_TO_PHY(u32(&KERNEL_END))},
     .entry = {.type = MULTIBOOT_HEADER_TAG_ENTRY_ADDRESS,
               .flags = 0,
               .size = sizeof(multiboot_header_tag_entry_address),
-              .entry_addr = VIR_TO_PHY((uint32_t)&_kernel_boot_stage1)},
+              .entry_addr = VIR_TO_PHY((u32)&_kernel_boot_stage1)},
     .mod_align = {.type = MULTIBOOT_HEADER_TAG_MODULE_ALIGN,
                   .flags = 0,
                   .size = sizeof(multiboot_header_tag_module_align)},
@@ -35,7 +35,7 @@ const char* mmap_entry_type_text[] = {"UNKNOWN"           //
                                       "NVS",              //
                                       "BAD_RAM"};
 
-extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_info)
+extern "C" void kernel_boot_stage2(u32 magic, multiboot_tag_start* boot_info)
 {
 	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
 		HLT();

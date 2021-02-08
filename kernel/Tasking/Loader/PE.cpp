@@ -21,10 +21,10 @@ Result<uintptr_t> PELoader::load(const char* file, size_t size)
 
 	const IMAGE_SECTION_HEADER* section_header = reinterpret_cast<const IMAGE_SECTION_HEADER*>(nt_header + 1);
 	for (size_t i = 0; i < nt_header->FileHeader.NumberOfSections; i++) {
-		const uint32_t section_va = section_header[i].VirtualAddress;
-		const uint32_t section_rd = section_header[i].PointerToRawData;
-		const uint32_t section_raw_size = section_header[i].SizeOfRawData;
-		const uint32_t section_vir_size = section_header[i].Misc.VirtualSize;
+		const u32 section_va = section_header[i].VirtualAddress;
+		const u32 section_rd = section_header[i].PointerToRawData;
+		const u32 section_raw_size = section_header[i].SizeOfRawData;
+		const u32 section_vir_size = section_header[i].Misc.VirtualSize;
 
 		if (!section_va || !section_vir_size)
 			return ResultError(ERROR_INVALID_EXECUTABLE);
@@ -47,7 +47,7 @@ Result<uintptr_t> PELoader::load(const char* file, size_t size)
 void* PELoader::load_pe_sections(const char* file, const IMAGE_NT_HEADERS32* nt_header)
 {
 	const IMAGE_SECTION_HEADER* section_header = reinterpret_cast<const IMAGE_SECTION_HEADER*>(nt_header + 1);
-	const uint32_t section_alignment = nt_header->OptionalHeader.SectionAlignment;
+	const u32 section_alignment = nt_header->OptionalHeader.SectionAlignment;
 	// Load headers
 	void* start_of_executable = valloc(reinterpret_cast<void*>(nt_header->OptionalHeader.ImageBase),
 	                                   nt_header->OptionalHeader.SectionAlignment, PAGE_USER | PAGE_READWRITE);
@@ -59,10 +59,10 @@ void* PELoader::load_pe_sections(const char* file, const IMAGE_NT_HEADERS32* nt_
 
 	// load sections
 	for (size_t i = 0; i < nt_header->FileHeader.NumberOfSections; i++) {
-		const uint32_t section_va = section_header[i].VirtualAddress;
-		const uint32_t section_rd = section_header[i].PointerToRawData;
-		const uint32_t section_raw_size = section_header[i].SizeOfRawData;
-		const uint32_t section_vir_size = align_to(section_header[i].Misc.VirtualSize, section_alignment);
+		const u32 section_va = section_header[i].VirtualAddress;
+		const u32 section_rd = section_header[i].PointerToRawData;
+		const u32 section_raw_size = section_header[i].SizeOfRawData;
+		const u32 section_vir_size = align_to(section_header[i].Misc.VirtualSize, section_alignment);
 		void* current_section_address = reinterpret_cast<void*>(uintptr_t(start_of_executable) + section_va);
 
 		current_section_address = valloc(current_section_address, section_vir_size, PAGE_USER | PAGE_READWRITE);

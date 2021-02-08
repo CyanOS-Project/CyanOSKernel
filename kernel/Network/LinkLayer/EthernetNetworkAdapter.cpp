@@ -4,14 +4,14 @@
 
 void EthernetNetworkAdapter::send_frame(ProtocolType type, const MACAddress& destination, const void* data, size_t len)
 {
-	uint8_t* ethernet_frame_raw = new uint8_t[len + ETHERNET_HEADER_SIZE];
+	u8* ethernet_frame_raw = new u8[len + ETHERNET_HEADER_SIZE];
 	EthernetFrame* ethernet_frame = reinterpret_cast<EthernetFrame*>(ethernet_frame_raw);
 
 	m_mac.copy(ethernet_frame->src_mac_addr);
 	destination.copy(ethernet_frame->dst_mac_addr);
 
 	memcpy(ethernet_frame->data, data, len);
-	ethernet_frame->type = to_big_endian(static_cast<uint16_t>(type));
+	ethernet_frame->type = to_big_endian(static_cast<u16>(type));
 
 	send_ethernet_frame(ethernet_frame_raw, len + ETHERNET_HEADER_SIZE);
 

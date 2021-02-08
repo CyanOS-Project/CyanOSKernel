@@ -7,7 +7,7 @@
 #include "PCIIdentification.h"
 #include "Tasking/Thread.h"
 
-void PCI::scan_function(Function<void(PCIDevice&)>& callback, uint8_t bus, uint8_t slot, uint8_t function)
+void PCI::scan_function(Function<void(PCIDevice&)>& callback, u8 bus, u8 slot, u8 function)
 {
 	PCIDevice function_device{bus, slot, function};
 	if (function_device.does_exist()) {
@@ -18,7 +18,7 @@ void PCI::scan_function(Function<void(PCIDevice&)>& callback, uint8_t bus, uint8
 	}
 }
 
-void PCI::scan_slot(Function<void(PCIDevice&)>& callback, uint8_t bus, uint8_t slot)
+void PCI::scan_slot(Function<void(PCIDevice&)>& callback, u8 bus, u8 slot)
 {
 	PCIDevice slot_device{bus, slot, 0};
 
@@ -32,7 +32,7 @@ void PCI::scan_slot(Function<void(PCIDevice&)>& callback, uint8_t bus, uint8_t s
 	}
 }
 
-void PCI::scan_bus(Function<void(PCIDevice&)>& callback, uint8_t bus)
+void PCI::scan_bus(Function<void(PCIDevice&)>& callback, u8 bus)
 {
 	for (size_t slot = 0; slot < 32; slot++) {
 		scan_slot(callback, bus, slot);

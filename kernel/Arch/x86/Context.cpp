@@ -1,6 +1,6 @@
 #include "Context.h"
 
-uint32_t Context::setup_task_stack_context(ContextType type, ContextInformation& info)
+u32 Context::setup_task_stack_context(ContextType type, ContextInformation& info)
 {
 	UNUSED(type);
 
@@ -16,10 +16,10 @@ uint32_t Context::setup_task_stack_context(ContextType type, ContextInformation&
 	context->isr_frame.registers.gs = PIB_SELECTOR;
 
 	context->isr_frame.eflags = EFLAGS_IF_ENABLE;
-	return uint32_t(&context->isr_frame) + 4;
+	return u32(&context->isr_frame) + 4;
 }
 
-void Context::switch_task_stack(uint32_t task_stack_start, uint32_t pib, uint32_t tib)
+void Context::switch_task_stack(u32 task_stack_start, u32 pib, u32 tib)
 {
 	GDT::set_tss_stack(task_stack_start);
 	GDT::load_gs(pib);
@@ -37,56 +37,56 @@ void Context::enter_usermode(uintptr_t address, uintptr_t stack)
 	             "pushl %4;"
 	             "iret;"
 	             :
-	             : "r"(uint32_t{UDS_SELECTOR}), "r"(uint32_t{stack}), "i"(uint32_t{EFLAGS_IF_ENABLE}),
-	               "r"(uint32_t{UCS_SELECTOR}), "r"(uint32_t{address}));
+	             : "r"(u32{UDS_SELECTOR}), "r"(u32{stack}), "i"(u32{EFLAGS_IF_ENABLE}), "r"(u32{UCS_SELECTOR}),
+	               "r"(u32{address}));
 }
 
-void Context::set_return_value(ISRContextFrame& frame, uint32_t value)
+void Context::set_return_value(ISRContextFrame& frame, u32 value)
 {
 	frame.registers.eax = value;
 }
 
-void Context::set_return_arg1(ISRContextFrame& frame, uint32_t value)
+void Context::set_return_arg1(ISRContextFrame& frame, u32 value)
 {
 	frame.registers.ecx = value;
 }
 
-void Context::set_return_arg2(ISRContextFrame& frame, uint32_t value)
+void Context::set_return_arg2(ISRContextFrame& frame, u32 value)
 {
 	frame.registers.edx = value;
 }
 
-void Context::set_return_arg3(ISRContextFrame& frame, uint32_t value)
+void Context::set_return_arg3(ISRContextFrame& frame, u32 value)
 {
 	frame.registers.ebx = value;
 }
 
-uint32_t Context::syscall_num(ISRContextFrame& frame)
+u32 Context::syscall_num(ISRContextFrame& frame)
 {
 	return frame.registers.eax;
 }
 
-uint32_t Context::syscall_param1(ISRContextFrame& frame)
+u32 Context::syscall_param1(ISRContextFrame& frame)
 {
 	return frame.registers.ecx;
 }
 
-uint32_t Context::syscall_param2(ISRContextFrame& frame)
+u32 Context::syscall_param2(ISRContextFrame& frame)
 {
 	return frame.registers.edx;
 }
 
-uint32_t Context::syscall_param3(ISRContextFrame& frame)
+u32 Context::syscall_param3(ISRContextFrame& frame)
 {
 	return frame.registers.ebx;
 }
 
-uint32_t Context::syscall_param4(ISRContextFrame& frame)
+u32 Context::syscall_param4(ISRContextFrame& frame)
 {
 	return frame.registers.esi;
 }
 
-uint32_t Context::syscall_param5(ISRContextFrame& frame)
+u32 Context::syscall_param5(ISRContextFrame& frame)
 {
 	return frame.registers.edi;
 }

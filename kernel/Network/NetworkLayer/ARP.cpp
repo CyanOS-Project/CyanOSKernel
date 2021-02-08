@@ -6,11 +6,11 @@
 void ARP::test_send(NetworkAdapter& network)
 {
 	ARPHeader arp{
-	    .hardware_type = to_big_endian(static_cast<uint16_t>(HardwareType::Ethernet)),
-	    .protocol_type = to_big_endian(static_cast<uint16_t>(ProtocolType::IPv4)),
+	    .hardware_type = to_big_endian(static_cast<u16>(HardwareType::Ethernet)),
+	    .protocol_type = to_big_endian(static_cast<u16>(ProtocolType::IPv4)),
 	    .hardware_addr_len = MAC_ADDRESS_LENGTH,
 	    .protocol_addr_len = IP4_ADDRESS_LENGTH,
-	    .opcode = to_big_endian(static_cast<uint16_t>(ARPCode::Request)),
+	    .opcode = to_big_endian(static_cast<u16>(ARPCode::Request)),
 	    .source_hw_addr = {},
 	    .source_protocol_addr = {10, 0, 2, 15}, // static address for us until we get one from DHCP.
 	    .destination_hw_addr = {},

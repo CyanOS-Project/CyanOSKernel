@@ -21,7 +21,7 @@ Process& Process::create_new_process(PathView path, StringView argument, Process
 {
 	ScopedLock local_lock(global_lock);
 	auto& pcb = processes.emplace_back(path[-1], path, argument, privilege);
-	Thread::create_thread(pcb, initiate_process, uintptr_t(&pcb), ThreadPrivilege::Kernel);
+	Thread::create_thread(pcb, initiate_process, uptr(&pcb), ThreadPrivilege::Kernel);
 	return pcb;
 }
 
@@ -101,7 +101,7 @@ ProcessPrivilege Process::privilege_level()
 	return m_privilege_level;
 }
 
-uintptr_t Process::page_directory()
+uptr Process::page_directory()
 {
 	ScopedLock local_lock(m_lock);
 	return m_page_directory;
@@ -127,10 +127,10 @@ HandlesManager& Process::handles()
 	return m_handles;
 }
 
-uintptr_t Process::pib()
+uptr Process::pib()
 {
 	ScopedLock local_lock(m_lock);
-	return reinterpret_cast<uintptr_t>(m_pib);
+	return reinterpret_cast<uptr>(m_pib);
 }
 
 void Process::terminate(int status_code)
@@ -220,7 +220,7 @@ Result<ExecutableInformation> Process::load_executable(PathView path)
 	return execable_info.value();
 }
 
-void Process::initiate_process(uintptr_t process)
+void Process::initiate_process(uptr process)
 {
 	Process* current_process = reinterpret_cast<Process*>(process);
 
@@ -237,7 +237,7 @@ void Process::initiate_process(uintptr_t process)
 	if (current_process->m_privilege_level == ProcessPrivilege::User) {
 		void* thread_user_stack = valloc(0, STACK_SIZE, PAGE_USER | PAGE_READWRITE);
 
-		Context::enter_usermode(execable_info.value().entry_point, uintptr_t(thread_user_stack) + STACK_SIZE - 4);
+		Context::enter_usermode(execable_info.value().entry_point, uptr(thread_user_stack) + STACK_SIZE - 4);
 	} else if (current_process->m_privilege_level == ProcessPrivilege::Kernel) {
 		ASSERT_NOT_REACHABLE(); // TODO: kernel process.
 	}

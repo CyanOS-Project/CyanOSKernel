@@ -5,22 +5,22 @@ class MACAddress
 {
   public:
 	MACAddress() = default;
-	MACAddress(const uint8_t* mac);
-	MACAddress(uint8_t mac0, uint8_t mac1, uint8_t mac2, uint8_t mac3, uint8_t mac4, uint8_t mac5);
+	MACAddress(const u8* mac);
+	MACAddress(u8 mac0, u8 mac1, u8 mac2, u8 mac3, u8 mac4, u8 mac5);
 	MACAddress(const MACAddress&);
 	MACAddress& operator=(const MACAddress&);
-	uint8_t& operator[](uint8_t index);
+	u8& operator[](u8 index);
 
 	bool operator==(const MACAddress& mac) const;
 	bool operator!=(const MACAddress& mac) const;
 	MACAddress mask(const MACAddress&) const;
-	uint8_t operator[](uint8_t index) const;
-	void copy(uint8_t* data) const;
+	u8 operator[](u8 index) const;
+	void copy(u8* data) const;
 
 	static MACAddress Broadcast;
 	static MACAddress Zero;
 
   private:
-	static constexpr uint8_t MAC_ELEMENTS_SIZE = 6;
-	uint8_t m_mac[MAC_ELEMENTS_SIZE] = {};
+	static constexpr u8 MAC_ELEMENTS_SIZE = 6;
+	u8 m_mac[MAC_ELEMENTS_SIZE] = {};
 };
