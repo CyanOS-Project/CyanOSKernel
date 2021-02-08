@@ -10,7 +10,9 @@ void ARP::test_send(NetworkAdapter& network)
 	    .hardware_addr_len = MAC_ADDRESS_LENGTH,
 	    .protocol_addr_len = IP4_ADDRESS_LENGTH,
 	    .opcode = to_big_endian(static_cast<uint16_t>(ARPCode::Request)),
-	    .source_protocol_addr = {10, 0, 2, 15},    // static address for us until we get one from DHCP.
+	    .source_hw_addr = {},
+	    .source_protocol_addr = {10, 0, 2, 15}, // static address for us until we get one from DHCP.
+	    .destination_hw_addr = {},
 	    .destination_protocol_addr = {10, 0, 2, 2} // IP 10.0.2.2 is Firewall/DHCP server in Qemu.
 	};
 

@@ -36,6 +36,7 @@ class Logger
 
   private:
 	static StaticSpinlock lock;
+	void print_hex(uint32_t value, uint8_t size = 0);
 
   protected:
 	DebugColor m_color;
