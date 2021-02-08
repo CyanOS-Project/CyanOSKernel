@@ -1,5 +1,5 @@
 #pragma once
-#include "NetworkAdapter.h"
+#include "Network/LinkLayer/NetworkAdapter.h"
 #include <Types.h>
 
 class ARP

@@ -20,6 +20,11 @@ void ARP::test_send(NetworkAdapter& network)
 	MACAddress::Zero.copy(arp.destination_hw_addr);
 
 	network.send_frame(ProtocolType::ARP, MACAddress::Broadcast, &arp, sizeof(ARPHeader));
+
+	info() << "ARP Request: Who owns " << arp.destination_protocol_addr[0] << "." << arp.destination_protocol_addr[1]
+	       << "." << arp.destination_protocol_addr[2] << "." << arp.destination_protocol_addr[3] << " ? Tell "
+	       << arp.source_protocol_addr[0] << "." << arp.source_protocol_addr[1] << "." << arp.source_protocol_addr[2]
+	       << "." << arp.source_protocol_addr[3];
 }
 
 void ARP::handle_arp_packet(const void* data, size_t size)

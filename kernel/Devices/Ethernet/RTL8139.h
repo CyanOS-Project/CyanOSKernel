@@ -1,6 +1,6 @@
 #pragma once
 #include "Devices/Bus/PCIDevice.h"
-#include "Network/EthernetNetworkAdapter.h"
+#include "Network/LinkLayer/EthernetNetworkAdapter.h"
 #include "Types.h"
 
 class RTL8139 : public EthernetNetworkAdapter

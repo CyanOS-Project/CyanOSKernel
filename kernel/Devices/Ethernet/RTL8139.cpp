@@ -48,9 +48,6 @@ void RTL8139::setup_tx()
 
 void RTL8139::setup_rx()
 {
-	// CAPR: keeps the address of data that driver had read. 0x0038 (16bit) R/W
-	// CBA: keeps the current address of data moved to buffer. 0x003A (16bit) R
-
 	m_rx_buffer = reinterpret_cast<uint8_t*>(valloc(0, MAX_RX_BUFFER_SIZE, PAGE_READWRITE | PAGE_CONTAGIOUS));
 	write_register32(RTL8139_PORT_RX_BUF, virtual_to_physical_address(m_rx_buffer));
 	write_register32(RTL8139_PORT_RX_CONFIG, RTL8139_RX_CONFIG_ACCEPT_PHYSICAL_MATCH_PACKETS |
@@ -58,7 +55,6 @@ void RTL8139::setup_rx()
 	                                             RTL8139_RX_CONFIG_ACCEPT_MULTICAST_PACKETS |
 	                                             RTL8139_RX_CONFIG_ACCEPT_BROADCAST_PACKETS | RTL8139_RX_CONFIG_WRAP |
 	                                             RTL8139_RX_CONFIG_MAX_DMA_BURST_SIZE_256);
-	// write_register16(RTL8139_PORT_RX_BUF_PTR, 0);
 }
 
 void RTL8139::start()
@@ -130,13 +126,10 @@ void RTL8139::send_ethernet_frame(const void* data, size_t len)
 	}
 
 	memcpy(m_tx_buffers[m_current_tx_buffer], data, len);
-	/*if (len < 60) {
-	    memset(reinterpret_cast<uint8_t*>(m_tx_buffers[m_current_tx_buffer]) + len, 0, 60 - len);
-	    len = 60;
-	}*/
 
 	info() << "Sending frame with size: " << len;
 	write_register32(TSD_array[m_current_tx_buffer], len);
+	// FIXME: acquire locks for descriptors here.
 	while (!(read_register32(TSD_array[m_current_tx_buffer]) & RTL8139_TX_STATUS_TOK)) {
 	}
 	m_current_tx_buffer = (m_current_tx_buffer + 1) % NUMBER_TX_BUFFERS;

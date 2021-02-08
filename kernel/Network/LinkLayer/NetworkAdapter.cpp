@@ -1,6 +1,6 @@
 #include "NetworkAdapter.h"
-#include "ARP.h"
 #include "Devices/DebugPort/Logger.h"
+#include "Network/NetworkLayer/ARP.h"
 
 void NetworkAdapter::handle_received_frame(ProtocolType type, const void* data, size_t size)
 {
@@ -10,7 +10,7 @@ void NetworkAdapter::handle_received_frame(ProtocolType type, const void* data, 
 	} else if (type == ProtocolType::IPv4) {
 		warn() << "IPv4 Packet";
 	} else {
-		warn() << "Unkown Packet";
+		warn() << "Unknown Packet";
 	}
 }
 
