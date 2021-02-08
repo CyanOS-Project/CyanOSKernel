@@ -14,8 +14,8 @@ RTL8139::RTL8139(GenericPCIDevice&& device) : m_ports{device.BAR0().io_address()
 	m_mac = read_MAC();
 	instance = this;
 
-	device.enable_interrupts();
 	device.enable_bus_mastering();
+	device.enable_interrupts();
 
 	turn_on();
 	software_rest();

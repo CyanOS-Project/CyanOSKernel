@@ -96,26 +96,26 @@ uint8_t PCIDevice::bist() const
 
 void PCIDevice::enable_bus_mastering()
 {
-	uint32_t command_port = read_config_word16(PCI_PORT_COMMAND);
+	uint16_t command_port = read_config_word16(PCI_PORT_COMMAND);
 	write_config_word16(PCI_PORT_COMMAND, command_port | PCI_COMMAND_BUS_MASTER);
 }
 
 void PCIDevice::disable_bus_mastering()
 {
-	uint32_t command_port = read_config_word32(PCI_PORT_COMMAND);
-	write_config_word32(PCI_PORT_COMMAND, command_port & (~PCI_COMMAND_BUS_MASTER));
+	uint16_t command_port = read_config_word16(PCI_PORT_COMMAND);
+	write_config_word16(PCI_PORT_COMMAND, command_port & (~PCI_COMMAND_BUS_MASTER));
 }
 
 void PCIDevice::disable_interrupts()
 {
-	uint32_t command_port = read_config_word32(PCI_PORT_COMMAND);
-	write_config_word32(PCI_PORT_COMMAND, command_port | PCI_COMMAND_INTERRUPT_DISABLE);
+	uint16_t command_port = read_config_word16(PCI_PORT_COMMAND);
+	write_config_word16(PCI_PORT_COMMAND, command_port | PCI_COMMAND_INTERRUPT_DISABLE);
 }
 
 void PCIDevice::enable_interrupts()
 {
-	uint32_t command_port = read_config_word32(PCI_PORT_COMMAND);
-	write_config_word32(PCI_PORT_COMMAND, command_port & (~PCI_COMMAND_BUS_MASTER));
+	uint16_t command_port = read_config_word16(PCI_PORT_COMMAND);
+	write_config_word16(PCI_PORT_COMMAND, command_port & (~PCI_COMMAND_INTERRUPT_DISABLE));
 }
 
 void PCIDevice::select_port(uint8_t offset) const
