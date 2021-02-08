@@ -37,86 +37,64 @@ Logger& Logger::operator<<(char str)
 	return *this;
 }
 
-Logger& Logger::operator<<(int num)
+Logger& Logger::operator<<(int value)
 {
-	char buf[11];
-	if (num < 0) {
-		num = 0 - num;
-		DebugPort::write("-", m_color);
-	}
-
-	itoa(buf, num, 10);
-	toupper(buf);
-	DebugPort::write(buf, m_color);
+	print_signed(value);
 	return *this;
 }
 
-Logger& Logger::operator<<(unsigned num)
+Logger& Logger::operator<<(unsigned value)
 {
-	char buf[11];
-	itoa(buf, num, 10);
-	toupper(buf);
-	DebugPort::write(buf, m_color);
+	print_unsigned(value);
 	return *this;
 }
 
-Logger& Logger::operator<<(int32_t num)
+Logger& Logger::operator<<(int32_t value)
 {
-	char buf[11];
-	if (num < 0) {
-		num = 0 - num;
-		DebugPort::write("-", m_color);
-	}
-
-	itoa(buf, num, 10);
-	toupper(buf);
-	DebugPort::write(buf, m_color);
+	print_signed(value);
 	return *this;
 }
 
-Logger& Logger::operator<<(uint32_t num)
+Logger& Logger::operator<<(uint32_t value)
 {
-	char buf[11];
-	itoa(buf, num, 10);
-	toupper(buf);
-	DebugPort::write(buf, m_color);
+	print_unsigned(value);
 	return *this;
 }
 
-Logger& Logger::operator<<(Hex num)
+Logger& Logger::operator<<(Hex value)
 {
 
 	DebugPort::write("0x", m_color);
-	print_hex(num.m_data, num.m_size);
+	print_hex(value.m_data, value.m_size);
 	return *this;
 }
 
-Logger& Logger::operator<<(Hex8 num)
+Logger& Logger::operator<<(Hex8 value)
 {
 	DebugPort::write("0x", m_color);
-	print_hex(num.m_data, 1);
+	print_hex(value.m_data, 1);
 	return *this;
 }
 
-Logger& Logger::operator<<(Hex16 num)
+Logger& Logger::operator<<(Hex16 value)
 {
 	DebugPort::write("0x", m_color);
-	print_hex(num.m_data, 2);
+	print_hex(value.m_data, 2);
 	return *this;
 }
 
-Logger& Logger::operator<<(Hex32 num)
+Logger& Logger::operator<<(Hex32 value)
 {
 	DebugPort::write("0x", m_color);
-	print_hex(num.m_data, 4);
+	print_hex(value.m_data, 4);
 	return *this;
 }
 
-Logger& Logger::operator<<(Hex64 num)
+Logger& Logger::operator<<(Hex64 value)
 {
 	DebugPort::write("0x", m_color);
-	print_hex((num.m_data & 0xFFFFFFFF00000000) >> 32, 4);
-	print_hex(num.m_data & 0xFFFFFFFF, 4);
+	print_hex((value.m_data & 0xFFFFFFFF00000000) >> 32, 4);
+	print_hex(value.m_data & 0xFFFFFFFF, 4);
 
 	return *this;
 }
@@ -141,6 +119,19 @@ Logger& Logger::operator<<(const MACAddress& mac)
 	return *this;
 }
 
+Logger& Logger::operator<<(const IPv4Address& mac)
+{
+	uint8_t mac_data[6];
+	mac.copy(mac_data);
+	for (size_t i = 0; i < 4; i++) {
+		print_unsigned(mac_data[i]);
+		if (i != 5) {
+			DebugPort::write(".", m_color);
+		}
+	}
+	return *this;
+}
+
 void Logger::print_hex(uint32_t value, uint8_t size)
 {
 	char buf[9];
@@ -150,5 +141,24 @@ void Logger::print_hex(uint32_t value, uint8_t size)
 	for (size_t i = 0; i < leading_zeros; i++) {
 		DebugPort::write("0", m_color);
 	}
+	DebugPort::write(buf, m_color);
+}
+
+void Logger::print_unsigned(unsigned value)
+{
+	char buf[11];
+	itoa(buf, value, 10);
+	DebugPort::write(buf, m_color);
+}
+
+void Logger::print_signed(int value)
+{
+	char buf[11];
+	if (value < 0) {
+		value = 0 - value;
+		DebugPort::write("-", m_color);
+	}
+
+	itoa(buf, value, 10);
 	DebugPort::write(buf, m_color);
 }
