@@ -10,10 +10,11 @@ class MACAddress
 	MACAddress(const MACAddress&);
 	MACAddress& operator=(const MACAddress&);
 	uint8_t& operator[](uint8_t index);
+
 	bool operator==(const MACAddress& mac) const;
 	bool operator!=(const MACAddress& mac) const;
 	MACAddress mask(const MACAddress&) const;
-	const uint8_t& operator[](uint8_t index) const;
+	uint8_t operator[](uint8_t index) const;
 	void copy(uint8_t* data) const;
 
 	static MACAddress Broadcast;

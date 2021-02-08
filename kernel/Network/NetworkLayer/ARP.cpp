@@ -1,6 +1,7 @@
 #include "ARP.h"
 #include "Devices/DebugPort/Logger.h"
 #include "Endianess.h"
+#include "IPv4Address.h"
 
 void ARP::test_send(NetworkAdapter& network)
 {
@@ -21,10 +22,8 @@ void ARP::test_send(NetworkAdapter& network)
 
 	network.send_frame(ProtocolType::ARP, MACAddress::Broadcast, &arp, sizeof(ARPHeader));
 
-	info() << "ARP Request: Who owns " << arp.destination_protocol_addr[0] << "." << arp.destination_protocol_addr[1]
-	       << "." << arp.destination_protocol_addr[2] << "." << arp.destination_protocol_addr[3] << " ? Tell "
-	       << arp.source_protocol_addr[0] << "." << arp.source_protocol_addr[1] << "." << arp.source_protocol_addr[2]
-	       << "." << arp.source_protocol_addr[3];
+	info() << "ARP Request: Who owns " << IPv4Address{arp.destination_protocol_addr} << " ? Tell "
+	       << IPv4Address{arp.source_protocol_addr};
 }
 
 void ARP::handle_arp_packet(const void* data, size_t size)
@@ -37,17 +36,13 @@ void ARP::handle_arp_packet(const void* data, size_t size)
 
 	switch (static_cast<ARPCode>(to_big_endian(arp.opcode))) {
 		case ARPCode::Request:
-			info() << "ARP Request: Who owns " << arp.destination_protocol_addr[0] << "."
-			       << arp.destination_protocol_addr[1] << "." << arp.destination_protocol_addr[2] << "."
-			       << arp.destination_protocol_addr[3] << " ? Tell " << arp.source_protocol_addr[0] << "."
-			       << arp.source_protocol_addr[1] << "." << arp.source_protocol_addr[2] << "."
-			       << arp.source_protocol_addr[3];
+			info() << "ARP Request: Who owns " << IPv4Address{arp.destination_protocol_addr} << " ? Tell "
+			       << IPv4Address{arp.source_protocol_addr};
 			break;
 
 		case ARPCode::Reply:
 			info() << "ARP Reply: Device " << MACAddress{arp.source_hw_addr} << " Owns " << arp.source_protocol_addr[0]
-			       << "." << arp.source_protocol_addr[1] << "." << arp.source_protocol_addr[2] << "."
-			       << arp.source_protocol_addr[3];
+			       << "." << IPv4Address{arp.source_protocol_addr};
 			break;
 		default:
 			warn() << "Unkown ARP code " << to_big_endian(arp.opcode) << "!";

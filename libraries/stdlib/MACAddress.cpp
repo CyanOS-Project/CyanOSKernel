@@ -64,7 +64,7 @@ uint8_t& MACAddress::operator[](uint8_t index)
 	return m_mac[index];
 }
 
-const uint8_t& MACAddress::operator[](uint8_t index) const
+uint8_t MACAddress::operator[](uint8_t index) const
 {
 	return m_mac[index];
 }
