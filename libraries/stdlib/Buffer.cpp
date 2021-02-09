@@ -1,15 +1,30 @@
 #include "Buffer.h"
-#include "Assert.h"
+#include "BufferView.h"
 #include "Clib.h"
 
 Buffer::Buffer(size_t size) : m_data{new u8[size]}, m_size{size} {}
 
-Buffer::Buffer(u8* data, size_t size) : m_data{data}, m_size{size} {}
+Buffer::Buffer(u8* data, size_t size) : m_data{new u8[size]}, m_size{size}
+{
+	memcpy(m_data, data, m_size);
+}
 
-Buffer::Buffer(const Buffer& other) : m_data{new u8[other.m_size]}, m_size{other.m_size}
+Buffer::Buffer(const Buffer& other, size_t dest_offset) :
+    m_data{new u8[other.m_size + dest_offset]},
+    m_size{other.m_size + dest_offset}
 {
 	ASSERT(this != &other);
-	memcpy(m_data, other.m_data, m_size);
+	ASSERT(dest_offset < other.m_size);
+
+	memcpy(m_data + dest_offset, other.m_data, other.m_size);
+}
+
+Buffer::Buffer(const BufferView& other, size_t dest_offset) :
+    m_data{new u8[other.size() + dest_offset]},
+    m_size{other.size() + dest_offset}
+{
+	ASSERT(dest_offset < other.size());
+	other.copy_to(m_data + dest_offset, 0, other.size());
 }
 
 Buffer::Buffer(Buffer&& other) : m_data{other.m_data}, m_size{other.m_size}
@@ -23,6 +38,8 @@ Buffer& Buffer::operator=(const Buffer& other)
 {
 	ASSERT(this != &other);
 
+	delete[] m_data;
+
 	m_data = new u8[other.m_size];
 	m_size = other.m_size;
 	memcpy(m_data, other.m_data, m_size);
@@ -34,17 +51,19 @@ Buffer& Buffer::operator=(Buffer&& other)
 {
 	ASSERT(this != &other);
 
+	delete[] m_data;
+
 	m_data = other.m_data;
 	m_size = other.m_size;
 
 	other.m_data = nullptr;
-	
+
 	return *this;
 }
 
 Buffer::~Buffer()
 {
-	delete m_data;
+	delete[] m_data;
 }
 
 void Buffer::resize(size_t new_size)
@@ -57,7 +76,7 @@ void Buffer::resize(size_t new_size)
 	u8* new_data = new u8[new_size];
 	memcpy(new_data, m_data, m_size);
 
-	delete m_data;
+	delete[] m_data;
 
 	m_data = new_data;
 	m_size = new_size;
