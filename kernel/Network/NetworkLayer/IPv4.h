@@ -1,13 +1,16 @@
 #pragma once
+#include <Buffer.h>
+#include <BufferView.h>
+#include <IPv4Address.h>
 #include <Types.h>
 
 class IPv4
 {
   public:
-	void send_ip_packet();
+	static void send_ip_packet(IPv4Address destination, const BufferView& data);
 
   private:
-	void handle_ip_packet();
+	static void handle_ip_packet(IPv4Address source, const BufferView& data);
 
 	struct IPv4Header {
 		u8 version : 4;

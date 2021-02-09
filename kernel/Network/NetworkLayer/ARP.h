@@ -1,5 +1,6 @@
 #pragma once
 #include "Network/LinkLayer/NetworkAdapter.h"
+#include <Buffer.h>
 #include <Types.h>
 
 class ARP
@@ -7,8 +8,8 @@ class ARP
 
   public:
 	ARP() = default;
-	void test_send(NetworkAdapter& network);
-	void handle_arp_packet(const void* data, size_t size);
+	static void test_send(NetworkAdapter& network);
+	static void handle_arp_packet(const BufferView& data);
 
   private:
 	enum class HardwareType

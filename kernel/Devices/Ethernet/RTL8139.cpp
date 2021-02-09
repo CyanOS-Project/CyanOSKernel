@@ -77,7 +77,8 @@ void RTL8139::handle_rx()
 
 	if (is_packet_ok(received_packet->status)) {
 		info() << "Size   : " << received_packet->size;
-		handle_received_ethernet_frame(received_packet->data, received_packet->size);
+		Buffer buf(received_packet->data, received_packet->size);
+		handle_received_ethernet_frame(buf);
 	} else {
 		info() << "Invalid Packet.";
 	}
@@ -118,17 +119,17 @@ void RTL8139::rx_tx_handler()
 	write_register16(RTL8139_PORT_INTR_STATUS, status);
 }
 
-void RTL8139::send_ethernet_frame(const void* data, size_t len)
+void RTL8139::send_ethernet_frame(const BufferView& data)
 {
-	if (len > MAX_TX_BUFFER_SIZE) {
+	if (data.size() > MAX_TX_BUFFER_SIZE) {
 		warn() << "Data too large to be sent!";
 		return;
 	}
 
-	memcpy(m_tx_buffers[m_current_tx_buffer], data, len);
+	data.copy_to(m_tx_buffers[m_current_tx_buffer], 0, data.size());
 
-	info() << "Sending frame with size: " << len;
-	write_register32(TSD_array[m_current_tx_buffer], len);
+	info() << "Sending frame with size: " << data.size();
+	write_register32(TSD_array[m_current_tx_buffer], data.size());
 	// FIXME: acquire locks for descriptors here.
 	while (!(read_register32(TSD_array[m_current_tx_buffer]) & RTL8139_TX_STATUS_TOK)) {
 	}

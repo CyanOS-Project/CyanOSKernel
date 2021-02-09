@@ -2,11 +2,11 @@
 #include "Devices/DebugPort/Logger.h"
 #include "Network/NetworkLayer/ARP.h"
 
-void NetworkAdapter::handle_received_frame(ProtocolType type, const void* data, size_t size)
+void NetworkAdapter::handle_received_frame(ProtocolType type, const BufferView& data)
 {
 	if (type == ProtocolType::ARP) {
 		warn() << "ARP Packet";
-		ARP().handle_arp_packet(data, size);
+		ARP().handle_arp_packet(data);
 	} else if (type == ProtocolType::IPv4) {
 		warn() << "IPv4 Packet";
 	} else {

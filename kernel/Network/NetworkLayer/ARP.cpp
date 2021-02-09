@@ -20,19 +20,19 @@ void ARP::test_send(NetworkAdapter& network)
 	network.MAC().copy(arp.source_hw_addr);
 	MACAddress::Zero.copy(arp.destination_hw_addr);
 
-	network.send_frame(ProtocolType::ARP, MACAddress::Broadcast, &arp, sizeof(ARPHeader));
+	network.send_frame(ProtocolType::ARP, MACAddress::Broadcast, BufferView{&arp, sizeof(ARPHeader)});
 
 	info() << "ARP Request: Who owns " << IPv4Address{arp.destination_protocol_addr} << " ? Tell "
 	       << IPv4Address{arp.source_protocol_addr};
 }
 
-void ARP::handle_arp_packet(const void* data, size_t size)
+void ARP::handle_arp_packet(const BufferView& data)
 {
-	if (size < sizeof(ARPHeader)) {
+	if (data.size() < sizeof(ARPHeader)) {
 		warn() << "Insufficient ARP packet size!";
 	}
 
-	const ARPHeader& arp = *reinterpret_cast<const ARPHeader*>(data);
+	const ARPHeader& arp = data.const_convert_to<ARPHeader>();
 
 	switch (static_cast<ARPCode>(to_big_endian(arp.opcode))) {
 		case ARPCode::Request:

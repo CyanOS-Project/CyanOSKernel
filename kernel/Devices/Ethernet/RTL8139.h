@@ -125,7 +125,7 @@ class RTL8139 : public EthernetNetworkAdapter
 	void handle_rx();
 	void handle_tx();
 	MACAddress read_MAC();
-	void send_ethernet_frame(const void* data, size_t size) override;
+	void send_ethernet_frame(const BufferView& data) override;
 	bool is_packet_ok(u16);
 
 	void write_register8(u16 address, u8 value);

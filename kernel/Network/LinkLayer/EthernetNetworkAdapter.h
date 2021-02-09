@@ -7,11 +7,11 @@ class EthernetNetworkAdapter : public NetworkAdapter
 {
   public:
 	EthernetNetworkAdapter() = default;
-	void send_frame(ProtocolType type, const MACAddress& destination, const void* data, size_t len) override;
+	void send_frame(ProtocolType type, const MACAddress& destination, const BufferView& data) override;
 
   protected:
-	virtual void send_ethernet_frame(const void* data, size_t size) = 0;
-	void handle_received_ethernet_frame(const void* data, size_t size);
+	virtual void send_ethernet_frame(const BufferView& data) = 0;
+	void handle_received_ethernet_frame(const BufferView& data);
 
   private:
 	struct EthernetFrame {
