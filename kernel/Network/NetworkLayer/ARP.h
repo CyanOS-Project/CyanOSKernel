@@ -2,14 +2,13 @@
 #include "Network/LinkLayer/NetworkAdapter.h"
 #include <Buffer.h>
 #include <Types.h>
+#include <Vector.h>
 
 class ARP
 {
 
   public:
-	ARP() = default;
-	static void test_send(NetworkAdapter& network);
-	static void handle_arp_packet(const BufferView& data);
+	static const MACAddress& mac_address_lookup(const IPv4Address& lookup_ip);
 
   private:
 	enum class HardwareType
@@ -37,4 +36,9 @@ class ARP
 		u8 destination_hw_addr[MAC_ADDRESS_LENGTH];
 		u8 destination_protocol_addr[IP4_ADDRESS_LENGTH];
 	} __attribute__((packed));
+
+	static Vector<MACAddress> arp_table;
+	static void send_arp_request(const IPv4Address& lookup_ip);
+	static void handle_arp_packet(const BufferView& data);
+	friend NetworkAdapter;
 };

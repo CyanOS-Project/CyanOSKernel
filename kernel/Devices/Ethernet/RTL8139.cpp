@@ -77,8 +77,7 @@ void RTL8139::handle_rx()
 
 	if (is_packet_ok(received_packet->status)) {
 		info() << "Size   : " << received_packet->size;
-		Buffer buf(received_packet->data, received_packet->size);
-		handle_received_ethernet_frame(buf);
+		handle_received_ethernet_frame(BufferView{received_packet->data, received_packet->size});
 	} else {
 		info() << "Invalid Packet.";
 	}

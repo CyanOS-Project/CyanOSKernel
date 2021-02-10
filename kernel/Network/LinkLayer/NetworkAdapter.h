@@ -18,6 +18,8 @@ class NetworkAdapter
 	virtual void send_frame(ProtocolType type, const MACAddress& destination, const BufferView& data) = 0;
 	const MACAddress& MAC() const;
 
+	static NetworkAdapter* default_network_adapter;
+
   protected:
 	void handle_received_frame(ProtocolType type, const BufferView& data);
 

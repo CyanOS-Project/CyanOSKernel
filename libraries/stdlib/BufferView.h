@@ -9,8 +9,8 @@ class BufferView
 {
 
   public:
-	BufferView(const Buffer&, size_t offset = 0);
-	BufferView(const BufferView&, size_t offset = 0);
+	BufferView(const Buffer&, size_t offset = 0, size_t size = 0);
+	BufferView(const BufferView&, size_t offset = 0, size_t size = 0);
 	BufferView(const void*, size_t);
 	BufferView& operator=(const Buffer&);
 	BufferView& operator=(const BufferView&);

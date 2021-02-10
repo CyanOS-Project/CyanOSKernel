@@ -69,10 +69,8 @@ void PCI::enumerate_pci_devices()
 			info() << "PCI_STATUS     : " << Hex(device.status());
 			// Thread::sleep(10000);
 			auto* eth0 = new RTL8139{GenericPCIDevice{device}};
-			// eth0->send_frame(ProtocolType::ARP, MACAddress::Broadcast, "hello", 50);
-			ARP().test_send(*eth0);
-			Thread::sleep(3000);
-			ARP().test_send(*eth0);
+			NetworkAdapter::default_network_adapter = eth0;
+			ARP::mac_address_lookup(IPv4Address{10, 0, 2, 2}); // IP 10.0.2.2 is Firewall/DHCP server in Qemu.
 		}
 	});
 }
