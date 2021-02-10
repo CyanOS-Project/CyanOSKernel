@@ -83,20 +83,22 @@ template <class T> class List
 	void pop_front();
 	void remove(Iterator);
 	template <class Predicate> bool remove_if(Predicate predicate);
-	void splice(List<T>& list, Iterator itr);
-	ConstIterator find(const T& element) const;
-	Iterator find(const T& element);
-	template <class Predicate> ConstIterator find_if(Predicate predicate) const;
-	template <class Predicate> Iterator find_if(Predicate predicate);
-	template <class Predicate> bool contains(Predicate predicate);
 	void clear();
+	void splice(List<T>& list, Iterator itr);
+	Iterator find(const T& element);
+	template <class Predicate> Iterator find_if(Predicate predicate);
+	T& first();
+	T& last();
+	T& operator[](int);
+
+	ConstIterator find(const T& element) const;
+	template <class Predicate> ConstIterator find_if(Predicate predicate) const;
+	template <class Predicate> bool contains(Predicate predicate) const;
 	bool is_empty() const;
 	size_t size() const;
-	T& first();
 	const T& first() const;
-	T& last();
 	const T& last() const;
-	T& operator[](int);
+	const T& operator[](int) const;
 };
 
 template <class T> List<T>::List() : m_shallow_ending_node{}, m_head{m_ending_node}, m_tail{m_ending_node}, m_count{0}
@@ -265,14 +267,31 @@ template <class T> template <class Predicate> typename List<T>::Iterator List<T>
 	return end();
 }
 
-template <class T> template <class Predicate> bool List<T>::contains(Predicate predicate)
+template <class T> typename List<T>::ConstIterator List<T>::find(const T& element) const
 {
-	for (const auto& i : *this) {
-		if (predicate(i)) {
-			return true;
+	for (auto&& i = cbegin(); i != cend(); i++) {
+		if (element == *i) {
+			return i;
 		}
 	}
-	return false;
+	return end();
+}
+
+template <class T>
+template <class Predicate>
+typename List<T>::ConstIterator List<T>::find_if(Predicate predicate) const
+{
+	for (auto&& i = cbegin(); i != cend(); i++) {
+		if (predicate(*i)) {
+			return i;
+		}
+	}
+	return cend();
+}
+
+template <class T> template <class Predicate> bool List<T>::contains(Predicate predicate) const
+{
+	return find_if(predicate) != cend();
 }
 
 template <class T> T& List<T>::first()
@@ -320,6 +339,15 @@ template <class T> void List<T>::clear()
 // FIXME: Delete this operator!!
 
 template <class T> T& List<T>::operator[](int num)
+{
+	auto itr = begin();
+	while (num--) {
+		++itr;
+	}
+	return *itr;
+}
+
+template <class T> const T& List<T>::operator[](int num) const
 {
 	auto itr = begin();
 	while (num--) {
