@@ -2,6 +2,7 @@
 #include "ARP.h"
 #include "Network/LinkLayer/NetworkAdapter.h"
 #include <Buffer.h>
+#include <Endianess.h>
 
 IPv4Address IPv4::device_ip_address{};
 IPv4Address IPv4::gateway_ip_address{};
@@ -18,10 +19,10 @@ void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const
 	auto& ip_packet = ip_raw_packet.convert_to<IPv4Header>();
 
 	ip_packet.version = IPv4_VERSION;
-	ip_packet.header_length = IPv4_HEADER_LENGTH;
+	ip_packet.header_length = to_big_endian(IPv4_HEADER_LENGTH);
 	ip_packet.dscp = 0;
 	ip_packet.ecn = 0;
-	ip_packet.total_length = ip_raw_packet.size();
+	ip_packet.total_length = to_big_endian(ip_raw_packet.size());
 	ip_packet.id = 0;
 	ip_packet.flags = 0;
 	ip_packet.fragment_offset = 0;
@@ -69,7 +70,9 @@ void IPv4::handle_ip_packet(const BufferView& data)
 
 const MACAddress& IPv4::destination_mac_lookup(IPv4Address address)
 {
-	if (is_in_local_subnet(address)) {
+	if (address == IPv4Address::Broadcast) {
+		return MACAddress::Broadcast;
+	} else if (is_in_local_subnet(address)) {
 		return ARP::mac_address_lookup(address);
 	} else {
 		return ARP::mac_address_lookup(gateway_ip_address);
@@ -96,15 +99,15 @@ u16 IPv4::calculate_checksum(const BufferView& data)
 	auto* u16_array = reinterpret_cast<const u16*>(data.ptr());
 	size_t u16_array_size = data.size() / sizeof(u16);
 
-	u32 result = 0;
+	u32 sum = 0;
 	for (size_t i = 0; i < u16_array_size; i++) {
-		result += u16_array[i];
-		if (result > 0xFFFF) {
-			result = (result & 0xFFFF) + ((result & 0xFFFF0000) >> 16);
+		sum += u16_array[i];
+		if (sum > 0xFFFF) {
+			sum = (sum & 0xFFFF) + ((sum & 0xFFFF0000) >> 16);
 		}
 	}
 
-	return ~static_cast<u16>(result);
+	return to_big_endian(u16(~u16(sum)));
 }
 
 IPv4Address IPv4::IP()

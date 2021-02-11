@@ -125,7 +125,7 @@ Logger& Logger::operator<<(const IPv4Address& mac)
 	mac.copy(mac_data);
 	for (size_t i = 0; i < 4; i++) {
 		print_unsigned(mac_data[i]);
-		if (i != 5) {
+		if (i != 3) {
 			DebugPort::write(".", m_color);
 		}
 	}
