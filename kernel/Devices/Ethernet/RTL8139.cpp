@@ -75,7 +75,7 @@ void RTL8139::handle_rx()
 	RxPacket* received_packet = reinterpret_cast<RxPacket*>(m_rx_buffer + m_current_rx_pointer);
 	info() << "Status : " << received_packet->status;
 
-	if (is_packet_ok(received_packet->status)) {
+	if (is_packet_ok(received_packet->status) && received_packet->size) {
 		info() << "Size   : " << received_packet->size;
 		handle_received_ethernet_frame(BufferView{received_packet->data, received_packet->size});
 	} else {

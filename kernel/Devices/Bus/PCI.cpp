@@ -5,7 +5,6 @@
 #include "Network/Network.h"
 #include "PCIDevice.h"
 #include "PCIIdentification.h"
-#include "Tasking/Thread.h"
 
 void PCI::scan_function(Function<void(PCIDevice&)>& callback, u8 bus, u8 slot, u8 function)
 {

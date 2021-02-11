@@ -1,6 +1,7 @@
 #include "IPv4.h"
 #include "ARP.h"
 #include "Network/LinkLayer/NetworkAdapter.h"
+#include <Algorithms.h>
 #include <Buffer.h>
 #include <Endianess.h>
 
@@ -15,17 +16,14 @@ void IPv4::initialize()
 
 void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const BufferView& data)
 {
-	Buffer ip_raw_packet{data, IPv4_HEADER_SIZE};
+	Buffer ip_raw_packet{data, sizeof(IPv4Header)};
 	auto& ip_packet = ip_raw_packet.convert_to<IPv4Header>();
 
-	ip_packet.version = IPv4_VERSION;
-	ip_packet.header_length = to_big_endian(IPv4_HEADER_LENGTH);
-	ip_packet.dscp = 0;
-	ip_packet.ecn = 0;
+	ip_packet.version_length = IPv4_VERSION_LENGTH;
+	ip_packet.dscp_ecn = 0;
 	ip_packet.total_length = to_big_endian(ip_raw_packet.size());
 	ip_packet.id = 0;
-	ip_packet.flags = 0;
-	ip_packet.fragment_offset = 0;
+	ip_packet.flags_fragment_offset = 0;
 	ip_packet.time_to_live = 64;
 	ip_packet.protocol = static_cast<u8>(protocol);
 	ip_packet.header_checksum = 0;
@@ -33,7 +31,7 @@ void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const
 	device_ip_address.copy(ip_packet.src_ip);
 	destination.copy(ip_packet.dst_ip);
 
-	ip_packet.header_checksum = calculate_checksum(BufferView{ip_raw_packet, 0, IPv4_HEADER_SIZE});
+	ip_packet.header_checksum = calculate_checksum(BufferView{ip_raw_packet, 0, sizeof(IPv4Header)});
 
 	auto& destination_mac = destination_mac_lookup(destination);
 
@@ -97,14 +95,15 @@ bool IPv4::is_packet_ok(const IPv4Header& packet)
 u16 IPv4::calculate_checksum(const BufferView& data)
 {
 	auto* u16_array = reinterpret_cast<const u16*>(data.ptr());
-	size_t u16_array_size = data.size() / sizeof(u16);
+	size_t u16_array_size = number_of_words<u16>(data.size());
 
 	u32 sum = 0;
 	for (size_t i = 0; i < u16_array_size; i++) {
-		sum += u16_array[i];
-		if (sum > 0xFFFF) {
-			sum = (sum & 0xFFFF) + ((sum & 0xFFFF0000) >> 16);
-		}
+		sum += to_big_endian(u16_array[i]);
+	}
+
+	while (sum > 0xFFFF) {
+		sum = (sum & 0xFFFF) + ((sum & 0xFFFF0000) >> 16);
 	}
 
 	return to_big_endian(u16(~u16(sum)));

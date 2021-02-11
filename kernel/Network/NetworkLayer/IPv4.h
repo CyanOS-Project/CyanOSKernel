@@ -19,25 +19,19 @@ class IPv4
 
   private:
 	struct IPv4Header {
-		u8 version : 4;
-		u8 header_length : 4;
-		u8 dscp : 6;
-		u8 ecn : 2;
+		u8 version_length;
+		u8 dscp_ecn;
 		u16 total_length;
 		u16 id;
-		u16 flags : 3;
-		u16 fragment_offset : 14;
+		u16 flags_fragment_offset;
 		u8 time_to_live;
 		u8 protocol;
 		u16 header_checksum;
 		u8 src_ip[4];
 		u8 dst_ip[4];
-		u8 data[1];
 	} __attribute__((packed));
 
-	static constexpr u32 IPv4_HEADER_SIZE = offsetof(IPv4Header, data);
-	static constexpr u8 IPv4_VERSION = 4;
-	static constexpr u8 IPv4_HEADER_LENGTH = IPv4_HEADER_SIZE / sizeof(u32);
+	static constexpr u8 IPv4_VERSION_LENGTH = (0x40 | (sizeof(IPv4Header) / sizeof(u32)));
 	static constexpr u8 IPv4_FLAGS_DONT_FRAGMENT = (1 << 1);
 	static constexpr u8 IPv4_FLAGS_MORE_FRAGMENTS = (1 << 2);
 
