@@ -107,7 +107,7 @@ void RTL8139::rx_tx_handler()
 	warn() << "Network Interupt:";
 	info() << "ISR status : " << status;
 	if (status & RTL8139_INTERRUPT_STATUS_TX_OK) {
-		// info() << "Interrupt: Data has been sent!";
+		info() << "Interrupt: Data has been sent!";
 		handle_tx();
 	}
 	if (status & RTL8139_INTERRUPT_STATUS_RX_OK) {

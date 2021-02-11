@@ -2,7 +2,7 @@
 #include "Arch/x86/Asm.h"
 #include "Devices/DebugPort/Logger.h"
 #include "Devices/Ethernet/RTL8139.h"
-#include "Network/NetworkLayer/ARP.h" //FIXME: remove this
+#include "Network/Network.h"
 #include "PCIDevice.h"
 #include "PCIIdentification.h"
 #include "Tasking/Thread.h"
@@ -70,7 +70,7 @@ void PCI::enumerate_pci_devices()
 			// Thread::sleep(10000);
 			auto* eth0 = new RTL8139{GenericPCIDevice{device}};
 			NetworkAdapter::default_network_adapter = eth0;
-			ARP::mac_address_lookup(IPv4Address{10, 0, 2, 2}); // IP 10.0.2.2 is Firewall/DHCP server in Qemu.
+			new Network{*eth0};
 		}
 	});
 }
