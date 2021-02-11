@@ -4,14 +4,16 @@
 #include "Thread.h"
 #include <IntrusiveList.h>
 #include <Rule5.h>
+#include <UniquePointer.h>
 
 class WaitQueue
 {
   public:
 	NON_COPYABLE(WaitQueue)
-	NON_MOVABLE(WaitQueue)
 
 	WaitQueue();
+	WaitQueue(WaitQueue&&);
+	WaitQueue& operator=(WaitQueue&&);
 	~WaitQueue();
 
 	void terminate_blocked_thread(Thread&);
@@ -20,18 +22,19 @@ class WaitQueue
 
 	template <typename T> void wait(ScopedLock<T>& checker_lock)
 	{
-		ScopedLock queue_lock(m_lock);
+		ScopedLock queue_lock(*m_lock);
 		Thread::current->block(*this);
 		m_threads.push_back(*Thread::current);
 		queue_lock.release();
 		checker_lock.release();
 
 		Thread::yield();
+
 		checker_lock.acquire();
 	}
 	template <typename T, typename L> void wait_on_event(T checker, ScopedLock<L>& checker_lock)
 	{
-		ScopedLock queue_lock(m_lock);
+		ScopedLock queue_lock(*m_lock);
 
 		while (checker()) {
 			Thread::current->block(*this);
@@ -47,7 +50,7 @@ class WaitQueue
 	}
 
   private:
-	Spinlock m_lock;
+	UniquePointer<Spinlock> m_lock;
 	IntrusiveList<Thread> m_threads;
 	void wake_up_one();
 };
