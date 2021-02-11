@@ -231,8 +231,8 @@ template <class T> void Vector<T>::make_free_spot(size_t free_spot_index)
 {
 	for (size_t i = m_count; i >= free_spot_index + 1; i--) {
 		m_storage[i] = move(m_storage[i - 1]);
+		m_storage[i - 1].~T();
 	}
-	m_storage[free_spot_index].~T();
 }
 
 template <class T> void Vector<T>::destruct_used_objects()
