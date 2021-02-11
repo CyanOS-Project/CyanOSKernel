@@ -5,17 +5,25 @@
 
 WaitQueue::WaitQueue() : m_lock{UniquePointer<Spinlock>::make_unique()}, m_threads{} {}
 
-WaitQueue::WaitQueue(WaitQueue&& other) : m_lock{move(other.m_lock)}, m_threads{move(other.m_threads)} {}
+WaitQueue::WaitQueue(WaitQueue&& other) : m_lock{move(other.m_lock)}, m_threads{move(other.m_threads)}
+{
+	other.is_moved = true;
+}
 
 WaitQueue& WaitQueue::operator=(WaitQueue&& other)
 {
 	m_lock = move(other.m_lock);
 	m_threads = move(other.m_threads);
+	other.is_moved = true;
 	return *this;
 }
 
 WaitQueue::~WaitQueue()
 {
+	if (is_moved) {
+		return;
+	}
+
 	wake_up_all(); // FIXME: is it okay to do so ?
 }
 

@@ -52,5 +52,6 @@ class WaitQueue
   private:
 	UniquePointer<Spinlock> m_lock;
 	IntrusiveList<Thread> m_threads;
+	bool is_moved = false;
 	void wake_up_one();
 };
