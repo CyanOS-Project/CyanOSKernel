@@ -21,6 +21,7 @@ SECTIONS
 		*(.rdata)
 
 		CONSTRUCTORS_ARRAY_START = .;
+		*(.ctors.*)
 		*(.ctors)
 		CONSTRUCTORS_ARRAY_END = .;
 	}

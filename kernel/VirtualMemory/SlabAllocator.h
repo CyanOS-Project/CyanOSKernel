@@ -41,6 +41,7 @@ template <size_t slab_size, size_t memory_size> class Slab
 	MemoryBlock<slab_size> blocks[MAX_BLOCKS];
 
 	void init(Slab* prev = nullptr);
+	Slab();
 	void* alloc();
 	void free(void* address);
 };
@@ -54,6 +55,11 @@ inline void* request_memory_from_os(size_t size)
 inline void free_memory_to_os(void* addrss, size_t size)
 {
 	vfree(addrss, size, 0);
+}
+
+template <size_t slab_size, size_t memory_size> Slab<slab_size, memory_size>::Slab()
+{
+	init();
 }
 
 template <size_t slab_size, size_t memory_size> void Slab<slab_size, memory_size>::init(Slab* prev)
