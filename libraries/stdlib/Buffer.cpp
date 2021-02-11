@@ -14,7 +14,6 @@ Buffer::Buffer(const Buffer& other, size_t dest_offset) :
     m_size{other.m_size + dest_offset}
 {
 	ASSERT(this != &other);
-	ASSERT(dest_offset < other.m_size);
 
 	memcpy(m_data + dest_offset, other.m_data, other.m_size);
 }
@@ -23,7 +22,6 @@ Buffer::Buffer(const BufferView& other, size_t dest_offset) :
     m_data{new u8[other.size() + dest_offset]},
     m_size{other.size() + dest_offset}
 {
-	ASSERT(dest_offset < other.size());
 	other.copy_to(m_data + dest_offset, 0, other.size());
 }
 
