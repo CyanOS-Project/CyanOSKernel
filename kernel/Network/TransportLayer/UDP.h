@@ -1,3 +1,5 @@
+#pragma once
+
 #include <BufferView.h>
 #include <IPv4Address.h>
 #include <Types.h>
@@ -8,6 +10,9 @@ class UDP
   public:
 	void send(const IPv4Address& dest_ip, u16 dest_port, const BufferView& data);
 	void handle(const IPv4Address& src_ip, const BufferView& data);
+
+  protected:
+	void send_segment(const IPv4Address& dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
 
   private:
 	struct UDPHeader {

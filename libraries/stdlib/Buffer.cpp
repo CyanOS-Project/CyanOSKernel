@@ -1,10 +1,9 @@
 #include "Buffer.h"
 #include "BufferView.h"
-#include "Clib.h"
 
-Buffer::Buffer(size_t size) : m_data{new u8[size]}, m_size{size} {}
+Buffer::Buffer(size_t size) : m_data{new u8[size]{}}, m_size{size} {}
 
-Buffer::Buffer(u8* data, size_t size) : m_data{new u8[size]}, m_size{size}
+Buffer::Buffer(const void* data, size_t size) : m_data{new u8[size]}, m_size{size}
 {
 	memcpy(m_data, data, m_size);
 }

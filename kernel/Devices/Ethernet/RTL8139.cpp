@@ -85,9 +85,8 @@ void RTL8139::handle_rx()
 		                       RTL8139_RX_READ_POINTER_MASK;
 
 		if (m_current_rx_pointer > MAX_RX_BUFFER_SIZE) {
-			m_current_rx_pointer -= MAX_RX_BUFFER_SIZE; // FIXME: not sure about this.
+			m_current_rx_pointer -= MAX_RX_BUFFER_SIZE;
 		}
-		info() << "Pos: " << Hex(m_current_rx_pointer);
 		write_register16(RTL8139_PORT_RX_BUF_PTR, m_current_rx_pointer - RTL8139_RX_PAD);
 	}
 }

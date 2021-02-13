@@ -33,12 +33,12 @@ u16 ICMP::calculate_checksum(const BufferView& data)
 
 	u32 sum = 0;
 	for (size_t i = 0; i < u16_array_size; i++) {
-		sum += to_big_endian(u16_array[i]);
+		sum += to_big_endian<u16>(u16_array[i]);
 	}
 
 	while (sum > 0xFFFF) {
 		sum = (sum & 0xFFFF) + ((sum & 0xFFFF0000) >> 16);
 	}
 
-	return to_big_endian(u16(~u16(sum)));
+	return to_big_endian<u16>(~u16(sum));
 }

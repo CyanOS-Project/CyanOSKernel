@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Assert.h"
+#include "Clib.h"
 #include "TypeTraits.h"
 #include "Types.h"
 
@@ -11,7 +12,7 @@ class Buffer
 
   public:
 	Buffer(size_t size);
-	Buffer(u8* data, size_t size);
+	Buffer(const void* data, size_t size);
 	Buffer(const Buffer&, size_t dest_offset = 0);
 	Buffer(const BufferView&, size_t dest_offset = 0);
 	Buffer(Buffer&&);
@@ -21,8 +22,10 @@ class Buffer
 
 	void resize(size_t size_t);
 	void fill_from(const void* src, size_t dest_offset, size_t size);
+	template <typename T> void fill_by(T& src, size_t dest_offset) { memcpy(m_data + dest_offset, &src, sizeof(T)); }
 	u8* ptr();
 	u8& operator[](size_t index);
+
 	template <typename T> T& convert_to()
 	{
 		ASSERT(sizeof(T) <= m_size);

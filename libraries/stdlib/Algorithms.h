@@ -44,11 +44,13 @@ constexpr size_t align_to(size_t num, size_t alignment, bool align_zero = true)
 		return num + alignment - (num % alignment);
 }
 
-template <typename T> size_t number_of_words(size_t size)
+template <typename T> constexpr size_t number_of_words(size_t size)
 {
-	T max((1 << (sizeof(T) - 1)) - 1);
-	size_t mask = ~max;
-	return (size + max) & mask;
+	size_t result = size / sizeof(T);
+	if (result % sizeof(T)) {
+		result++;
+	}
+	return result;
 }
 
 template <typename T> T& swap(const T& a, const T& b)

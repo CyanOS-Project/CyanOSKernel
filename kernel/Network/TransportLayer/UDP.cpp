@@ -6,24 +6,27 @@
 
 void UDP::send(const IPv4Address& dest_ip, u16 dest_port, const BufferView& data)
 {
-	Buffer udp_raw_segment{sizeof(UDPHeader) + data.size()};
-	auto& udp_segment = udp_raw_segment.convert_to<UDPHeader>();
-
-	udp_segment.source_port = to_big_endian(u16(68));
-	udp_segment.destination_port = to_big_endian(dest_port);
-	udp_segment.total_length = to_big_endian(u16(sizeof(UDPHeader) + data.size()));
-	udp_segment.checksum = 0;
-
-	udp_raw_segment.fill_from(data.ptr(), sizeof(UDPHeader), data.size());
-
-	udp_segment.checksum = calculate_checksum(udp_raw_segment);
-
-	IPv4::send_ip_packet(dest_ip, IPv4Protocols::UDP, udp_raw_segment);
+	send_segment(dest_ip, dest_port, 68, data);
 }
 
 void UDP::handle(const IPv4Address& src_ip, const BufferView& data)
 {
 	// TODO
+}
+
+void UDP::send_segment(const IPv4Address& dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
+{
+	Buffer udp_raw_segment{sizeof(UDPHeader) + data.size()};
+	auto& udp_segment = udp_raw_segment.convert_to<UDPHeader>();
+
+	udp_segment.source_port = to_big_endian<u16>(src_port);
+	udp_segment.destination_port = to_big_endian<u16>(dest_port);
+	udp_segment.total_length = to_big_endian<u16>(sizeof(UDPHeader) + data.size());
+	udp_segment.checksum = 0;
+
+	udp_raw_segment.fill_from(data.ptr(), sizeof(UDPHeader), data.size());
+
+	IPv4::send_ip_packet(dest_ip, IPv4Protocols::UDP, udp_raw_segment);
 }
 
 u16 UDP::calculate_checksum(const BufferView& data)
@@ -33,12 +36,12 @@ u16 UDP::calculate_checksum(const BufferView& data)
 
 	u32 sum = 0;
 	for (size_t i = 0; i < u16_array_size; i++) {
-		sum += to_big_endian(u16_array[i]);
+		sum += to_big_endian<u16>(u16_array[i]);
 	}
 
 	while (sum > 0xFFFF) {
 		sum = (sum & 0xFFFF) + ((sum & 0xFFFF0000) >> 16);
 	}
 
-	return to_big_endian(u16(~u16(sum)));
+	return to_big_endian<u16>(~u16(sum));
 }

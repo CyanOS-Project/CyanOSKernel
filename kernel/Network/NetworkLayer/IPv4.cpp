@@ -7,7 +7,7 @@
 
 IPv4Address IPv4::device_ip_address{};
 IPv4Address IPv4::gateway_ip_address{};
-IPv4Address IPv4::subnet_mask{};
+IPv4Address IPv4::subnet_mask{255, 255, 255, 255};
 
 void IPv4::initialize()
 {
@@ -21,7 +21,7 @@ void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const
 
 	ip_packet.version_length = IPv4_VERSION_LENGTH;
 	ip_packet.dscp_ecn = 0;
-	ip_packet.total_length = to_big_endian(ip_raw_packet.size());
+	ip_packet.total_length = to_big_endian<u16>(ip_raw_packet.size());
 	ip_packet.id = 0;
 	ip_packet.flags_fragment_offset = 0;
 	ip_packet.time_to_live = 64;
@@ -99,14 +99,14 @@ u16 IPv4::calculate_checksum(const BufferView& data)
 
 	u32 sum = 0;
 	for (size_t i = 0; i < u16_array_size; i++) {
-		sum += to_big_endian(u16_array[i]);
+		sum += to_big_endian<u16>(u16_array[i]);
 	}
 
 	while (sum > 0xFFFF) {
 		sum = (sum & 0xFFFF) + ((sum & 0xFFFF0000) >> 16);
 	}
 
-	return to_big_endian(u16(~u16(sum)));
+	return to_big_endian<u16>(~u16(sum));
 }
 
 IPv4Address IPv4::IP()
