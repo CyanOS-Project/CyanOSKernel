@@ -61,36 +61,35 @@ void RTL8139::start()
 {
 	write_register8(RTL8139_PORT_CHIP_CMD, RTL8139_COMMAND_RX_ENABLE | RTL8139_COMMAND_TX_ENABLE);
 
-	write_register16(RTL8139_PORT_INTR_MASK,
-	                 RTL8139_INTERRUPT_MASK_RX_OK | RTL8139_INTERRUPT_MASK_TX_OK | RTL8139_INTERRUPT_MASK_TX_ERROR |
-	                     RTL8139_INTERRUPT_MASK_RX_ERROR | RTL8139_INTERRUPT_MASK_BUFFER_OVERFLOW |
-	                     RTL8139_INTERRUPT_MASK_PACKET_UNDERRUN | RTL8139_INTERRUPT_MASK_RX_FIFO_OVERFLOW |
-	                     RTL8139_INTERRUPT_MASK_DESCRIPTOR_UNAVAILABLE | RTL8139_INTERRUPT_MASK_CABLE_LEN_CHANGE |
-	                     RTL8139_INTERRUPT_MASK_TIMEOUT | RTL8139_INTERRUPT_MASK_SYSTEM_ERROR);
+	write_register16(RTL8139_PORT_INTR_MASK, RTL8139_INTERRUPT_MASK_RX_OK | RTL8139_INTERRUPT_MASK_TX_OK);
 }
 
 void RTL8139::handle_rx()
 {
-	// while (!(read_register8(RTL8139_PORT_CHIP_CMD) & RTL8139_COMMAND_BUFFER_EMPTY)) {
-	RxPacket* received_packet = reinterpret_cast<RxPacket*>(m_rx_buffer + m_current_rx_pointer);
-	info() << "Status : " << received_packet->status;
+	while (!(read_register8(RTL8139_PORT_CHIP_CMD) & RTL8139_COMMAND_BUFFER_EMPTY)) {
 
-	if (is_packet_ok(received_packet->status) && received_packet->size) {
+		RxPacket* received_packet = reinterpret_cast<RxPacket*>(m_rx_buffer + m_current_rx_pointer);
+
+		info() << "---------------------------------------";
+		warn() << "Interrupt: Data has been received!";
+		info() << "Status : " << received_packet->status;
 		info() << "Size   : " << received_packet->size;
-		handle_received_ethernet_frame(BufferView{received_packet->data, received_packet->size});
-	} else {
-		info() << "Invalid Packet.";
-	}
 
-	if ((m_current_rx_pointer + received_packet->size + RTL8139_RX_PACKET_HEADER_SIZE) < MAX_RX_BUFFER_SIZE) {
-		m_current_rx_pointer =
-		    (received_packet->size + RTL8139_RX_PACKET_HEADER_SIZE + 3) & RTL8139_RX_READ_POINTER_MASK;
-	} else {
-		m_current_rx_pointer = 0; // FIXME: not sure about this.
-	}
+		if (is_packet_ok(received_packet->status) && received_packet->size) {
+			handle_received_ethernet_frame(BufferView{received_packet->data, received_packet->size});
+		} else {
+			info() << "Invalid Packet.";
+		}
 
-	write_register16(RTL8139_PORT_RX_BUF_PTR, m_current_rx_pointer - RTL8139_RX_PAD);
-	//}
+		m_current_rx_pointer = (m_current_rx_pointer + received_packet->size + RTL8139_RX_PACKET_HEADER_SIZE + 3) &
+		                       RTL8139_RX_READ_POINTER_MASK;
+
+		if (m_current_rx_pointer > MAX_RX_BUFFER_SIZE) {
+			m_current_rx_pointer -= MAX_RX_BUFFER_SIZE; // FIXME: not sure about this.
+		}
+		info() << "Pos: " << Hex(m_current_rx_pointer);
+		write_register16(RTL8139_PORT_RX_BUF_PTR, m_current_rx_pointer - RTL8139_RX_PAD);
+	}
 }
 
 void RTL8139::handle_tx()
@@ -101,17 +100,16 @@ void RTL8139::handle_tx()
 
 void RTL8139::rx_tx_handler()
 {
-	info() << "---------------------------------------";
 
 	u16 status = read_register16(RTL8139_PORT_INTR_STATUS);
-	warn() << "Network Interupt:";
-	info() << "ISR status : " << status;
+	// warn() << "Network Interupt:";
+	// info() << "ISR status : " << status;
 	if (status & RTL8139_INTERRUPT_STATUS_TX_OK) {
-		info() << "Interrupt: Data has been sent!";
+		// info() << "Interrupt: Data has been sent!";
 		handle_tx();
 	}
 	if (status & RTL8139_INTERRUPT_STATUS_RX_OK) {
-		info() << "Interrupt: Data has been received!";
+		// info() << "Interrupt: Data has been received!";
 		handle_rx();
 	}
 
