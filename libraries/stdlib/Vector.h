@@ -333,10 +333,11 @@ template <class T> template <class Predicate> bool Vector<T>::remove_if(Predicat
 	bool is_removed = false;
 	auto&& i = begin();
 	while (i != end()) {
-		auto iterator_copy = i++;
-		if (predicate(*iterator_copy)) {
-			erase(iterator_copy);
+		if (predicate(*i)) {
+			erase(i);
 			is_removed = true;
+		} else {
+			i++;
 		}
 	}
 	return is_removed;
