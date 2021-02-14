@@ -1,12 +1,12 @@
 #include "DHCP.h"
 #include <Endianess.h>
 
-DHCP::DHCP(const Network& network) : m_network{network} {}
+DHCP::DHCP(Network& network) : m_network{network} {}
 
 void DHCP::get_my_ip()
 {
 	Buffer dhcp_raw_segment = make_dhcp_segment(IPv4Address::Zero, DCHPMessageType::Discover);
-	UDP().send(IPv4Address::Broadcast, 67, dhcp_raw_segment);
+	m_network.udp_provider().send_with_special_port(IPv4Address::Broadcast, 67, 68, dhcp_raw_segment);
 }
 
 void DHCP::send_dhcp_discovery() {}
@@ -32,7 +32,7 @@ Buffer DHCP::make_dhcp_segment(const IPv4Address& requested_ip, DCHPMessageType 
 	// dhcp_segment.gateway_ip
 	// dhcp_segment.client_hardware_addr
 	// IPv4Address{10, 0, 2, 2}.copy(dhcp_segment.gateway_ip);
-	m_network.MAC().copy(dhcp_segment.client_hardware_addr);
+	m_network.device_mac().copy(dhcp_segment.client_hardware_addr);
 
 	dhcp_segment.magic_cookie = to_big_endian<u32>(0x63825363);
 
@@ -49,7 +49,7 @@ Buffer DHCP::make_dhcp_segment(const IPv4Address& requested_ip, DCHPMessageType 
 	client_id.code = OptionCodes::ClientIdentifier;
 	client_id.size = 7;
 	client_id.hardware_type = 1;
-	m_network.MAC().copy(client_id.hardware_id);
+	m_network.device_mac().copy(client_id.hardware_id);
 	dhcp_raw_segment.fill_by(client_id, options_offset);
 	options_offset += sizeof(client_id);
 

@@ -5,14 +5,14 @@ BufferView::BufferView(const Buffer& buff, size_t offset, size_t size) :
     m_data{buff.ptr() + offset},
     m_size{size == 0 ? (buff.size() - offset) : (size)}
 {
-	ASSERT((size + offset) < buff.size());
+	ASSERT((size + offset) <= buff.size());
 }
 
 BufferView::BufferView(const BufferView& other, size_t offset, size_t size) :
     m_data{other.m_data + offset},
     m_size{size == 0 ? (other.m_size - offset) : (size)}
 {
-	ASSERT((size + offset) < other.m_size);
+	ASSERT((size + offset) <= other.m_size);
 }
 
 BufferView::BufferView(const void* data, size_t size) : m_data{reinterpret_cast<const u8*>(data)}, m_size{size} {}

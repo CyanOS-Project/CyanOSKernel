@@ -1,17 +1,17 @@
 #pragma once
-#include "Network/Network.h"
 #include <BufferView.h>
 #include <IPv4Address.h>
 #include <Types.h>
 
+class Network;
 class ICMP
 {
 
   public:
-	ICMP(Network&);
+	ICMP(Network& network);
 
 	void send_echo_request(const IPv4Address& address);
-	void handle_icmp_reply();
+	void handle_icmp_reply(const IPv4Address& source_ip, const BufferView& data);
 
   private:
 	struct ICMPHeader {

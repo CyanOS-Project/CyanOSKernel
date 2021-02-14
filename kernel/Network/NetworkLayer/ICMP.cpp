@@ -1,4 +1,5 @@
 #include "ICMP.h"
+#include "Network/Network.h"
 #include <Buffer.h>
 #include <Endianess.h>
 
@@ -18,12 +19,12 @@ void ICMP::send_echo_request(const IPv4Address& address)
 
 	icmp_header.checksum = calculate_checksum(icmp_raw_packet);
 
-	IPv4::send_ip_packet(address, IPv4Protocols::ICMP, icmp_raw_packet);
+	m_network.ipv4_provider().send_ip_packet(address, IPv4Protocols::ICMP, icmp_raw_packet);
 }
 
-void ICMP::handle_icmp_reply()
+void ICMP::handle_icmp_reply(const IPv4Address& source_ip, const BufferView& data)
 {
-	// TODO
+	warn() << "ICMP packet received.";
 }
 
 u16 ICMP::calculate_checksum(const BufferView& data)

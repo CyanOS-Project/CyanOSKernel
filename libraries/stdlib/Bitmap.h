@@ -10,7 +10,8 @@
 	#include "Clib.h"
 	#include "Assert.h"
 #endif
-
+// TODO: Do bitmap with allocation.
+// TODO: implement find and set function.
 #define MAX_BITMAP_SIZE       24576
 #define CHECK_BIT(value, bit) ((value >> bit) & 1)
 #define BITMAP_NO_BITS_LEFT   0xFFFFFFFF

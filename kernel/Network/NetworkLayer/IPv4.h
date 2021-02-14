@@ -1,4 +1,6 @@
 #pragma once
+#include "Network/LinkLayer/NetworkAdapter.h"
+#include "Network/NetworkLayer/ARP.h"
 #include <Buffer.h>
 #include <BufferView.h>
 #include <IPv4Address.h>
@@ -10,12 +12,16 @@ enum class IPv4Protocols
 	TCP = 0x6,
 	UDP = 0x11,
 };
+
+class Network;
 class IPv4
 {
   public:
-	static void initialize();
-	static void send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const BufferView& data);
-	static IPv4Address IP();
+	IPv4(Network& network);
+	void send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const BufferView& data);
+	void handle_ip_packet(const BufferView& data);
+
+	IPv4Address IP();
 
   private:
 	struct IPv4Header {
@@ -35,13 +41,16 @@ class IPv4
 	static constexpr u8 IPv4_FLAGS_DONT_FRAGMENT = (1 << 1);
 	static constexpr u8 IPv4_FLAGS_MORE_FRAGMENTS = (1 << 2);
 
-	static IPv4Address device_ip_address;
-	static IPv4Address gateway_ip_address;
-	static IPv4Address subnet_mask;
+	IPv4Address device_ip_address{};
+	IPv4Address gateway_ip_address{};
+	IPv4Address subnet_mask{255, 255, 255, 255};
 
-	static void handle_ip_packet(const BufferView& data);
-	static const MACAddress& destination_mac_lookup(IPv4Address address);
-	static bool is_in_local_subnet(IPv4Address address);
-	static bool is_packet_ok(const IPv4Header& packet);
-	static u16 calculate_checksum(const BufferView& data);
+	const MACAddress& destination_mac_lookup(IPv4Address address);
+	bool is_in_local_subnet(IPv4Address address);
+	bool is_packet_ok(const IPv4Header& packet);
+	u16 calculate_checksum(const BufferView& data);
+
+	constexpr inline size_t header_length(u8 value) { return (value & 0xF) * sizeof(u32); }
+
+	Network& m_network;
 };

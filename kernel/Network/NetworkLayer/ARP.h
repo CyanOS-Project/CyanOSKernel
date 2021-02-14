@@ -1,16 +1,18 @@
 #pragma once
-#include "Network/LinkLayer/NetworkAdapter.h"
 #include "Tasking/SpinLock.h"
 #include "Tasking/WaitQueue.h"
 #include <Buffer.h>
 #include <Types.h>
 #include <Vector.h>
 
+class Network;
 class ARP
 {
 
   public:
-	static const MACAddress& mac_address_lookup(const IPv4Address& lookup_ip);
+	ARP(Network& network);
+	const MACAddress& mac_address_lookup(const IPv4Address& lookup_ip);
+	void handle_arp_packet(const BufferView& data);
 
   private:
 	enum class HardwareType
@@ -54,11 +56,12 @@ class ARP
 			return *this;
 		}
 	};
-	static Spinlock lock;
-	static Vector<ARPEntry> arp_table;
-	static void send_arp_request(const IPv4Address& lookup_ip);
-	static void answer_arp_request(const IPv4Address& dest_ip, const MACAddress& dest_mac);
-	static void add_arp_entry(const IPv4Address& ip, const MACAddress& mac);
-	static void handle_arp_packet(const BufferView& data);
-	friend NetworkAdapter;
+
+	Network& m_network;
+	Spinlock m_lock;
+	Vector<ARPEntry> m_arp_table;
+
+	void send_arp_request(const IPv4Address& lookup_ip);
+	void answer_arp_request(const IPv4Address& dest_ip, const MACAddress& dest_mac);
+	void add_arp_entry(const IPv4Address& ip, const MACAddress& mac);
 };

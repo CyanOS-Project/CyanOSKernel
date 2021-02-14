@@ -1,15 +1,15 @@
 #include "IPv4.h"
 #include "ARP.h"
 #include "Network/LinkLayer/NetworkAdapter.h"
+#include "Network/Network.h"
+#include "Network/NetworkLayer/ICMP.h"
+#include "Network/TransportLayer/TCP.h"
+#include "Network/TransportLayer/UDP.h"
 #include <Algorithms.h>
 #include <Buffer.h>
 #include <Endianess.h>
 
-IPv4Address IPv4::device_ip_address{};
-IPv4Address IPv4::gateway_ip_address{};
-IPv4Address IPv4::subnet_mask{255, 255, 255, 255};
-
-void IPv4::initialize()
+IPv4::IPv4(Network& network) : m_network{network}
 {
 	// FIXME: Get an IP address using DHCP.
 }
@@ -35,33 +35,40 @@ void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const
 
 	auto& destination_mac = destination_mac_lookup(destination);
 
-	NetworkAdapter::default_network_adapter->send_frame(ProtocolType::IPv4, destination_mac, ip_raw_packet);
+	m_network.network_adapter().send_frame(ProtocolType::IPv4, destination_mac, ip_raw_packet);
 }
 
 void IPv4::handle_ip_packet(const BufferView& data)
 {
+	warn() << "IPv4 Packet received.";
+
 	auto& ip_packet = data.const_convert_to<IPv4Header>();
 
 	if (!is_packet_ok(ip_packet)) {
 		return;
 	}
 
-	// Note: some packets have the optional fields so you have to calculate data field position right.
+	size_t header_len = header_length(ip_packet.version_length);
+	BufferView extracted_data{data, header_len, data.size() - header_len};
 
 	switch (static_cast<IPv4Protocols>(ip_packet.protocol)) {
 		case IPv4Protocols::ICMP: {
+			m_network.icmp_provider().handle_icmp_reply(IPv4Address{ip_packet.src_ip}, extracted_data);
 			break;
 		}
 
 		case IPv4Protocols::TCP: {
+			m_network.tcp_provider().handle(IPv4Address{ip_packet.src_ip}, extracted_data);
 			break;
 		}
 
 		case IPv4Protocols::UDP: {
+			m_network.udp_provider().handle(IPv4Address{ip_packet.src_ip}, extracted_data);
 			break;
 		}
 
 		default:
+			warn() << "Unknown IPv4 packet.";
 			break;
 	}
 }
@@ -71,9 +78,9 @@ const MACAddress& IPv4::destination_mac_lookup(IPv4Address address)
 	if (address == IPv4Address::Broadcast) {
 		return MACAddress::Broadcast;
 	} else if (is_in_local_subnet(address)) {
-		return ARP::mac_address_lookup(address);
+		return m_network.arp_provider().mac_address_lookup(address);
 	} else {
-		return ARP::mac_address_lookup(gateway_ip_address);
+		return m_network.arp_provider().mac_address_lookup(gateway_ip_address);
 	}
 }
 

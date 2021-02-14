@@ -6,7 +6,7 @@ class DHCP
 {
 
   public:
-	DHCP(const Network& network);
+	DHCP(Network& network);
 	void get_my_ip();
 
   private:
@@ -112,5 +112,5 @@ class DHCP
 	};
 	Buffer make_dhcp_segment(const IPv4Address& requested_ip, DCHPMessageType type);
 
-	const Network& m_network;
+	Network& m_network;
 };
