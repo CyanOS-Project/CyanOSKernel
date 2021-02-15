@@ -4,7 +4,7 @@
 #include <Bitmap.h>
 #include <Types.h>
 
-const static uint32_t MAGIC = 0x8CBEEFC8;
+const static u32 MAGIC = 0x8CBEEFC8;
 
 template <size_t size = 1> struct MemoryBlock {
 	void* slab_ptr;
@@ -16,8 +16,8 @@ template <size_t slab_size, size_t memory_size> class Slab
 {
   private:
 	template <size_t max_blocks> struct SlabHeader {
-		uint32_t magic;
-		uint32_t size;
+		u32 magic;
+		u32 size;
 		size_t free_blocks;
 		size_t next_fit_block;
 		Slab<slab_size, memory_size>*prev, *next;
@@ -41,19 +41,25 @@ template <size_t slab_size, size_t memory_size> class Slab
 	MemoryBlock<slab_size> blocks[MAX_BLOCKS];
 
 	void init(Slab* prev = nullptr);
+	Slab();
 	void* alloc();
 	void free(void* address);
 };
 
 inline void* request_memory_from_os(size_t size)
 {
-	void* address = valloc(size, PAGE_READWRITE);
+	void* address = valloc(0, size, PAGE_READWRITE);
 	return address;
 }
 
 inline void free_memory_to_os(void* addrss, size_t size)
 {
 	vfree(addrss, size, 0);
+}
+
+template <size_t slab_size, size_t memory_size> Slab<slab_size, memory_size>::Slab()
+{
+	init();
 }
 
 template <size_t slab_size, size_t memory_size> void Slab<slab_size, memory_size>::init(Slab* prev)
@@ -148,7 +154,7 @@ void Slab<slab_size, memory_size>::free_from_current_slab(size_t block_index)
 }
 
 struct BigSlab {
-	uint32_t magic;
+	u32 magic;
 	MemoryBlock<> block;
 };
 

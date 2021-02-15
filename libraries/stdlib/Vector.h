@@ -67,33 +67,38 @@ template <class T> class Vector
 	Vector& operator=(Vector&&);
 	~Vector();
 
-	Iterator begin() const;
-	Iterator end() const;
-	ConstIterator cbegin() const;
-	ConstIterator cend() const;
+	Iterator begin();
+	Iterator end();
 	template <typename... U> T& emplace_back(U&&... u);
 	template <typename... U> T& emplace_front(U&&... u);
 	template <typename... U> T& emplace(Iterator node, U&&... u);
 	template <typename U> T& insert(Iterator node, U&& new_node);
 	template <typename U> T& push_back(U&& new_data);
 	template <typename U> T& push_front(U&& new_data);
+	void reserve(size_t size);
 	void pop_back();
 	void pop_front();
 	void erase(Iterator);
-	void reserve(size_t size);
-	template <class Predicate> bool remove_if(Predicate predicate);
-	template <class Predicate> bool contains(Predicate predicate);
 	void clear();
+	template <class Predicate> bool remove_if(Predicate predicate);
+	Iterator find(const T& element);
+	template <class Predicate> Iterator find_if(Predicate predicate);
 	void splice(Vector<T>& destination_list, Iterator from, Iterator to);
+	T& head();
+	T& tail();
+	T& operator[](size_t index);
+
+	ConstIterator cbegin() const;
+	ConstIterator cend() const;
+	ConstIterator find(const T& element) const;
+	template <class Predicate> ConstIterator find_if(Predicate predicate) const;
+	template <class Predicate> bool contains(Predicate predicate) const;
 	bool is_empty() const;
 	size_t size() const;
 	size_t capacity() const;
 	const T& head() const;
 	const T& tail() const;
 	const T& operator[](size_t index) const;
-	T& head();
-	T& tail();
-	T& operator[](size_t index);
 };
 
 template <class T>
@@ -226,8 +231,8 @@ template <class T> void Vector<T>::make_free_spot(size_t free_spot_index)
 {
 	for (size_t i = m_count; i >= free_spot_index + 1; i--) {
 		m_storage[i] = move(m_storage[i - 1]);
+		m_storage[i - 1].~T();
 	}
-	m_storage[free_spot_index].~T();
 }
 
 template <class T> void Vector<T>::destruct_used_objects()
@@ -267,12 +272,12 @@ template <class T> typename Vector<T>::ConstIterator Vector<T>::cend() const
 	return ConstIterator(m_storage, m_count);
 }
 
-template <class T> typename Vector<T>::Iterator Vector<T>::begin() const
+template <class T> typename Vector<T>::Iterator Vector<T>::begin()
 {
 	return Iterator(m_storage, 0);
 }
 
-template <class T> typename Vector<T>::Iterator Vector<T>::end() const
+template <class T> typename Vector<T>::Iterator Vector<T>::end()
 {
 	return Iterator(m_storage, m_count);
 }
@@ -328,23 +333,61 @@ template <class T> template <class Predicate> bool Vector<T>::remove_if(Predicat
 	bool is_removed = false;
 	auto&& i = begin();
 	while (i != end()) {
-		auto iterator_copy = i++;
-		if (predicate(*iterator_copy)) {
-			erase(iterator_copy);
+		if (predicate(*i)) {
+			erase(i);
 			is_removed = true;
+		} else {
+			i++;
 		}
 	}
 	return is_removed;
 }
 
-template <class T> template <class Predicate> bool Vector<T>::contains(Predicate predicate)
+template <class T> typename Vector<T>::Iterator Vector<T>::find(const T& element)
 {
-	for (auto&& i : *this) {
-		if (predicate(i)) {
-			return true;
+	for (auto&& i = begin(); i != end(); i++) {
+		if (element == *i) {
+			return i;
 		}
 	}
-	return false;
+	return end();
+}
+
+template <class T> template <class Predicate> typename Vector<T>::Iterator Vector<T>::find_if(Predicate predicate)
+{
+	for (auto&& i = begin(); i != end(); i++) {
+		if (predicate(*i)) {
+			return i;
+		}
+	}
+	return end();
+}
+
+template <class T> typename Vector<T>::ConstIterator Vector<T>::find(const T& element) const
+{
+	for (auto&& i = cbegin(); i != cend(); i++) {
+		if (element == *i) {
+			return i;
+		}
+	}
+	return end();
+}
+
+template <class T>
+template <class Predicate>
+typename Vector<T>::ConstIterator Vector<T>::find_if(Predicate predicate) const
+{
+	for (auto&& i = cbegin(); i != cend(); i++) {
+		if (predicate(*i)) {
+			return i;
+		}
+	}
+	return cend();
+}
+
+template <class T> template <class Predicate> bool Vector<T>::contains(Predicate predicate) const
+{
+	return find_if(predicate) != cend();
 }
 
 template <class T> void Vector<T>::pop_back()

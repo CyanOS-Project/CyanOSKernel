@@ -1,10 +1,14 @@
 #pragma once
 
+#include <Rule5.h>
 #include <Types.h>
 
 class StaticSpinlock
 {
   public:
+	NON_COPYABLE(StaticSpinlock)
+	NON_MOVABLE(StaticSpinlock)
+
 	void init();
 	void acquire();
 	void release();
@@ -12,6 +16,6 @@ class StaticSpinlock
 	~StaticSpinlock() = default;
 
   private:
-	uint32_t m_value;
-	uint32_t m_eflags;
+	u32 m_value;
+	u32 m_eflags;
 };

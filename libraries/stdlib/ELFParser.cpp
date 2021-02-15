@@ -61,7 +61,7 @@ const elf32_shdr& ELFParser::section_header_by_name(StringView name) const
 	return m_section_headers_array[SHN_UNDEF];
 }
 
-const elf32_shdr& ELFParser::section_header_by_type(uint32_t type) const
+const elf32_shdr& ELFParser::section_header_by_type(u32 type) const
 {
 	for (size_t i = 0; i < m_sections_number; i++) {
 		auto& section = section_header_by_index(i);

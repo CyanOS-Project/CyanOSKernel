@@ -10,7 +10,8 @@
 	#include "Clib.h"
 	#include "Assert.h"
 #endif
-
+// TODO: Do bitmap with allocation.
+// TODO: implement find and set function.
 #define MAX_BITMAP_SIZE       24576
 #define CHECK_BIT(value, bit) ((value >> bit) & 1)
 #define BITMAP_NO_BITS_LEFT   0xFFFFFFFF
@@ -57,7 +58,7 @@ template <size_t bitmap_size> void Bitmap<bitmap_size>::set_range(size_t positio
 		return;
 	}
 
-	uint32_t current_position = position;
+	u32 current_position = position;
 	for (size_t i = 0; i < count; i++) {
 		m_bitmap_data[current_position / 8] |= (1 << (current_position % 8));
 		current_position++;
@@ -75,7 +76,7 @@ template <size_t bitmap_size> void Bitmap<bitmap_size>::clear_range(size_t posit
 		return;
 	}
 
-	uint32_t current_position = position;
+	u32 current_position = position;
 	for (size_t i = 0; i < count; i++) {
 		m_bitmap_data[current_position / 8] &= ~(1 << (current_position % 8));
 		current_position++;

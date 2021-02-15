@@ -4,35 +4,39 @@
 #include "Isr.h"
 #include <Types.h>
 
-enum class ContextType { Kernel, User };
+enum class ContextType
+{
+	Kernel,
+	User
+};
 struct ContextInformation {
 	void* stack;
-	uint32_t stack_size;
-	uint32_t start_function;
-	uint32_t return_function;
-	uint32_t argument;
+	u32 stack_size;
+	u32 start_function;
+	u32 return_function;
+	u32 argument;
 };
 
 class Context
 {
   public:
-	static uint32_t setup_task_stack_context(ContextType type, ContextInformation& info);
-	static void switch_task_stack(uint32_t task_stack_start, uint32_t pib, uint32_t tib);
+	static u32 setup_task_stack_context(ContextType type, ContextInformation& info);
+	static void switch_task_stack(u32 task_stack_start, u32 pib, u32 tib);
 	static void enter_usermode(uintptr_t thread_address, uintptr_t thread_stack);
 	static void set_fs_segment(uintptr_t address);
 	static void set_gs_segment(uintptr_t address);
 
-	static void set_return_value(ISRContextFrame& frame, uint32_t value);
-	static void set_return_arg1(ISRContextFrame& frame, uint32_t value);
-	static void set_return_arg2(ISRContextFrame& frame, uint32_t value);
-	static void set_return_arg3(ISRContextFrame& frame, uint32_t value);
+	static void set_return_value(ISRContextFrame& frame, u32 value);
+	static void set_return_arg1(ISRContextFrame& frame, u32 value);
+	static void set_return_arg2(ISRContextFrame& frame, u32 value);
+	static void set_return_arg3(ISRContextFrame& frame, u32 value);
 
-	static uint32_t syscall_num(ISRContextFrame& frame);
-	static uint32_t syscall_param1(ISRContextFrame& frame);
-	static uint32_t syscall_param2(ISRContextFrame& frame);
-	static uint32_t syscall_param3(ISRContextFrame& frame);
-	static uint32_t syscall_param4(ISRContextFrame& frame);
-	static uint32_t syscall_param5(ISRContextFrame& frame);
+	static u32 syscall_num(ISRContextFrame& frame);
+	static u32 syscall_param1(ISRContextFrame& frame);
+	static u32 syscall_param2(ISRContextFrame& frame);
+	static u32 syscall_param3(ISRContextFrame& frame);
+	static u32 syscall_param4(ISRContextFrame& frame);
+	static u32 syscall_param5(ISRContextFrame& frame);
 
   private:
 	struct InitialTaskContext {
@@ -40,5 +44,5 @@ class Context
 		uintptr_t return_address;
 		uintptr_t argument;
 	};
-	static const uint32_t EFLAGS_IF_ENABLE = 0x202;
+	static const u32 EFLAGS_IF_ENABLE = 0x202;
 };

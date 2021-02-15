@@ -14,7 +14,7 @@ Spinlock Scheduler::lock;
 
 void Scheduler::setup()
 {
-	ISR::register_isr_handler(schedule_handler, SCHEDULE_IRQ);
+	ISR::register_software_interrupt_handler(schedule_handler, SCHEDULE_IRQ);
 	SystemCall::setup();
 }
 

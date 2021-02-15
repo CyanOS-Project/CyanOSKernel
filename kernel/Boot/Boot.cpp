@@ -12,14 +12,14 @@ __attribute__((section(".multiboot2"))) static const volatile Mutiboot2_Header m
     .address = {.type = MULTIBOOT_HEADER_TAG_ADDRESS,
                 .flags = 0,
                 .size = sizeof(multiboot_header_tag_address),
-                .header_addr = VIR_TO_PHY((uint32_t)&my_multiboot2_header),
+                .header_addr = VIR_TO_PHY((u32)&my_multiboot2_header),
                 .load_addr = unsigned(-1),
                 .load_end_addr = 0,
-                .bss_end_addr = VIR_TO_PHY(uint32_t(&KERNEL_END))},
+                .bss_end_addr = VIR_TO_PHY(u32(&KERNEL_END))},
     .entry = {.type = MULTIBOOT_HEADER_TAG_ENTRY_ADDRESS,
               .flags = 0,
               .size = sizeof(multiboot_header_tag_entry_address),
-              .entry_addr = VIR_TO_PHY((uint32_t)&_kernel_boot_stage1)},
+              .entry_addr = VIR_TO_PHY((u32)&_kernel_boot_stage1)},
     .mod_align = {.type = MULTIBOOT_HEADER_TAG_MODULE_ALIGN,
                   .flags = 0,
                   .size = sizeof(multiboot_header_tag_module_align)},
@@ -35,7 +35,7 @@ const char* mmap_entry_type_text[] = {"UNKNOWN"           //
                                       "NVS",              //
                                       "BAD_RAM"};
 
-extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_info)
+extern "C" void kernel_boot_stage2(u32 magic, multiboot_tag_start* boot_info)
 {
 	if (magic != MULTIBOOT2_BOOTLOADER_MAGIC)
 		HLT();
@@ -59,7 +59,7 @@ extern "C" void kernel_boot_stage2(uint32_t magic, multiboot_tag_start* boot_inf
 	bootloader_info.ramdisk.start = Memory::map(uintptr_t(ramdisk_module.start), ramdisk_module.size, PAGE_READWRITE);
 	bootloader_info.ramdisk.size = ramdisk_module.size;
 
-	uintptr_t new_stack = uintptr_t(valloc(STACK_SIZE, PAGE_READWRITE));
+	uintptr_t new_stack = uintptr_t(valloc(0, STACK_SIZE, PAGE_READWRITE));
 	SET_STACK(new_stack + STACK_SIZE);
 	CALL(kernel_init, &bootloader_info)
 
@@ -110,7 +110,7 @@ void parse_mbi(multiboot_tag_start* multiboot_info)
 				size_t i = 0;
 				info() << "Memory Map:";
 				while (tag2->entries[i].type != 0) {
-					info() << "\tAddr: " << Hex(tag2->entries[i].addr) << " Size: " << Hex(tag2->entries[i].len)
+					info() << "\tAddr: " << Hex64(tag2->entries[i].addr) << " Size: " << Hex64(tag2->entries[i].len)
 					       << " Type: " << mmap_entry_type_text[tag2->entries[i].type];
 					i++;
 				}

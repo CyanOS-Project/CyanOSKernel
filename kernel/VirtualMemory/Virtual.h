@@ -10,8 +10,8 @@
 class VirtualMemory
 {
   public:
-	static uintptr_t find_pages(uint32_t start_address, uint32_t end_address, uint32_t pages_num);
+	static uintptr_t find_pages(u32 start_address, u32 end_address, u32 pages_num);
 	static uintptr_t create_page_table();
-	static bool check_free_pages(uint32_t start_address, uint32_t pages_num);
-	static void map_pages(uintptr_t virtual_address, uintptr_t physical_address, uint32_t pages, uint32_t flags);
+	static bool check_free_pages(u32 start_address, u32 pages_num);
+	static void map_pages(uintptr_t virtual_address, uintptr_t physical_address, u32 pages, u32 flags);
 };

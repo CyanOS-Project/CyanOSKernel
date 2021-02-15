@@ -29,7 +29,7 @@ unsigned SystemCall::syscalls_count = sizeof(systemcalls_routines) / sizeof(gene
 
 void SystemCall::setup()
 {
-	ISR::register_isr_handler(systemcall_handler, SYSCALL_IRQ);
+	ISR::register_software_interrupt_handler(systemcall_handler, SYSCALL_IRQ);
 }
 
 generic_syscall SystemCall::get_syscall_routine(unsigned syscall_num)
@@ -239,7 +239,7 @@ Result<int> VirtualAlloc(void* address, size_t size, int flags)
 	if (address) {
 		ret_address = valloc(address, size, flags | PAGE_USER);
 	} else {
-		ret_address = valloc(size, flags | PAGE_USER);
+		ret_address = valloc(0, size, flags | PAGE_USER);
 	}
 	return reinterpret_cast<int>(ret_address);
 }

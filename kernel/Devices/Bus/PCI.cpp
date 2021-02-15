@@ -1,10 +1,12 @@
 #include "PCI.h"
 #include "Arch/x86/Asm.h"
 #include "Devices/DebugPort/Logger.h"
+#include "Devices/Ethernet/RTL8139.h"
+#include "Network/Network.h"
 #include "PCIDevice.h"
 #include "PCIIdentification.h"
 
-void PCI::scan_function(Function<void(PCIDevice&)>& callback, uint8_t bus, uint8_t slot, uint8_t function)
+void PCI::scan_function(Function<void(PCIDevice&)>& callback, u8 bus, u8 slot, u8 function)
 {
 	PCIDevice function_device{bus, slot, function};
 	if (function_device.does_exist()) {
@@ -15,7 +17,7 @@ void PCI::scan_function(Function<void(PCIDevice&)>& callback, uint8_t bus, uint8
 	}
 }
 
-void PCI::scan_slot(Function<void(PCIDevice&)>& callback, uint8_t bus, uint8_t slot)
+void PCI::scan_slot(Function<void(PCIDevice&)>& callback, u8 bus, u8 slot)
 {
 	PCIDevice slot_device{bus, slot, 0};
 
@@ -29,7 +31,7 @@ void PCI::scan_slot(Function<void(PCIDevice&)>& callback, uint8_t bus, uint8_t s
 	}
 }
 
-void PCI::scan_bus(Function<void(PCIDevice&)>& callback, uint8_t bus)
+void PCI::scan_bus(Function<void(PCIDevice&)>& callback, u8 bus)
 {
 	for (size_t slot = 0; slot < 32; slot++) {
 		scan_slot(callback, bus, slot);
@@ -52,14 +54,22 @@ void PCI::scan_pci(Function<void(PCIDevice&)> callback)
 void PCI::enumerate_pci_devices()
 {
 	scan_pci([](PCIDevice& device) {
-		info() << "----------------------------------------------------";
-		info() << "Class: " << PCI_id_to_string(device.device_class(), device.device_subclass());
-		info() << "Vendor: " << PCI_vendor_to_string(device.vendor_id());
-		info() << "Device: " << PCI_device_id_to_string(device.vendor_id(), device.device_id());
-		info() << "Bus Number     : " << Hex(device.bus());
-		info() << "Slot Number    : " << Hex(device.slot());
-		info() << "Function Number: " << Hex(device.function());
-		info() << "PCI_COMMAND    : " << Hex(device.command());
-		info() << "PCI_STATUS     : " << Hex(device.status());
+		if (device.vendor_id() == RTL8139::RTL8139_VENDOR_ID && device.device_id() == RTL8139::RTL8139_DEVICE_ID) {
+			info() << "----------------------------------------------------";
+			info() << "Class: " << PCI_id_to_string(device.device_class(), device.device_subclass());
+			info() << "Vendor: " << PCI_vendor_to_string(device.vendor_id());
+			info() << "Device: " << PCI_device_id_to_string(device.vendor_id(), device.device_id());
+			info() << "Vendor ID: " << Hex(device.vendor_id());
+			info() << "Device ID: " << Hex(device.device_id());
+			info() << "Bus Number     : " << Hex(device.bus());
+			info() << "Slot Number    : " << Hex(device.slot());
+			info() << "Function Number: " << Hex(device.function());
+			info() << "PCI_COMMAND    : " << Hex(device.command());
+			info() << "PCI_STATUS     : " << Hex(device.status());
+			// Thread::sleep(10000);
+			auto* eth0 = new RTL8139{GenericPCIDevice{device}};
+			NetworkAdapter::default_network_adapter = eth0;
+			new Network{*eth0};
+		}
 	});
 }

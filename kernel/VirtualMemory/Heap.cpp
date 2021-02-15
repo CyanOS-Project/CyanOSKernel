@@ -1,11 +1,11 @@
 #include "Heap.h"
 #include "Arch/x86/Panic.h"
 
-Slab<0x010, PAGE_SIZE> Heap::slab_0x10;
-Slab<0x020, PAGE_SIZE> Heap::slab_0x20;
-Slab<0x040, PAGE_SIZE> Heap::slab_0x40;
-Slab<0x080, PAGE_SIZE> Heap::slab_0x80;
-Slab<0x100, PAGE_SIZE> Heap::slab_0x100;
+Slab<0x010, PAGE_SIZE> Heap::slab_0x10 __attribute__((init_priority(101))){};
+Slab<0x020, PAGE_SIZE> Heap::slab_0x20 __attribute__((init_priority(101))){};
+Slab<0x040, PAGE_SIZE> Heap::slab_0x40 __attribute__((init_priority(101))){};
+Slab<0x080, PAGE_SIZE> Heap::slab_0x80 __attribute__((init_priority(101))){};
+Slab<0x100, PAGE_SIZE> Heap::slab_0x100 __attribute__((init_priority(101)));
 // Slab<0x200, PAGE_SIZE> Heap::slab_0x200;
 // Slab<0x300, PAGE_SIZE> Heap::slab_0x300;
 

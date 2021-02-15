@@ -61,7 +61,7 @@ void Console::initiate_console()
 {
 	m_hPosition = 0;
 	m_vPosition = 0;
-	m_video_ram = (uint16_t*)Memory::map(VGATEXTMODE_BUFFER, 0x1000, PAGE_READWRITE);
+	m_video_ram = (u16*)Memory::map(VGATEXTMODE_BUFFER, 0x1000, PAGE_READWRITE);
 	if (!m_video_ram)
 		PANIC("Cannot map text mode memory");
 
@@ -71,7 +71,7 @@ void Console::initiate_console()
 void Console::set_mode(TerminalMode Mode)
 {
 	UNUSED(Mode);
-	m_video_ram = (uint16_t*)VGATEXTMODE_BUFFER;
+	m_video_ram = (u16*)VGATEXTMODE_BUFFER;
 }
 
 uint8_t Console::vga_entry_color(VGAColor fg, VGAColor bg)
@@ -79,9 +79,9 @@ uint8_t Console::vga_entry_color(VGAColor fg, VGAColor bg)
 	return fg | bg << 4;
 }
 
-uint16_t Console::vga_entry(unsigned char uc, uint8_t color)
+u16 Console::vga_entry(unsigned char uc, uint8_t color)
 {
-	return (uint16_t)uc | (uint16_t)color << 8;
+	return (u16)uc | (u16)color << 8;
 }
 
 void Console::page_up()

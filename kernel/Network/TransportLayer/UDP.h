@@ -1,0 +1,52 @@
+#pragma once
+
+#include "Tasking/WaitQueue.h"
+#include <Bitmap.h>
+#include <BufferView.h>
+#include <IPv4Address.h>
+#include <Types.h>
+#include <Vector.h>
+
+class Network;
+class UDP
+{
+
+  public:
+	struct ConnectionInformation {
+		u16 src_port;
+		IPv4Address src_ip;
+		size_t data_size;
+	};
+
+	UDP(Network&);
+	void send(const IPv4Address& dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
+	ConnectionInformation receive(u16 dest_port, Buffer& buffer);
+	void handle(const IPv4Address& src_ip, const BufferView& data);
+
+  protected:
+	void send_segment(const IPv4Address& dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
+
+  private:
+	struct UDPHeader {
+		u16 source_port;
+		u16 destination_port;
+		u16 total_length;
+		u16 checksum;
+	} __attribute__((packed));
+
+	u16 calculate_checksum(const BufferView& data);
+
+	struct Connection {
+		u16 dest_port;
+		u16 src_port;
+		IPv4Address src_ip;
+		Buffer* buffer;
+		size_t data_size;
+		WaitQueue wait_queue;
+		Connection(u16 t_port, Buffer& t_buffer) : dest_port{t_port}, buffer{&t_buffer}, wait_queue{} {}
+	};
+
+	Spinlock m_lock;
+	Network& m_network;
+	Vector<Connection> m_connections_list;
+};

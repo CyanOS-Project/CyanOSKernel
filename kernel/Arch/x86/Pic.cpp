@@ -19,23 +19,24 @@ void PIC::setup()
 	out8(PIC2_DATA, 0xFF); //	Disable all IRs.
 }
 
-void PIC::enable_irq(uint8_t irq)
+void PIC::enable_irq(uint8_t interrupt_line)
 {
 	uint8_t pic_mask;
-	if (irq < 8) { // PIC1
+	if (interrupt_line < 8) { // PIC1
 		pic_mask = in8(PIC1_DATA);
-		out8(PIC1_DATA, pic_mask & ~(1 << irq));
+		out8(PIC1_DATA, pic_mask & ~(1 << interrupt_line));
 	} else { // PIC2
 		pic_mask = in8(PIC2_DATA);
-		out8(PIC2_DATA, pic_mask & ~(1 << (irq - 8)));
+		out8(PIC2_DATA, pic_mask & ~(1 << (interrupt_line - 8)));
 	}
 }
 
 void PIC::acknowledge_pic(uint8_t irq)
 {
-	if (irq < 8) { // PIC1
+	if (irq < (PIC1_IDT_OFFSET + 8)) { // PIC1
 		out8(PIC1_COMMAND, PIC_EOI);
 	} else { // PIC2
+		out8(PIC1_COMMAND, PIC_EOI);
 		out8(PIC2_COMMAND, PIC_EOI);
 	}
 }

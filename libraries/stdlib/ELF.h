@@ -4,13 +4,13 @@
 
 #include "Types.h"
 
-typedef uint16_t Elf32_Half; // Unsigned half int
-typedef uint32_t Elf32_Off;  // Unsigned offset
-typedef uint32_t Elf32_Addr; // Unsigned address
-typedef uint32_t Elf32_Word; // Unsigned int
+typedef u16 Elf32_Half;      // Unsigned half int
+typedef u32 Elf32_Off;       // Unsigned offset
+typedef u32 Elf32_Addr;      // Unsigned address
+typedef u32 Elf32_Word;      // Unsigned int
 typedef int32_t Elf32_Sword; // Signed int
 
-typedef uint32_t Elf64_Half; // Unsigned half int
+typedef u32 Elf64_Half;      // Unsigned half int
 typedef uint64_t Elf64_Off;  // Unsigned offset
 typedef uint64_t Elf64_Addr; // Unsigned address
 typedef uint64_t Elf64_Word; // Unsigned int
