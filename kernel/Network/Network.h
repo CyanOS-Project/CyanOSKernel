@@ -25,9 +25,9 @@ class Network
 
   private:
 	NetworkAdapter& m_network_adapter;
-	IPv4 m_ipv4;
-	ARP m_arp;
-	ICMP m_icmp;
 	UDP m_udp;
 	TCP m_tcp;
+	ICMP m_icmp;
+	ARP m_arp;
+	IPv4 m_ipv4;
 };

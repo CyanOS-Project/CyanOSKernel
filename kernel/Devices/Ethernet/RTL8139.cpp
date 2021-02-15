@@ -70,15 +70,10 @@ void RTL8139::handle_rx()
 
 		RxPacket* received_packet = reinterpret_cast<RxPacket*>(m_rx_buffer + m_current_rx_pointer);
 
-		info() << "---------------------------------------";
-		warn() << "Interrupt: Data has been received!";
-		info() << "Status : " << received_packet->status;
-		info() << "Size   : " << received_packet->size;
-
 		if (is_packet_ok(received_packet->status) && received_packet->size) {
-			handle_received_ethernet_frame(BufferView{received_packet->data, received_packet->size});
+			handle_received_ethernet_frame(BufferView{received_packet->data, received_packet->size - 4});
 		} else {
-			info() << "Invalid Packet.";
+			err() << "Invalid Packet.";
 		}
 
 		m_current_rx_pointer = (m_current_rx_pointer + received_packet->size + RTL8139_RX_PACKET_HEADER_SIZE + 3) &
@@ -124,7 +119,6 @@ void RTL8139::send_ethernet_frame(const BufferView& data)
 
 	data.copy_to(m_tx_buffers[m_current_tx_buffer], 0, data.size());
 
-	info() << "Sending frame with size: " << data.size();
 	write_register32(TSD_array[m_current_tx_buffer], data.size());
 	// FIXME: acquire locks for descriptors here.
 	while (!(read_register32(TSD_array[m_current_tx_buffer]) & RTL8139_TX_STATUS_TOK)) {

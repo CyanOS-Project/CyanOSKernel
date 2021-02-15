@@ -382,7 +382,7 @@ typename Vector<T>::ConstIterator Vector<T>::find_if(Predicate predicate) const
 			return i;
 		}
 	}
-	return end();
+	return cend();
 }
 
 template <class T> template <class Predicate> bool Vector<T>::contains(Predicate predicate) const

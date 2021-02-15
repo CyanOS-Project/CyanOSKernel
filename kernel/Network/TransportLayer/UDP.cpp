@@ -9,37 +9,29 @@
 // TODO: refactor network structures so one function will handle convertions to/from big endian.
 UDP::UDP(Network& network) : m_network{network} {}
 
-void UDP::send(const IPv4Address& dest_ip, u16 dest_port, const BufferView& data)
+void UDP::send(const IPv4Address& dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
 {
-	ScopedLock local_lock{m_lock};
-
-	u16 source_port = m_available_ports_bitmap.find_first_clear();
-	m_available_ports_bitmap.set(source_port);
-	auto& connection = m_connections_list.emplace_back(source_port);
-
-	send_segment(dest_ip, dest_port, source_port, data);
-
-	connection.wait_queue.wait(local_lock);
-
-	m_available_ports_bitmap.clear(source_port);
-	m_connections_list.remove_if([&connection](const Connection& i) { return connection.port == i.port; });
+	send_segment(dest_ip, dest_port, src_port, data);
 }
 
-void UDP::send_with_special_port(const IPv4Address& dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
+UDP::ConnectionInformation UDP::receive(u16 dest_port, Buffer& buffer)
 {
 	ScopedLock local_lock{m_lock};
 
-	ASSERT(m_available_ports_bitmap.check_clear(src_port));
+	ASSERT(!m_connections_list.contains([dest_port](const Connection& i) { return dest_port == i.dest_port; }));
 
-	m_available_ports_bitmap.set(src_port);
-	auto& connection = m_connections_list.emplace_back(src_port);
-
-	send_segment(dest_ip, dest_port, src_port, data);
+	auto& connection = m_connections_list.emplace_back(dest_port, buffer);
 
 	connection.wait_queue.wait(local_lock);
 
-	m_available_ports_bitmap.clear(src_port);
-	m_connections_list.remove_if([&connection](const Connection& i) { return connection.port == i.port; });
+	ConnectionInformation connection_info;
+	connection_info.data_size = connection.data_size;
+	connection_info.src_port = connection.src_port;
+	connection_info.src_ip = connection.src_ip;
+
+	m_connections_list.remove_if([&connection](const Connection& i) { return connection.dest_port == i.dest_port; });
+
+	return connection_info;
 }
 
 void UDP::handle(const IPv4Address& src_ip, const BufferView& data)
@@ -52,11 +44,17 @@ void UDP::handle(const IPv4Address& src_ip, const BufferView& data)
 
 	u16 dest_port = to_big_endian<u16>(udp_segment.destination_port);
 	auto connection = m_connections_list.find_if([dest_port](const Connection& connection) {
-		return connection.port == dest_port;
-		info() << connection.port;
+		return connection.dest_port == dest_port;
+		info() << connection.dest_port;
 	});
 
 	if (connection != m_connections_list.end()) {
+		connection->src_port = to_big_endian<u16>(udp_segment.source_port);
+		connection->src_ip = src_ip;
+		connection->data_size = data.size() - sizeof(UDPHeader);
+		// FIXME: check if it fits first;
+		connection->buffer->fill_from(data.ptr() + sizeof(UDPHeader), 0, data.size() - sizeof(UDPHeader));
+
 		connection->wait_queue.wake_up_all();
 	} else {
 		err() << "Received UDP packet with no known source port.";

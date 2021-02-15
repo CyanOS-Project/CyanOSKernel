@@ -7,6 +7,7 @@ class IPv4Address
   public:
 	IPv4Address() = default;
 	IPv4Address(const u8* ip);
+	IPv4Address(u32 ip);
 	IPv4Address(u8 ip0, u8 ip1, u8 ip2, u8 ip3);
 	IPv4Address(const IPv4Address& ip);
 	IPv4Address& operator=(const IPv4Address& ip);

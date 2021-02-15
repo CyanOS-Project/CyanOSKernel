@@ -1,17 +1,68 @@
 #include "DHCP.h"
+#include "Network/Network.h"
 #include <Endianess.h>
 
 DHCP::DHCP(Network& network) : m_network{network} {}
 
-void DHCP::get_my_ip()
+DHCP::DHCPInformation DHCP::request_dhcp_information()
 {
-	Buffer dhcp_raw_segment = make_dhcp_segment(IPv4Address::Zero, DCHPMessageType::Discover);
-	m_network.udp_provider().send_with_special_port(IPv4Address::Broadcast, 67, 68, dhcp_raw_segment);
+	send_dhcp_discovery();
+
+	Buffer received_data{2000};
+	while (m_state != DHCPState::Acknowledge) {
+		auto connection = m_network.udp_provider().receive(68, received_data);
+		handle_dhcp(received_data);
+		info() << "Received some udp data! (" << connection.data_size << " bytes) from " << connection.src_ip << ":"
+		       << connection.src_port << ".";
+	}
+
+	warn() << "The DCHP answered our request:\n"
+	       << "My IP:       " << m_device_ip << "\nGateway IP:  " << m_gateway_ip << "\nSubnet mask: " << m_subnet_mask;
+
+	return DHCPInformation{m_device_ip, m_gateway_ip, m_subnet_mask};
 }
 
-void DHCP::send_dhcp_discovery() {}
+void DHCP::handle_dhcp(const BufferView& buffer)
+{
+	switch (get_dhcp_type(buffer)) {
+		case DCHPMessageType::Offer:
+			handle_dhcp_offer(buffer);
+			break;
 
-void DHCP::send_dhcp_request() {}
+		case DCHPMessageType::ACK:
+			handle_dhcp_ack(buffer);
+			break;
+
+		default:
+			err() << "Something wrong with DCHP!";
+	}
+}
+
+void DHCP::handle_dhcp_offer(const BufferView& buffer)
+{
+	parse_dhcp_offer(buffer);
+	send_dhcp_request(m_device_ip);
+	m_state = DHCPState::Offer;
+}
+
+void DHCP::handle_dhcp_ack(const BufferView& buffer)
+{
+	m_state = DHCPState::Acknowledge;
+}
+
+void DHCP::send_dhcp_discovery()
+{
+	Buffer dhcp_raw_segment = make_dhcp_segment(IPv4Address::Zero, DCHPMessageType::Discover);
+	m_network.udp_provider().send(IPv4Address::Broadcast, 67, 68, dhcp_raw_segment);
+	m_state = DHCPState::Discovery;
+}
+
+void DHCP::send_dhcp_request(const IPv4Address& requested_ip)
+{
+	Buffer dhcp_raw_segment = make_dhcp_segment(IPv4Address::Zero, DCHPMessageType::Request);
+	m_network.udp_provider().send(IPv4Address::Broadcast, 67, 68, dhcp_raw_segment);
+	m_state = DHCPState::Request;
+}
 
 Buffer DHCP::make_dhcp_segment(const IPv4Address& requested_ip, DCHPMessageType type)
 {
@@ -97,4 +148,57 @@ Buffer DHCP::make_dhcp_segment(const IPv4Address& requested_ip, DCHPMessageType 
 	options_offset += sizeof(message_end);
 
 	return dhcp_raw_segment;
+}
+
+DHCP::DCHPMessageType DHCP::get_dhcp_type(const BufferView& buffer)
+{
+	auto& dhcp_segment = buffer.const_convert_to<DHCPHeader>();
+
+	const u8* options_offset = dhcp_segment.options;
+	const u8* options_end = buffer.ptr() + sizeof(DHCPHeader);
+
+	auto* header = reinterpret_cast<const OptionHeader*>(options_offset);
+
+	while (options_offset < options_end && header->code != OptionCodes::End) {
+		if (header->code == OptionCodes::MessageType) {
+			return static_cast<DCHPMessageType>(reinterpret_cast<const OptionMessageType*>(header)->type);
+		} else if (header->code == OptionCodes::Pading) {
+			options_offset++;
+		} else {
+			options_offset += header->size;
+		}
+		header = reinterpret_cast<const OptionHeader*>(options_offset);
+	}
+	return DCHPMessageType::NACK;
+}
+
+void DHCP::parse_dhcp_offer(const BufferView& buffer)
+{
+	auto& dhcp_segment = buffer.const_convert_to<DHCPHeader>();
+	m_device_ip = IPv4Address{dhcp_segment.your_ip};
+
+	const u8* options_offset = dhcp_segment.options;
+	const u8* options_end = buffer.ptr() + sizeof(DHCPHeader);
+
+	auto* header = reinterpret_cast<const OptionHeader*>(options_offset);
+
+	while (options_offset < options_end && header->code != OptionCodes::End) {
+		if (header->code == OptionCodes::RouterIPs) {
+
+			auto* option = reinterpret_cast<const OptionRouterIPs*>(header);
+			m_gateway_ip = IPv4Address(option->router_ip[0]);
+
+		} else if (header->code == OptionCodes::SubnetMask) {
+
+			auto* option = reinterpret_cast<const OptionSubnetMask*>(header);
+			m_subnet_mask = IPv4Address(option->subnet_mask);
+		}
+
+		if (header->code == OptionCodes::Pading) {
+			options_offset++;
+		} else {
+			options_offset += header->size + sizeof(OptionHeader);
+		}
+		header = reinterpret_cast<const OptionHeader*>(options_offset);
+	}
 }

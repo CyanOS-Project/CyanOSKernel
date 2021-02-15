@@ -1,6 +1,7 @@
 #pragma once
 #include "Network/LinkLayer/NetworkAdapter.h"
 #include "Network/NetworkLayer/ARP.h"
+#include "Network/TransportLayer/DHCP.h"
 #include <Buffer.h>
 #include <BufferView.h>
 #include <IPv4Address.h>
@@ -41,10 +42,6 @@ class IPv4
 	static constexpr u8 IPv4_FLAGS_DONT_FRAGMENT = (1 << 1);
 	static constexpr u8 IPv4_FLAGS_MORE_FRAGMENTS = (1 << 2);
 
-	IPv4Address device_ip_address{};
-	IPv4Address gateway_ip_address{};
-	IPv4Address subnet_mask{255, 255, 255, 255};
-
 	const MACAddress& destination_mac_lookup(IPv4Address address);
 	bool is_in_local_subnet(IPv4Address address);
 	bool is_packet_ok(const IPv4Header& packet);
@@ -53,4 +50,7 @@ class IPv4
 	constexpr inline size_t header_length(u8 value) { return (value & 0xF) * sizeof(u32); }
 
 	Network& m_network;
+	IPv4Address m_device_ip_address{};
+	IPv4Address m_gateway_ip_address{};
+	IPv4Address m_subnet_mask{};
 };

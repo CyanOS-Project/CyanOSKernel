@@ -9,6 +9,13 @@ IPv4Address::IPv4Address(const u8* ip)
 		m_ip[i] = ip[i];
 	}
 }
+IPv4Address::IPv4Address(u32 ip)
+{
+	u8* c_ip = reinterpret_cast<u8*>(&ip);
+	for (size_t i = 0; i < IPv4_ELEMENTS_SIZE; i++) {
+		m_ip[i] = c_ip[i];
+	}
+}
 
 IPv4Address::IPv4Address(u8 ip0, u8 ip1, u8 ip2, u8 ip3)
 {

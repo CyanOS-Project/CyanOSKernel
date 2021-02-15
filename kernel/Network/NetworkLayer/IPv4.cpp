@@ -28,7 +28,7 @@ void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const
 	ip_packet.protocol = static_cast<u8>(protocol);
 	ip_packet.header_checksum = 0;
 
-	device_ip_address.copy(ip_packet.src_ip);
+	m_device_ip_address.copy(ip_packet.src_ip);
 	destination.copy(ip_packet.dst_ip);
 
 	ip_packet.header_checksum = calculate_checksum(BufferView{ip_raw_packet, 0, sizeof(IPv4Header)});
@@ -80,13 +80,13 @@ const MACAddress& IPv4::destination_mac_lookup(IPv4Address address)
 	} else if (is_in_local_subnet(address)) {
 		return m_network.arp_provider().mac_address_lookup(address);
 	} else {
-		return m_network.arp_provider().mac_address_lookup(gateway_ip_address);
+		return m_network.arp_provider().mac_address_lookup(m_gateway_ip_address);
 	}
 }
 
 bool IPv4::is_in_local_subnet(IPv4Address address)
 {
-	if (address.mask(subnet_mask) == address) {
+	if (address.mask(m_subnet_mask) == address) {
 		return true;
 	} else {
 		return false;
@@ -118,5 +118,5 @@ u16 IPv4::calculate_checksum(const BufferView& data)
 
 IPv4Address IPv4::IP()
 {
-	return device_ip_address;
+	return m_device_ip_address;
 }

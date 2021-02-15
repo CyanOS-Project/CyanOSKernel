@@ -1,13 +1,22 @@
-#include "Network/Network.h"
+#pragma once
+
 #include "UDP.h"
+#include <IPv4Address.h>
 #include <Types.h>
 
+class Network;
 class DHCP
 {
 
   public:
+	struct DHCPInformation {
+		IPv4Address device_ip;
+		IPv4Address gateway_ip;
+		IPv4Address subnet_mask;
+	};
+
 	DHCP(Network& network);
-	void get_my_ip();
+	DHCPInformation request_dhcp_information();
 
   private:
 	struct DHCPHeader {
@@ -59,58 +68,76 @@ class DHCP
 	struct OptionHeader {
 		u8 code;
 		u8 size;
-	};
+	} __attribute__((packed));
 
 	struct OptionClientID : public OptionHeader {
 		u8 hardware_type;
 		u8 hardware_id[6];
-	};
+	} __attribute__((packed));
 
 	struct OptionSubnetMask : public OptionHeader {
 		u32 subnet_mask;
-	};
+	} __attribute__((packed));
 
 	struct OptionRouterIPs : public OptionHeader {
 		u32 router_ip[1];
-	};
+	} __attribute__((packed));
 
 	struct OptionDNSServers : public OptionHeader {
 		u32 server_ip[1];
-	};
+	} __attribute__((packed));
 
 	struct OptionDomainName : public OptionHeader {
 		u8 domain_name[1];
-	};
+	} __attribute__((packed));
 
 	struct OptionMessageType : public OptionHeader {
 		u8 type;
-	};
+	} __attribute__((packed));
 
 	struct OptionParameterRequestList : public OptionHeader {
 		u8 param[8];
-	};
+	} __attribute__((packed));
 
 	struct OptionRequestedIP : public OptionHeader {
 		u8 address[4];
-	};
+	} __attribute__((packed));
 
 	struct OptionPadding {
 		u8 code;
-	};
+	} __attribute__((packed));
 
 	struct OptionEnd {
 		u8 code;
-	};
-
-	void send_dhcp_discovery();
-	void send_dhcp_request();
+	} __attribute__((packed));
 
 	enum class DHCP_OP
 	{
 		Request = 1,
 		Reply = 2
 	};
+
+	enum class DHCPState
+	{
+		Idle,
+		Discovery,
+		Offer,
+		Request,
+		Acknowledge
+	};
+
+	void handle_dhcp(const BufferView& buffer);
+	void handle_dhcp_offer(const BufferView&);
+	void handle_dhcp_ack(const BufferView&);
+	void send_dhcp_discovery();
+	void send_dhcp_request(const IPv4Address& requested_ip);
 	Buffer make_dhcp_segment(const IPv4Address& requested_ip, DCHPMessageType type);
+	void parse_dhcp_offer(const BufferView& buffer);
+	DCHPMessageType get_dhcp_type(const BufferView&);
 
 	Network& m_network;
+	DHCPState m_state = DHCPState::Idle;
+	IPv4Address m_device_ip;
+	IPv4Address m_gateway_ip;
+	IPv4Address m_subnet_mask;
 };
