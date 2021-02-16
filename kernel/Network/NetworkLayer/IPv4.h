@@ -46,7 +46,6 @@ class IPv4
 	const MACAddress& destination_mac_lookup(IPv4Address address);
 	bool is_in_local_subnet(IPv4Address address);
 	bool is_packet_ok(const IPv4Header& packet);
-	u16 calculate_checksum(const BufferView& data);
 
 	constexpr inline size_t header_length(u8 value) { return (value & 0xF) * sizeof(u32); }
 

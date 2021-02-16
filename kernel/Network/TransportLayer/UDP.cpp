@@ -75,20 +75,3 @@ void UDP::send_segment(const IPv4Address& dest_ip, u16 dest_port, u16 src_port, 
 
 	m_network.ipv4_provider().send_ip_packet(dest_ip, IPv4Protocols::UDP, udp_raw_segment);
 }
-
-u16 UDP::calculate_checksum(const BufferView& data)
-{
-	auto* u16_array = reinterpret_cast<const u16*>(data.ptr());
-	size_t u16_array_size = number_of_words<u16>(data.size());
-
-	u32 sum = 0;
-	for (size_t i = 0; i < u16_array_size; i++) {
-		sum += to_big_endian<u16>(u16_array[i]);
-	}
-
-	while (sum > 0xFFFF) {
-		sum = (sum & 0xFFFF) + ((sum & 0xFFFF0000) >> 16);
-	}
-
-	return to_big_endian<u16>(~u16(sum));
-}

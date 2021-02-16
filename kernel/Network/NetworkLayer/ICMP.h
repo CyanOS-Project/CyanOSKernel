@@ -48,8 +48,6 @@ class ICMP
 		Connection(IPv4Address t_dest) : state{State::Sent}, dest{t_dest}, wait_queue{} {}
 	};
 
-	u16 calculate_checksum(const BufferView& data);
-
 	Network& m_network;
 	Spinlock m_lock;
 	Vector<Connection> m_connection_list;

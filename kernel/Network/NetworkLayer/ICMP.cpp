@@ -2,6 +2,7 @@
 #include "Network/Network.h"
 #include <Buffer.h>
 #include <Endianess.h>
+#include <NetworkAlgorithms.h>
 
 ICMP::ICMP(Network& network) : m_network{network}, m_lock{}, m_connection_list{} {}
 
@@ -18,7 +19,7 @@ void ICMP::send_echo_request(const IPv4Address& address)
 	icmp_header.echo_id = 'a';
 	icmp_header.echo_seq = 'z';
 
-	icmp_header.checksum = calculate_checksum(icmp_raw_packet);
+	icmp_header.checksum = checksum(icmp_raw_packet);
 
 	m_network.ipv4_provider().send_ip_packet(address, IPv4Protocols::ICMP, icmp_raw_packet);
 	auto& connection = m_connection_list.emplace_back(address);
@@ -75,26 +76,9 @@ bool ICMP::is_icmp_reply_ok(const BufferView& data)
 		return false;
 	}
 
-	if (calculate_checksum(data) != 0) {
+	if (checksum(data) != 0) {
 		return false;
 	}
 
 	return true;
-}
-
-u16 ICMP::calculate_checksum(const BufferView& data)
-{
-	auto* u16_array = reinterpret_cast<const u16*>(data.ptr());
-	size_t u16_array_size = number_of_words<u16>(data.size());
-
-	u32 sum = 0;
-	for (size_t i = 0; i < u16_array_size; i++) {
-		sum += to_big_endian<u16>(u16_array[i]);
-	}
-
-	while (sum > 0xFFFF) {
-		sum = (sum & 0xFFFF) + ((sum & 0xFFFF0000) >> 16);
-	}
-
-	return to_big_endian<u16>(~u16(sum));
 }

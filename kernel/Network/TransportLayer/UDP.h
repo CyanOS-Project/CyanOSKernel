@@ -34,8 +34,6 @@ class UDP
 		u16 checksum;
 	} __attribute__((packed));
 
-	u16 calculate_checksum(const BufferView& data);
-
 	struct Connection {
 		u16 dest_port;
 		u16 src_port;

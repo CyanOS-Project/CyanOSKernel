@@ -8,6 +8,7 @@
 #include <Algorithms.h>
 #include <Buffer.h>
 #include <Endianess.h>
+#include <NetworkAlgorithms.h>
 
 IPv4::IPv4(Network& network) : m_network{network}, m_dhcp{network} {}
 
@@ -37,7 +38,7 @@ void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const
 	m_device_ip_address.copy(ip_packet.src_ip);
 	destination.copy(ip_packet.dst_ip);
 
-	ip_packet.header_checksum = calculate_checksum(BufferView{ip_raw_packet, 0, sizeof(IPv4Header)});
+	ip_packet.header_checksum = checksum(BufferView{ip_raw_packet, 0, sizeof(IPv4Header)});
 
 	auto& destination_mac = destination_mac_lookup(destination);
 
@@ -103,23 +104,6 @@ bool IPv4::is_packet_ok(const IPv4Header& packet)
 {
 	// TODO: check integrity ip packet here.
 	return true;
-}
-
-u16 IPv4::calculate_checksum(const BufferView& data)
-{
-	auto* u16_array = reinterpret_cast<const u16*>(data.ptr());
-	size_t u16_array_size = number_of_words<u16>(data.size());
-
-	u32 sum = 0;
-	for (size_t i = 0; i < u16_array_size; i++) {
-		sum += to_big_endian<u16>(u16_array[i]);
-	}
-
-	while (sum > 0xFFFF) {
-		sum = (sum & 0xFFFF) + ((sum & 0xFFFF0000) >> 16);
-	}
-
-	return to_big_endian<u16>(~u16(sum));
 }
 
 IPv4Address IPv4::IP()
