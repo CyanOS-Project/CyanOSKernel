@@ -68,8 +68,9 @@ void PCI::enumerate_pci_devices()
 			info() << "PCI_STATUS     : " << Hex(device.status());
 			// Thread::sleep(10000);
 			auto* eth0 = new RTL8139{GenericPCIDevice{device}};
-			NetworkAdapter::default_network_adapter = eth0;
-			new Network{*eth0};
+			auto network = new Network{*eth0};
+			eth0->set_network_handler(*network);
+			network->start();
 		}
 	});
 }

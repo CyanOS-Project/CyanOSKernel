@@ -12,7 +12,12 @@ Network::Network(NetworkAdapter& network_adapter) :
     m_arp{*this},
     m_ipv4{*this}
 {
-	network_adapter.set_network_handler(*this);
+}
+
+void Network::start()
+{
+	m_ipv4.start();
+
 	// Thread::sleep(5000);
 
 	/*ARP::mac_address_lookup(IPv4Address{10, 0, 2, 2}); // IP 10.0.2.2 is Firewall/DHCP server in Qemu.
@@ -20,9 +25,8 @@ Network::Network(NetworkAdapter& network_adapter) :
 	ARP::mac_address_lookup(IPv4Address{10, 0, 2, 2}); // IP 10.0.2.2 is Firewall/DHCP server in Qemu.
 	Thread::sleep(1000);
 	ARP::mac_address_lookup(IPv4Address{10, 0, 2, 2}); // IP 10.0.2.2 is Firewall/DHCP server in Qemu.*/
-	// ICMP(*this).send_echo_request(IPv4Address{10, 0, 2, 2});
+	m_icmp.send_echo_request(IPv4Address{10, 0, 2, 2});
 	// UDP().send(IPv4Address::Broadcast, 1234, Buffer{"Hello there", 10});
-	DHCP(*this).request_dhcp_information();
 }
 
 IPv4Address Network::device_ip() const

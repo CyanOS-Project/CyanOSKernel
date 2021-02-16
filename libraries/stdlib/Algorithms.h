@@ -47,7 +47,7 @@ constexpr size_t align_to(size_t num, size_t alignment, bool align_zero = true)
 template <typename T> constexpr size_t number_of_words(size_t size)
 {
 	size_t result = size / sizeof(T);
-	if (result % sizeof(T)) {
+	if (size % sizeof(T)) {
 		result++;
 	}
 	return result;

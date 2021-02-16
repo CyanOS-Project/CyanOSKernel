@@ -19,6 +19,7 @@ class IPv4
 {
   public:
 	IPv4(Network& network);
+	void start();
 	void send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const BufferView& data);
 	void handle_ip_packet(const BufferView& data);
 
@@ -50,6 +51,7 @@ class IPv4
 	constexpr inline size_t header_length(u8 value) { return (value & 0xF) * sizeof(u32); }
 
 	Network& m_network;
+	DHCP m_dhcp;
 	IPv4Address m_device_ip_address{};
 	IPv4Address m_gateway_ip_address{};
 	IPv4Address m_subnet_mask{};

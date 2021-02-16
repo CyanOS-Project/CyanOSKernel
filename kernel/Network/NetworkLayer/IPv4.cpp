@@ -9,8 +9,14 @@
 #include <Buffer.h>
 #include <Endianess.h>
 
-IPv4::IPv4(Network& network) : m_network{network}
+IPv4::IPv4(Network& network) : m_network{network}, m_dhcp{network} {}
+
+void IPv4::start()
 {
+	auto dhcp_info = m_dhcp.request_dhcp_information();
+	m_device_ip_address = dhcp_info.device_ip;
+	m_gateway_ip_address = dhcp_info.gateway_ip;
+	m_subnet_mask = dhcp_info.subnet_mask;
 	// FIXME: Get an IP address using DHCP.
 }
 

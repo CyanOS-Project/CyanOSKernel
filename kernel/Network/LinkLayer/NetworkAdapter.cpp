@@ -4,8 +4,6 @@
 #include "Network/NetworkLayer/ARP.h"
 #include "Network/NetworkLayer/IPv4.h"
 
-NetworkAdapter* NetworkAdapter::default_network_adapter = nullptr;
-
 void NetworkAdapter::set_network_handler(Network& network)
 {
 	m_network = &network;

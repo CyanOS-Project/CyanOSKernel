@@ -12,6 +12,7 @@ class Network
 {
   public:
 	Network(NetworkAdapter& network_adapter);
+	void start();
 	IPv4Address device_ip() const;
 	MACAddress device_mac() const;
 	NetworkAdapter& network_adapter();
