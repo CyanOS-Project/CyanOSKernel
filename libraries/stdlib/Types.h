@@ -7,7 +7,7 @@
 #define UNUSED(expr)     (void)(expr)
 #define UNUSEDARG        __attribute__((unused))
 
-#define MASKABLE_PRAM(x) (1 << x)
+#define Bit(x) (1 << x)
 
 using u32 = uint32_t;
 using u16 = uint16_t;

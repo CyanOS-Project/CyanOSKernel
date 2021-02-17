@@ -28,13 +28,13 @@ RTL8139::RTL8139(GenericPCIDevice&& device) : m_ports{device.BAR0().io_address()
 
 void RTL8139::turn_on()
 {
-	write_register8(RTL8139_PORT_CONFIG1, 0);
+	write_register8(PORT_CONFIG1, 0);
 }
 
 void RTL8139::software_rest()
 {
-	write_register8(RTL8139_PORT_CHIP_CMD, RTL8139_COMMAND_RESET);
-	while (read_register8(RTL8139_PORT_CHIP_CMD) & RTL8139_COMMAND_RESET) {
+	write_register8(PORT_CHIP_CMD, COMMAND_RESET);
+	while (read_register8(PORT_CHIP_CMD) & COMMAND_RESET) {
 	}
 }
 
@@ -49,24 +49,23 @@ void RTL8139::setup_tx()
 void RTL8139::setup_rx()
 {
 	m_rx_buffer = reinterpret_cast<u8*>(valloc(0, MAX_RX_BUFFER_SIZE, PAGE_READWRITE | PAGE_CONTAGIOUS));
-	write_register32(RTL8139_PORT_RX_BUF, virtual_to_physical_address(m_rx_buffer));
-	write_register32(RTL8139_PORT_RX_CONFIG, RTL8139_RX_CONFIG_ACCEPT_PHYSICAL_MATCH_PACKETS |
-	                                             RTL8139_RX_CONFIG_ACCEPT_PHYSICAL_ADDRESS_PACKETS |
-	                                             RTL8139_RX_CONFIG_ACCEPT_MULTICAST_PACKETS |
-	                                             RTL8139_RX_CONFIG_ACCEPT_BROADCAST_PACKETS | RTL8139_RX_CONFIG_WRAP |
-	                                             RTL8139_RX_CONFIG_MAX_DMA_BURST_SIZE_256);
+	write_register32(PORT_RX_BUF, virtual_to_physical_address(m_rx_buffer));
+	write_register32(PORT_RX_CONFIG, RX_CONFIG_ACCEPT_PHYSICAL_MATCH_PACKETS |
+	                                     RX_CONFIG_ACCEPT_PHYSICAL_ADDRESS_PACKETS |
+	                                     RX_CONFIG_ACCEPT_MULTICAST_PACKETS | RX_CONFIG_ACCEPT_BROADCAST_PACKETS |
+	                                     RX_CONFIG_WRAP | RX_CONFIG_MAX_DMA_BURST_SIZE_256);
 }
 
 void RTL8139::start()
 {
-	write_register8(RTL8139_PORT_CHIP_CMD, RTL8139_COMMAND_RX_ENABLE | RTL8139_COMMAND_TX_ENABLE);
+	write_register8(PORT_CHIP_CMD, COMMAND_RX_ENABLE | COMMAND_TX_ENABLE);
 
-	write_register16(RTL8139_PORT_INTR_MASK, RTL8139_INTERRUPT_MASK_RX_OK | RTL8139_INTERRUPT_MASK_TX_OK);
+	write_register16(PORT_INTR_MASK, INTERRUPT_MASK_RX_OK | INTERRUPT_MASK_TX_OK);
 }
 
 void RTL8139::handle_rx()
 {
-	while (!(read_register8(RTL8139_PORT_CHIP_CMD) & RTL8139_COMMAND_BUFFER_EMPTY)) {
+	while (!(read_register8(PORT_CHIP_CMD) & COMMAND_BUFFER_EMPTY)) {
 
 		RxPacket* received_packet = reinterpret_cast<RxPacket*>(m_rx_buffer + m_current_rx_pointer);
 
@@ -76,38 +75,38 @@ void RTL8139::handle_rx()
 			err() << "Invalid Packet.";
 		}
 
-		m_current_rx_pointer = (m_current_rx_pointer + received_packet->size + RTL8139_RX_PACKET_HEADER_SIZE + 3) &
-		                       RTL8139_RX_READ_POINTER_MASK;
+		m_current_rx_pointer =
+		    (m_current_rx_pointer + received_packet->size + RX_PACKET_HEADER_SIZE + 3) & RX_READ_POINTER_MASK;
 
 		if (m_current_rx_pointer > MAX_RX_BUFFER_SIZE) {
 			m_current_rx_pointer -= MAX_RX_BUFFER_SIZE;
 		}
-		write_register16(RTL8139_PORT_RX_BUF_PTR, m_current_rx_pointer - RTL8139_RX_PAD);
+		write_register16(PORT_RX_BUF_PTR, m_current_rx_pointer - RX_PAD);
 	}
 }
 
 void RTL8139::handle_tx()
 {
-	// info() << "TX descriptors: " << Hex(read_register16(RTL8139_PORT_TX_SUMMARY));
+	// info() << "TX descriptors: " << Hex(read_register16(PORT_TX_SUMMARY));
 	// FIXME: release waitqueues for descriptors here.
 }
 
 void RTL8139::rx_tx_handler()
 {
 
-	u16 status = read_register16(RTL8139_PORT_INTR_STATUS);
+	u16 status = read_register16(PORT_INTR_STATUS);
 	// warn() << "Network Interupt:";
 	// info() << "ISR status : " << status;
-	if (status & RTL8139_INTERRUPT_STATUS_TX_OK) {
+	if (status & INTERRUPT_STATUS_TX_OK) {
 		// info() << "Interrupt: Data has been sent!";
 		handle_tx();
 	}
-	if (status & RTL8139_INTERRUPT_STATUS_RX_OK) {
+	if (status & INTERRUPT_STATUS_RX_OK) {
 		// info() << "Interrupt: Data has been received!";
 		handle_rx();
 	}
 
-	write_register16(RTL8139_PORT_INTR_STATUS, status);
+	write_register16(PORT_INTR_STATUS, status);
 }
 
 void RTL8139::send_ethernet_frame(const BufferView& data)
@@ -121,14 +120,14 @@ void RTL8139::send_ethernet_frame(const BufferView& data)
 
 	write_register32(TSD_array[m_current_tx_buffer], data.size());
 	// FIXME: acquire locks for descriptors here.
-	while (!(read_register32(TSD_array[m_current_tx_buffer]) & RTL8139_TX_STATUS_TOK)) {
+	while (!(read_register32(TSD_array[m_current_tx_buffer]) & TX_STATUS_TOK)) {
 	}
 	m_current_tx_buffer = (m_current_tx_buffer + 1) % NUMBER_TX_BUFFERS;
 }
 
 bool RTL8139::is_packet_ok(u16 status)
 {
-	if (status & RTL8139_RX_PACKET_STATUS_ROK) {
+	if (status & RX_PACKET_STATUS_ROK) {
 		return true;
 	} else {
 		return false;
