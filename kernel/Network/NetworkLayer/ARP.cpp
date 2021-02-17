@@ -1,9 +1,9 @@
 #include "ARP.h"
 #include "Devices/DebugPort/Logger.h"
-#include "Endianess.h"
 #include "IPv4.h"
 #include "IPv4Address.h"
 #include "Network/Network.h"
+#include "NetworkAlgorithms.h"
 
 ARP::ARP(Network& network) : m_network{network} {}
 
@@ -34,11 +34,11 @@ const MACAddress& ARP::mac_address_lookup(const IPv4Address& lookup_ip)
 void ARP::send_arp_request(const IPv4Address& lookup_ip)
 {
 
-	ARPHeader arp{.hardware_type = to_big_endian<u16>(static_cast<u16>(HardwareType::Ethernet)),
-	              .protocol_type = to_big_endian<u16>(static_cast<u16>(ProtocolType::IPv4)),
+	ARPHeader arp{.hardware_type = network_word16(static_cast<u16>(HardwareType::Ethernet)),
+	              .protocol_type = network_word16(static_cast<u16>(ProtocolType::IPv4)),
 	              .hardware_addr_len = MAC_ADDRESS_LENGTH,
 	              .protocol_addr_len = IP4_ADDRESS_LENGTH,
-	              .opcode = to_big_endian<u16>(static_cast<u16>(ARPCode::Request)),
+	              .opcode = network_word16(static_cast<u16>(ARPCode::Request)),
 	              .source_hw_addr = {},
 	              .source_protocol_addr = {10, 0, 2, 15}, // static address for us until we get one from DHCP.
 	              .destination_hw_addr = {},
@@ -58,15 +58,13 @@ void ARP::send_arp_request(const IPv4Address& lookup_ip)
 
 void ARP::handle_arp_packet(const BufferView& data)
 {
-	warn() << "ARP Packet";
-
 	if (data.size() < sizeof(ARPHeader)) {
 		warn() << "Insufficient ARP packet size!";
 	}
 
 	const ARPHeader& arp = data.const_convert_to<ARPHeader>();
 
-	switch (static_cast<ARPCode>(to_big_endian<u16>(arp.opcode))) {
+	switch (static_cast<ARPCode>(network_word16(arp.opcode))) {
 		case ARPCode::Request: {
 			info() << "ARP Request: Who owns " << IPv4Address{arp.destination_protocol_addr} << " ? Tell "
 			       << IPv4Address{arp.source_protocol_addr} << ".";
@@ -86,7 +84,7 @@ void ARP::handle_arp_packet(const BufferView& data)
 			break;
 		}
 		default:
-			warn() << "Unkown ARP code " << to_big_endian<u16>(arp.opcode) << "!";
+			warn() << "Unkown ARP code " << network_word16(arp.opcode) << "!";
 			break;
 	}
 }
@@ -115,11 +113,11 @@ void ARP::add_arp_entry(const IPv4Address& ip, const MACAddress& mac)
 
 void ARP::answer_arp_request(const IPv4Address& dest_ip, const MACAddress& dest_mac)
 {
-	ARPHeader arp{.hardware_type = to_big_endian<u16>(static_cast<u16>(HardwareType::Ethernet)),
-	              .protocol_type = to_big_endian<u16>(static_cast<u16>(ProtocolType::IPv4)),
+	ARPHeader arp{.hardware_type = network_word16(static_cast<u16>(HardwareType::Ethernet)),
+	              .protocol_type = network_word16(static_cast<u16>(ProtocolType::IPv4)),
 	              .hardware_addr_len = MAC_ADDRESS_LENGTH,
 	              .protocol_addr_len = IP4_ADDRESS_LENGTH,
-	              .opcode = to_big_endian<u16>(static_cast<u16>(ARPCode::Reply)),
+	              .opcode = network_word16(static_cast<u16>(ARPCode::Reply)),
 	              .source_hw_addr = {},
 	              .source_protocol_addr = {},
 	              .destination_hw_addr = {},

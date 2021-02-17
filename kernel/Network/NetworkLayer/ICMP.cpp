@@ -46,15 +46,11 @@ void ICMP::handle_icmp_reply(const IPv4Address& source_ip, const BufferView& dat
 			err() << "Unknown ICMP packet received!";
 			break;
 	}
-
-	warn() << "ICMP packet received.";
 }
 
 void ICMP::handle_echo_reply(const IPv4Address& source_ip, const BufferView& data)
 {
 	ScopedLock local_lock{m_lock};
-
-	auto& icmp_header = data.const_convert_to<EchoPacket>();
 
 	auto connection = m_connection_list.find_if([source_ip](const Connection& i) { return i.dest == source_ip; });
 	if (connection == m_connection_list.end()) {

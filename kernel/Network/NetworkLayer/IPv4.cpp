@@ -7,7 +7,6 @@
 #include "Network/TransportLayer/UDP.h"
 #include <Algorithms.h>
 #include <Buffer.h>
-#include <Endianess.h>
 #include <NetworkAlgorithms.h>
 
 IPv4::IPv4(Network& network) : m_network{network}, m_dhcp{network} {}
@@ -28,7 +27,7 @@ void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const
 
 	ip_packet.version_length = IPv4_VERSION_LENGTH;
 	ip_packet.dscp_ecn = 0;
-	ip_packet.total_length = to_big_endian<u16>(ip_raw_packet.size());
+	ip_packet.total_length = network_word16(ip_raw_packet.size());
 	ip_packet.id = 0;
 	ip_packet.flags_fragment_offset = 0;
 	ip_packet.time_to_live = 64;
@@ -47,8 +46,6 @@ void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const
 
 void IPv4::handle_ip_packet(const BufferView& data)
 {
-	warn() << "IPv4 Packet received.";
-
 	auto& ip_packet = data.const_convert_to<IPv4Header>();
 
 	if (!is_packet_ok(ip_packet)) {
@@ -102,7 +99,10 @@ bool IPv4::is_in_local_subnet(IPv4Address address)
 
 bool IPv4::is_packet_ok(const IPv4Header& packet)
 {
-	// TODO: check integrity ip packet here.
+	if (checksum(BufferView{&packet, sizeof(IPv4Header)}) != 0) {
+		return false;
+	}
+
 	return true;
 }
 

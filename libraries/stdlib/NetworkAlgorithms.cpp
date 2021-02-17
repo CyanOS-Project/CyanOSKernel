@@ -18,3 +18,13 @@ u16 checksum(const BufferView& data)
 
 	return to_big_endian<u16>(~u16(sum));
 }
+
+u16 network_word16(u16 value)
+{
+	return to_big_endian<u16>(value);
+}
+
+u32 network_word32(u32 value)
+{
+	return to_big_endian<u32>(value);
+}

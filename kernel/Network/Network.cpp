@@ -18,15 +18,7 @@ void Network::start()
 {
 	m_ipv4.start();
 
-	// Thread::sleep(5000);
-
-	/*ARP::mac_address_lookup(IPv4Address{10, 0, 2, 2}); // IP 10.0.2.2 is Firewall/DHCP server in Qemu.
-	Thread::sleep(1000);
-	ARP::mac_address_lookup(IPv4Address{10, 0, 2, 2}); // IP 10.0.2.2 is Firewall/DHCP server in Qemu.
-	Thread::sleep(1000);
-	ARP::mac_address_lookup(IPv4Address{10, 0, 2, 2}); // IP 10.0.2.2 is Firewall/DHCP server in Qemu.*/
 	m_icmp.send_echo_request(IPv4Address{10, 0, 2, 2});
-	// UDP().send(IPv4Address::Broadcast, 1234, Buffer{"Hello there", 10});
 }
 
 IPv4Address Network::device_ip() const
