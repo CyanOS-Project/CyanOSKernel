@@ -6,14 +6,17 @@
 class Semaphore
 {
   public:
-	explicit Semaphore(size_t t_max_count, size_t t_initial_value = 0);
+	NON_COPYABLE(Semaphore)
+	explicit Semaphore(int initial_value);
+	Semaphore(Semaphore&&);
+	Semaphore& operator=(Semaphore&&);
 	~Semaphore();
 	void acquire();
 	void release();
 
   private:
-	Spinlock m_lock;
-	unsigned m_max_count;
-	unsigned m_count;
+	UniquePointer<Spinlock> m_lock;
+	int m_count;
 	WaitQueue m_queue;
+	bool is_moved = false;
 };

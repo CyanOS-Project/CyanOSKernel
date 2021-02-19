@@ -2,21 +2,34 @@
 #include "ScopedLock.h"
 #include <Clib.h>
 
-Semaphore::Semaphore(size_t t_max_count, size_t t_initial_value) :
-    m_lock{},
-    m_max_count{t_max_count},
-    m_count{t_initial_value}
+Semaphore::Semaphore(int initial_value) : m_lock{UniquePointer<Spinlock>::make_unique()}, m_count{initial_value} {}
+
+Semaphore::Semaphore(Semaphore&& other) :
+    m_lock{move(other.m_lock)},
+    m_count{other.m_count},
+    m_queue{move(other.m_queue)}
 {
+	other.is_moved = true;
+}
+
+Semaphore& Semaphore::operator=(Semaphore&& other)
+{
+	m_lock = move(other.m_lock);
+	m_count = other.m_count;
+	m_queue = move(other.m_queue);
+
+	other.is_moved = true;
+	return *this;
 }
 
 Semaphore::~Semaphore() {}
 
 void Semaphore::acquire()
 {
-	ScopedLock local_lock(m_lock);
+	ScopedLock local_lock(*m_lock);
 
-	if (m_count < m_max_count) {
-		m_count++;
+	if (m_count > 0) {
+		m_count--;
 	} else {
 		m_queue.wait(local_lock);
 	}
@@ -24,10 +37,10 @@ void Semaphore::acquire()
 
 void Semaphore::release()
 {
-	ScopedLock local_lock(m_lock);
+	ScopedLock local_lock(*m_lock);
 
-	if (!m_count)
-		return;
-	m_queue.wake_up();
-	m_count--;
+	if (m_count < 0) {
+		m_queue.wake_up();
+	}
+	m_count++;
 }
