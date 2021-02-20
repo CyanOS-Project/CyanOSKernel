@@ -19,6 +19,7 @@ Why a new half working operating systems? you might ask, And the answer: because
 - PIC Driver.
 - Keyboard Driver.
 - A Shell & basic commands like cd, ls, cat...
+- Networking (IPv4, UDP, TCP, ARP and DHCP)
 
 ## Building CyanOS
 #### Requirements

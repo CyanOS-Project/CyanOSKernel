@@ -18,15 +18,16 @@ void Network::start()
 {
 	m_ipv4.start();
 
-	m_icmp.send_echo_request(IPv4Address{10, 0, 2, 2});
+	// m_icmp.send_echo_request(IPv4Address{10, 0, 2, 2});
+	m_tcp.connect(IPv4Address{10, 0, 2, 2}, 80);
 }
 
-IPv4Address Network::device_ip() const
+IPv4Address Network::device_ip()
 {
-	return IPv4Address::Zero;
+	return m_ipv4.IP();
 }
 
-MACAddress Network::device_mac() const
+MACAddress Network::device_mac()
 {
 	return m_network_adapter.MAC();
 }
