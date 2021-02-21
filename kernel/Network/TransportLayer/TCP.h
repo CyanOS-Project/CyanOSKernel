@@ -53,6 +53,20 @@ class TCPSession
 		ECE = Bit(6),
 		CWR = Bit(7),
 	};
+
+	enum class ConnectionState
+	{
+		Listen,
+		SYN_Sent,
+		SYN_Received,
+		Established,
+		FIN_Wait1,
+		FIN_Wait2,
+		Close_Wait,
+		Last_Ack,
+		Time_Wait,
+		Closed
+	};
 	void handle(IPv4Address src_ip, const BufferView& data);
 	void send_syn();
 	void wait_for_syn();
@@ -64,6 +78,7 @@ class TCPSession
 	Buffer wait_for_packet();
 	bool is_packet_ok(const BufferView& data);
 	u16 tcp_checksum(const BufferView& data);
+	bool is_packet_for_me(const IPv4Address& ip, const BufferView& data);
 	constexpr u8 data_offset(size_t value) { return (number_of_words<u32>(value) & 0xF) << 4; }
 
 	Network* m_network;

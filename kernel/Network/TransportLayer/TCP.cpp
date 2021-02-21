@@ -8,10 +8,13 @@ TCP::TCP(Network& network) : m_network{network} {}
 
 void TCP::handle(const IPv4Address& src_ip, const BufferView& data)
 {
-	UNUSED(src_ip);
-	UNUSED(data);
-
-	warn() << "TCP packet received, No handler for that yet.";
+	auto session = m_connection_sessions.find_if(
+	    [&data, &src_ip](TCPSession& session) { return session.is_packet_for_me(src_ip, data); });
+	if (session != m_connection_sessions.end()) {
+		session->handle(src_ip, data);
+	} else {
+		warn() << "TCP packet received, with no known session, packet dropped.";
+	}
 }
 TCPSession& TCP::accept(u16 port)
 {
@@ -186,28 +189,31 @@ u16 TCPSession::tcp_checksum(const BufferView& data)
 
 	u32 sum = 0;
 
-	u32 sum1 = 0;
 	auto* tcp_array = reinterpret_cast<const u16*>(data.ptr());
 	size_t tcp_array_size = number_of_words<u16>(data.size());
 	for (size_t i = 0; i < tcp_array_size; i++) {
-		info() << Hex16(to_big_endian<u16>(tcp_array[i]));
-		sum1 += to_big_endian<u16>(tcp_array[i]);
+		sum += to_big_endian<u16>(tcp_array[i]);
 	}
 
-	info() << "...................";
-
-	u32 sum2 = 0;
 	auto* pseudo_ipv4_array = reinterpret_cast<const u16*>(&pseudo_ip);
 	size_t pseudo_ipv4_array_size = number_of_words<u16>(sizeof(PseudoIPHeader));
 	for (size_t i = 0; i < pseudo_ipv4_array_size; i++) {
-		info() << Hex16(to_big_endian<u16>(pseudo_ipv4_array[i]));
-		sum2 += to_big_endian<u16>(pseudo_ipv4_array[i]);
+		sum += to_big_endian<u16>(pseudo_ipv4_array[i]);
 	}
 
-	sum = sum1 + sum2;
 	while (sum > 0xFFFF) {
 		sum = (sum & 0xFFFF) + ((sum & 0xFFFF0000) >> 16);
 	}
 
 	return to_big_endian<u16>(~u16(sum));
+}
+
+bool TCPSession::is_packet_for_me(const IPv4Address& ip, const BufferView& data)
+{
+	auto& tcp_header = data.const_convert_to<TCPHeader>();
+	if ((to_big_endian<u16>(tcp_header.dest_port) == m_src_port) && (ip == m_dest_ip)) {
+		return true;
+	} else {
+		return false;
+	}
 }
