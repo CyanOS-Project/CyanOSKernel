@@ -106,7 +106,7 @@ Logger& Logger::operator<<(void* ptr)
 	return *this;
 }
 
-Logger& Logger::operator<<(const MACAddress& mac)
+Logger& Logger::operator<<(MACAddress mac)
 {
 	u8 mac_data[6];
 	mac.copy(mac_data);
@@ -119,7 +119,7 @@ Logger& Logger::operator<<(const MACAddress& mac)
 	return *this;
 }
 
-Logger& Logger::operator<<(const IPv4Address& mac)
+Logger& Logger::operator<<(IPv4Address mac)
 {
 	u8 mac_data[6];
 	mac.copy(mac_data);

@@ -13,7 +13,7 @@ class MACAddress
 
 	bool operator==(const MACAddress& mac) const;
 	bool operator!=(const MACAddress& mac) const;
-	MACAddress mask(const MACAddress&) const;
+	MACAddress mask(MACAddress) const;
 	u8 operator[](u8 index) const;
 	void copy(u8* data) const;
 

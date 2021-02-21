@@ -56,14 +56,14 @@ void DHCP::send_dhcp_discovery()
 	m_state = DHCPState::Discovery;
 }
 
-void DHCP::send_dhcp_request(const IPv4Address& requested_ip)
+void DHCP::send_dhcp_request(IPv4Address requested_ip)
 {
 	Buffer dhcp_raw_segment = make_dhcp_segment(requested_ip, DCHPMessageType::Request);
 	m_network.udp_provider().send(IPv4Address::Broadcast, 67, 68, dhcp_raw_segment);
 	m_state = DHCPState::Request;
 }
 
-Buffer DHCP::make_dhcp_segment(const IPv4Address& requested_ip, DCHPMessageType type)
+Buffer DHCP::make_dhcp_segment(IPv4Address requested_ip, DCHPMessageType type)
 {
 	Buffer dhcp_raw_segment{sizeof(DHCPHeader)};
 	auto& dhcp_segment = dhcp_raw_segment.convert_to<DHCPHeader>();

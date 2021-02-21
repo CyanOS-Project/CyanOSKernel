@@ -13,9 +13,9 @@ class ICMP
   public:
 	ICMP(Network& network);
 
-	void send_echo_request(const IPv4Address& address);
-	void handle_icmp_reply(const IPv4Address& source_ip, const BufferView& data);
-	void handle_echo_reply(const IPv4Address& source_ip, const BufferView& data);
+	void send_echo_request(IPv4Address address);
+	void handle_icmp_reply(IPv4Address source_ip, const BufferView& data);
+	void handle_echo_reply(IPv4Address source_ip, const BufferView& data);
 	bool is_icmp_reply_ok(const BufferView& data);
 
   private:

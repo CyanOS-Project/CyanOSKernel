@@ -9,7 +9,7 @@
 // TODO: refactor network structures so one function will handle convertions to/from big endian.
 UDP::UDP(Network& network) : m_network{network} {}
 
-void UDP::send(const IPv4Address& dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
+void UDP::send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
 {
 	send_segment(dest_ip, dest_port, src_port, data);
 }
@@ -34,7 +34,7 @@ UDP::ConnectionInformation UDP::receive(u16 dest_port, Buffer& buffer)
 	return connection_info;
 }
 
-void UDP::handle(const IPv4Address& src_ip, const BufferView& data)
+void UDP::handle(IPv4Address src_ip, const BufferView& data)
 {
 	ScopedLock local_lock{m_lock};
 
@@ -61,7 +61,7 @@ void UDP::handle(const IPv4Address& src_ip, const BufferView& data)
 	}
 }
 
-void UDP::send_segment(const IPv4Address& dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
+void UDP::send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
 {
 	Buffer udp_raw_segment{sizeof(UDPHeader) + data.size()};
 	auto& udp_segment = udp_raw_segment.convert_to<UDPHeader>();

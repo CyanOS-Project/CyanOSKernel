@@ -2,7 +2,7 @@
 #include <Clib.h>
 #include <NetworkAlgorithms.h>
 
-void EthernetNetworkAdapter::send_frame(ProtocolType type, const MACAddress& destination, const BufferView& data)
+void EthernetNetworkAdapter::send_frame(ProtocolType type, MACAddress destination, const BufferView& data)
 {
 	Buffer ethernet_frame_raw(data, ETHERNET_HEADER_SIZE);
 	EthernetFrame& ethernet_frame = ethernet_frame_raw.convert_to<EthernetFrame>();

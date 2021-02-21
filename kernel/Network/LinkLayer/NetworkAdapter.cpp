@@ -24,7 +24,7 @@ void NetworkAdapter::handle_received_frame(ProtocolType type, const BufferView& 
 	}
 }
 
-const MACAddress& NetworkAdapter::MAC() const
+MACAddress NetworkAdapter::MAC() const
 {
 	return m_mac;
 }

@@ -50,7 +50,7 @@ bool MACAddress::operator!=(const MACAddress& other) const
 	return !operator==(other);
 }
 
-MACAddress MACAddress::mask(const MACAddress& mask) const
+MACAddress MACAddress::mask(MACAddress mask) const
 {
 	MACAddress new_mac{};
 	for (size_t i = 0; i < MAC_ELEMENTS_SIZE; i++) {

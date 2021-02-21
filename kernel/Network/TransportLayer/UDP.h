@@ -19,12 +19,12 @@ class UDP
 	};
 
 	UDP(Network&);
-	void send(const IPv4Address& dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
+	void send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
 	ConnectionInformation receive(u16 dest_port, Buffer& buffer);
-	void handle(const IPv4Address& src_ip, const BufferView& data);
+	void handle(IPv4Address src_ip, const BufferView& data);
 
   protected:
-	void send_segment(const IPv4Address& dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
+	void send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
 
   private:
 	struct UDPHeader {

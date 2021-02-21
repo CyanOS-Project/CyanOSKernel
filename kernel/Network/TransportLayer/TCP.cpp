@@ -6,7 +6,7 @@
 
 TCP::TCP(Network& network) : m_network{network} {}
 
-void TCP::handle(const IPv4Address& src_ip, const BufferView& data)
+void TCP::handle(IPv4Address src_ip, const BufferView& data)
 {
 	auto session = m_connection_sessions.find_if(
 	    [&data, &src_ip](TCPSession& session) { return session.is_packet_for_me(src_ip, data); });
@@ -18,22 +18,24 @@ void TCP::handle(const IPv4Address& src_ip, const BufferView& data)
 }
 TCPSession& TCP::accept(u16 port)
 {
-	auto& server = m_connection_sessions.emplace_back(m_network);
+	auto& server = m_connection_sessions.emplace_back(m_network, TCPSession::Type::Server);
 	server.accept(port);
 	return server;
 }
 
 TCPSession& TCP::connect(IPv4Address ip, u16 port)
 {
-	auto& client = m_connection_sessions.emplace_back(m_network);
+	auto& client = m_connection_sessions.emplace_back(m_network, TCPSession::Type::Client);
 	client.connect(ip, port);
 	return client;
 }
 
 void TCP::close(TCPSession&) {}
 
-TCPSession::TCPSession(Network& network) :
+TCPSession::TCPSession(Network& network, Type type) :
     m_network{&network},
+    m_type{type},
+    m_state{ConnectionState::Idle},
     m_syn_semaphore{0},
     m_ack_semaphore{0},
     m_data_semaphore{0}
@@ -46,9 +48,6 @@ void TCPSession::accept(u16 port)
 	m_src_sequence = 0;
 
 	wait_for_syn();
-	send_ack();
-	send_syn();
-	wait_for_ack();
 }
 
 void TCPSession::connect(IPv4Address ip, u16 port)
@@ -59,9 +58,6 @@ void TCPSession::connect(IPv4Address ip, u16 port)
 	m_src_sequence = 0;
 
 	send_syn();
-	wait_for_ack();
-	wait_for_syn();
-	send_ack();
 }
 
 void TCPSession::close() {}
@@ -87,21 +83,69 @@ void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 
 	auto& tcp_header = data.const_convert_to<TCPHeader>();
 
-	if (tcp_header.flags & FLAGS::ACK) {
-		m_ack_semaphore.release();
+	if (data.size() > (tcp_header.data_offset * sizeof(u32))) {
+		handle_data(src_ip, data);
 	}
 
 	if (tcp_header.flags & FLAGS::SYN) {
-		m_syn_semaphore.release();
+		handle_syn(src_ip, data);
+	}
+
+	if (tcp_header.flags & FLAGS::RST) {
+		handle_fin(src_ip, data);
 	}
 
 	if (tcp_header.flags & FLAGS::FIN) {
-		handle_fin();
+		handle_fin(src_ip, data);
 	}
 
-	if (data.size() > (tcp_header.data_offset * sizeof(u32))) {
-		m_data_semaphore.release();
+	if (tcp_header.flags & FLAGS::ACK) {
+		handle_ack(src_ip, data);
 	}
+}
+
+void TCPSession::handle_ack(IPv4Address src_ip, const BufferView& data)
+{
+
+	switch (m_state) {
+		case ConnectionState::SYN_Sent: {
+			m_state = ConnectionState::Established;
+			m_ack_semaphore.release();
+			break;
+		}
+		default:
+			m_ack_semaphore.release();
+	}
+}
+
+void TCPSession::handle_syn(IPv4Address src_ip, const BufferView& data)
+{
+	if (m_state == ConnectionState::Listen) {
+		m_state = ConnectionState::SYN_Received;
+		send_syn();
+		wait_for_ack();
+	} else if (m_state == ConnectionState::SYN_Sent) {
+		send_ack();
+	} else {
+		warn() << "Shouldn't happen!";
+	}
+}
+
+void TCPSession::handle_rst(IPv4Address src_ip, const BufferView& data)
+{
+	end_connection();
+}
+
+void TCPSession::handle_fin(IPv4Address src_ip, const BufferView& data) {}
+
+void TCPSession::handle_data(IPv4Address src_ip, const BufferView& data) {}
+
+void TCPSession::end_connection()
+{
+	m_state = ConnectionState::Closed;
+	m_syn_semaphore.release();
+	m_ack_semaphore.release();
+	m_data_semaphore.release();
 }
 
 void TCPSession::send_syn()
@@ -122,13 +166,6 @@ void TCPSession::send_ack()
 void TCPSession::wait_for_ack()
 {
 	m_ack_semaphore.acquire();
-}
-
-void TCPSession::handle_fin()
-{
-	send_ack();
-	send_control_packet(FLAGS::FIN);
-	wait_for_ack();
 }
 
 void TCPSession::send_control_packet(u8 flags)
@@ -208,7 +245,7 @@ u16 TCPSession::tcp_checksum(const BufferView& data)
 	return to_big_endian<u16>(~u16(sum));
 }
 
-bool TCPSession::is_packet_for_me(const IPv4Address& ip, const BufferView& data)
+bool TCPSession::is_packet_for_me(IPv4Address ip, const BufferView& data)
 {
 	auto& tcp_header = data.const_convert_to<TCPHeader>();
 	if ((to_big_endian<u16>(tcp_header.dest_port) == m_src_port) && (ip == m_dest_ip)) {

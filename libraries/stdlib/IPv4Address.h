@@ -13,7 +13,7 @@ class IPv4Address
 	IPv4Address& operator=(const IPv4Address& ip);
 	u8& operator[](u8 index);
 
-	IPv4Address mask(const IPv4Address&) const;
+	IPv4Address mask(IPv4Address) const;
 	bool operator==(const IPv4Address&) const;
 	bool operator!=(const IPv4Address&) const;
 	u8 operator[](u8 index) const;

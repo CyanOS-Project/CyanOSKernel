@@ -7,7 +7,7 @@
 
 ARP::ARP(Network& network) : m_network{network} {}
 
-const MACAddress& ARP::mac_address_lookup(const IPv4Address& lookup_ip)
+MACAddress ARP::mac_address_lookup(IPv4Address lookup_ip)
 {
 	ScopedLock local_lock{m_lock};
 
@@ -31,7 +31,7 @@ const MACAddress& ARP::mac_address_lookup(const IPv4Address& lookup_ip)
 	}
 }
 
-void ARP::send_arp_request(const IPv4Address& lookup_ip)
+void ARP::send_arp_request(IPv4Address lookup_ip)
 {
 
 	ARPHeader arp{.hardware_type = network_word16(static_cast<u16>(HardwareType::Ethernet)),
@@ -89,7 +89,7 @@ void ARP::handle_arp_packet(const BufferView& data)
 	}
 }
 
-void ARP::add_arp_entry(const IPv4Address& ip, const MACAddress& mac)
+void ARP::add_arp_entry(IPv4Address ip, MACAddress mac)
 {
 	ScopedLock local_lock{m_lock};
 
@@ -111,7 +111,7 @@ void ARP::add_arp_entry(const IPv4Address& ip, const MACAddress& mac)
 	}
 }
 
-void ARP::answer_arp_request(const IPv4Address& dest_ip, const MACAddress& dest_mac)
+void ARP::answer_arp_request(IPv4Address dest_ip, MACAddress dest_mac)
 {
 	ARPHeader arp{.hardware_type = network_word16(static_cast<u16>(HardwareType::Ethernet)),
 	              .protocol_type = network_word16(static_cast<u16>(ProtocolType::IPv4)),

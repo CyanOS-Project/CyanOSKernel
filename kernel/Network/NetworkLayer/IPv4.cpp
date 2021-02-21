@@ -39,7 +39,7 @@ void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const
 
 	ip_packet.header_checksum = checksum(BufferView{ip_raw_packet, 0, sizeof(IPv4Header)});
 
-	auto& destination_mac = destination_mac_lookup(destination);
+	auto destination_mac = destination_mac_lookup(destination);
 
 	m_network.network_adapter().send_frame(ProtocolType::IPv4, destination_mac, ip_raw_packet);
 }
@@ -77,10 +77,12 @@ void IPv4::handle_ip_packet(const BufferView& data)
 	}
 }
 
-const MACAddress& IPv4::destination_mac_lookup(IPv4Address address)
+MACAddress IPv4::destination_mac_lookup(IPv4Address address)
 {
 	if (address == IPv4Address::Broadcast) {
 		return MACAddress::Broadcast;
+	} else if (address == m_device_ip_address) {
+		return m_network.device_mac();
 	} else if (is_in_local_subnet(address)) {
 		return m_network.arp_provider().mac_address_lookup(address);
 	} else {
@@ -90,7 +92,7 @@ const MACAddress& IPv4::destination_mac_lookup(IPv4Address address)
 
 bool IPv4::is_in_local_subnet(IPv4Address address)
 {
-	if (address.mask(m_subnet_mask) == address) {
+	if (address.mask(m_subnet_mask) == m_device_ip_address.mask(m_subnet_mask)) {
 		return true;
 	} else {
 		return false;

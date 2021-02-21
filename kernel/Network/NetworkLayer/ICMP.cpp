@@ -6,7 +6,7 @@
 
 ICMP::ICMP(Network& network) : m_network{network}, m_lock{}, m_connection_list{} {}
 
-void ICMP::send_echo_request(const IPv4Address& address)
+void ICMP::send_echo_request(IPv4Address address)
 {
 	ScopedLock local_lock{m_lock};
 
@@ -33,7 +33,7 @@ void ICMP::send_echo_request(const IPv4Address& address)
 	}
 	m_connection_list.remove_if([&connection](const Connection& i) { return i.dest == connection.dest; });
 }
-void ICMP::handle_icmp_reply(const IPv4Address& source_ip, const BufferView& data)
+void ICMP::handle_icmp_reply(IPv4Address source_ip, const BufferView& data)
 {
 	auto& icmp_header = data.const_convert_to<EchoPacket>();
 
@@ -48,7 +48,7 @@ void ICMP::handle_icmp_reply(const IPv4Address& source_ip, const BufferView& dat
 	}
 }
 
-void ICMP::handle_echo_reply(const IPv4Address& source_ip, const BufferView& data)
+void ICMP::handle_echo_reply(IPv4Address source_ip, const BufferView& data)
 {
 	ScopedLock local_lock{m_lock};
 

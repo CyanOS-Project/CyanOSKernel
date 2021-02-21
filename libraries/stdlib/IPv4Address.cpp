@@ -55,7 +55,7 @@ bool IPv4Address::operator!=(const IPv4Address& other) const
 	return !operator==(other);
 }
 
-IPv4Address IPv4Address::mask(const IPv4Address& mask) const
+IPv4Address IPv4Address::mask(IPv4Address mask) const
 {
 	IPv4Address new_ip{};
 	for (size_t i = 0; i < IPv4_ELEMENTS_SIZE; i++) {

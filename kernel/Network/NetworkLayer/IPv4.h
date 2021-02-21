@@ -43,7 +43,7 @@ class IPv4
 	static constexpr u8 IPv4_FLAGS_DONT_FRAGMENT = (1 << 1);
 	static constexpr u8 IPv4_FLAGS_MORE_FRAGMENTS = (1 << 2);
 
-	const MACAddress& destination_mac_lookup(IPv4Address address);
+	MACAddress destination_mac_lookup(IPv4Address address);
 	bool is_in_local_subnet(IPv4Address address);
 	bool is_packet_ok(const IPv4Header& packet);
 

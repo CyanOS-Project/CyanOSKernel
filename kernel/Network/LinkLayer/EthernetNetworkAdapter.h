@@ -7,7 +7,7 @@ class EthernetNetworkAdapter : public NetworkAdapter
 {
   public:
 	EthernetNetworkAdapter() = default;
-	void send_frame(ProtocolType type, const MACAddress& destination, const BufferView& data) override;
+	void send_frame(ProtocolType type, MACAddress destination, const BufferView& data) override;
 
   protected:
 	virtual void send_ethernet_frame(const BufferView& data) = 0;

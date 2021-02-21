@@ -130,8 +130,8 @@ class DHCP
 	void handle_dhcp_offer(const BufferView&);
 	void handle_dhcp_ack(const BufferView&);
 	void send_dhcp_discovery();
-	void send_dhcp_request(const IPv4Address& requested_ip);
-	Buffer make_dhcp_segment(const IPv4Address& requested_ip, DCHPMessageType type);
+	void send_dhcp_request(IPv4Address requested_ip);
+	Buffer make_dhcp_segment(IPv4Address requested_ip, DCHPMessageType type);
 	void parse_dhcp_offer(const BufferView& buffer);
 	DCHPMessageType get_dhcp_type(const BufferView&);
 

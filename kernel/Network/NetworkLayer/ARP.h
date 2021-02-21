@@ -11,7 +11,7 @@ class ARP
 
   public:
 	ARP(Network& network);
-	const MACAddress& mac_address_lookup(const IPv4Address& lookup_ip);
+	MACAddress mac_address_lookup(IPv4Address lookup_ip);
 	void handle_arp_packet(const BufferView& data);
 
   private:
@@ -45,8 +45,8 @@ class ARP
 		IPv4Address ip;
 		MACAddress mac;
 		WaitQueue wait_queue;
-		ARPEntry(const IPv4Address& _ip) : ip{_ip}, mac{}, wait_queue{} {}
-		ARPEntry(const IPv4Address& _ip, const MACAddress& _mac) : ip{_ip}, mac{_mac}, wait_queue{} {}
+		ARPEntry(IPv4Address _ip) : ip{_ip}, mac{}, wait_queue{} {}
+		ARPEntry(IPv4Address _ip, MACAddress _mac) : ip{_ip}, mac{_mac}, wait_queue{} {}
 		ARPEntry(ARPEntry&& other) : ip{other.ip}, mac{other.mac}, wait_queue{move(other.wait_queue)} {}
 		ARPEntry& operator=(ARPEntry&& other)
 		{
@@ -61,7 +61,7 @@ class ARP
 	Spinlock m_lock;
 	Vector<ARPEntry> m_arp_table;
 
-	void send_arp_request(const IPv4Address& lookup_ip);
-	void answer_arp_request(const IPv4Address& dest_ip, const MACAddress& dest_mac);
-	void add_arp_entry(const IPv4Address& ip, const MACAddress& mac);
+	void send_arp_request(IPv4Address lookup_ip);
+	void answer_arp_request(IPv4Address dest_ip, MACAddress dest_mac);
+	void add_arp_entry(IPv4Address ip, MACAddress mac);
 };

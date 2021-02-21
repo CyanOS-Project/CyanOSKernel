@@ -12,9 +12,14 @@ class TCPSession
 {
   public:
 	NON_COPYABLE(TCPSession)
-	TCPSession(Network& network);
-	TCPSession(TCPSession&& network) = default;
-	TCPSession& operator=(TCPSession&& network) = default;
+	enum class Type
+	{
+		Server,
+		Client
+	};
+	TCPSession(Network& network, Type type);
+	TCPSession(TCPSession&&) = default;
+	TCPSession& operator=(TCPSession&&) = default;
 	void accept(u16 port);
 	void connect(IPv4Address ip, u16 port);
 	void close();
@@ -56,6 +61,7 @@ class TCPSession
 
 	enum class ConnectionState
 	{
+		Idle,
 		Listen,
 		SYN_Sent,
 		SYN_Received,
@@ -68,6 +74,13 @@ class TCPSession
 		Closed
 	};
 	void handle(IPv4Address src_ip, const BufferView& data);
+	void handle_ack(IPv4Address src_ip, const BufferView& data);
+	void handle_syn(IPv4Address src_ip, const BufferView& data);
+	void handle_rst(IPv4Address src_ip, const BufferView& data);
+	void handle_fin(IPv4Address src_ip, const BufferView& data);
+	void handle_data(IPv4Address src_ip, const BufferView& data);
+
+	void end_connection();
 	void send_syn();
 	void wait_for_syn();
 	void send_ack();
@@ -78,10 +91,12 @@ class TCPSession
 	Buffer wait_for_packet();
 	bool is_packet_ok(const BufferView& data);
 	u16 tcp_checksum(const BufferView& data);
-	bool is_packet_for_me(const IPv4Address& ip, const BufferView& data);
+	bool is_packet_for_me(IPv4Address ip, const BufferView& data);
 	constexpr u8 data_offset(size_t value) { return (number_of_words<u32>(value) & 0xF) << 4; }
 
 	Network* m_network;
+	Type m_type;
+	ConnectionState m_state;
 	Semaphore m_syn_semaphore;
 	Semaphore m_ack_semaphore;
 	Semaphore m_data_semaphore;
@@ -101,7 +116,7 @@ class TCP
 	TCPSession& accept(u16 port);
 	TCPSession& connect(IPv4Address ip, u16 port);
 	void close(TCPSession&);
-	void handle(const IPv4Address& src_ip, const BufferView& data);
+	void handle(IPv4Address src_ip, const BufferView& data);
 
 	Network& m_network;
 	Vector<TCPSession> m_connection_sessions;

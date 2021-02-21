@@ -33,8 +33,8 @@ class Logger
 	Logger& operator<<(Hex32 value);
 	Logger& operator<<(Hex64 value);
 	Logger& operator<<(void* ptr);
-	Logger& operator<<(const MACAddress& mac);
-	Logger& operator<<(const IPv4Address& ip);
+	Logger& operator<<(MACAddress mac);
+	Logger& operator<<(IPv4Address ip);
 
   private:
 	static StaticSpinlock lock;
