@@ -40,7 +40,7 @@ void ARP::send_arp_request(IPv4Address lookup_ip)
 	              .protocol_addr_len = IP4_ADDRESS_LENGTH,
 	              .opcode = network_word16(static_cast<u16>(ARPCode::Request)),
 	              .source_hw_addr = {},
-	              .source_protocol_addr = {10, 0, 2, 15}, // static address for us until we get one from DHCP.
+	              .source_protocol_addr = {},
 	              .destination_hw_addr = {},
 	              .destination_protocol_addr = {}};
 

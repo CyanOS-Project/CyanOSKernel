@@ -19,7 +19,8 @@ void Network::start()
 	m_ipv4.start();
 
 	// m_icmp.send_echo_request(IPv4Address{10, 0, 2, 2});
-	m_tcp.connect(IPv4Address{10, 0, 2, 2}, 80);
+	m_tcp.accept(80);
+	// m_tcp.connect(IPv4Address{10, 0, 2, 2}, 80);
 }
 
 IPv4Address Network::device_ip()

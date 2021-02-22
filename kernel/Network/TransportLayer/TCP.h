@@ -3,6 +3,7 @@
 #include "Tasking/Semaphore.h"
 #include <BufferView.h>
 #include <IPv4Address.h>
+#include <Result.h>
 #include <Vector.h>
 
 class Network;
@@ -20,11 +21,11 @@ class TCPSession
 	TCPSession(Network& network, Type type);
 	TCPSession(TCPSession&&) = default;
 	TCPSession& operator=(TCPSession&&) = default;
-	void accept(u16 port);
-	void connect(IPv4Address ip, u16 port);
+	Result<void> accept(u16 port);
+	Result<void> connect(IPv4Address ip, u16 port);
 	void close();
-	void send(const BufferView& data);
-	void receive(BufferView& data);
+	Result<void> send(const BufferView& data);
+	Result<void> receive(BufferView& data);
 
   private:
 	struct TCPHeader {
@@ -59,7 +60,7 @@ class TCPSession
 		CWR = Bit(7),
 	};
 
-	enum class ConnectionState
+	enum class State
 	{
 		Idle,
 		Listen,
@@ -96,15 +97,15 @@ class TCPSession
 
 	Network* m_network;
 	Type m_type;
-	ConnectionState m_state;
+	State m_state;
 	Semaphore m_syn_semaphore;
 	Semaphore m_ack_semaphore;
 	Semaphore m_data_semaphore;
 	size_t m_dest_sequence;
-	size_t m_src_sequence;
-	IPv4Address m_dest_ip;
-	size_t m_dest_port;
-	size_t m_src_port;
+	size_t m_local_sequence;
+	IPv4Address m_remote_ip;
+	size_t m_local_port;
+	size_t m_remote_port;
 
 	friend TCP;
 };
