@@ -52,6 +52,8 @@ template <typename T> class Result
 
 	Result(T&& result) : m_error(ResultError(0)), m_storage(move(result)) {}
 
+	operator bool() { return !m_error.m_error; }
+
 	bool is_error() const { return m_error.m_error != 0; }
 
 	unsigned error() const { return m_error.m_error; }
@@ -96,6 +98,8 @@ template <typename T> class Result<T&>
 
 	Result(T&& result) = delete;
 
+	operator bool() { return !m_error.m_error; }
+
 	bool is_error() const { return m_error.m_error != 0; }
 
 	unsigned error() const { return m_error.m_error; }
@@ -123,7 +127,11 @@ template <> class Result<void>
 		return *this;
 	}
 
+	Result() : m_error(ResultError(0)){};
+
 	Result(const ResultError& error) : m_error(error) {}
+
+	operator bool() { return !m_error.m_error; }
 
 	bool is_error() const { return m_error.m_error != 0; }
 
