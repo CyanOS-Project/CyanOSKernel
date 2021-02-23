@@ -39,13 +39,9 @@ class TupleImpl<index, HeadItem, TailItems...> : public TupleLeaf<index, HeadIte
 template <typename HeadItem, typename... TailItems> class Tuple : public TupleImpl<0, HeadItem, TailItems...>
 {
   public:
-	template <typename... RestArgs>
-	Tuple(RestArgs&&... args) : TupleImpl<0, HeadItem, TailItems...>(forward<RestArgs>(args)...)
-	{
-	}
-
-	DEFAULT_COPY(Tuple)
-	DEFAULT_MOVE(Tuple)
+	DEFAULT_COPY(Tuple);
+	DEFAULT_MOVE(Tuple);
+	template <typename... Args> Tuple(Args&&... args) : TupleImpl<0, HeadItem, TailItems...>(forward<Args>(args)...) {}
 
 	template <size_t index> auto& get()
 	{
@@ -84,3 +80,5 @@ template <typename HeadItem, typename... TailItems> class Tuple : public TupleIm
 		}
 	}
 };
+
+template <typename... Args> Tuple(Args... args) -> Tuple<Args...>;
