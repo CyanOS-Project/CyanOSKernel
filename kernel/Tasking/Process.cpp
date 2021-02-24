@@ -13,7 +13,7 @@ Spinlock Process::global_lock;
 Process& Process::create_virtual_process(StringView name, ProcessPrivilege privilege)
 {
 	ScopedLock local_lock(global_lock);
-	auto& pcb = processes.emplace_back(name, "/", "", privilege);
+	auto& pcb = processes.emplace_back(name);
 	return pcb;
 }
 
@@ -21,7 +21,6 @@ Process& Process::create_new_process(PathView path, StringView argument, Process
 {
 	ScopedLock local_lock(global_lock);
 	auto& pcb = processes.emplace_back(path[-1], path, argument, privilege);
-	Thread::create_thread(pcb, initiate_process, uptr(&pcb), ThreadPrivilege::Kernel);
 	return pcb;
 }
 
@@ -33,6 +32,24 @@ Result<Process&> Process::get_process_from_pid(size_t pid)
 		}
 	}
 	return ResultError(ERROR_INVALID_PID);
+}
+
+Process::Process(StringView name) :
+    m_lock{},
+    m_singal_waiting_queue{},
+    m_pid{reserve_pid()},
+    m_name{name},
+    m_path{"/"},
+    m_argument{""},
+    m_privilege_level{ProcessPrivilege::Kernel},
+    m_page_directory{Memory::create_new_virtual_space()},
+    m_descriptor_references{0},
+    m_parent{nullptr},
+    m_state{ProcessState::Ready},
+    m_handles{},
+    m_threads{},
+    m_pib{nullptr}
+{
 }
 
 Process::Process(StringView name, PathView path, StringView argument, ProcessPrivilege privilege) :
@@ -67,6 +84,9 @@ Process::Process(StringView name, PathView path, StringView argument, ProcessPri
 	if (Thread::current) {
 		Memory::switch_page_directory(Thread::current->parent_process().page_directory());
 	}
+
+	Thread::create_thread(
+	    *this, [this]() { initiate_process(); }, ThreadPrivilege::Kernel);
 }
 
 Process::~Process()
@@ -220,25 +240,23 @@ Result<ExecutableInformation> Process::load_executable(PathView path)
 	return execable_info.value();
 }
 
-void Process::initiate_process(uptr process)
+void Process::initiate_process()
 {
-	Process* current_process = reinterpret_cast<Process*>(process);
-
-	auto&& execable_info = current_process->load_executable(current_process->m_path);
+	auto&& execable_info = load_executable(m_path);
 	if (execable_info.is_error()) {
-		warn() << "couldn't load the process: \"" << current_process->m_path << "\" error: " << execable_info.error();
-		current_process->terminate(execable_info.error());
+		warn() << "couldn't load the process: \"" << m_path << "\" error: " << execable_info.error();
+		terminate(execable_info.error());
 		return;
 	}
 
-	current_process->m_pib->constructors_array = execable_info.value().constructors_array;
-	current_process->m_pib->constructors_array_count = execable_info.value().constructors_array_count;
+	m_pib->constructors_array = execable_info.value().constructors_array;
+	m_pib->constructors_array_count = execable_info.value().constructors_array_count;
 
-	if (current_process->m_privilege_level == ProcessPrivilege::User) {
+	if (m_privilege_level == ProcessPrivilege::User) {
 		void* thread_user_stack = valloc(0, STACK_SIZE, PAGE_USER | PAGE_READWRITE);
 
 		Context::enter_usermode(execable_info.value().entry_point, uptr(thread_user_stack) + STACK_SIZE - 4);
-	} else if (current_process->m_privilege_level == ProcessPrivilege::Kernel) {
+	} else if (m_privilege_level == ProcessPrivilege::Kernel) {
 		ASSERT_NOT_REACHABLE(); // TODO: kernel process.
 	}
 

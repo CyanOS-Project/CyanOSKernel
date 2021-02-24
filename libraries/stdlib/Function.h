@@ -1,3 +1,5 @@
+#pragma once
+
 #include "TypeTraits.h"
 #include "UniquePointer.h"
 

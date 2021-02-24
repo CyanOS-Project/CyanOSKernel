@@ -2,19 +2,25 @@
 #include "Arch/x86/Spinlock.h"
 #include "SpinLock.h"
 #include <Bitmap.h>
+#include <Function.h>
 #include <IntrusiveList.h>
 #include <IterationDecision.h>
 #include <Result.h>
 #include <Types.h>
 #include <UniquePointer.h>
 
-enum class ThreadState {
+enum class ThreadState
+{
 	Ready,
 	BlockedSleep,
 	BlockedQueue,
 	Suspended,
 };
-enum class ThreadPrivilege { Kernel, User };
+enum class ThreadPrivilege
+{
+	Kernel,
+	User
+};
 
 const size_t STACK_SIZE = 0x1000;
 
@@ -27,8 +33,8 @@ class Thread : public IntrusiveListNode<Thread>
 	typedef void (*thread_function)(uintptr_t argument);
 
 	static Thread* current;
-	static Thread& create_thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv);
-	static Thread& create_init_thread(Process& process);
+	static Thread& create_thread(Process&, Function<void()>, ThreadPrivilege);
+	static Thread& create_init_thread(Process&);
 	static void sleep(size_t ms);
 	static void yield();
 	static size_t number_of_ready_threads();
@@ -75,12 +81,13 @@ class Thread : public IntrusiveListNode<Thread>
 	static IntrusiveList<Thread> ready_threads;
 	static IntrusiveList<Thread> sleeping_threads;
 	static Spinlock global_lock;
-	static void thread_finishing();
+	static void thread_start(Thread*);
 
 	const size_t m_tid;
 	Process& m_parent;
 	ThreadState m_state;
 	ThreadPrivilege m_privilege;
+	Function<void()> m_entry_point;
 	WaitQueue* m_blocker;
 	UserThreadInformationBlock* m_tib;
 	size_t m_sleep_ticks;
@@ -89,7 +96,7 @@ class Thread : public IntrusiveListNode<Thread>
 	uintptr_t m_kernel_stack_pointer;
 	uintptr_t m_user_stack_start;
 
-	Thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv);
+	Thread(Process&, Function<void()>, ThreadPrivilege);
 	size_t reserve_tid();
 	void cleanup();
 

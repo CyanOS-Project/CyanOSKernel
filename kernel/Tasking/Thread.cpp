@@ -13,11 +13,11 @@ IntrusiveList<Thread> Thread::sleeping_threads;
 Bitmap<MAX_BITMAP_SIZE> Thread::tid_bitmap;
 Spinlock Thread::global_lock;
 
-Thread& Thread::create_thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv)
+Thread& Thread::create_thread(Process& process, Function<void()> entry_point, ThreadPrivilege priv)
 {
 	ScopedLock local_lock(global_lock);
 
-	Thread& new_thread = ready_threads.push_back(*new Thread(process, address, argument, priv));
+	Thread& new_thread = ready_threads.push_back(*new Thread(process, move(entry_point), priv));
 	process.list_new_thread(new_thread);
 
 	return new_thread;
@@ -26,16 +26,19 @@ Thread& Thread::create_thread(Process& process, thread_function address, uintptr
 Thread& Thread::create_init_thread(Process& process)
 {
 	ASSERT(current == nullptr);
-	auto& new_thread = create_thread(process, nullptr, 0, ThreadPrivilege::Kernel);
+
+	auto fake_callable_object = []() {};
+	auto& new_thread = create_thread(process, fake_callable_object, ThreadPrivilege::Kernel);
 	current = &new_thread;
 	return new_thread;
 }
 
-Thread::Thread(Process& process, thread_function address, uintptr_t argument, ThreadPrivilege priv) :
+Thread::Thread(Process& process, Function<void()> entry_point, ThreadPrivilege priv) :
     m_tid{reserve_tid()},
     m_parent{process},
     m_state{ThreadState::Ready},
     m_privilege{priv},
+    m_entry_point{move(entry_point)},
     m_blocker{nullptr}
 {
 	void* thread_kernel_stack = valloc(0, STACK_SIZE, PAGE_READWRITE);
@@ -43,9 +46,9 @@ Thread::Thread(Process& process, thread_function address, uintptr_t argument, Th
 	uintptr_t stack_pointer = 0;
 	ContextInformation info = {.stack = thread_kernel_stack,
 	                           .stack_size = STACK_SIZE,
-	                           .start_function = uintptr_t(address),
-	                           .return_function = uintptr_t(thread_finishing),
-	                           .argument = argument};
+	                           .start_function = uptr(thread_start),
+	                           .return_function = uptr(nullptr),
+	                           .argument = uptr(this)};
 
 	if (priv == ThreadPrivilege::Kernel) {
 		stack_pointer = Context::setup_task_stack_context(ContextType::Kernel, info);
@@ -79,6 +82,15 @@ Thread::~Thread()
 	tid_bitmap.clear(m_tid);
 }
 
+void Thread::thread_start(Thread* thread)
+{
+	thread->m_entry_point();
+	warn() << "thread returned...";
+	while (1) {
+		HLT();
+	}
+}
+
 void Thread::wake_up_from_queue()
 {
 	ScopedLock local_lock(global_lock);
@@ -109,14 +121,6 @@ void Thread::block(WaitQueue& blocker)
 void Thread::yield()
 {
 	asm volatile("int $0x81");
-}
-
-void Thread::thread_finishing()
-{
-	warn() << "thread returned.";
-	while (1) {
-		HLT();
-	}
 }
 
 size_t Thread::reserve_tid()

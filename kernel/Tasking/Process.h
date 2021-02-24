@@ -15,13 +15,18 @@
 #include <Types.h>
 #include <UniquePointer.h>
 
-enum class ProcessState {
+enum class ProcessState
+{
 	Ready,
 	Blocked,
 	Suspended,
 	Zombie,
 };
-enum class ProcessPrivilege { Kernel, User };
+enum class ProcessPrivilege
+{
+	Kernel,
+	User
+};
 
 class Thread;
 class Process
@@ -52,7 +57,6 @@ class Process
 	static Bitmap<MAX_BITMAP_SIZE> pid_bitmap;
 	static List<Process> processes;
 	static Spinlock global_lock;
-	static void initiate_process(uintptr_t pcb);
 
 	Spinlock m_lock;
 	WaitQueue m_singal_waiting_queue;
@@ -71,6 +75,8 @@ class Process
 	int m_return_status;
 
 	Process(StringView name, PathView path, StringView argument, ProcessPrivilege privilege);
+	Process(StringView name);
+	void initiate_process();
 	Result<ExecutableInformation> load_executable(PathView path);
 	size_t reserve_pid();
 	void cleanup();
