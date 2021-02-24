@@ -19,7 +19,10 @@ void Network::start()
 	m_ipv4.start();
 
 	// m_icmp.send_echo_request(IPv4Address{10, 0, 2, 2});
-	m_tcp.accept(80);
+	auto& connection = m_tcp.accept(80);
+	Buffer buf{100};
+	connection.receive(buf);
+	info() << "Message: " << (char*)(buf.ptr());
 	// m_tcp.connect(IPv4Address{10, 0, 2, 2}, 80);
 }
 

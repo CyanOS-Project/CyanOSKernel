@@ -47,13 +47,14 @@ void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const
 void IPv4::handle_ip_packet(const BufferView& data)
 {
 	auto& ip_packet = data.const_convert_to<IPv4Header>();
+	size_t packet_size = network_word16(ip_packet.total_length);
 
 	if (!is_packet_ok(ip_packet)) {
 		return;
 	}
 
 	size_t header_len = header_length(ip_packet.version_length);
-	BufferView extracted_data{data, header_len, data.size() - header_len};
+	BufferView extracted_data{data, header_len, packet_size - header_len};
 
 	switch (static_cast<IPv4Protocols>(ip_packet.protocol)) {
 		case IPv4Protocols::ICMP: {

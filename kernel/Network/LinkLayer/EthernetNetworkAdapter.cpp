@@ -17,9 +17,8 @@ void EthernetNetworkAdapter::send_frame(ProtocolType type, MACAddress destinatio
 
 void EthernetNetworkAdapter::handle_received_ethernet_frame(const BufferView& data)
 {
-	Buffer data_copy{data};
-	const EthernetFrame& ethernet_frame = data_copy.const_convert_to<EthernetFrame>();
+	const EthernetFrame& ethernet_frame = data.const_convert_to<EthernetFrame>();
 
 	handle_received_frame(static_cast<ProtocolType>(network_word16(ethernet_frame.type)),
-	                      BufferView{data_copy, ETHERNET_HEADER_SIZE});
+	                      BufferView{data, ETHERNET_HEADER_SIZE});
 }

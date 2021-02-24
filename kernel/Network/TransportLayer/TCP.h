@@ -25,7 +25,7 @@ class TCPSession
 	Result<void> connect(IPv4Address ip, u16 port);
 	void close();
 	Result<void> send(const BufferView& data);
-	Result<void> receive(BufferView& data);
+	Result<void> receive(Buffer& data);
 
   private:
 	struct TCPHeader {
@@ -81,19 +81,23 @@ class TCPSession
 	void handle_fin(IPv4Address src_ip, const BufferView& data);
 	void handle_data(IPv4Address src_ip, const BufferView& data);
 
-	void end_connection();
-	void send_syn();
-	void wait_for_syn();
 	void send_ack();
+	void send_syn();
+	void send_ack_syn();
+
 	void wait_for_ack();
-	void handle_fin();
+	void wait_for_syn();
+	void wait_for_packet();
+
+	void end_connection();
+
 	void send_packet(const BufferView& data, u8 flags);
 	void send_control_packet(u8 flags);
-	Buffer wait_for_packet();
 	bool is_packet_ok(const BufferView& data);
 	u16 tcp_checksum(const BufferView& data);
 	bool is_packet_for_me(IPv4Address ip, const BufferView& data);
-	constexpr u8 data_offset(size_t value) { return (number_of_words<u32>(value) & 0xF) << 4; }
+	constexpr u8 to_data_offset(size_t value) { return (number_of_words<u32>(value) & 0xF) << 4; }
+	constexpr size_t from_data_offset(u8 value) { return (value >> 4) * sizeof(u32); }
 
 	Network* m_network;
 	Type m_type;
@@ -101,11 +105,12 @@ class TCPSession
 	Semaphore m_syn_semaphore;
 	Semaphore m_ack_semaphore;
 	Semaphore m_data_semaphore;
-	size_t m_dest_sequence;
+	size_t m_remote_sequence;
 	size_t m_local_sequence;
 	IPv4Address m_remote_ip;
 	size_t m_local_port;
 	size_t m_remote_port;
+	Buffer* m_buffer;
 
 	friend TCP;
 };

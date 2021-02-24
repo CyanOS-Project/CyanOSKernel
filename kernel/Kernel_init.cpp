@@ -58,7 +58,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	Process& proc = Process::create_virtual_process("system", ProcessPrivilege::User);
 	Thread::create_init_thread(proc); // It will just continue here.
 	Thread::yield();
-	Thread::create_thread(proc, idle, 0, ThreadPrivilege::Kernel);
+	Thread::create_thread(proc, idle, ThreadPrivilege::Kernel);
 	info() << "Done!";
 
 	info() << "CyanOS is ready!";
@@ -75,7 +75,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	ASSERT_NOT_REACHABLE();
 }
 
-void idle(uintptr_t)
+void idle()
 {
 	while (true) {
 		HLT();

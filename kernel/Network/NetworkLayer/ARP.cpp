@@ -44,6 +44,7 @@ void ARP::send_arp_request(IPv4Address lookup_ip)
 	              .destination_hw_addr = {},
 	              .destination_protocol_addr = {}};
 
+	m_network.device_ip().copy(arp.source_protocol_addr);
 	m_network.device_mac().copy(arp.source_hw_addr);
 
 	MACAddress::Zero.copy(arp.destination_hw_addr);

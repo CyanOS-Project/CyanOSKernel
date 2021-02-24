@@ -85,10 +85,7 @@ Thread::~Thread()
 void Thread::thread_start(Thread* thread)
 {
 	thread->m_entry_point();
-	warn() << "thread returned...";
-	while (1) {
-		HLT();
-	}
+	thread->terminate();
 }
 
 void Thread::wake_up_from_queue()

@@ -13,61 +13,6 @@
 #include <ELFParser.h>
 #include <PathView.h>
 
-Semaphore* sem_lock;
-void test_semaphore_thread2(uintptr_t arg)
-{
-	UNUSED(arg);
-	warn() << "Thread2:";
-	sem_lock->acquire();
-	warn() << "Semaphore acquired by thread2";
-	Thread::sleep(1000);
-	sem_lock->release();
-	warn() << "Semaphore released by thread2";
-	while (1) {
-		HLT();
-	}
-}
-
-void test_semaphore(uintptr_t arg)
-{
-	UNUSED(arg);
-	warn() << "Thread1:";
-	sem_lock = new Semaphore(1);
-	sem_lock->acquire();
-	Thread::create_thread(Thread::current->parent_process(), test_semaphore_thread2, 0, ThreadPrivilege::Kernel);
-	warn() << "Semaphore acquired by thread1";
-	Thread::sleep(3000);
-	warn() << "wakeup thread1";
-	sem_lock->release();
-	warn() << "Semaphore released by thread1";
-	while (1) {
-		HLT();
-	}
-}
-
-void thread_test(uintptr_t arg)
-{
-	warn() << "Thread " << arg;
-	for (size_t i = 0; i < 3; i++) {
-		warn() << "Thread " << arg << ": Hello " << i;
-	}
-	while (true) {
-		// HLT();
-	}
-}
-void test_threading(uintptr_t arg)
-{
-	UNUSED(arg);
-	// printf("Main thread: creating other threads\n");
-	for (size_t i = 0; i < 200; i++) {
-		warn() << "Main thread: Creating thread " << i;
-		Thread::create_thread(Thread::current->parent_process(), thread_test, i, ThreadPrivilege::Kernel);
-	}
-	while (true) {
-		/* code */
-	}
-}
-
 void test_pipe1(uintptr_t arg)
 {
 	UNUSED(arg);
