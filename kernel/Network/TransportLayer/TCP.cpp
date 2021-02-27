@@ -34,22 +34,32 @@ TCPSession& TCP::connect(IPv4Address ip, u16 port)
 void TCP::close(TCPSession&) {}
 
 TCPSession::TCPSession(Network& network, Type type) :
+    m_lock{UniquePointer<Spinlock>::make_unique()},
     m_network{&network},
     m_type{type},
-    m_state{State::Idle},
+    m_state{State::Closed},
     m_syn_semaphore{0},
     m_ack_semaphore{0},
-    m_data_semaphore{0}
+    m_data_semaphore{0},
+    m_local_sequence{0},
+    m_buffer{0}
 {
 }
 
 Result<void> TCPSession::accept(u16 port)
 {
+	ScopedLock local_lock{*m_lock};
+
 	m_local_port = port;
-	m_local_sequence = 0;
 	m_state = State::Listen;
 
-	wait_for_syn();
+	wait_for_syn(local_lock);
+	m_state = State::SYN_Received;
+
+	send_ack_syn();
+	wait_for_ack(local_lock);
+
+	m_state = State::Established;
 
 	if (m_state == State::Established) {
 		return {};
@@ -61,13 +71,19 @@ Result<void> TCPSession::accept(u16 port)
 
 Result<void> TCPSession::connect(IPv4Address ip, u16 port)
 {
+	ScopedLock local_lock{*m_lock};
+
 	m_remote_ip = ip;
-	m_local_port = 5000;
 	m_remote_port = port;
-	m_local_sequence = 0;
-	m_state = State::SYN_Sent;
+	m_local_port = 5000;
 
 	send_syn();
+	m_state = State::SYN_Sent;
+
+	wait_for_syn(local_lock);
+	send_ack();
+
+	m_state == State::Established;
 
 	if (m_state == State::Established) {
 		return {};
@@ -81,19 +97,37 @@ void TCPSession::close() {}
 
 Result<void> TCPSession::send(const BufferView& data)
 {
+	ScopedLock local_lock{*m_lock};
+
+	if (m_state != State::Established) {
+		return ResultError{ERROR_CONNECTION_CLOSED};
+	}
+
 	send_packet(data, 0);
-	wait_for_ack();
+	wait_for_ack(local_lock);
+
+	return {};
 }
 
 Result<void> TCPSession::receive(Buffer& data)
 {
+	ScopedLock local_lock{*m_lock};
+
+	if (m_state != State::Established) {
+		return ResultError{ERROR_CONNECTION_CLOSED};
+	}
+
 	m_buffer = &data;
-	wait_for_packet();
+	wait_for_packet(local_lock);
 	send_ack();
+
+	return {};
 }
 
 void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 {
+	ScopedLock local_lock{*m_lock};
+
 	if (!is_packet_ok(data)) {
 		// FIXME: handle error here.
 		return;
@@ -102,7 +136,7 @@ void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 	auto& tcp_header = data.const_convert_to<TCPHeader>();
 
 	if (data.size() > from_data_offset(tcp_header.data_offset)) {
-		handle_data(src_ip, data);
+		handle_data(data);
 	}
 
 	if (tcp_header.flags & FLAGS::SYN) {
@@ -110,25 +144,16 @@ void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 	}
 
 	if (tcp_header.flags & FLAGS::RST) {
-		handle_fin(src_ip, data);
+		handle_rst();
 	}
 
 	if (tcp_header.flags & FLAGS::FIN) {
-		handle_fin(src_ip, data);
+		handle_fin();
 	}
 
 	if (tcp_header.flags & FLAGS::ACK) {
-		handle_ack(src_ip, data);
+		handle_ack();
 	}
-}
-
-void TCPSession::handle_ack(IPv4Address src_ip, const BufferView& data)
-{
-	if (m_state == State::SYN_Sent) {
-		m_state = State::Established;
-	}
-
-	m_ack_semaphore.release();
 }
 
 void TCPSession::handle_syn(IPv4Address src_ip, const BufferView& data)
@@ -137,37 +162,42 @@ void TCPSession::handle_syn(IPv4Address src_ip, const BufferView& data)
 
 	if (m_state == State::Listen) {
 
-		m_state = State::SYN_Received;
 		m_remote_sequence = network_word32(tcp_header.seq) + 1;
 		m_remote_port = network_word16(tcp_header.src_port);
 		m_remote_ip = IPv4Address{src_ip};
-
-		send_ack_syn();
-		wait_for_ack();
 		m_syn_semaphore.release();
-		m_state = State::Established;
 
 	} else if (m_state == State::SYN_Sent) {
-		send_ack();
+		m_syn_semaphore.release();
 	} else {
 		err() << "Shouldn't happen!";
 	}
 }
 
-void TCPSession::handle_rst(IPv4Address src_ip, const BufferView& data)
+void TCPSession::handle_ack()
+{
+	m_ack_semaphore.release();
+}
+
+void TCPSession::handle_rst()
 {
 	end_connection();
 }
 
-void TCPSession::handle_fin(IPv4Address src_ip, const BufferView& data) {}
+void TCPSession::handle_fin() {}
 
-void TCPSession::handle_data(IPv4Address src_ip, const BufferView& data)
+void TCPSession::handle_psh() {}
+
+void TCPSession::handle_data(const BufferView& data)
 {
 	// FIXME: check if buffer is available.
 	auto& tcp_header = data.const_convert_to<TCPHeader>();
 	size_t header_size = from_data_offset(tcp_header.data_offset);
+	size_t payload_size = data.size() - header_size;
 
-	m_buffer->fill_from(data.ptr() + header_size, 0, data.size() - header_size);
+	m_buffer->fill_from(data.ptr() + header_size, 0, payload_size);
+	m_remote_sequence += payload_size;
+
 	m_data_semaphore.release();
 }
 
@@ -186,19 +216,25 @@ void TCPSession::send_ack()
 	send_control_packet(FLAGS::ACK);
 }
 
-void TCPSession::wait_for_ack()
+void TCPSession::wait_for_ack(ScopedLock<Spinlock>& lock)
 {
+	lock.release();
 	m_ack_semaphore.acquire();
+	lock.acquire();
 }
 
-void TCPSession::wait_for_syn()
+void TCPSession::wait_for_syn(ScopedLock<Spinlock>& lock)
 {
+	lock.release();
 	m_syn_semaphore.acquire();
+	lock.acquire();
 }
 
-void TCPSession::wait_for_packet()
+void TCPSession::wait_for_packet(ScopedLock<Spinlock>& lock)
 {
+	lock.release();
 	m_data_semaphore.acquire();
+	lock.acquire();
 }
 
 void TCPSession::end_connection()

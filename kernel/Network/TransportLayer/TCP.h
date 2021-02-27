@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Tasking/ScopedLock.h"
 #include "Tasking/Semaphore.h"
 #include <BufferView.h>
 #include <IPv4Address.h>
@@ -62,7 +63,6 @@ class TCPSession
 
 	enum class State
 	{
-		Idle,
 		Listen,
 		SYN_Sent,
 		SYN_Received,
@@ -75,19 +75,20 @@ class TCPSession
 		Closed
 	};
 	void handle(IPv4Address src_ip, const BufferView& data);
-	void handle_ack(IPv4Address src_ip, const BufferView& data);
 	void handle_syn(IPv4Address src_ip, const BufferView& data);
-	void handle_rst(IPv4Address src_ip, const BufferView& data);
-	void handle_fin(IPv4Address src_ip, const BufferView& data);
-	void handle_data(IPv4Address src_ip, const BufferView& data);
+	void handle_ack();
+	void handle_rst();
+	void handle_fin();
+	void handle_psh();
+	void handle_data(const BufferView& data);
 
 	void send_ack();
 	void send_syn();
 	void send_ack_syn();
 
-	void wait_for_ack();
-	void wait_for_syn();
-	void wait_for_packet();
+	void wait_for_ack(ScopedLock<Spinlock>& lock);
+	void wait_for_syn(ScopedLock<Spinlock>& lock);
+	void wait_for_packet(ScopedLock<Spinlock>& lock);
 
 	void end_connection();
 
@@ -98,19 +99,21 @@ class TCPSession
 	bool is_packet_for_me(IPv4Address ip, const BufferView& data);
 	constexpr u8 to_data_offset(size_t value) { return (number_of_words<u32>(value) & 0xF) << 4; }
 	constexpr size_t from_data_offset(u8 value) { return (value >> 4) * sizeof(u32); }
+	static const u16 WINDOW_SIZE = 1000;
 
+	UniquePointer<Spinlock> m_lock;
 	Network* m_network;
 	Type m_type;
 	State m_state;
+	Buffer* m_buffer;
 	Semaphore m_syn_semaphore;
 	Semaphore m_ack_semaphore;
 	Semaphore m_data_semaphore;
+	IPv4Address m_remote_ip;
 	size_t m_remote_sequence;
 	size_t m_local_sequence;
-	IPv4Address m_remote_ip;
 	size_t m_local_port;
 	size_t m_remote_port;
-	Buffer* m_buffer;
 
 	friend TCP;
 };

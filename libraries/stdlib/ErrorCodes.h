@@ -19,3 +19,4 @@
 #define ERROR_READING_ARGS          16
 #define ERROR_ACCESS_DENIED         17
 #define ERROR_CONNECTION_DENIED     18
+#define ERROR_CONNECTION_CLOSED     19

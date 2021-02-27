@@ -17,12 +17,16 @@ Network::Network(NetworkAdapter& network_adapter) :
 void Network::start()
 {
 	m_ipv4.start();
+	Thread::sleep(1000);
 
 	// m_icmp.send_echo_request(IPv4Address{10, 0, 2, 2});
 	auto& connection = m_tcp.accept(80);
 	Buffer buf{100};
-	connection.receive(buf);
-	info() << "Message: " << (char*)(buf.ptr());
+	while (1) {
+		connection.receive(buf);
+		info() << "Message: " << (char*)(buf.ptr());
+		memset(buf.ptr(), 0, buf.size());
+	}
 	// m_tcp.connect(IPv4Address{10, 0, 2, 2}, 80);
 }
 
