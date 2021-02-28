@@ -38,8 +38,6 @@ void UDP::handle(IPv4Address src_ip, const BufferView& data)
 {
 	ScopedLock local_lock{m_lock};
 
-	warn() << "UDP Packet received.";
-
 	auto& udp_segment = data.const_convert_to<UDPHeader>();
 
 	u16 dest_port = network_word16(udp_segment.destination_port);

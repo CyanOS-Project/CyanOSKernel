@@ -26,7 +26,9 @@ void Network::start()
 		connection.receive(buf);
 		info() << "Message: " << (char*)(buf.ptr());
 		memset(buf.ptr(), 0, buf.size());
+		warn() << "---------------------------";
 	}
+
 	// m_tcp.connect(IPv4Address{10, 0, 2, 2}, 80);
 }
 

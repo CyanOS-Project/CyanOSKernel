@@ -16,7 +16,6 @@ Spinlock Thread::global_lock;
 Thread& Thread::create_thread(Process& process, Function<void()> entry_point, ThreadPrivilege priv)
 {
 	ScopedLock local_lock(global_lock);
-
 	Thread& new_thread = ready_threads.push_back(*new Thread(process, move(entry_point), priv));
 	process.list_new_thread(new_thread);
 
@@ -85,7 +84,11 @@ Thread::~Thread()
 void Thread::thread_start(Thread* thread)
 {
 	thread->m_entry_point();
-	thread->terminate();
+	while (1) {
+		HLT();
+	}
+	// FIXME: there is bug in thread termination.
+	// thread->terminate();
 }
 
 void Thread::wake_up_from_queue()
@@ -202,6 +205,5 @@ size_t Thread::number_of_ready_threads()
 
 void Thread::cleanup()
 {
-	warn() << "Thread " << m_tid << " is freed from memory.";
 	delete this;
 }

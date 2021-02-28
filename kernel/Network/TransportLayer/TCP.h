@@ -95,6 +95,7 @@ class TCPSession
 	void send_packet(const BufferView& data, u8 flags);
 	void send_control_packet(u8 flags);
 	bool is_packet_ok(const BufferView& data);
+	bool is_buffer_available();
 	u16 tcp_checksum(const BufferView& data);
 	bool is_packet_for_me(IPv4Address ip, const BufferView& data);
 	constexpr u8 to_data_offset(size_t value) { return (number_of_words<u32>(value) & 0xF) << 4; }
@@ -104,16 +105,16 @@ class TCPSession
 	UniquePointer<Spinlock> m_lock;
 	Network* m_network;
 	Type m_type;
-	State m_state;
-	Buffer* m_buffer;
-	Semaphore m_syn_semaphore;
-	Semaphore m_ack_semaphore;
-	Semaphore m_data_semaphore;
-	IPv4Address m_remote_ip;
-	size_t m_remote_sequence;
-	size_t m_local_sequence;
-	size_t m_local_port;
-	size_t m_remote_port;
+	Buffer* m_buffer{0};
+	State m_state{State::Closed};
+	Semaphore m_syn_semaphore{0};
+	Semaphore m_ack_semaphore{0};
+	Semaphore m_data_semaphore{0};
+	IPv4Address m_remote_ip{};
+	size_t m_remote_sequence{0};
+	size_t m_local_sequence{0};
+	size_t m_local_port{0};
+	size_t m_remote_port{0};
 
 	friend TCP;
 };

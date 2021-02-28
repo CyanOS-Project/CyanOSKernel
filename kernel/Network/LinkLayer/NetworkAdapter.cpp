@@ -16,7 +16,7 @@ void NetworkAdapter::handle_received_frame(ProtocolType type, const BufferView& 
 		err() << "No network handler for this network adapter!";
 	}
 
-	auto frame_handler = [this, type, data = Buffer{data}]() mutable {
+	auto frame_handler = [this, type, data = Buffer(data)]() mutable {
 		if (type == ProtocolType::ARP) {
 			m_network->arp_provider().handle_arp_packet(data);
 		} else if (type == ProtocolType::IPv4) {
@@ -26,7 +26,7 @@ void NetworkAdapter::handle_received_frame(ProtocolType type, const BufferView& 
 		}
 	};
 
-	Thread::create_thread(Thread::current->parent_process(), frame_handler, ThreadPrivilege::Kernel);
+	Thread::create_thread(Thread::current->parent_process(), move(frame_handler), ThreadPrivilege::Kernel);
 }
 
 MACAddress NetworkAdapter::MAC() const
