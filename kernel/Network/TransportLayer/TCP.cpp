@@ -111,11 +111,16 @@ Result<void> TCPSession::receive(Buffer& data)
 		return ResultError{ERROR_CONNECTION_CLOSED};
 	}
 
+	m_initial_remote_sequence = m_remote_sequence;
 	m_buffer = &data;
+
 	wait_for_packet(local_lock);
-	send_ack();
+
 	m_buffer = nullptr;
 
+	if (m_state != State::Established) {
+		return ResultError{ERROR_CONNECTION_CLOSED};
+	}
 	return {};
 }
 
@@ -123,12 +128,15 @@ void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 {
 	ScopedLock local_lock{*m_lock};
 
+	auto& tcp_header = data.const_convert_to<TCPHeader>();
+
 	if (!is_packet_ok(data)) {
 		// FIXME: handle error here.
 		return;
 	}
-
-	auto& tcp_header = data.const_convert_to<TCPHeader>();
+	if (!handle_out_of_order_packets(local_lock, network_word32(tcp_header.seq))) {
+		return;
+	}
 
 	if (data.size() > from_data_offset(tcp_header.data_offset)) {
 		handle_data(data);
@@ -136,6 +144,10 @@ void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 
 	if (tcp_header.flags & FLAGS::SYN) {
 		handle_syn(src_ip, data);
+	}
+
+	if (tcp_header.flags & FLAGS::PSH) {
+		handle_psh();
 	}
 
 	if (tcp_header.flags & FLAGS::RST) {
@@ -149,6 +161,8 @@ void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 	if (tcp_header.flags & FLAGS::ACK) {
 		handle_ack();
 	}
+
+	m_receive_waitqueue.wake_up_all();
 }
 
 void TCPSession::handle_syn(IPv4Address src_ip, const BufferView& data)
@@ -178,7 +192,10 @@ void TCPSession::handle_rst()
 
 void TCPSession::handle_fin() {}
 
-void TCPSession::handle_psh() {}
+void TCPSession::handle_psh()
+{
+	m_data_semaphore.release();
+}
 
 void TCPSession::handle_data(const BufferView& data)
 {
@@ -186,12 +203,28 @@ void TCPSession::handle_data(const BufferView& data)
 		auto& tcp_header = data.const_convert_to<TCPHeader>();
 		size_t header_size = from_data_offset(tcp_header.data_offset);
 		size_t payload_size = data.size() - header_size;
+		size_t data_offset = m_remote_sequence - m_initial_remote_sequence;
 
-		m_buffer->fill_from(data.ptr() + header_size, 0, payload_size);
+		m_buffer->fill_from(data.ptr() + header_size, data_offset, payload_size);
 		m_remote_sequence += payload_size;
 
-		m_data_semaphore.release();
+		send_ack();
 	}
+}
+
+bool TCPSession::handle_out_of_order_packets(ScopedLock<Spinlock>& lock, u32 remote_sequence)
+{
+	if (m_state != State::Established) {
+		return true;
+	}
+
+	while (!is_in_order_packet(remote_sequence) && is_in_window_packet(remote_sequence)) {
+		// FIXME: wait for some more out of order packets before sending ack (for retransmition)
+		send_ack();
+
+		m_receive_waitqueue.wait(lock);
+	}
+	return is_in_window_packet(remote_sequence);
 }
 
 void TCPSession::send_syn()
@@ -238,6 +271,7 @@ void TCPSession::end_connection()
 	m_syn_semaphore.release();
 	m_ack_semaphore.release();
 	m_data_semaphore.release();
+	m_receive_waitqueue.wake_up_all();
 }
 
 void TCPSession::send_control_packet(u8 flags)
@@ -286,6 +320,16 @@ bool TCPSession::is_packet_ok(const BufferView& data)
 	return true;
 }
 
+bool TCPSession::is_in_order_packet(u32 remote_sequence)
+{
+	return m_remote_sequence == remote_sequence;
+}
+bool TCPSession::is_in_window_packet(u32 remote_sequence)
+{
+	return (m_initial_remote_sequence <= remote_sequence) &&
+	       ((m_initial_remote_sequence + MAX_WINDOW_SIZE) > remote_sequence);
+}
+
 bool TCPSession::is_buffer_available()
 {
 	if (m_buffer) {
@@ -329,17 +373,9 @@ bool TCPSession::is_packet_for_me(IPv4Address ip, const BufferView& data)
 {
 	auto& tcp_header = data.const_convert_to<TCPHeader>();
 	if (m_state == State::Listen) {
-		if (to_big_endian<u16>(tcp_header.dest_port) == m_local_port) {
-			return true;
-		} else {
-			return false;
-		}
+		return to_big_endian<u16>(tcp_header.dest_port) == m_local_port;
 	} else {
-		if ((to_big_endian<u16>(tcp_header.dest_port) == m_local_port) &&
-		    (to_big_endian<u16>(tcp_header.src_port) == m_remote_port) && (ip == m_remote_ip)) {
-			return true;
-		} else {
-			return false;
-		}
+		return (to_big_endian<u16>(tcp_header.dest_port) == m_local_port) &&
+		       (to_big_endian<u16>(tcp_header.src_port) == m_remote_port) && (ip == m_remote_ip);
 	}
 }

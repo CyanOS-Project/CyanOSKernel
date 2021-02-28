@@ -17,7 +17,6 @@ void IPv4::start()
 	m_device_ip_address = dhcp_info.device_ip;
 	m_gateway_ip_address = dhcp_info.gateway_ip;
 	m_subnet_mask = dhcp_info.subnet_mask;
-	// FIXME: Get an IP address using DHCP.
 }
 
 void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const BufferView& data)

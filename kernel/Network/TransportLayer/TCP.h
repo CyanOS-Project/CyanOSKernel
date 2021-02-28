@@ -81,6 +81,7 @@ class TCPSession
 	void handle_fin();
 	void handle_psh();
 	void handle_data(const BufferView& data);
+	bool handle_out_of_order_packets(ScopedLock<Spinlock>&, u32 remote_sequence);
 
 	void send_ack();
 	void send_syn();
@@ -95,12 +96,14 @@ class TCPSession
 	void send_packet(const BufferView& data, u8 flags);
 	void send_control_packet(u8 flags);
 	bool is_packet_ok(const BufferView& data);
+	bool is_in_order_packet(u32 remote_sequence);
+	bool is_in_window_packet(u32 remote_sequence);
 	bool is_buffer_available();
 	u16 tcp_checksum(const BufferView& data);
 	bool is_packet_for_me(IPv4Address ip, const BufferView& data);
 	constexpr u8 to_data_offset(size_t value) { return (number_of_words<u32>(value) & 0xF) << 4; }
 	constexpr size_t from_data_offset(u8 value) { return (value >> 4) * sizeof(u32); }
-	static const u16 WINDOW_SIZE = 1000;
+	static const u16 MAX_WINDOW_SIZE = 1000;
 
 	UniquePointer<Spinlock> m_lock;
 	Network* m_network;
@@ -110,11 +113,15 @@ class TCPSession
 	Semaphore m_syn_semaphore{0};
 	Semaphore m_ack_semaphore{0};
 	Semaphore m_data_semaphore{0};
+	WaitQueue m_receive_waitqueue{};
 	IPv4Address m_remote_ip{};
 	size_t m_remote_sequence{0};
 	size_t m_local_sequence{0};
 	size_t m_local_port{0};
 	size_t m_remote_port{0};
+	size_t local_window_size{MAX_WINDOW_SIZE};
+	size_t remote_window_size{MAX_WINDOW_SIZE};
+	size_t m_initial_remote_sequence{0};
 
 	friend TCP;
 };
