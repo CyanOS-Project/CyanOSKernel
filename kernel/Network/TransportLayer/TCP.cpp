@@ -87,7 +87,15 @@ Result<void> TCPSession::connect(IPv4Address ip, u16 port)
 	}
 }
 
-void TCPSession::close() {}
+void TCPSession::close()
+{
+	ScopedLock local_lock{*m_lock};
+
+	m_state = State::FIN_Wait1;
+	send_fin();
+	wait_for_ack(local_lock);
+	m_state = State::FIN_Wait2;
+}
 
 Result<void> TCPSession::send(const BufferView& data)
 {
@@ -130,6 +138,10 @@ void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 
 	auto& tcp_header = data.const_convert_to<TCPHeader>();
 
+	if (m_state == State::Closed) {
+		return;
+	}
+
 	if (!is_packet_ok(data)) {
 		// FIXME: handle error here.
 		return;
@@ -155,7 +167,7 @@ void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 	}
 
 	if (tcp_header.flags & FLAGS::FIN) {
-		handle_fin();
+		handle_fin(local_lock);
 	}
 
 	if (tcp_header.flags & FLAGS::ACK) {
@@ -190,7 +202,26 @@ void TCPSession::handle_rst()
 	end_connection();
 }
 
-void TCPSession::handle_fin() {}
+void TCPSession::handle_fin(ScopedLock<Spinlock>& lock)
+{
+	if (m_state == State::FIN_Wait2) {
+		m_remote_sequence++;
+		send_ack();
+		m_state = State::Closed;
+	} else if (m_state == State::Established) {
+		m_state = State::Close_Wait;
+		m_remote_sequence++;
+		send_ack();
+		send_fin();
+
+		m_state = State::Last_Ack;
+		wait_for_ack(lock);
+
+		m_state = State::Closed;
+	} else {
+		warn() << "This shouldn't happen, received FIN outside FIN_WAIT2 or ESTABLISHED states!";
+	}
+}
 
 void TCPSession::handle_psh()
 {
@@ -242,6 +273,11 @@ void TCPSession::send_ack_syn()
 void TCPSession::send_ack()
 {
 	send_control_packet(FLAGS::ACK);
+}
+
+void TCPSession::send_fin()
+{
+	send_control_packet(FLAGS::FIN);
 }
 
 void TCPSession::wait_for_ack(ScopedLock<Spinlock>& lock)
@@ -368,7 +404,9 @@ u16 TCPSession::tcp_checksum(const BufferView& data)
 bool TCPSession::is_packet_for_me(IPv4Address ip, const BufferView& data)
 {
 	auto& tcp_header = data.const_convert_to<TCPHeader>();
-	if (m_state == State::Listen) {
+	if (m_state == State::Closed) {
+		return false;
+	} else if (m_state == State::Listen) {
 		return to_big_endian<u16>(tcp_header.dest_port) == m_local_port;
 	} else {
 		return (to_big_endian<u16>(tcp_header.dest_port) == m_local_port) &&

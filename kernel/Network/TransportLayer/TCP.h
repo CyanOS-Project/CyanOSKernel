@@ -78,7 +78,7 @@ class TCPSession
 	void handle_syn(IPv4Address src_ip, const BufferView& data);
 	void handle_ack();
 	void handle_rst();
-	void handle_fin();
+	void handle_fin(ScopedLock<Spinlock>&);
 	void handle_psh();
 	void handle_data(const BufferView& data);
 	bool handle_out_of_order_packets(ScopedLock<Spinlock>&, u32 remote_sequence);
@@ -86,6 +86,7 @@ class TCPSession
 	void send_ack();
 	void send_syn();
 	void send_ack_syn();
+	void send_fin();
 
 	void wait_for_ack(ScopedLock<Spinlock>& lock);
 	void wait_for_syn(ScopedLock<Spinlock>& lock);
