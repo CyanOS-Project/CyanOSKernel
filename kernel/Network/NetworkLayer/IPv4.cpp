@@ -92,11 +92,7 @@ MACAddress IPv4::destination_mac_lookup(IPv4Address address)
 
 bool IPv4::is_in_local_subnet(IPv4Address address)
 {
-	if (address.mask(m_subnet_mask) == m_device_ip_address.mask(m_subnet_mask)) {
-		return true;
-	} else {
-		return false;
-	}
+	return address.mask(m_subnet_mask) == m_device_ip_address.mask(m_subnet_mask);
 }
 
 bool IPv4::is_packet_ok(const IPv4Header& packet)

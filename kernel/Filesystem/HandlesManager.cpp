@@ -32,18 +32,12 @@ void HandlesManager::remove_handle(Handle handle)
 
 	switch (handle_entry.type) {
 		case HandleType::FileDescription:
-			file_description_table.remove_if([&](UniquePointer<FileDescription>& fd) {
-				if (fd.ptr() == handle_entry.file_description)
-					return true;
-				return false;
-			});
+			file_description_table.remove_if(
+			    [&](UniquePointer<FileDescription>& fd) { return fd.ptr() == handle_entry.file_description; });
 			break;
 		case HandleType::ProcessDescription:
-			process_description_table.remove_if([&](UniquePointer<ProcessDescription>& fd) {
-				if (fd.ptr() == handle_entry.process_description)
-					return true;
-				return false;
-			});
+			process_description_table.remove_if(
+			    [&](UniquePointer<ProcessDescription>& fd) { return fd.ptr() == handle_entry.process_description; });
 			break;
 		case HandleType::Invalid:
 			ASSERT_NOT_REACHABLE();

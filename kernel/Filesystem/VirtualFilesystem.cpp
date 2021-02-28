@@ -11,11 +11,7 @@ Spinlock VFS::lock;
 
 Result<void> VFS::mount(UniquePointer<FSNode>&& new_fs_root)
 {
-	if (fs_roots.contains([&](const UniquePointer<FSNode>& node) {
-		    if (node->m_name == new_fs_root->m_name)
-			    return true;
-		    return false;
-	    })) {
+	if (fs_roots.contains([&](const UniquePointer<FSNode>& node) { return node->m_name == new_fs_root->m_name; })) {
 		return ResultError(ERROR_FS_ALREADY_EXISTS);
 	}
 	fs_roots.push_back(move(new_fs_root));

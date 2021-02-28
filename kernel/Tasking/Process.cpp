@@ -192,12 +192,7 @@ void Process::unlist_new_thread(Thread& thread)
 {
 	ScopedLock local_lock(m_lock);
 
-	m_threads.remove_if([&](Reference<Thread>& cur) {
-		if (cur->tid() == thread.tid())
-			return true;
-		else
-			return false;
-	});
+	m_threads.remove_if([&](Reference<Thread>& cur) { return cur->tid() == thread.tid(); });
 }
 
 void Process::descriptor_referenced()
@@ -273,11 +268,5 @@ size_t Process::reserve_pid()
 void Process::cleanup()
 {
 	warn() << "Process " << m_pid << " is freed from memory.";
-	processes.remove(processes.find_if([this](auto& process) {
-		if (&process == this) {
-			return true;
-		} else {
-			return false;
-		}
-	}));
+	processes.remove(processes.find_if([this](auto& process) { return &process == this; }));
 }

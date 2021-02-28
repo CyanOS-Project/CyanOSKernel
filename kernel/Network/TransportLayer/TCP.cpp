@@ -332,11 +332,7 @@ bool TCPSession::is_in_window_packet(u32 remote_sequence)
 
 bool TCPSession::is_buffer_available()
 {
-	if (m_buffer) {
-		return true;
-	} else {
-		return false;
-	}
+	return m_buffer;
 }
 
 u16 TCPSession::tcp_checksum(const BufferView& data)

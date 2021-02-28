@@ -93,12 +93,7 @@ template <size_t slab_size, size_t memory_size> void Slab<slab_size, memory_size
 
 template <size_t slab_size, size_t memory_size> bool Slab<slab_size, memory_size>::is_address_in_slab(void* address)
 {
-	if ((address >= blocks) && (address <= &blocks[MAX_BLOCKS - 1].data[slab_size - 1])) {
-		return true;
-	} else {
-		return false;
-	}
-	return true;
+	return (address >= blocks) && (address <= &blocks[MAX_BLOCKS - 1].data[slab_size - 1]);
 }
 
 template <size_t slab_size, size_t memory_size> void* Slab<slab_size, memory_size>::alloc_in_new_slab()

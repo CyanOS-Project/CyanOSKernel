@@ -19,11 +19,7 @@ Result<FSNode&> SocketFS::create(const StringView& name, OpenMode mode, OpenFlag
 	UNUSED(mode);
 	UNUSED(flags);
 
-	if (m_children.contains([&](const Socket& socket) {
-		    if (socket.m_name == name)
-			    return true;
-		    return false;
-	    })) {
+	if (m_children.contains([&](const Socket& socket) { return socket.m_name == name; })) {
 		return ResultError(ERROR_FILE_ALREADY_EXISTS);
 	}
 	return m_children.emplace_back(name);

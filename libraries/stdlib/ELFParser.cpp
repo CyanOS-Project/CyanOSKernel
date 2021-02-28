@@ -21,11 +21,7 @@ ELFParser::ELFParser(const char* file, size_t size) :
 
 bool ELFParser::is_valid() const
 {
-	if (!strncmp((char*)m_elf_header->e_ident, ELFMAG, SELFMAG)) {
-		return true;
-	} else {
-		return false;
-	}
+	return !strncmp((char*)m_elf_header->e_ident, ELFMAG, SELFMAG);
 }
 
 const elf32_hdr& ELFParser::elf_header() const

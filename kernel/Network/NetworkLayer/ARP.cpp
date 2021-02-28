@@ -11,13 +11,7 @@ MACAddress ARP::mac_address_lookup(IPv4Address lookup_ip)
 {
 	ScopedLock local_lock{m_lock};
 
-	auto dest_mac = m_arp_table.find_if([&lookup_ip](const ARPEntry& arp_entry) {
-		if (arp_entry.ip == lookup_ip) {
-			return true;
-		} else {
-			return false;
-		}
-	});
+	auto dest_mac = m_arp_table.find_if([&lookup_ip](const ARPEntry& arp_entry) { return arp_entry.ip == lookup_ip; });
 
 	if (dest_mac != m_arp_table.end()) {
 		return dest_mac->mac;
@@ -94,13 +88,7 @@ void ARP::add_arp_entry(IPv4Address ip, MACAddress mac)
 {
 	ScopedLock local_lock{m_lock};
 
-	auto arp_entry = m_arp_table.find_if([&ip](const ARPEntry& arp_entry) {
-		if (arp_entry.ip == ip) {
-			return true;
-		} else {
-			return false;
-		}
-	});
+	auto arp_entry = m_arp_table.find_if([&ip](const ARPEntry& arp_entry) { return arp_entry.ip == ip; });
 
 	if (arp_entry == m_arp_table.end()) {
 		// We got a MAC we didn't ask for, add it to the table anyway.
