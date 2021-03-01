@@ -54,7 +54,6 @@ void Thread::wake_up_sleepers()
 			iterator_copy->m_sleep_ticks = 0;
 			iterator_copy->wake_up();
 		}
-		thread2 = iterator_copy;
 	}
 }
 
