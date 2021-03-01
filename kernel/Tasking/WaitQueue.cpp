@@ -31,7 +31,7 @@ void WaitQueue::terminate_blocked_thread(Thread& thread)
 {
 	ScopedLock local_lock(*m_lock);
 
-	m_threads.remove(thread);
+	m_threads.remove_if([&thread](auto i) { return i->tid() == thread.tid(); });
 }
 
 void WaitQueue::wake_up(size_t num)
@@ -57,6 +57,6 @@ void WaitQueue::wake_up_one()
 	if (!m_threads.size()) {
 		return;
 	}
-	auto& thread_to_wake = m_threads.pop_front();
-	thread_to_wake.wake_up_from_queue();
+	m_threads.head()->wake_up();
+	m_threads.pop_front();
 }

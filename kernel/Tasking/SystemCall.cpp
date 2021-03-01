@@ -212,7 +212,7 @@ Result<int> TerminateThread(Handle handle, int status)
 
 Result<int> Sleep(size_t size)
 {
-	Thread::sleep(size);
+	Thread::current->sleep(size);
 	return 0;
 }
 

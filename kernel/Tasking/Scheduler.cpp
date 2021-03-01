@@ -27,7 +27,7 @@ void Scheduler::schedule(ISRContextFrame& current_context, ScheduleType type)
 	ASSERT(Thread::current);
 
 	if (type == ScheduleType::Timed) {
-		wake_up_sleepers();
+		Thread::wake_up_sleepers();
 	}
 
 	save_context(current_context, *Thread::current);
@@ -51,17 +51,6 @@ Thread& Scheduler::select_next_thread()
 	} else {
 		return *next_thread;
 	}
-}
-
-void Scheduler::wake_up_sleepers()
-{
-	Thread::for_each_sleeping([](Thread& thread) {
-		if (thread.m_sleep_ticks <= PIT::ticks) {
-			thread.m_sleep_ticks = 0;
-			thread.wake_up_from_sleep();
-		}
-		return IterationDecision::Continue;
-	});
 }
 
 void Scheduler::load_context(ISRContextFrame& current_context, Thread& thread)

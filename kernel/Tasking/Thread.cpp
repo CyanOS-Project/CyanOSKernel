@@ -10,6 +10,8 @@
 Thread* Thread::current = nullptr;
 IntrusiveList<Thread> Thread::ready_threads;
 IntrusiveList<Thread> Thread::sleeping_threads;
+IntrusiveList<Thread> Thread::blocked_threads;
+IntrusiveList<Thread> Thread::blocked_timed_threads;
 Bitmap<MAX_BITMAP_SIZE> Thread::tid_bitmap;
 Spinlock Thread::global_lock;
 
@@ -32,13 +34,36 @@ Thread& Thread::create_init_thread(Process& process)
 	return new_thread;
 }
 
+void Thread::wake_up_sleepers()
+{
+	auto&& thread1 = Thread::sleeping_threads.begin();
+	while (thread1 != Thread::sleeping_threads.end()) {
+		auto iterator_copy = thread1++;
+
+		if (iterator_copy->m_sleep_ticks <= PIT::ticks) {
+			iterator_copy->m_sleep_ticks = 0;
+			iterator_copy->wake_up();
+		}
+	}
+
+	auto&& thread2 = Thread::blocked_timed_threads.begin();
+	while (thread2 != Thread::blocked_timed_threads.end()) {
+		auto iterator_copy = thread2++;
+
+		if (iterator_copy->m_sleep_ticks <= PIT::ticks) {
+			iterator_copy->m_sleep_ticks = 0;
+			iterator_copy->wake_up();
+		}
+		thread2 = iterator_copy;
+	}
+}
+
 Thread::Thread(Process& process, Function<void()> entry_point, ThreadPrivilege priv) :
     m_tid{reserve_tid()},
     m_parent{process},
     m_state{ThreadState::Ready},
     m_privilege{priv},
-    m_entry_point{move(entry_point)},
-    m_blocker{nullptr}
+    m_entry_point{move(entry_point)}
 {
 	void* thread_kernel_stack = valloc(0, STACK_SIZE, PAGE_READWRITE);
 
@@ -91,31 +116,64 @@ void Thread::thread_start(Thread* thread)
 	// thread->terminate();
 }
 
-void Thread::wake_up_from_queue()
+void Thread::wake_up()
 {
 	ScopedLock local_lock(global_lock);
+
+	switch (m_state) {
+		case ThreadState::BlockedSleep: {
+			sleeping_threads.remove(*this);
+			break;
+		}
+		case ThreadState::BlockedQueue: {
+			blocked_threads.remove(*this);
+			break;
+		}
+
+		case ThreadState::BlockedQueueTimed: {
+			blocked_timed_threads.remove(*this);
+			break;
+		}
+		default:
+			break;
+	}
 
 	ready_threads.push_back(*this);
 	m_state = ThreadState::Ready;
 	m_blocker = nullptr;
 }
 
-void Thread::wake_up_from_sleep()
-{
-	ScopedLock local_lock(global_lock);
-
-	sleeping_threads.remove(*this);
-	ready_threads.push_back(*this);
-	m_state = ThreadState::Ready;
-}
-
-void Thread::block(WaitQueue& blocker)
+void Thread::block(WaitQueue& blocker, size_t ms_timeout)
 {
 	ScopedLock local_lock(global_lock);
 
 	ready_threads.remove(*this);
-	m_state = ThreadState::BlockedQueue;
+
+	if (ms_timeout) {
+		m_sleep_ticks = PIT::ticks + ms_timeout;
+		m_state = ThreadState::BlockedQueueTimed;
+		blocked_timed_threads.push_back(*this);
+	} else {
+		m_state = ThreadState::BlockedQueue;
+		blocked_threads.push_back(*this);
+	}
+
 	m_blocker = &blocker;
+}
+
+void Thread::sleep(size_t ms)
+{
+	ScopedLock local_lock(global_lock);
+
+	ready_threads.remove(*this);
+
+	m_sleep_ticks = PIT::ticks + ms;
+	m_state = ThreadState::BlockedSleep;
+	sleeping_threads.push_back(*this);
+
+	local_lock.release();
+
+	yield();
 }
 
 void Thread::yield()
@@ -149,6 +207,16 @@ void Thread::terminate()
 			ASSERT(m_blocker);
 			ScopedLock local_lock(global_lock);
 
+			blocked_threads.remove(*this);
+			m_blocker->terminate_blocked_thread(*this);
+			break;
+		}
+
+		case ThreadState::BlockedQueueTimed: {
+			ASSERT(m_blocker);
+			ScopedLock local_lock(global_lock);
+
+			blocked_timed_threads.remove(*this);
 			m_blocker->terminate_blocked_thread(*this);
 			break;
 		}
@@ -161,35 +229,21 @@ void Thread::terminate()
 	cleanup();
 }
 
-void Thread::sleep(size_t ms)
-{
-	ScopedLock local_lock(global_lock);
-
-	current->m_sleep_ticks = PIT::ticks + ms;
-	current->m_state = ThreadState::BlockedSleep;
-	ready_threads.remove(*current);
-	sleeping_threads.push_back(*current);
-
-	local_lock.release();
-
-	yield();
-}
-
-size_t Thread::tid()
+size_t Thread::tid() const
 {
 	ScopedLock local_lock(global_lock);
 
 	return m_tid;
 }
 
-Process& Thread::parent_process()
+Process& Thread::parent_process() const
 {
 	ScopedLock local_lock(global_lock);
 
 	return m_parent;
 }
 
-ThreadState Thread::state()
+ThreadState Thread::state() const
 {
 	ScopedLock local_lock(global_lock);
 

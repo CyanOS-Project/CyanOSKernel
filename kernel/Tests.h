@@ -37,7 +37,7 @@ void test_pipe1(uintptr_t arg)
 void test_pipe2(uintptr_t arg)
 {
 	UNUSED(arg);
-	Thread::sleep(1000);
+	Thread::current->sleep(1000);
 	auto fd = FileDescription::open("/fs/my_pipe", OpenMode::OM_WRITE, OpenFlags::OF_OPEN_EXISTING);
 	if (fd.is_error()) {
 		warn() << "error opening the file, error: " << fd.error();
