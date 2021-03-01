@@ -12,13 +12,13 @@ Why a new half working operating systems? you might ask, And the answer: because
 - Heap Allocator.
 - Concurrency in terms of Threads & Processes.
 - Basic ELF loader
-- Task Synchronization (Spinlocks, Semaphores and Mutex)
+- Task Synchronization (WaitQueues, Spinlocks, Semaphores and Mutex)
 - Inter-process communication (using pipes & sockets)
 - Virtual File System.
 - User Space.
-- PIC Driver.
-- Keyboard Driver.
 - A Shell & basic commands like cd, ls, cat...
+- PCI bus.
+- RTL8139 Ethernet Driver.
 - Networking (IPv4, UDP, TCP, ARP and DHCP)
 
 ## Building CyanOS
