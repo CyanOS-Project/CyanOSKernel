@@ -45,22 +45,21 @@ Result<void> TCPSession::accept(u16 port)
 	ScopedLock local_lock{*m_lock};
 
 	m_local_port = port;
-	m_state = State::Listen;
+	m_state = State::LISTEN;
 
-	wait_for_syn(local_lock);
-	m_state = State::SYN_Received;
+	if (auto error = wait_for_syn(local_lock))
+		return error;
+
+	m_state = State::SYN_RECEIVED;
 
 	send_ack_syn();
-	wait_for_ack(local_lock);
 
-	m_state = State::Established;
+	if (auto error = wait_for_ack(local_lock))
+		return error;
 
-	if (m_state == State::Established) {
-		return {};
-	} else {
-		warn() << "Connection Denied!";
-		return ResultError{ERROR_CONNECTION_DENIED};
-	}
+	m_state = State::ESTABLISHED;
+
+	return {};
 }
 
 Result<void> TCPSession::connect(IPv4Address ip, u16 port)
@@ -72,36 +71,33 @@ Result<void> TCPSession::connect(IPv4Address ip, u16 port)
 	m_local_port = 5000;
 
 	send_syn();
-	m_state = State::SYN_Sent;
+	m_state = State::SYN_SENT;
 
-	wait_for_syn(local_lock);
+	if (auto error = wait_for_syn(local_lock))
+		return error;
+
 	send_ack();
 
-	m_state = State::Established;
+	m_state = State::ESTABLISHED;
 
-	if (m_state == State::Established) {
-		return {};
-	} else {
-		warn() << "Connection Denied!";
-		return ResultError{ERROR_CONNECTION_DENIED};
-	}
+	return {};
 }
 
 void TCPSession::close()
 {
 	ScopedLock local_lock{*m_lock};
 
-	m_state = State::FIN_Wait1;
+	m_state = State::FIN_WAIT1;
 	send_fin();
 	wait_for_ack(local_lock);
-	m_state = State::FIN_Wait2;
+	m_state = State::FIN_WAIT2;
 }
 
 Result<void> TCPSession::send(const BufferView& data)
 {
 	ScopedLock local_lock{*m_lock};
 
-	if (m_state != State::Established) {
+	if (m_state != State::ESTABLISHED) {
 		return ResultError{ERROR_CONNECTION_CLOSED};
 	}
 
@@ -115,7 +111,7 @@ Result<void> TCPSession::receive(Buffer& data)
 {
 	ScopedLock local_lock{*m_lock};
 
-	if (m_state != State::Established) {
+	if (m_state != State::ESTABLISHED) {
 		return ResultError{ERROR_CONNECTION_CLOSED};
 	}
 
@@ -126,7 +122,7 @@ Result<void> TCPSession::receive(Buffer& data)
 
 	m_buffer = nullptr;
 
-	if (m_state != State::Established) {
+	if (m_state != State::ESTABLISHED) {
 		return ResultError{ERROR_CONNECTION_CLOSED};
 	}
 	return {};
@@ -138,7 +134,7 @@ void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 
 	auto& tcp_header = data.const_convert_to<TCPHeader>();
 
-	if (m_state == State::Closed) {
+	if (m_state == State::CLOSED) {
 		return;
 	}
 
@@ -174,19 +170,19 @@ void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 		handle_ack();
 	}
 
-	m_receive_waitqueue.wake_up_all();
+	m_data_waitqueue.wake_up_all();
 }
 
 void TCPSession::handle_syn(IPv4Address src_ip, const BufferView& data)
 {
 	auto& tcp_header = data.const_convert_to<TCPHeader>();
 
-	if (m_state == State::Listen | m_state == State::SYN_Sent) {
+	if (m_state == State::LISTEN | m_state == State::SYN_SENT) {
 
 		m_remote_sequence = network_word32(tcp_header.seq) + 1;
 		m_remote_port = network_word16(tcp_header.src_port);
 		m_remote_ip = IPv4Address{src_ip};
-		m_syn_semaphore.release();
+		m_syn_waitqueue.wake_up_all();
 	} else {
 		err() << "Shouldn't happen!";
 	}
@@ -194,7 +190,7 @@ void TCPSession::handle_syn(IPv4Address src_ip, const BufferView& data)
 
 void TCPSession::handle_ack()
 {
-	m_ack_semaphore.release();
+	m_ack_waitqueue.wake_up_all();
 }
 
 void TCPSession::handle_rst()
@@ -204,20 +200,21 @@ void TCPSession::handle_rst()
 
 void TCPSession::handle_fin(ScopedLock<Spinlock>& lock)
 {
-	if (m_state == State::FIN_Wait2) {
+	if (m_state == State::FIN_WAIT2) {
 		m_remote_sequence++;
 		send_ack();
-		m_state = State::Closed;
-	} else if (m_state == State::Established) {
-		m_state = State::Close_Wait;
+		m_state = State::CLOSED;
+	} else if (m_state == State::ESTABLISHED) {
+		m_state = State::CLOSE_WAIT;
 		m_remote_sequence++;
 		send_ack();
 		send_fin();
 
-		m_state = State::Last_Ack;
+		m_state = State::LAST_ACK;
 		wait_for_ack(lock);
 
-		m_state = State::Closed;
+		m_state = State::CLOSED;
+		end_connection();
 	} else {
 		warn() << "This shouldn't happen, received FIN outside FIN_WAIT2 or ESTABLISHED states!";
 	}
@@ -225,7 +222,7 @@ void TCPSession::handle_fin(ScopedLock<Spinlock>& lock)
 
 void TCPSession::handle_psh()
 {
-	m_data_semaphore.release();
+	m_data_push_waitqueue.wake_up_all();
 }
 
 void TCPSession::handle_data(const BufferView& data)
@@ -245,7 +242,7 @@ void TCPSession::handle_data(const BufferView& data)
 
 bool TCPSession::handle_out_of_order_packets(ScopedLock<Spinlock>& lock, u32 remote_sequence)
 {
-	if (m_state != State::Established) {
+	if (m_state != State::ESTABLISHED) {
 		return true;
 	}
 
@@ -253,64 +250,72 @@ bool TCPSession::handle_out_of_order_packets(ScopedLock<Spinlock>& lock, u32 rem
 		// FIXME: wait for some more out of order packets before sending ack (for retransmition)
 		send_ack();
 
-		m_receive_waitqueue.wait(lock);
+		m_data_waitqueue.wait(lock);
 	}
 	return is_in_window_packet(remote_sequence);
 }
 
-void TCPSession::send_syn()
+Result<void> TCPSession::send_syn()
 {
-	send_control_packet(FLAGS::SYN);
+	auto result = send_control_packet(FLAGS::SYN);
 	m_local_sequence++;
+	return result;
 }
 
-void TCPSession::send_ack_syn()
+Result<void> TCPSession::send_ack_syn()
 {
-	send_control_packet(FLAGS::SYN | FLAGS::ACK);
+	auto result = send_control_packet(FLAGS::SYN | FLAGS::ACK);
 	m_local_sequence++;
+	return result;
 }
 
-void TCPSession::send_ack()
+Result<void> TCPSession::send_ack()
 {
-	send_control_packet(FLAGS::ACK);
+	return send_control_packet(FLAGS::ACK);
 }
 
-void TCPSession::send_fin()
+Result<void> TCPSession::send_fin()
 {
-	send_control_packet(FLAGS::FIN);
+	return send_control_packet(FLAGS::FIN);
 }
 
-void TCPSession::wait_for_ack(ScopedLock<Spinlock>& lock)
+Result<void> TCPSession::wait_for_ack(ScopedLock<Spinlock>& lock)
 {
-	lock.release();
-	m_ack_semaphore.acquire();
-	lock.acquire();
+	m_ack_waitqueue.wait(lock);
+	if (m_state == State::CLOSED) {
+		return ResultError{ERROR_CONNECTION_CLOSED};
+	}
+	return {};
 }
 
-void TCPSession::wait_for_syn(ScopedLock<Spinlock>& lock)
+Result<void> TCPSession::wait_for_syn(ScopedLock<Spinlock>& lock)
 {
-	lock.release();
-	m_syn_semaphore.acquire();
-	lock.acquire();
+	m_syn_waitqueue.wait(lock);
+	if (m_state == State::CLOSED) {
+		return ResultError{ERROR_CONNECTION_CLOSED};
+	}
+	return {};
 }
 
-void TCPSession::wait_for_packet(ScopedLock<Spinlock>& lock)
+Result<void> TCPSession::wait_for_packet(ScopedLock<Spinlock>& lock)
 {
-	lock.release();
-	m_data_semaphore.acquire();
-	lock.acquire();
+	m_data_push_waitqueue.wait(lock);
+	if (m_state == State::CLOSED) {
+		return ResultError{ERROR_CONNECTION_CLOSED};
+	}
+	return {};
 }
 
 void TCPSession::end_connection()
 {
-	m_state = State::Closed;
-	m_syn_semaphore.release();
-	m_ack_semaphore.release();
-	m_data_semaphore.release();
-	m_receive_waitqueue.wake_up_all();
+	m_state = State::CLOSED;
+	m_syn_waitqueue.wake_up_all();
+	m_ack_waitqueue.wake_up_all();
+	m_data_waitqueue.wake_up_all();
+	m_data_push_waitqueue.wake_up_all();
 }
 
-void TCPSession::send_control_packet(u8 flags)
+Result<void> TCPSession::send_control_packet(u8 flags)
 {
 	TCPHeader tcp_header;
 	tcp_header.src_port = network_word16(m_local_port);
@@ -325,11 +330,10 @@ void TCPSession::send_control_packet(u8 flags)
 
 	tcp_header.checksum = tcp_checksum(BufferView{&tcp_header, sizeof(TCPHeader)});
 
-	m_network->ipv4_provider().send_ip_packet(m_remote_ip, IPv4Protocols::TCP,
-	                                          BufferView{&tcp_header, sizeof(TCPHeader)});
+	m_network->ipv4_provider().send(m_remote_ip, IPv4Protocols::TCP, BufferView{&tcp_header, sizeof(TCPHeader)});
 }
 
-void TCPSession::send_packet(const BufferView& data, u8 flags)
+Result<void> TCPSession::send_packet(const BufferView& data, u8 flags)
 {
 	TCPHeader tcp_header;
 	tcp_header.src_port = network_word16(m_local_port);
@@ -342,11 +346,9 @@ void TCPSession::send_packet(const BufferView& data, u8 flags)
 	tcp_header.checksum = 0;
 	tcp_header.urgent_pointer = 0;
 
-	// Add check sum of pseudo ip header.
 	tcp_header.checksum = tcp_checksum(BufferView{&tcp_header, sizeof(TCPHeader)});
 
-	m_network->ipv4_provider().send_ip_packet(m_remote_ip, IPv4Protocols::TCP,
-	                                          BufferView{&tcp_header, sizeof(TCPHeader)});
+	m_network->ipv4_provider().send(m_remote_ip, IPv4Protocols::TCP, BufferView{&tcp_header, sizeof(TCPHeader)});
 
 	m_local_sequence += data.size();
 }
@@ -404,9 +406,9 @@ u16 TCPSession::tcp_checksum(const BufferView& data)
 bool TCPSession::is_packet_for_me(IPv4Address ip, const BufferView& data)
 {
 	auto& tcp_header = data.const_convert_to<TCPHeader>();
-	if (m_state == State::Closed) {
+	if (m_state == State::CLOSED) {
 		return false;
-	} else if (m_state == State::Listen) {
+	} else if (m_state == State::LISTEN) {
 		return to_big_endian<u16>(tcp_header.dest_port) == m_local_port;
 	} else {
 		return (to_big_endian<u16>(tcp_header.dest_port) == m_local_port) &&

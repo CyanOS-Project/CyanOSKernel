@@ -71,5 +71,5 @@ void UDP::send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, const B
 
 	udp_raw_segment.fill_from(data.ptr(), sizeof(UDPHeader), data.size());
 
-	m_network.ipv4_provider().send_ip_packet(dest_ip, IPv4Protocols::UDP, udp_raw_segment);
+	m_network.ipv4_provider().send(dest_ip, IPv4Protocols::UDP, udp_raw_segment);
 }

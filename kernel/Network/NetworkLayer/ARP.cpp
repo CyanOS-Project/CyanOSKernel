@@ -51,7 +51,7 @@ void ARP::send_arp_request(IPv4Address lookup_ip)
 	       << IPv4Address{arp.source_protocol_addr};
 }
 
-void ARP::handle_arp_packet(const BufferView& data)
+void ARP::handle(const BufferView& data)
 {
 	if (data.size() < sizeof(ARPHeader)) {
 		warn() << "Insufficient ARP packet size!";

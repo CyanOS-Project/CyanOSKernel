@@ -20,8 +20,8 @@ class IPv4
   public:
 	IPv4(Network& network);
 	void start();
-	void send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const BufferView& data);
-	void handle_ip_packet(const BufferView& data);
+	void send(IPv4Address destination, IPv4Protocols protocol, const BufferView& data);
+	void handle(const BufferView& data);
 
 	IPv4Address IP();
 

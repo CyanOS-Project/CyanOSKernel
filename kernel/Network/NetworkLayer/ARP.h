@@ -12,7 +12,7 @@ class ARP
   public:
 	ARP(Network& network);
 	MACAddress mac_address_lookup(IPv4Address lookup_ip);
-	void handle_arp_packet(const BufferView& data);
+	void handle(const BufferView& data);
 
   private:
 	enum class HardwareType

@@ -63,16 +63,16 @@ class TCPSession
 
 	enum class State
 	{
-		Listen,
-		SYN_Sent,
-		SYN_Received,
-		Established,
-		FIN_Wait1,
-		FIN_Wait2,
-		Close_Wait,
-		Last_Ack,
-		Time_Wait,
-		Closed
+		LISTEN,
+		SYN_SENT,
+		SYN_RECEIVED,
+		ESTABLISHED,
+		FIN_WAIT1,
+		FIN_WAIT2,
+		CLOSE_WAIT,
+		LAST_ACK,
+		TIME_WAIT,
+		CLOSED
 	};
 	void handle(IPv4Address src_ip, const BufferView& data);
 	void handle_syn(IPv4Address src_ip, const BufferView& data);
@@ -83,25 +83,26 @@ class TCPSession
 	void handle_data(const BufferView& data);
 	bool handle_out_of_order_packets(ScopedLock<Spinlock>&, u32 remote_sequence);
 
-	void send_ack();
-	void send_syn();
-	void send_ack_syn();
-	void send_fin();
+	Result<void> send_ack();
+	Result<void> send_syn();
+	Result<void> send_ack_syn();
+	Result<void> send_fin();
 
-	void wait_for_ack(ScopedLock<Spinlock>& lock);
-	void wait_for_syn(ScopedLock<Spinlock>& lock);
-	void wait_for_packet(ScopedLock<Spinlock>& lock);
+	Result<void> wait_for_ack(ScopedLock<Spinlock>& lock);
+	Result<void> wait_for_syn(ScopedLock<Spinlock>& lock);
+	Result<void> wait_for_packet(ScopedLock<Spinlock>& lock);
 
 	void end_connection();
 
-	void send_packet(const BufferView& data, u8 flags);
-	void send_control_packet(u8 flags);
+	Result<void> send_packet(const BufferView& data, u8 flags);
+	Result<void> send_control_packet(u8 flags);
+
 	bool is_packet_ok(const BufferView& data);
 	bool is_in_order_packet(u32 remote_sequence);
 	bool is_in_window_packet(u32 remote_sequence);
 	bool is_buffer_available();
-	u16 tcp_checksum(const BufferView& data);
 	bool is_packet_for_me(IPv4Address ip, const BufferView& data);
+	u16 tcp_checksum(const BufferView& data);
 	constexpr u8 to_data_offset(size_t value) { return (number_of_words<u32>(value) & 0xF) << 4; }
 	constexpr size_t from_data_offset(u8 value) { return (value >> 4) * sizeof(u32); }
 	static const u16 MAX_WINDOW_SIZE = 1000;
@@ -109,12 +110,12 @@ class TCPSession
 	UniquePointer<Spinlock> m_lock;
 	Network* m_network;
 	Type m_type;
-	Buffer* m_buffer{0};
-	State m_state{State::Closed};
-	Semaphore m_syn_semaphore{0};
-	Semaphore m_ack_semaphore{0};
-	Semaphore m_data_semaphore{0};
-	WaitQueue m_receive_waitqueue{};
+	Buffer* m_buffer{nullptr};
+	State m_state{State::CLOSED};
+	WaitQueue m_syn_waitqueue{};
+	WaitQueue m_ack_waitqueue{};
+	WaitQueue m_data_push_waitqueue{};
+	WaitQueue m_data_waitqueue{};
 	IPv4Address m_remote_ip{};
 	size_t m_remote_sequence{0};
 	size_t m_local_sequence{0};

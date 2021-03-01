@@ -18,9 +18,9 @@ void NetworkAdapter::handle_received_frame(ProtocolType type, const BufferView& 
 
 	auto frame_handler = [this, type, data = Buffer(data)]() mutable {
 		if (type == ProtocolType::ARP) {
-			m_network->arp_provider().handle_arp_packet(data);
+			m_network->arp_provider().handle(data);
 		} else if (type == ProtocolType::IPv4) {
-			m_network->ipv4_provider().handle_ip_packet(data);
+			m_network->ipv4_provider().handle(data);
 		} else {
 			warn() << "Unknown Packet";
 		}

@@ -23,7 +23,11 @@ void Network::start()
 	auto& connection = m_tcp.accept(80);
 	Buffer buf{100};
 	while (1) {
-		connection.receive(buf);
+		if (auto error = connection.receive(buf)) {
+			info() << "Error: " << error.error();
+			break;
+		}
+
 		info() << "Message: " << (char*)(buf.ptr());
 		memset(buf.ptr(), 0, buf.size());
 		warn() << "---------------------------";

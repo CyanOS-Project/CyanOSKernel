@@ -19,7 +19,7 @@ void IPv4::start()
 	m_subnet_mask = dhcp_info.subnet_mask;
 }
 
-void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const BufferView& data)
+void IPv4::send(IPv4Address destination, IPv4Protocols protocol, const BufferView& data)
 {
 	Buffer ip_raw_packet{data, sizeof(IPv4Header)};
 	auto& ip_packet = ip_raw_packet.convert_to<IPv4Header>();
@@ -43,7 +43,7 @@ void IPv4::send_ip_packet(IPv4Address destination, IPv4Protocols protocol, const
 	m_network.network_adapter().send_frame(ProtocolType::IPv4, destination_mac, ip_raw_packet);
 }
 
-void IPv4::handle_ip_packet(const BufferView& data)
+void IPv4::handle(const BufferView& data)
 {
 	auto& ip_packet = data.const_convert_to<IPv4Header>();
 	size_t packet_size = network_word16(ip_packet.total_length);
