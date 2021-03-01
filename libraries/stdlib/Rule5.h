@@ -15,3 +15,5 @@
 #define DEFAULT_MOVE(x)                                                                                                \
 	x(x&&) = default;                                                                                                  \
 	x& operator=(x&&) = default;
+
+#define DEFAULT_DESTRUCTOR(x) ~x() = default;
