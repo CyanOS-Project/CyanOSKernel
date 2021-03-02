@@ -25,14 +25,6 @@ BufferView& BufferView::operator=(const Buffer& other)
 	return *this;
 }
 
-BufferView& BufferView::operator=(const BufferView& other)
-{
-	m_data = other.m_data;
-	m_size = other.m_size;
-
-	return *this;
-}
-
 void BufferView::copy_to(void* dest, size_t src_offset, size_t size) const
 {
 	ASSERT((src_offset + size) <= m_size);
