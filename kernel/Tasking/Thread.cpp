@@ -131,6 +131,7 @@ void Thread::wake_up()
 
 		case ThreadState::BlockedQueueTimed: {
 			blocked_timed_threads.remove(*this);
+			m_blocker->handle_thread_timeout(*this);
 			break;
 		}
 		default:
@@ -207,7 +208,7 @@ void Thread::terminate()
 			ScopedLock local_lock(global_lock);
 
 			blocked_threads.remove(*this);
-			m_blocker->terminate_blocked_thread(*this);
+			m_blocker->handle_thread_terminated(*this);
 			break;
 		}
 
@@ -216,7 +217,7 @@ void Thread::terminate()
 			ScopedLock local_lock(global_lock);
 
 			blocked_timed_threads.remove(*this);
-			m_blocker->terminate_blocked_thread(*this);
+			m_blocker->handle_thread_terminated(*this);
 			break;
 		}
 		case ThreadState::Suspended: {
@@ -230,15 +231,11 @@ void Thread::terminate()
 
 size_t Thread::tid() const
 {
-	ScopedLock local_lock(global_lock);
-
 	return m_tid;
 }
 
 Process& Thread::parent_process() const
 {
-	ScopedLock local_lock(global_lock);
-
 	return m_parent;
 }
 

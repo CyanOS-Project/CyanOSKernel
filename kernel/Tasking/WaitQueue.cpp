@@ -3,9 +3,9 @@
 #include "Thread.h"
 #include <TypeTraits.h>
 
-WaitQueue::WaitQueue() : m_lock{UniquePointer<Spinlock>::make_unique()}, m_threads{} {}
+WaitQueue::WaitQueue() : m_lock{UniquePointer<Spinlock>::make_unique()}, m_queue{} {}
 
-WaitQueue::WaitQueue(WaitQueue&& other) : m_lock{move(other.m_lock)}, m_threads{move(other.m_threads)}
+WaitQueue::WaitQueue(WaitQueue&& other) : m_lock{move(other.m_lock)}, m_queue{move(other.m_queue)}
 {
 	other.is_moved = true;
 }
@@ -13,7 +13,7 @@ WaitQueue::WaitQueue(WaitQueue&& other) : m_lock{move(other.m_lock)}, m_threads{
 WaitQueue& WaitQueue::operator=(WaitQueue&& other)
 {
 	m_lock = move(other.m_lock);
-	m_threads = move(other.m_threads);
+	m_queue = move(other.m_queue);
 	other.is_moved = true;
 	return *this;
 }
@@ -27,36 +27,46 @@ WaitQueue::~WaitQueue()
 	wake_up_all(); // FIXME: is it okay to do so ?
 }
 
-void WaitQueue::terminate_blocked_thread(Thread& thread)
+void WaitQueue::wake_up()
 {
 	ScopedLock local_lock(*m_lock);
 
-	m_threads.remove_if([&thread](auto i) { return i->tid() == thread.tid(); });
-}
+	auto find_first_blocked_queue = [](auto& i) { return i.state == State::Blocked; };
 
-void WaitQueue::wake_up(size_t num)
-{
-	ScopedLock local_lock(*m_lock);
-
-	while ((num--) && (!m_threads.is_empty())) {
-		wake_up_one();
-	}
+	auto blocked_queue = m_queue.find_if(find_first_blocked_queue);
+	ASSERT(blocked_queue != m_queue.end());
+	blocked_queue->state = State::WokenUp;
+	blocked_queue->thread->wake_up();
 }
 
 void WaitQueue::wake_up_all()
 {
 	ScopedLock local_lock(*m_lock);
 
-	while (!m_threads.is_empty()) {
-		wake_up_one();
+	auto find_first_blocked_queue = [](auto& i) { return i.state == State::Blocked; };
+
+	auto queue = m_queue.begin();
+	while (queue != m_queue.end()) {
+		if (queue->state == State::Blocked) {
+			queue->state = State::WokenUp;
+			queue->thread->wake_up();
+			queue = m_queue.find_if(find_first_blocked_queue);
+		}
 	}
 }
 
-void WaitQueue::wake_up_one()
+void WaitQueue::handle_thread_timeout(Thread& thread)
 {
-	if (!m_threads.size()) {
-		return;
-	}
-	m_threads.head()->wake_up();
-	m_threads.pop_front();
+	ScopedLock local_lock(*m_lock);
+
+	auto queue = m_queue.find_if([tid = thread.tid()](auto& i) { return i.thread->tid() == tid; });
+	queue->state = State::Timeout;
+}
+
+void WaitQueue::handle_thread_terminated(Thread& thread)
+{
+	ScopedLock local_lock(*m_lock);
+
+	bool removed = m_queue.remove_if([tid = thread.tid()](auto& i) { return i.thread->tid() == tid; });
+	ASSERT(removed); // FIXME: remove this.
 }
