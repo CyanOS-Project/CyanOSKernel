@@ -32,7 +32,7 @@ class Thread;
 class Process
 {
   public:
-	static Process& create_virtual_process(StringView name, ProcessPrivilege privilege);
+	static Process& create_virtual_process(StringView name);
 	static Process& create_new_process(PathView path, StringView argument, ProcessPrivilege privilege);
 	static Result<Process&> get_process_from_pid(size_t pid);
 

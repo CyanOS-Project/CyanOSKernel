@@ -195,12 +195,12 @@ TEST(Vector_Test, Erasing)
 	EXPECT_EQ(*(vec1.cbegin() + 1), 4);
 	EXPECT_EQ(vec1.cbegin() + 2, vec1.cend());
 
-	vec1.erase(vec1.begin() + 1);
+	vec1.remove(vec1.begin() + 1);
 	EXPECT_EQ(vec1.size(), 1); // [3]
 	EXPECT_EQ(*(vec1.cbegin() + 0), 3);
 	EXPECT_EQ(vec1.cbegin() + 1, vec1.cend());
 
-	vec1.erase(vec1.begin());
+	vec1.remove(vec1.begin());
 	EXPECT_EQ(vec1.size(), 0); // []
 	EXPECT_EQ(vec1.cbegin(), vec1.cend());
 
@@ -208,14 +208,14 @@ TEST(Vector_Test, Erasing)
 	vec1.push_back(2);
 	vec1.push_back(3);
 	vec1.push_back(4);
-	vec1.erase(vec1.begin() + 1);
+	vec1.remove(vec1.begin() + 1);
 	EXPECT_EQ(vec1.size(), 3); // [1, 3, 4]
 	EXPECT_EQ(*(vec1.cbegin() + 0), 1);
 	EXPECT_EQ(*(vec1.cbegin() + 1), 3);
 	EXPECT_EQ(*(vec1.cbegin() + 2), 4);
 	EXPECT_EQ(vec1.cbegin() + 3, vec1.cend());
 
-	vec1.erase(vec1.begin() + 1);
+	vec1.remove(vec1.begin() + 1);
 	EXPECT_EQ(vec1.size(), 2); // [1, 4]
 	EXPECT_EQ(*(vec1.cbegin() + 0), 1);
 	EXPECT_EQ(*(vec1.cbegin() + 1), 4);
@@ -311,7 +311,7 @@ TEST(Vector_Test, Capacity)
 	EXPECT_EQ(*(list.cbegin() + 3), 6);
 	EXPECT_EQ(*(list.cbegin() + 4), 1);
 
-	list.erase(list.begin() + 1);
+	list.remove(list.begin() + 1);
 	EXPECT_EQ(list.capacity(), 9);
 	EXPECT_EQ(list.size(), 4);
 	EXPECT_EQ(*(list.cbegin() + 0), 3);

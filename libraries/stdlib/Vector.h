@@ -25,9 +25,11 @@ template <class T> class Vector
 	{
 
 	  public:
-		BaseIterator(const BaseIterator& other);
-		~BaseIterator() = default;
-		void operator=(const BaseIterator& other);
+		DEFAULT_CONSTRUCTOR(BaseIterator)
+		DEFAULT_DESTRUCTOR(BaseIterator)
+		DEFAULT_MOVE(BaseIterator)
+		DEFAULT_COPY(BaseIterator)
+
 		operator BaseIterator<const RemoveConst<U>>();
 		BaseIterator operator++(int);
 		BaseIterator& operator++();
@@ -69,17 +71,17 @@ template <class T> class Vector
 
 	Iterator begin();
 	Iterator end();
-	template <typename... U> T& emplace_back(U&&... u);
-	template <typename... U> T& emplace_front(U&&... u);
-	template <typename... U> T& emplace(Iterator node, U&&... u);
-	template <typename U> T& insert(Iterator node, U&& new_node);
-	template <typename U> T& push_back(U&& new_data);
-	template <typename U> T& push_front(U&& new_data);
+	template <typename... U> Iterator emplace_back(U&&... u);
+	template <typename... U> Iterator emplace_front(U&&... u);
+	template <typename... U> Iterator emplace(Iterator node, U&&... u);
+	template <typename U> Iterator insert(Iterator node, U&& new_node);
+	template <typename U> Iterator push_back(U&& new_data);
+	template <typename U> Iterator push_front(U&& new_data);
 	void reserve(size_t size);
 	void pop_back();
 	void pop_front();
-	void erase(Iterator);
 	void clear();
+	void remove(Iterator);
 	template <class Predicate> bool remove_if(Predicate predicate);
 	Iterator find(const T& element);
 	template <class Predicate> Iterator find_if(Predicate predicate);
@@ -259,7 +261,7 @@ template <class T> void Vector<T>::clear()
 template <class T> void Vector<T>::splice(Vector<T>& destination_list, Iterator from, Iterator to)
 {
 	destination_list.insert(to, *from);
-	erase(from);
+	remove(from);
 }
 
 template <class T> typename Vector<T>::ConstIterator Vector<T>::cbegin() const
@@ -282,7 +284,7 @@ template <class T> typename Vector<T>::Iterator Vector<T>::end()
 	return Iterator(m_storage, m_count);
 }
 
-template <class T> template <typename... U> T& Vector<T>::emplace(Iterator pos, U&&... u)
+template <class T> template <typename... U> Vector<T>::Iterator Vector<T>::emplace(Iterator pos, U&&... u)
 {
 	ASSERT(m_storage);
 	if (m_count == m_capacity) {
@@ -292,10 +294,10 @@ template <class T> template <typename... U> T& Vector<T>::emplace(Iterator pos, 
 	}
 	new (&m_storage[pos.m_current]) T{forward<U>(u)...};
 	m_count++;
-	return m_storage[pos.m_current];
+	return Iterator{m_storage, pos.m_current};
 }
 
-template <class T> template <typename U> T& Vector<T>::insert(Iterator pos, U&& new_data)
+template <class T> template <typename U> Vector<T>::Iterator Vector<T>::insert(Iterator pos, U&& new_data)
 {
 	ASSERT(m_storage);
 	if (m_count == m_capacity) {
@@ -305,25 +307,25 @@ template <class T> template <typename U> T& Vector<T>::insert(Iterator pos, U&& 
 	}
 	new (&m_storage[pos.m_current]) T{forward<U>(new_data)};
 	m_count++;
-	return m_storage[pos.m_current];
+	return Iterator{m_storage, pos.m_current};
 }
 
-template <class T> template <typename... U> T& Vector<T>::emplace_back(U&&... u)
+template <class T> template <typename... U> Vector<T>::Iterator Vector<T>::emplace_back(U&&... u)
 {
 	return emplace(end(), forward<U>(u)...);
 }
 
-template <class T> template <typename... U> T& Vector<T>::emplace_front(U&&... u)
+template <class T> template <typename... U> Vector<T>::Iterator Vector<T>::emplace_front(U&&... u)
 {
 	return emplace(begin(), forward<U>(u)...);
 }
 
-template <class T> template <typename U> T& Vector<T>::push_back(U&& new_data)
+template <class T> template <typename U> Vector<T>::Iterator Vector<T>::push_back(U&& new_data)
 {
 	return insert(end(), forward<T>(new_data));
 }
 
-template <class T> template <typename U> T& Vector<T>::push_front(U&& new_data)
+template <class T> template <typename U> Vector<T>::Iterator Vector<T>::push_front(U&& new_data)
 {
 	return insert(begin(), forward<T>(new_data));
 }
@@ -334,7 +336,7 @@ template <class T> template <class Predicate> bool Vector<T>::remove_if(Predicat
 	auto&& i = begin();
 	while (i != end()) {
 		if (predicate(*i)) {
-			erase(i);
+			remove(i);
 			is_removed = true;
 		} else {
 			i++;
@@ -392,15 +394,15 @@ template <class T> template <class Predicate> bool Vector<T>::contains(Predicate
 
 template <class T> void Vector<T>::pop_back()
 {
-	erase(--end());
+	remove(--end());
 }
 
 template <class T> void Vector<T>::pop_front()
 {
-	erase(begin());
+	remove(begin());
 }
 
-template <class T> void Vector<T>::erase(Iterator itr)
+template <class T> void Vector<T>::remove(Iterator itr)
 {
 	ASSERT(m_storage);
 
@@ -472,23 +474,9 @@ Vector<T>::BaseIterator<U>::BaseIterator(T* storage, size_t index) : m_storage{s
 {
 }
 
-template <typename T>
-template <typename U>
-Vector<T>::BaseIterator<U>::BaseIterator(const BaseIterator& other) :
-    m_storage{other.m_storage},
-    m_current{other.m_current}
-{
-}
-
 template <typename T> template <typename U> Vector<T>::BaseIterator<U>::operator BaseIterator<const RemoveConst<U>>()
 {
 	return BaseIterator<const RemoveConst<U>>{m_storage, m_current};
-}
-
-template <typename T> template <typename U> void Vector<T>::BaseIterator<U>::operator=(const BaseIterator<U>& other)
-{
-	m_current = other.m_current;
-	m_storage = other.m_storage;
 }
 
 template <typename T>

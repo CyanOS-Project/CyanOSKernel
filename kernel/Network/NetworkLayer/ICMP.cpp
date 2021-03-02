@@ -22,7 +22,7 @@ void ICMP::send_echo_request(IPv4Address address)
 	icmp_header.checksum = checksum(icmp_raw_packet);
 
 	m_network.ipv4_provider().send(address, IPv4Protocols::ICMP, icmp_raw_packet);
-	auto& connection = m_connection_list.emplace_back(address);
+	auto& connection = *m_connection_list.emplace_back(address);
 
 	connection.wait_queue.wait(local_lock);
 

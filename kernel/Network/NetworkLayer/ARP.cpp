@@ -18,7 +18,7 @@ MACAddress ARP::mac_address_lookup(IPv4Address lookup_ip)
 	} else {
 		send_arp_request(lookup_ip);
 
-		auto& new_arp_entry = m_arp_table.emplace_front(lookup_ip);
+		auto& new_arp_entry = *m_arp_table.emplace_front(lookup_ip);
 		new_arp_entry.wait_queue.wait(local_lock);
 
 		return new_arp_entry.mac;

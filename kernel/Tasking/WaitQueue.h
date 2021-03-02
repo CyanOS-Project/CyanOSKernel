@@ -33,7 +33,7 @@ class WaitQueue
 		ScopedLock queue_lock(*m_lock);
 
 		Thread::current->block(*this, ms_timeout);
-		m_queue.emplace_back(*Thread::current);
+		auto blocked_thread = m_queue.emplace_back(*Thread::current);
 
 		queue_lock.release();
 		checker_lock.release();
@@ -43,10 +43,8 @@ class WaitQueue
 		checker_lock.acquire();
 		queue_lock.acquire();
 
-		auto queue = m_queue.find_if([tid = Thread::current->tid()](auto& i) { return i.thread->tid() == tid; });
-		State state = queue->state;
-		bool removed = m_queue.remove_if([tid = Thread::current->tid()](auto& i) { return i.thread->tid() == tid; });
-		ASSERT(removed); // FIXME: remove this.
+		State state = blocked_thread->state;
+		m_queue.remove(blocked_thread);
 
 		return state;
 	}
@@ -54,9 +52,15 @@ class WaitQueue
 	{
 		ScopedLock queue_lock(*m_lock);
 
-		while (checker()) {
+		if (!checker()) {
+			return State::WokenUp;
+		}
+
+		Vector<Queue>::Iterator blocked_thread;
+
+		do {
 			Thread::current->block(*this, ms_timeout);
-			m_queue.emplace_back(*Thread::current);
+			blocked_thread = m_queue.emplace_back(*Thread::current);
 			queue_lock.release();
 			checker_lock.release();
 
@@ -64,12 +68,11 @@ class WaitQueue
 
 			checker_lock.acquire();
 			queue_lock.acquire();
-		}
 
-		auto queue = m_queue.find_if([tid = Thread::current->tid()](auto& i) { return i.thread->tid() == tid; });
-		State state = queue->state;
-		bool removed = m_queue.remove_if([tid = Thread::current->tid()](auto& i) { return i.thread->tid() == tid; });
-		ASSERT(removed); // FIXME: remove this.
+		} while (checker() && (blocked_thread->state != State::Timeout));
+
+		State state = blocked_thread->state;
+		m_queue.remove(blocked_thread);
 		return state;
 	}
 

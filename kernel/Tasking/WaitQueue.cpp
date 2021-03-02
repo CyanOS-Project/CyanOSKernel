@@ -60,6 +60,8 @@ void WaitQueue::handle_thread_timeout(Thread& thread)
 	ScopedLock local_lock(*m_lock);
 
 	auto queue = m_queue.find_if([tid = thread.tid()](auto& i) { return i.thread->tid() == tid; });
+
+	ASSERT(queue != m_queue.end());
 	queue->state = State::Timeout;
 }
 
@@ -68,5 +70,5 @@ void WaitQueue::handle_thread_terminated(Thread& thread)
 	ScopedLock local_lock(*m_lock);
 
 	bool removed = m_queue.remove_if([tid = thread.tid()](auto& i) { return i.thread->tid() == tid; });
-	ASSERT(removed); // FIXME: remove this.
+	ASSERT(removed);
 }

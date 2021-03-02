@@ -10,7 +10,7 @@ List<Process> Process::processes;
 Bitmap<MAX_BITMAP_SIZE> Process::pid_bitmap;
 Spinlock Process::global_lock;
 
-Process& Process::create_virtual_process(StringView name, ProcessPrivilege privilege)
+Process& Process::create_virtual_process(StringView name)
 {
 	ScopedLock local_lock(global_lock);
 	auto& pcb = processes.emplace_back(name);

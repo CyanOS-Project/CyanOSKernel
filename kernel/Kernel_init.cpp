@@ -55,7 +55,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	info() << "Done!";
 
 	info() << "Starting the system process...";
-	Process& proc = Process::create_virtual_process("system", ProcessPrivilege::User);
+	Process& proc = Process::create_virtual_process("system");
 	Thread::create_init_thread(proc); // It will just continue here.
 	Thread::yield();
 	Thread::create_thread(proc, idle, ThreadPrivilege::Kernel);

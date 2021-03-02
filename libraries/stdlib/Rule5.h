@@ -16,4 +16,5 @@
 	x(x&&) = default;                                                                                                  \
 	x& operator=(x&&) = default;
 
-#define DEFAULT_DESTRUCTOR(x) ~x() = default;
+#define DEFAULT_DESTRUCTOR(x)  ~x() = default;
+#define DEFAULT_CONSTRUCTOR(x) x() = default;
