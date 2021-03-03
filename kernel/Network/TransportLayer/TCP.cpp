@@ -69,10 +69,13 @@ Result<void> TCPSession::connect(IPv4Address ip, u16 port)
 	m_local_port = 5000;
 
 	m_state = State::SYN_SENT;
-	send_syn(local_lock);
+
+	if (auto error = send_syn(local_lock))
+		return error;
 
 	if (auto error = wait_for_syn(local_lock))
 		return error;
+
 	send_ack();
 
 	m_state = State::ESTABLISHED;
@@ -301,7 +304,7 @@ Result<void> TCPSession::send_and_wait_ack(ScopedLock<Spinlock>& lock, const Buf
 	u32 sent_sequence = m_local_sequence;
 	size_t retransmitions = 0;
 
-	auto ack_checker = [this, sent_sequence]() { return m_last_ack <= sent_sequence; };
+	auto ack_checker = [this, sent_sequence]() { return m_last_ack <= sent_sequence && m_state != State::CLOSED; };
 
 	WaitQueue::State queue_state = WaitQueue::State::Blocked;
 
@@ -311,10 +314,20 @@ Result<void> TCPSession::send_and_wait_ack(ScopedLock<Spinlock>& lock, const Buf
 
 		retransmitions++;
 		queue_state = m_ack_waitqueue.wait_on_event(ack_checker, lock, 1000);
-	} while ((retransmitions == 5) && (queue_state == WaitQueue::State::Timeout));
+	} while ((retransmitions != 5) && (queue_state == WaitQueue::State::Timeout));
 
 	if (queue_state == WaitQueue::State::Timeout) {
 		return ResultError{ERROR_CONNECTION_TIMEOUT};
+	}
+
+	if (m_state == State::CLOSED) {
+		return ResultError{ERROR_CONNECTION_CLOSED};
+	}
+
+	if ((flags & FLAGS::FIN) || (flags & FLAGS::SYN)) {
+		m_local_sequence++;
+	} else {
+		m_local_sequence += data.size();
 	}
 	return {};
 }
@@ -338,12 +351,6 @@ Result<void> TCPSession::send_packet(const BufferView& data, u8 flags)
 	} else {
 		tcp_header.checksum = tcp_checksum(BufferView{&tcp_header, sizeof(TCPHeader)});
 		m_network->ipv4_provider().send(m_remote_ip, IPv4Protocols::TCP, BufferView{&tcp_header, sizeof(TCPHeader)});
-	}
-
-	if ((flags & FLAGS::FIN) || (flags & FLAGS::SYN)) {
-		m_local_sequence++;
-	} else {
-		m_local_sequence += data.size();
 	}
 
 	return {};
