@@ -57,10 +57,10 @@ class WaitQueue
 		}
 
 		Vector<Queue>::Iterator blocked_thread;
+		blocked_thread = m_queue.emplace_back(*Thread::current);
 
 		do {
 			Thread::current->block(*this, ms_timeout);
-			blocked_thread = m_queue.emplace_back(*Thread::current);
 			queue_lock.release();
 			checker_lock.release();
 
