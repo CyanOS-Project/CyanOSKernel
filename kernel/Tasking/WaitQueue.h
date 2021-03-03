@@ -86,4 +86,5 @@ class WaitQueue
 	UniquePointer<Spinlock> m_lock;
 	Vector<Queue> m_queue;
 	bool is_moved = false;
+	void wake_up_queue(Queue& blocked_queue);
 };

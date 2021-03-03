@@ -52,6 +52,7 @@ void Thread::wake_up_sleepers()
 
 		if (iterator_copy->m_sleep_ticks <= PIT::ticks) {
 			iterator_copy->m_sleep_ticks = 0;
+			iterator_copy->m_blocker->handle_thread_timeout(*iterator_copy);
 			iterator_copy->wake_up();
 		}
 	}
@@ -124,6 +125,7 @@ void Thread::wake_up()
 			sleeping_threads.remove(*this);
 			break;
 		}
+
 		case ThreadState::BlockedQueue: {
 			blocked_threads.remove(*this);
 			break;
@@ -131,7 +133,6 @@ void Thread::wake_up()
 
 		case ThreadState::BlockedQueueTimed: {
 			blocked_timed_threads.remove(*this);
-			m_blocker->handle_thread_timeout(*this);
 			break;
 		}
 		default:
