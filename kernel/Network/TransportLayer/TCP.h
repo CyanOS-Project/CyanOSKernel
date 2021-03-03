@@ -76,7 +76,7 @@ class TCPSession
 	};
 	void handle(IPv4Address src_ip, const BufferView& data);
 	void handle_syn(IPv4Address src_ip, const BufferView& data);
-	void handle_ack();
+	void handle_ack(u32 ack_number);
 	void handle_rst();
 	void handle_fin(ScopedLock<Spinlock>&);
 	void handle_psh();
@@ -84,18 +84,16 @@ class TCPSession
 	bool handle_out_of_order_packets(ScopedLock<Spinlock>&, u32 remote_sequence);
 
 	Result<void> send_ack();
-	Result<void> send_syn();
-	Result<void> send_ack_syn();
-	Result<void> send_fin();
+	Result<void> send_syn(ScopedLock<Spinlock>& lock);
+	Result<void> send_fin(ScopedLock<Spinlock>&);
 
-	Result<void> wait_for_ack(ScopedLock<Spinlock>& lock);
 	Result<void> wait_for_syn(ScopedLock<Spinlock>& lock);
 	Result<void> wait_for_packet(ScopedLock<Spinlock>& lock);
 
 	void end_connection();
 
+	Result<void> send_and_wait_ack(ScopedLock<Spinlock>& lock, const BufferView& data, u8 flags);
 	Result<void> send_packet(const BufferView& data, u8 flags);
-	Result<void> send_control_packet(u8 flags);
 
 	bool is_packet_ok(const BufferView& data);
 	bool is_in_order_packet(u32 remote_sequence);
@@ -119,6 +117,7 @@ class TCPSession
 	IPv4Address m_remote_ip{};
 	size_t m_remote_sequence{0};
 	size_t m_local_sequence{0};
+	size_t m_last_ack{0};
 	size_t m_local_port{0};
 	size_t m_remote_port{0};
 	size_t local_window_size{MAX_WINDOW_SIZE};
