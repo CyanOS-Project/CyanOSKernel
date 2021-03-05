@@ -30,7 +30,7 @@ void Network::start()
 				info() << "Error: " << error.error();
 				break;
 			}
-
+			connection.send(BufferView{"you sent something", 19});
 			info() << "Message: " << (char*)(buf.ptr());
 			memset(buf.ptr(), 0, buf.size());
 			warn() << "---------------------------";

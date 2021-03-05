@@ -101,7 +101,7 @@ Result<void> TCPSession::send(const BufferView& data)
 		return ResultError{ERROR_CONNECTION_CLOSED};
 	}
 
-	send_packet(data, 0);
+	send_and_wait_ack(local_lock, data, FLAGS::PSH);
 
 	return {};
 }
@@ -352,8 +352,13 @@ Result<void> TCPSession::send_packet(const BufferView& data, u8 flags)
 	tcp_header.urgent_pointer = 0;
 
 	if (data.size() > 0) {
-		tcp_header.checksum = tcp_checksum(BufferView{&tcp_header, sizeof(TCPHeader)});
-		m_network->ipv4_provider().send(m_remote_ip, IPv4Protocols::TCP, BufferView{&tcp_header, sizeof(TCPHeader)});
+		Buffer segment{data.size() + sizeof(TCPHeader)};
+		segment.fill_by(tcp_header, 0);
+		segment.fill_from(data.ptr(), sizeof(TCPHeader), data.size());
+
+		segment.convert_to<TCPHeader>().checksum = tcp_checksum(segment);
+
+		m_network->ipv4_provider().send(m_remote_ip, IPv4Protocols::TCP, segment);
 	} else {
 		tcp_header.checksum = tcp_checksum(BufferView{&tcp_header, sizeof(TCPHeader)});
 		m_network->ipv4_provider().send(m_remote_ip, IPv4Protocols::TCP, BufferView{&tcp_header, sizeof(TCPHeader)});
