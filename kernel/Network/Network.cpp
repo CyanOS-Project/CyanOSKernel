@@ -20,18 +20,24 @@ void Network::start()
 
 	// m_icmp.send_echo_request(IPv4Address{10, 0, 2, 2});
 	// auto& connection = m_tcp.accept(80);
-	auto& connection = m_tcp.connect(IPv4Address{10, 0, 2, 2}, 5000);
-	Buffer buf{100};
-	while (1) {
-		if (auto error = connection.receive(buf)) {
-			info() << "Error: " << error.error();
-			break;
-		}
 
-		info() << "Message: " << (char*)(buf.ptr());
-		memset(buf.ptr(), 0, buf.size());
-		warn() << "---------------------------";
-	}
+	auto client_thread = [this]() {
+		// auto& connection = m_tcp.connect(IPv4Address{216, 58, 198, 78}, 80);
+		auto& connection = m_tcp.accept(80);
+		Buffer buf{100};
+		while (1) {
+			if (auto error = connection.receive(buf)) {
+				info() << "Error: " << error.error();
+				break;
+			}
+
+			info() << "Message: " << (char*)(buf.ptr());
+			memset(buf.ptr(), 0, buf.size());
+			warn() << "---------------------------";
+		}
+	};
+
+	Thread::create_thread(Thread::current->parent_process(), client_thread, ThreadPrivilege::Kernel);
 
 	// m_tcp.connect(IPv4Address{10, 0, 2, 2}, 80);
 }

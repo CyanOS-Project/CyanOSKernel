@@ -114,12 +114,14 @@ Result<void> TCPSession::receive(Buffer& data)
 		return ResultError{ERROR_CONNECTION_CLOSED};
 	}
 
-	m_initial_remote_sequence = m_remote_sequence;
-	m_buffer = &data;
+	m_buffer_start_pointer = m_buffer_written_pointer;
 
 	wait_for_packet(local_lock);
 
-	m_buffer = nullptr;
+	size_t data_size = m_buffer_written_pointer - m_buffer_start_pointer;
+	data.fill_from(m_buffer.ptr() + m_buffer_start_pointer, 0, data_size);
+
+	m_local_window_size += data_size;
 
 	if (m_state != State::ESTABLISHED) {
 		return ResultError{ERROR_CONNECTION_CLOSED};
@@ -131,22 +133,27 @@ void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 {
 	ScopedLock local_lock{*m_lock};
 
+	if (!is_packet_ok(data)) {
+		// FIXME: handle error here.
+		return;
+	}
+
 	auto& tcp_header = data.const_convert_to<TCPHeader>();
+	size_t payload_offset = from_data_offset(tcp_header.data_offset);
+	size_t payload_size = data.size() - payload_offset;
+
+	m_remote_window_size = network_word16(tcp_header.window_size);
 
 	if (m_state == State::CLOSED) {
 		return;
 	}
 
-	if (!is_packet_ok(data)) {
-		// FIXME: handle error here.
-		return;
-	}
-	if (!handle_out_of_order_packets(local_lock, network_word32(tcp_header.seq))) {
+	if (!handle_out_of_order_packets(local_lock, network_word32(tcp_header.seq), payload_size)) {
 		return;
 	}
 
-	if (data.size() > from_data_offset(tcp_header.data_offset)) {
-		handle_data(data);
+	if (payload_size > 0) {
+		handle_data(data, payload_offset, payload_size);
 	}
 
 	if (tcp_header.flags & FLAGS::SYN) {
@@ -226,34 +233,33 @@ void TCPSession::handle_psh()
 	m_data_push_waitqueue.wake_up_all();
 }
 
-void TCPSession::handle_data(const BufferView& data)
+void TCPSession::handle_data(const BufferView& data, size_t payload_offset, size_t payload_size)
 {
-	if (is_buffer_available()) {
+	if (is_buffer_available(data.size())) {
 		auto& tcp_header = data.const_convert_to<TCPHeader>();
-		size_t header_size = from_data_offset(tcp_header.data_offset);
-		size_t payload_size = data.size() - header_size;
-		size_t data_offset = m_remote_sequence - m_initial_remote_sequence;
 
-		m_buffer->fill_from(data.ptr() + header_size, data_offset, payload_size);
+		m_buffer.fill_from(data.ptr() + payload_offset, m_buffer_written_pointer, payload_size);
+		m_buffer_written_pointer += payload_size;
 		m_remote_sequence += payload_size;
+		m_local_window_size -= payload_size;
 
 		send_ack();
 	}
 }
 
-bool TCPSession::handle_out_of_order_packets(ScopedLock<Spinlock>& lock, u32 remote_sequence)
+bool TCPSession::handle_out_of_order_packets(ScopedLock<Spinlock>& lock, u32 remote_sequence, size_t data_size)
 {
 	if (m_state != State::ESTABLISHED) {
 		return true;
 	}
 
-	while (!is_in_order_packet(remote_sequence) && is_in_window_packet(remote_sequence)) {
+	while (!is_in_order_packet(remote_sequence) && is_in_window_packet(remote_sequence, data_size)) {
 		// FIXME: wait for some more out of order packets before sending ack (for retransmition)
 		send_ack();
 
 		m_data_waitqueue.wait(lock);
 	}
-	return is_in_window_packet(remote_sequence);
+	return is_in_window_packet(remote_sequence, data_size);
 }
 
 Result<void> TCPSession::send_syn(ScopedLock<Spinlock>& lock)
@@ -341,7 +347,7 @@ Result<void> TCPSession::send_packet(const BufferView& data, u8 flags)
 	tcp_header.ack = network_word32(m_remote_sequence);
 	tcp_header.data_offset = to_data_offset(sizeof(TCPHeader));
 	tcp_header.flags = flags | FLAGS::ACK;
-	tcp_header.window_size = network_word16(1000);
+	tcp_header.window_size = network_word16(m_local_window_size);
 	tcp_header.checksum = 0;
 	tcp_header.urgent_pointer = 0;
 
@@ -365,15 +371,14 @@ bool TCPSession::is_in_order_packet(u32 remote_sequence)
 {
 	return m_remote_sequence == remote_sequence;
 }
-bool TCPSession::is_in_window_packet(u32 remote_sequence)
+bool TCPSession::is_in_window_packet(u32 new_remote_sequence, size_t data_size)
 {
-	return (m_initial_remote_sequence <= remote_sequence) &&
-	       ((m_initial_remote_sequence + MAX_WINDOW_SIZE) > remote_sequence);
+	return (data_size + new_remote_sequence - m_remote_sequence) <= m_local_window_size;
 }
 
-bool TCPSession::is_buffer_available()
+bool TCPSession::is_buffer_available(size_t requested_size)
 {
-	return m_buffer;
+	return m_local_window_size >= requested_size;
 }
 
 u16 TCPSession::tcp_checksum(const BufferView& data)

@@ -80,8 +80,8 @@ class TCPSession
 	void handle_rst();
 	void handle_fin(ScopedLock<Spinlock>&);
 	void handle_psh();
-	void handle_data(const BufferView& data);
-	bool handle_out_of_order_packets(ScopedLock<Spinlock>&, u32 remote_sequence);
+	void handle_data(const BufferView& data, size_t payload_offset, size_t payload_size);
+	bool handle_out_of_order_packets(ScopedLock<Spinlock>&, u32 remote_sequence, size_t data_size);
 
 	Result<void> send_ack();
 	Result<void> send_syn(ScopedLock<Spinlock>& lock);
@@ -97,32 +97,34 @@ class TCPSession
 
 	bool is_packet_ok(const BufferView& data);
 	bool is_in_order_packet(u32 remote_sequence);
-	bool is_in_window_packet(u32 remote_sequence);
-	bool is_buffer_available();
+	bool is_in_window_packet(u32 remote_sequence, size_t data_size);
+	bool is_buffer_available(size_t requested_size);
 	bool is_packet_for_me(IPv4Address ip, const BufferView& data);
 	u16 tcp_checksum(const BufferView& data);
 	constexpr u8 to_data_offset(size_t value) { return (number_of_words<u32>(value) & 0xF) << 4; }
 	constexpr size_t from_data_offset(u8 value) { return (value >> 4) * sizeof(u32); }
-	static const u16 MAX_WINDOW_SIZE = 1000;
+
+	static constexpr size_t MAX_WINDOW_SIZE = 1000;
 
 	UniquePointer<Spinlock> m_lock;
 	Network* m_network;
 	Type m_type;
-	Buffer* m_buffer{nullptr};
 	State m_state{State::CLOSED};
 	WaitQueue m_syn_waitqueue{};
 	WaitQueue m_ack_waitqueue{};
 	WaitQueue m_data_push_waitqueue{};
 	WaitQueue m_data_waitqueue{};
 	IPv4Address m_remote_ip{};
-	size_t m_remote_sequence{0};
-	size_t m_local_sequence{0};
-	size_t m_last_ack{0};
-	size_t m_local_port{0};
-	size_t m_remote_port{0};
-	size_t local_window_size{MAX_WINDOW_SIZE};
-	size_t remote_window_size{MAX_WINDOW_SIZE};
-	size_t m_initial_remote_sequence{0};
+	Buffer m_buffer{MAX_WINDOW_SIZE};
+	size_t m_buffer_start_pointer{0};
+	size_t m_buffer_written_pointer{0};
+	u32 m_remote_sequence{0};
+	u32 m_local_sequence{0};
+	u32 m_last_ack{0};
+	u16 m_local_port{0};
+	u16 m_remote_port{0};
+	u16 m_local_window_size{MAX_WINDOW_SIZE};
+	u16 m_remote_window_size{1};
 
 	friend TCP;
 };
