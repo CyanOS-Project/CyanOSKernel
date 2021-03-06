@@ -27,8 +27,8 @@ void IPv4::send(IPv4Address destination, IPv4Protocols protocol, const BufferVie
 	ip_packet.version_length = IPv4_VERSION_LENGTH;
 	ip_packet.dscp_ecn = 0;
 	ip_packet.total_length = network_word16(ip_raw_packet.size());
-	ip_packet.id = 0;
-	ip_packet.flags_fragment_offset = 0;
+	ip_packet.id = 1;
+	ip_packet.flags_fragment_offset = 0x0040;
 	ip_packet.time_to_live = 64;
 	ip_packet.protocol = static_cast<u8>(protocol);
 	ip_packet.header_checksum = 0;
