@@ -40,14 +40,12 @@ void WaitQueue::wake_up_all()
 {
 	ScopedLock local_lock(*m_lock);
 
-	auto find_first_blocked_queue = [](auto& i) { return i.state == State::Blocked; };
-
 	auto queue = m_queue.begin();
 	while (queue != m_queue.end()) {
 		if (queue->state == State::Blocked) {
 			wake_up_queue(*queue);
-			queue = m_queue.find_if(find_first_blocked_queue);
 		}
+		queue++;
 	}
 }
 
