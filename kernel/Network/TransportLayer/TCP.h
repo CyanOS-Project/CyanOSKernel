@@ -84,11 +84,12 @@ class TCPSession
 	bool handle_out_of_order_packets(ScopedLock<Spinlock>&, u32 remote_sequence, size_t data_size);
 
 	Result<void> send_ack();
-	Result<void> send_syn(ScopedLock<Spinlock>& lock);
+	Result<void> send_syn(ScopedLock<Spinlock>&);
 	Result<void> send_fin(ScopedLock<Spinlock>&);
+	Result<void> send_payload(ScopedLock<Spinlock>&, const BufferView&);
 
-	Result<void> wait_for_syn(ScopedLock<Spinlock>& lock);
-	Result<void> wait_for_packet(ScopedLock<Spinlock>& lock);
+	Result<void> wait_for_syn(ScopedLock<Spinlock>&);
+	Result<void> wait_for_packet(ScopedLock<Spinlock>&);
 
 	void end_connection();
 
@@ -104,13 +105,13 @@ class TCPSession
 	constexpr u8 to_data_offset(size_t value) { return (number_of_words<u32>(value) & 0xF) << 4; }
 	constexpr size_t from_data_offset(u8 value) { return (value >> 4) * sizeof(u32); }
 
-	static constexpr size_t MAX_WINDOW_SIZE = 1000;
+	static constexpr size_t MAX_WINDOW_SIZE = 8000;
 
 	UniquePointer<Spinlock> m_lock;
 	Network* m_network;
 	Type m_type;
 	State m_state{State::CLOSED};
-	WaitQueue m_syn_waitqueue{};
+	Semaphore m_syn_waitqueue{0};
 	WaitQueue m_ack_waitqueue{};
 	WaitQueue m_data_push_waitqueue{};
 	WaitQueue m_data_waitqueue{};

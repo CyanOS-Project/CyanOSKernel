@@ -66,7 +66,7 @@ Result<void> TCPSession::connect(IPv4Address ip, u16 port)
 
 	m_remote_ip = ip;
 	m_remote_port = port;
-	m_local_port = 5000;
+	m_local_port = 52012;
 
 	m_state = State::SYN_SENT;
 
@@ -101,7 +101,7 @@ Result<void> TCPSession::send(const BufferView& data)
 		return ResultError{ERROR_CONNECTION_CLOSED};
 	}
 
-	send_and_wait_ack(local_lock, data, FLAGS::PSH);
+	send_payload(local_lock, data);
 
 	return {};
 }
@@ -119,13 +119,17 @@ Result<void> TCPSession::receive(Buffer& data)
 	wait_for_packet(local_lock);
 
 	size_t data_size = m_buffer_written_pointer - m_buffer_start_pointer;
-	data.fill_from(m_buffer.ptr() + m_buffer_start_pointer, 0, data_size);
+	if (data_size > data.size()) {
+		return ResultError{ERROR_BUFFER_OVERFLOW};
+	}
 
-	m_local_window_size += data_size;
-
-	if (m_state != State::ESTABLISHED) {
+	if (data_size == 0 && m_state != State::ESTABLISHED) {
 		return ResultError{ERROR_CONNECTION_CLOSED};
 	}
+
+	data.fill_from(m_buffer.ptr() + m_buffer_start_pointer, 0, data_size);
+	m_local_window_size += data_size;
+
 	return {};
 }
 
@@ -188,7 +192,7 @@ void TCPSession::handle_syn(IPv4Address src_ip, const BufferView& data)
 		m_remote_sequence = network_word32(tcp_header.seq) + 1;
 		m_remote_port = network_word16(tcp_header.src_port);
 		m_remote_ip = IPv4Address{src_ip};
-		m_syn_waitqueue.wake_up_all();
+		m_syn_waitqueue.release();
 	} else {
 		err() << "Shouldn't happen!";
 	}
@@ -236,7 +240,6 @@ void TCPSession::handle_psh()
 void TCPSession::handle_data(const BufferView& data, size_t payload_offset, size_t payload_size)
 {
 	if (is_buffer_available(data.size())) {
-		auto& tcp_header = data.const_convert_to<TCPHeader>();
 
 		m_buffer.fill_from(data.ptr() + payload_offset, m_buffer_written_pointer, payload_size);
 		m_buffer_written_pointer += payload_size;
@@ -274,12 +277,20 @@ Result<void> TCPSession::send_ack()
 
 Result<void> TCPSession::send_fin(ScopedLock<Spinlock>& lock)
 {
-	return send_and_wait_ack(lock, BufferView{}, FLAGS::FIN);
+	return send_and_wait_ack(lock, BufferView{}, FLAGS::FIN | FLAGS::ACK);
+}
+
+Result<void> TCPSession::send_payload(ScopedLock<Spinlock>& lock, const BufferView& payload)
+{
+	return send_and_wait_ack(lock, payload, FLAGS::ACK | FLAGS::PSH);
 }
 
 Result<void> TCPSession::wait_for_syn(ScopedLock<Spinlock>& lock)
 {
-	m_syn_waitqueue.wait(lock);
+	lock.release();
+	m_syn_waitqueue.acquire();
+	lock.acquire();
+
 	if (m_state == State::CLOSED) {
 		return ResultError{ERROR_CONNECTION_CLOSED};
 	}
@@ -298,7 +309,7 @@ Result<void> TCPSession::wait_for_packet(ScopedLock<Spinlock>& lock)
 void TCPSession::end_connection()
 {
 	m_state = State::CLOSED;
-	m_syn_waitqueue.wake_up_all();
+	m_syn_waitqueue.release();
 	m_ack_waitqueue.wake_up_all();
 	m_data_waitqueue.wake_up_all();
 	m_data_push_waitqueue.wake_up_all();
@@ -306,7 +317,6 @@ void TCPSession::end_connection()
 
 Result<void> TCPSession::send_and_wait_ack(ScopedLock<Spinlock>& lock, const BufferView& data, u8 flags)
 {
-
 	u32 sent_sequence = m_local_sequence;
 	size_t retransmitions = 0;
 
@@ -346,7 +356,7 @@ Result<void> TCPSession::send_packet(const BufferView& data, u8 flags)
 	tcp_header.seq = network_word32(m_local_sequence);
 	tcp_header.ack = network_word32(m_remote_sequence);
 	tcp_header.data_offset = to_data_offset(sizeof(TCPHeader));
-	tcp_header.flags = flags | FLAGS::ACK;
+	tcp_header.flags = flags;
 	tcp_header.window_size = network_word16(m_local_window_size);
 	tcp_header.checksum = 0;
 	tcp_header.urgent_pointer = 0;

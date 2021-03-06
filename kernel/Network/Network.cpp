@@ -22,15 +22,16 @@ void Network::start()
 	// auto& connection = m_tcp.accept(80);
 
 	auto client_thread = [this]() {
-		// auto& connection = m_tcp.connect(IPv4Address{216, 58, 198, 78}, 80);
-		auto& connection = m_tcp.accept(80);
-		Buffer buf{100};
+		auto& connection = m_tcp.connect(IPv4Address{216, 58, 198, 78}, 80);
+		// auto& connection = m_tcp.accept(80);
+		Buffer buf{10000};
 		while (1) {
+			connection.send(BufferView{"hello\x0A", 6});
+
 			if (auto error = connection.receive(buf)) {
 				info() << "Error: " << error.error();
 				break;
 			}
-			connection.send(BufferView{"you sent something", 19});
 			info() << "Message: " << (char*)(buf.ptr());
 			memset(buf.ptr(), 0, buf.size());
 			warn() << "---------------------------";
