@@ -29,7 +29,9 @@ void Semaphore::acquire()
 	ScopedLock local_lock(*m_lock);
 
 	m_count--;
-	m_queue.wait(local_lock);
+	if (m_count < 0) {
+		m_queue.wait(local_lock);
+	}
 }
 
 void Semaphore::release()
