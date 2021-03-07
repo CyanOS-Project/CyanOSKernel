@@ -6,12 +6,15 @@
 class RTL8139 : public EthernetNetworkAdapter
 {
   public:
-	static constexpr u16 VENDOR_ID = 0x10EC;
-	static constexpr u16 DEVICE_ID = 0x8139;
-
+	NON_COPYABLE(RTL8139)
+	NON_MOVABLE(RTL8139)
 	RTL8139(GenericPCIDevice&& device);
+	MACAddress mac() const override;
 	~RTL8139();
 	void rx_tx_handler();
+
+	static constexpr u16 VENDOR_ID = 0x10EC;
+	static constexpr u16 DEVICE_ID = 0x8139;
 
   private:
 	static constexpr u8 NUMBER_TX_BUFFERS = 4;
@@ -110,11 +113,11 @@ class RTL8139 : public EthernetNetworkAdapter
 	static constexpr u32 RX_PACKET_HEADER_SIZE = offsetof(RxPacket, data);
 
 	u16 m_ports = 0;
-
 	u8 m_current_tx_buffer = 0;
+	u32 m_current_rx_pointer = 0;
 	void* m_tx_buffers[NUMBER_TX_BUFFERS] = {};
 	u8* m_rx_buffer = nullptr;
-	u32 m_current_rx_pointer = 0;
+	MACAddress m_mac;
 
 	void turn_on();
 	void software_rest();
@@ -123,9 +126,9 @@ class RTL8139 : public EthernetNetworkAdapter
 	void start();
 	void handle_rx();
 	void handle_tx();
-	MACAddress read_MAC();
 	void send_ethernet_frame(const BufferView& data) override;
 	bool is_packet_ok(u16);
+	MACAddress read_MAC();
 
 	void write_register8(u16 address, u8 value);
 	void write_register16(u16 address, u16 value);

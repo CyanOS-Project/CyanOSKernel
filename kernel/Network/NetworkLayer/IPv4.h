@@ -23,7 +23,7 @@ class IPv4
 	void send(IPv4Address destination, IPv4Protocols protocol, const BufferView& data);
 	void handle(const BufferView& data);
 
-	IPv4Address IP();
+	IPv4Address ip() const;
 
   private:
 	struct IPv4Header {

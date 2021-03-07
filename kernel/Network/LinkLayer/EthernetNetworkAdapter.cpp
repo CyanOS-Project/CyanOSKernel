@@ -7,7 +7,7 @@ void EthernetNetworkAdapter::send_frame(ProtocolType type, MACAddress destinatio
 	Buffer ethernet_frame_raw(data, ETHERNET_HEADER_SIZE);
 	EthernetFrame& ethernet_frame = ethernet_frame_raw.convert_to<EthernetFrame>();
 
-	m_mac.copy(ethernet_frame.src_mac_addr);
+	mac().copy(ethernet_frame.src_mac_addr);
 	destination.copy(ethernet_frame.dst_mac_addr);
 
 	ethernet_frame.type = network_word16(static_cast<u16>(type));

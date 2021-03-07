@@ -28,8 +28,3 @@ void NetworkAdapter::handle_received_frame(ProtocolType type, const BufferView& 
 
 	Thread::create_thread(Thread::current->parent_process(), move(frame_handler), ThreadPrivilege::Kernel);
 }
-
-MACAddress NetworkAdapter::MAC() const
-{
-	return m_mac;
-}

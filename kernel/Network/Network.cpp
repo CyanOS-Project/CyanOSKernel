@@ -43,14 +43,14 @@ void Network::start()
 	// m_tcp.connect(IPv4Address{10, 0, 2, 2}, 80);
 }
 
-IPv4Address Network::device_ip()
+IPv4Address Network::device_ip() const
 {
-	return m_ipv4.IP();
+	return m_ipv4.ip();
 }
 
-MACAddress Network::device_mac()
+MACAddress Network::device_mac() const
 {
-	return m_network_adapter.MAC();
+	return m_network_adapter.mac();
 }
 
 NetworkAdapter& Network::network_adapter()

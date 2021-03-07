@@ -26,6 +26,11 @@ RTL8139::RTL8139(GenericPCIDevice&& device) : m_ports{device.BAR0().io_address()
 	ISR::register_hardware_interrupt_handler(irq_handler, device.interrupt_line());
 }
 
+MACAddress RTL8139::mac() const
+{
+	return m_mac;
+}
+
 void RTL8139::turn_on()
 {
 	write_register8(PORT_CONFIG1, 0);

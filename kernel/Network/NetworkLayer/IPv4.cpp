@@ -104,7 +104,7 @@ bool IPv4::is_packet_ok(const IPv4Header& packet)
 	return true;
 }
 
-IPv4Address IPv4::IP()
+IPv4Address IPv4::ip() const
 {
 	return m_device_ip_address;
 }

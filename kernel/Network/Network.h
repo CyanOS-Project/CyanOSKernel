@@ -13,14 +13,14 @@ class Network
   public:
 	Network(NetworkAdapter& network_adapter);
 	void start();
-	IPv4Address device_ip();
-	MACAddress device_mac();
 	NetworkAdapter& network_adapter();
 	IPv4& ipv4_provider();
 	ARP& arp_provider();
 	ICMP& icmp_provider();
 	UDP& udp_provider();
 	TCP& tcp_provider();
+	IPv4Address device_ip() const;
+	MACAddress device_mac() const;
 
 	~Network();
 

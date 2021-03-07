@@ -379,6 +379,10 @@ Result<void> TCPSession::send_packet(const BufferView& data, u8 flags)
 
 bool TCPSession::is_packet_ok(const BufferView& data)
 {
+	if (tcp_checksum(data) != 0) {
+		return false;
+	}
+
 	return true;
 }
 
