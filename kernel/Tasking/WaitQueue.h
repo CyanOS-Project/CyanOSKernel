@@ -28,6 +28,7 @@ class WaitQueue
 	void handle_thread_terminated(Thread&);
 	void wake_up();
 	void wake_up_all();
+	bool is_empty_queue();
 	template <typename T> State wait(ScopedLock<T>& checker_lock, size_t ms_timeout = 0)
 	{
 		ScopedLock queue_lock(*m_lock);

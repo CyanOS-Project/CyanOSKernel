@@ -48,6 +48,12 @@ void WaitQueue::wake_up_all()
 		queue++;
 	}
 }
+bool WaitQueue::is_empty_queue()
+{
+	ScopedLock local_lock(*m_lock);
+	auto blocked_queue = m_queue.find_if([](auto& i) { return i.state == State::Blocked; });
+	return blocked_queue == m_queue.end();
+}
 
 void WaitQueue::handle_thread_timeout(Thread& thread)
 {
