@@ -9,13 +9,16 @@
 static void irq_handler(ISRContextFrame& context);
 RTL8139* instance = nullptr;
 
-RTL8139::RTL8139(GenericPCIDevice&& device) : m_ports{device.BAR0().io_address()}
+RTL8139::RTL8139(GenericPCIDevice&& device) :
+    GenericPCIDevice{move(device)},
+    m_ports{BAR0().io_address()},
+    m_mac{read_mac()}
 {
-	m_mac = read_MAC();
+	ASSERT(instance == 0);
 	instance = this;
 
-	device.enable_bus_mastering();
-	device.enable_interrupts();
+	enable_bus_mastering();
+	enable_interrupts();
 
 	turn_on();
 	software_rest();
@@ -23,7 +26,7 @@ RTL8139::RTL8139(GenericPCIDevice&& device) : m_ports{device.BAR0().io_address()
 	setup_tx();
 	setup_rx();
 
-	ISR::register_hardware_interrupt_handler(irq_handler, device.interrupt_line());
+	ISR::register_hardware_interrupt_handler(irq_handler, interrupt_line());
 }
 
 MACAddress RTL8139::mac() const
@@ -139,7 +142,7 @@ bool RTL8139::is_packet_ok(u16 status)
 	}
 }
 
-MACAddress RTL8139::read_MAC()
+MACAddress RTL8139::read_mac()
 {
 	u32 mac1 = read_register32(0);
 	u32 mac2 = read_register32(4);

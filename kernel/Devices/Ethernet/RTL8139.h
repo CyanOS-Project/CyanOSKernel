@@ -3,7 +3,7 @@
 #include "Network/LinkLayer/EthernetNetworkAdapter.h"
 #include "Types.h"
 
-class RTL8139 : public EthernetNetworkAdapter
+class RTL8139 : public EthernetNetworkAdapter, public GenericPCIDevice
 {
   public:
 	NON_COPYABLE(RTL8139)
@@ -113,11 +113,11 @@ class RTL8139 : public EthernetNetworkAdapter
 	static constexpr u32 RX_PACKET_HEADER_SIZE = offsetof(RxPacket, data);
 
 	u16 m_ports = 0;
+	MACAddress m_mac;
 	u8 m_current_tx_buffer = 0;
 	u32 m_current_rx_pointer = 0;
 	void* m_tx_buffers[NUMBER_TX_BUFFERS] = {};
 	u8* m_rx_buffer = nullptr;
-	MACAddress m_mac;
 
 	void turn_on();
 	void software_rest();
@@ -128,7 +128,7 @@ class RTL8139 : public EthernetNetworkAdapter
 	void handle_tx();
 	void send_ethernet_frame(const BufferView& data) override;
 	bool is_packet_ok(u16);
-	MACAddress read_MAC();
+	MACAddress read_mac();
 
 	void write_register8(u16 address, u8 value);
 	void write_register16(u16 address, u16 value);
