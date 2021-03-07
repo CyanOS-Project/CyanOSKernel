@@ -69,6 +69,6 @@ void WaitQueue::handle_thread_terminated(Thread& thread)
 
 void WaitQueue::wake_up_queue(Queue& blocked_queue)
 {
-	blocked_queue.state = State::WokenUp;
+	blocked_queue.state = State::WokenUpNormally;
 	blocked_queue.thread->wake_up();
 }

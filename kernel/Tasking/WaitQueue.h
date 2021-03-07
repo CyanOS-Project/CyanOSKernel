@@ -14,7 +14,7 @@ class WaitQueue
 	enum class State
 	{
 		Blocked,
-		WokenUp,
+		WokenUpNormally,
 		Timeout
 	};
 
@@ -53,7 +53,7 @@ class WaitQueue
 		ScopedLock queue_lock(*m_lock);
 
 		if (!checker()) {
-			return State::WokenUp;
+			return State::WokenUpNormally;
 		}
 
 		Vector<Queue>::Iterator blocked_thread;
