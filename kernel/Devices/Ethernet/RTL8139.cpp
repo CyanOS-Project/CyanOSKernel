@@ -95,7 +95,6 @@ void RTL8139::handle_rx()
 
 void RTL8139::handle_tx()
 {
-	// info() << "TX descriptors: " << Hex(read_register16(PORT_TX_SUMMARY));
 	// FIXME: release waitqueues for descriptors here.
 }
 
@@ -119,18 +118,24 @@ void RTL8139::rx_tx_handler()
 
 void RTL8139::send_ethernet_frame(const BufferView& data)
 {
+	m_rx_ports_semaphore.acquire();
+	ScopedLock local_lock{m_lock};
+
 	if (data.size() > MAX_TX_BUFFER_SIZE) {
 		warn() << "Data too large to be sent!";
 		return;
 	}
 
-	data.copy_to(m_tx_buffers[m_current_tx_buffer], 0, data.size());
-
-	write_register32(TSD_array[m_current_tx_buffer], data.size());
-	// FIXME: acquire locks for descriptors here.
-	while (!(read_register32(TSD_array[m_current_tx_buffer]) & TX_STATUS_TOK)) {
-	}
+	auto used_tx_buffer = m_current_tx_buffer;
 	m_current_tx_buffer = (m_current_tx_buffer + 1) % NUMBER_TX_BUFFERS;
+
+	data.copy_to(m_tx_buffers[used_tx_buffer], 0, data.size());
+	write_register32(TSD_array[used_tx_buffer], data.size());
+
+	while (!(read_register32(TSD_array[used_tx_buffer]) & TX_STATUS_TOK)) {
+	}
+
+	m_rx_ports_semaphore.release();
 }
 
 bool RTL8139::is_packet_ok(u16 status)

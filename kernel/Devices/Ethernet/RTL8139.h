@@ -1,6 +1,8 @@
 #pragma once
 #include "Devices/Bus/PCIDevice.h"
 #include "Network/LinkLayer/EthernetNetworkAdapter.h"
+#include "Tasking/Semaphore.h"
+#include "Tasking/SpinLock.h"
 #include "Types.h"
 
 class RTL8139 : public EthernetNetworkAdapter, public GenericPCIDevice
@@ -118,6 +120,8 @@ class RTL8139 : public EthernetNetworkAdapter, public GenericPCIDevice
 	u32 m_current_rx_pointer = 0;
 	void* m_tx_buffers[NUMBER_TX_BUFFERS] = {};
 	u8* m_rx_buffer = nullptr;
+	Spinlock m_lock;
+	Semaphore m_rx_ports_semaphore{4};
 
 	void turn_on();
 	void software_rest();
