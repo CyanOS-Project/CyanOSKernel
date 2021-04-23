@@ -12,7 +12,7 @@ IntrusiveList<Thread> Thread::ready_threads;
 IntrusiveList<Thread> Thread::sleeping_threads;
 IntrusiveList<Thread> Thread::blocked_threads;
 IntrusiveList<Thread> Thread::blocked_timed_threads;
-Bitmap<MAX_BITMAP_SIZE> Thread::tid_bitmap;
+StaticBitmap<MAX_BITMAP_SIZE> Thread::tid_bitmap;
 Spinlock Thread::global_lock;
 
 Thread& Thread::create_thread(Process& process, Function<void()> entry_point, ThreadPrivilege priv)

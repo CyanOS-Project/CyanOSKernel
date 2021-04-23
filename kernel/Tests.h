@@ -9,9 +9,9 @@
 #include "Tasking/Semaphore.h"
 #include "VirtualMemory/Memory.h"
 #include <ArgumentParser.h>
-#include <Bitmap.h>
 #include <ELFParser.h>
 #include <PathView.h>
+#include <StaticBitmap.h>
 
 void test_pipe1(uintptr_t arg)
 {

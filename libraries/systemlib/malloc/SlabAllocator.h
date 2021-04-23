@@ -1,6 +1,6 @@
 #pragma once
 #include "../Systemcalls/Systemcalls.h"
-#include <Bitmap.h>
+#include <StaticBitmap.h>
 #include <Types.h>
 
 const static u32 MAGIC = 0x8CBEEFC8;
@@ -21,7 +21,7 @@ template <size_t slab_size, size_t memory_size> class Slab
 		size_t free_blocks;
 		size_t next_fit_block;
 		Slab<slab_size, memory_size>*prev, *next;
-		Bitmap<max_blocks> mem_map;
+		StaticBitmap<max_blocks> mem_map;
 	};
 	const static size_t MAX_HEADER_SIZE = sizeof(SlabHeader<memory_size / slab_size>);
 	const static size_t MAX_BLOCKS = (memory_size - MAX_HEADER_SIZE) / sizeof(MemoryBlock<slab_size>);

@@ -3,11 +3,11 @@
 #endif
 
 #include <gtest/gtest.h>
-#include <stdlib/Bitmap.h>
+#include <stdlib/StaticBitmap.h>
 
 TEST(Bitmap_Test, SearchForUsed)
 {
-	Bitmap<10> bm;
+	StaticBitmap<10> bm;
 	EXPECT_EQ(bm.find_first_set_range(1), BITMAP_NO_BITS_LEFT);
 	EXPECT_EQ(bm.find_first_clear_range(10), 0);
 	bm.set(2);
@@ -23,7 +23,7 @@ TEST(Bitmap_Test, SearchForUsed)
 
 TEST(Bitmap_Test, SearchForUnused)
 {
-	Bitmap<10> bm;
+	StaticBitmap<10> bm;
 	EXPECT_EQ(bm.find_first_clear_range(5), 0);
 	bm.set(2);
 	EXPECT_EQ(bm.find_first_clear_range(5), 3);

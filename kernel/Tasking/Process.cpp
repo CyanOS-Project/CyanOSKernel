@@ -7,7 +7,7 @@
 #include <Assert.h>
 
 List<Process> Process::processes;
-Bitmap<MAX_BITMAP_SIZE> Process::pid_bitmap;
+StaticBitmap<MAX_BITMAP_SIZE> Process::pid_bitmap;
 Spinlock Process::global_lock;
 
 Process& Process::create_virtual_process(StringView name)
