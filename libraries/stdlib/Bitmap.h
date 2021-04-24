@@ -19,13 +19,15 @@
 class Bitmap
 {
   private:
-	const size_t m_bitmap_size;
+	size_t m_bitmap_size;
 	UniquePointer<u8[]> m_bitmap_data;
 
   public:
 	NON_COPYABLE(Bitmap)
-	NON_MOVABLE(Bitmap)
+	DEFAULT_MOVE(Bitmap)
+
 	Bitmap(size_t m_bitmap_size);
+
 	~Bitmap();
 	void set(size_t position);
 	void set_range(size_t position, size_t count);
