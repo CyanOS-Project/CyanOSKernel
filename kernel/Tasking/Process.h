@@ -5,11 +5,11 @@
 #include "Loader/ELF.h"
 #include "ProcessDefinitions.h"
 #include "WaitQueue.h"
+#include <Bitmap.h>
 #include <List.h>
 #include <PathView.h>
 #include <Reference.h>
 #include <Result.h>
-#include <StaticBitmap.h>
 #include <String.h>
 #include <StringView.h>
 #include <Types.h>
@@ -54,7 +54,7 @@ class Process
 	~Process();
 
   private:
-	static StaticBitmap<MAX_BITMAP_SIZE> pid_bitmap;
+	static Bitmap pid_bitmap;
 	static List<Process> processes;
 	static Spinlock global_lock;
 

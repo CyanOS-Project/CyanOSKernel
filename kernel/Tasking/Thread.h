@@ -1,11 +1,11 @@
 #pragma once
 #include "Arch/x86/Spinlock.h"
 #include "SpinLock.h"
+#include <Bitmap.h>
 #include <Function.h>
 #include <IntrusiveList.h>
 #include <IterationDecision.h>
 #include <Result.h>
-#include <StaticBitmap.h>
 #include <Types.h>
 #include <UniquePointer.h>
 
@@ -63,7 +63,7 @@ class Thread : public IntrusiveListNode<Thread>
 		size_t tid;
 	};
 
-	static StaticBitmap<MAX_BITMAP_SIZE> tid_bitmap;
+	static Bitmap tid_bitmap;
 	static IntrusiveList<Thread> ready_threads;
 	static IntrusiveList<Thread> sleeping_threads;
 	static IntrusiveList<Thread> blocked_threads;
