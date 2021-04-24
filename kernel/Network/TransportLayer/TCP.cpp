@@ -5,6 +5,8 @@
 #include <ErrorCodes.h>
 #include <NetworkAlgorithms.h>
 
+Bitmap TCPSession::m_ports{65535};
+
 TCP::TCP(Network& network) : m_network{network} {}
 
 void TCP::handle(IPv4Address src_ip, const BufferView& data)
@@ -30,8 +32,6 @@ TCPSession& TCP::connect(IPv4Address ip, u16 port)
 	client.connect(ip, port);
 	return client;
 }
-
-void TCP::close(TCPSession&) {}
 
 TCPSession::TCPSession(Network& network, Type type) :
     m_lock{UniquePointer<Spinlock>::make_unique()},
@@ -66,7 +66,7 @@ Result<void> TCPSession::connect(IPv4Address ip, u16 port)
 
 	m_remote_ip = ip;
 	m_remote_port = port;
-	m_local_port = 52012;
+	m_local_port = m_ports.find_first_clear();
 
 	m_state = State::SYN_SENT;
 
@@ -91,6 +91,8 @@ void TCPSession::close()
 	send_fin(local_lock);
 
 	m_state = State::CLOSED;
+
+	m_ports.clear(m_local_port);
 }
 
 Result<void> TCPSession::send(const BufferView& data)

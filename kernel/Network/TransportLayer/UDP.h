@@ -1,9 +1,9 @@
 #pragma once
 
 #include "Tasking/WaitQueue.h"
+#include <Bitmap.h>
 #include <BufferView.h>
 #include <IPv4Address.h>
-#include <StaticBitmap.h>
 #include <Types.h>
 #include <Vector.h>
 

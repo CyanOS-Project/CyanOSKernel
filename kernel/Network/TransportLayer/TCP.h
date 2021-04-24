@@ -2,6 +2,7 @@
 
 #include "Tasking/ScopedLock.h"
 #include "Tasking/Semaphore.h"
+#include <Bitmap.h>
 #include <BufferView.h>
 #include <IPv4Address.h>
 #include <Result.h>
@@ -127,6 +128,8 @@ class TCPSession
 	u16 m_local_window_size{MAX_WINDOW_SIZE};
 	u16 m_remote_window_size{1};
 
+	static Bitmap m_ports;
+
 	friend TCP;
 };
 
@@ -136,7 +139,6 @@ class TCP
 	TCP(Network&);
 	TCPSession& accept(u16 port);
 	TCPSession& connect(IPv4Address ip, u16 port);
-	void close(TCPSession&);
 	void handle(IPv4Address src_ip, const BufferView& data);
 
 	Network& m_network;
