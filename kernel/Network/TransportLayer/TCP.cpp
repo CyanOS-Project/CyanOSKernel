@@ -47,13 +47,17 @@ Result<void> TCPSession::accept(u16 port)
 	m_local_port = port;
 	m_state = State::LISTEN;
 
-	if (auto error = wait_for_syn(local_lock))
+	if (auto error = wait_for_syn(local_lock)) {
+		end_connection();
 		return error;
+	}
 
 	m_state = State::SYN_RECEIVED;
 
-	if (auto error = send_syn(local_lock))
+	if (auto error = send_syn(local_lock)) {
+		end_connection();
 		return error;
+	}
 
 	m_state = State::ESTABLISHED;
 
@@ -70,13 +74,20 @@ Result<void> TCPSession::connect(IPv4Address ip, u16 port)
 
 	m_state = State::SYN_SENT;
 
-	if (auto error = send_syn(local_lock))
+	if (auto error = send_syn(local_lock)) {
+		end_connection();
 		return error;
+	}
 
-	if (auto error = wait_for_syn(local_lock))
+	if (auto error = wait_for_syn(local_lock)) {
+		end_connection();
 		return error;
+	}
 
-	send_ack();
+	if (auto error = send_ack()) {
+		end_connection();
+		return error;
+	}
 
 	m_state = State::ESTABLISHED;
 
@@ -90,9 +101,7 @@ void TCPSession::close()
 	m_state = State::FIN_WAIT1;
 	send_fin(local_lock);
 
-	m_state = State::CLOSED;
-
-	m_ports.clear(m_local_port);
+	end_connection();
 }
 
 Result<void> TCPSession::send(const BufferView& data)
@@ -103,7 +112,10 @@ Result<void> TCPSession::send(const BufferView& data)
 		return ResultError{ERROR_CONNECTION_CLOSED};
 	}
 
-	send_payload(local_lock, data);
+	if (auto error = send_payload(local_lock, data)) {
+		end_connection();
+		return error;
+	}
 
 	return {};
 }
@@ -118,7 +130,10 @@ Result<void> TCPSession::receive(Buffer& data)
 
 	m_buffer_start_pointer = m_buffer_written_pointer;
 
-	wait_for_packet(local_lock);
+	if (auto error = wait_for_packet(local_lock)) {
+		end_connection();
+		return error;
+	}
 
 	size_t data_size = m_buffer_written_pointer - m_buffer_start_pointer;
 	if (data_size > data.size()) {
@@ -315,6 +330,8 @@ void TCPSession::end_connection()
 	m_ack_waitqueue.wake_up_all();
 	m_data_waitqueue.wake_up_all();
 	m_data_push_waitqueue.wake_up_all();
+
+	m_ports.clear(m_local_port);
 }
 
 Result<void> TCPSession::send_and_wait_ack(ScopedLock<Spinlock>& lock, const BufferView& data, u8 flags)
