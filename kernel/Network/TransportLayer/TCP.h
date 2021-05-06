@@ -110,7 +110,7 @@ class TCPSession
 	static constexpr size_t MAX_WINDOW_SIZE = 8000;
 
 	UniquePointer<Spinlock> m_lock;
-	Network* m_network;
+	Reference<Network> m_network;
 	Reference<Bitmap> m_ports;
 	Type m_type;
 	State m_state{State::CLOSED};
