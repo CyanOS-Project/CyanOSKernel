@@ -4,6 +4,7 @@
 #include <Bitmap.h>
 #include <BufferView.h>
 #include <IPv4Address.h>
+#include <Result.h>
 #include <Types.h>
 #include <Vector.h>
 
@@ -19,12 +20,10 @@ class UDP
 	};
 
 	UDP(Network&);
-	void send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
+	Result<void> send(IPv4Address dest_ip, u16 dest_port, const BufferView& data);
+	Result<void> send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
 	ConnectionInformation receive(u16 dest_port, Buffer& buffer);
 	void handle(IPv4Address src_ip, const BufferView& data);
-
-  protected:
-	void send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
 
   private:
 	struct UDPHeader {
@@ -44,7 +43,10 @@ class UDP
 		Connection(u16 t_port, Buffer& t_buffer) : dest_port{t_port}, buffer{&t_buffer}, wait_queue{} {}
 	};
 
+	void send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
+
 	Spinlock m_lock;
 	Network& m_network;
 	Vector<Connection> m_connections_list;
+	Bitmap m_ports{65535};
 };

@@ -1,17 +1,38 @@
 #include "UDP.h"
+#include "Devices/DebugPort/Logger.h"
 #include "Network/Network.h"
 #include "Network/NetworkLayer/IPv4.h"
 #include "Tasking/ScopedLock.h"
 #include <Algorithms.h>
 #include <Buffer.h>
+#include <ErrorCodes.h>
 #include <NetworkAlgorithms.h>
 
 // TODO: refactor network structures so one function will handle convertions to/from big endian.
 UDP::UDP(Network& network) : m_network{network} {}
 
-void UDP::send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
+Result<void> UDP::send(IPv4Address dest_ip, u16 dest_port, const BufferView& data)
 {
+	u16 src_port = m_ports.find_first_clear();
+
 	send_segment(dest_ip, dest_port, src_port, data);
+
+	m_ports.clear(src_port);
+
+	return {};
+}
+
+Result<void> UDP::send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
+{
+	if (m_ports.check_set(src_port)) {
+		return ResultError{ERROR_PORT_ALREADY_IN_USE};
+	}
+
+	send_segment(dest_ip, dest_port, src_port, data);
+
+	m_ports.clear(src_port);
+
+	return {};
 }
 
 UDP::ConnectionInformation UDP::receive(u16 dest_port, Buffer& buffer)
@@ -41,10 +62,8 @@ void UDP::handle(IPv4Address src_ip, const BufferView& data)
 	auto& udp_segment = data.const_convert_to<UDPHeader>();
 
 	u16 dest_port = network_word16(udp_segment.destination_port);
-	auto connection = m_connections_list.find_if([dest_port](const Connection& connection) {
-		return connection.dest_port == dest_port;
-		info() << connection.dest_port;
-	});
+	auto connection = m_connections_list.find_if(
+	    [dest_port](const Connection& connection) { return connection.dest_port == dest_port; });
 
 	if (connection != m_connections_list.end()) {
 		connection->src_port = network_word16(udp_segment.source_port);
