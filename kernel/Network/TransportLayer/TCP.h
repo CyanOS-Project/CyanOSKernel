@@ -5,6 +5,7 @@
 #include <Bitmap.h>
 #include <BufferView.h>
 #include <IPv4Address.h>
+#include <Reference.h>
 #include <Result.h>
 #include <Vector.h>
 
@@ -15,14 +16,14 @@ class TCPSession
 {
   public:
 	NON_COPYABLE(TCPSession)
+	DEFAULT_MOVE(TCPSession)
+
 	enum class Type
 	{
 		Server,
 		Client
 	};
-	TCPSession(Network& network, Type type);
-	TCPSession(TCPSession&&) = default;
-	TCPSession& operator=(TCPSession&&) = default;
+	TCPSession(Network& network, Bitmap& port_bitmap, Type type);
 	Result<void> accept(u16 port);
 	Result<void> connect(IPv4Address ip, u16 port);
 	void close();
@@ -110,6 +111,7 @@ class TCPSession
 
 	UniquePointer<Spinlock> m_lock;
 	Network* m_network;
+	Reference<Bitmap> m_ports;
 	Type m_type;
 	State m_state{State::CLOSED};
 	Semaphore m_syn_waitqueue{0};
@@ -128,8 +130,6 @@ class TCPSession
 	u16 m_local_window_size{MAX_WINDOW_SIZE};
 	u16 m_remote_window_size{1};
 
-	static Bitmap m_ports;
-
 	friend TCP;
 };
 
@@ -143,4 +143,5 @@ class TCP
 
 	Network& m_network;
 	Vector<TCPSession> m_connection_sessions;
+	Bitmap m_ports{65535};
 };

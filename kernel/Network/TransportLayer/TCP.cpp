@@ -5,8 +5,6 @@
 #include <ErrorCodes.h>
 #include <NetworkAlgorithms.h>
 
-Bitmap TCPSession::m_ports{65535};
-
 TCP::TCP(Network& network) : m_network{network} {}
 
 void TCP::handle(IPv4Address src_ip, const BufferView& data)
@@ -21,21 +19,22 @@ void TCP::handle(IPv4Address src_ip, const BufferView& data)
 }
 TCPSession& TCP::accept(u16 port)
 {
-	auto& server = *m_connection_sessions.emplace_back(m_network, TCPSession::Type::Server);
+	auto& server = *m_connection_sessions.emplace_back(m_network, m_ports, TCPSession::Type::Server);
 	server.accept(port);
 	return server;
 }
 
 TCPSession& TCP::connect(IPv4Address ip, u16 port)
 {
-	auto& client = *m_connection_sessions.emplace_back(m_network, TCPSession::Type::Client);
+	auto& client = *m_connection_sessions.emplace_back(m_network, m_ports, TCPSession::Type::Client);
 	client.connect(ip, port);
 	return client;
 }
 
-TCPSession::TCPSession(Network& network, Type type) :
+TCPSession::TCPSession(Network& network, Bitmap& bitmap, Type type) :
     m_lock{UniquePointer<Spinlock>::make_unique()},
     m_network{&network},
+    m_ports{bitmap},
     m_type{type}
 {
 }
@@ -70,7 +69,7 @@ Result<void> TCPSession::connect(IPv4Address ip, u16 port)
 
 	m_remote_ip = ip;
 	m_remote_port = port;
-	m_local_port = m_ports.find_first_clear();
+	m_local_port = m_ports->find_first_clear();
 
 	m_state = State::SYN_SENT;
 
@@ -331,7 +330,7 @@ void TCPSession::end_connection()
 	m_data_waitqueue.wake_up_all();
 	m_data_push_waitqueue.wake_up_all();
 
-	m_ports.clear(m_local_port);
+	m_ports->clear(m_local_port);
 }
 
 Result<void> TCPSession::send_and_wait_ack(ScopedLock<Spinlock>& lock, const BufferView& data, u8 flags)
