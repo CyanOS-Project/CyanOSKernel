@@ -35,24 +35,25 @@ Result<void> UDP::send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const B
 	return {};
 }
 
-UDP::ConnectionInformation UDP::receive(u16 dest_port, Buffer& buffer)
+Result<size_t> UDP::receive(u16 dest_port, Buffer& buffer)
 {
-	ScopedLock local_lock{m_lock};
+	auto result = receive_segment(dest_port, buffer);
+	if (result)
+		return ResultError{result.error()};
 
-	ASSERT(!m_connections_list.contains([dest_port](const Connection& i) { return dest_port == i.dest_port; }));
+	return result.value().data_size;
+}
 
-	auto& connection = *m_connections_list.emplace_back(dest_port, buffer);
+Result<size_t> UDP::receive(u16 dest_port, Buffer& buffer, SocketAddress& source_address)
+{
+	auto result = receive_segment(dest_port, buffer);
+	if (result)
+		return ResultError{result.error()};
 
-	connection.wait_queue.wait(local_lock);
+	source_address.ip = result.value().src_ip;
+	source_address.port = result.value().src_port;
 
-	ConnectionInformation connection_info;
-	connection_info.data_size = connection.data_size;
-	connection_info.src_port = connection.src_port;
-	connection_info.src_ip = connection.src_ip;
-
-	m_connections_list.remove_if([&connection](const Connection& i) { return connection.dest_port == i.dest_port; });
-
-	return connection_info;
+	return result.value().data_size;
 }
 
 void UDP::handle(IPv4Address src_ip, const BufferView& data)
@@ -78,7 +79,7 @@ void UDP::handle(IPv4Address src_ip, const BufferView& data)
 	}
 }
 
-void UDP::send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
+Result<void> UDP::send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
 {
 	Buffer udp_raw_segment{sizeof(UDPHeader) + data.size()};
 	auto& udp_segment = udp_raw_segment.convert_to<UDPHeader>();
@@ -91,4 +92,26 @@ void UDP::send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, const B
 	udp_raw_segment.fill_from(data.ptr(), sizeof(UDPHeader), data.size());
 
 	m_network.ipv4_provider().send(dest_ip, IPv4Protocols::UDP, udp_raw_segment);
+
+	return {};
+}
+
+Result<UDP::DatagramInfo> UDP::receive_segment(u16 dest_port, Buffer& buffer)
+{
+	ScopedLock local_lock{m_lock};
+
+	ASSERT(!m_connections_list.contains([dest_port](const Connection& i) { return dest_port == i.dest_port; }));
+
+	auto& connection = *m_connections_list.emplace_back(dest_port, buffer);
+
+	connection.wait_queue.wait(local_lock);
+
+	DatagramInfo info;
+	info.src_port = connection.src_port;
+	info.src_ip = connection.src_ip;
+	info.data_size = connection.data_size;
+
+	m_connections_list.remove_if([&connection](const Connection& i) { return connection.dest_port == i.dest_port; });
+
+	return info;
 }
