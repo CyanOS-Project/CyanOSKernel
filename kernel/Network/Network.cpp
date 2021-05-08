@@ -1,4 +1,5 @@
 #include "Network.h"
+#include "ApplicationLayer/DNS.h"
 #include "Network/NetworkLayer/ICMP.h"
 #include "Network/TransportLayer/DHCP.h"
 #include "Network/TransportLayer/UDP.h"
@@ -21,22 +22,7 @@ void Network::start()
 	// m_icmp.send_echo_request(IPv4Address{10, 0, 2, 2});
 	// auto& connection = m_tcp.accept(80);
 
-	auto client_thread = [this]() {
-		auto& connection = m_tcp.connect(IPv4Address{216, 58, 198, 78}, 80);
-		// auto& connection = m_tcp.accept(80);
-		Buffer buf{10000};
-		while (1) {
-			connection.send(BufferView{"hello\x0A", 6});
-
-			if (auto error = connection.receive(buf)) {
-				info() << "Error: " << error.error();
-				break;
-			}
-			info() << "Message: " << (char*)(buf.ptr());
-			memset(buf.ptr(), 0, buf.size());
-			warn() << "---------------------------";
-		}
-	};
+	auto client_thread = [this]() { DNS(m_udp, IPv4Address{8, 8, 8, 8}).reslove("www.google.com"); };
 
 	Thread::create_thread(Thread::current->parent_process(), client_thread, ThreadPrivilege::Kernel);
 
