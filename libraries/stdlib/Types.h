@@ -7,7 +7,8 @@
 #define UNUSED(expr)     (void)(expr)
 #define UNUSEDARG        __attribute__((unused))
 
-#define Bit(x) (1 << x)
+#define Bit(shift)         (1 << shift)
+#define Bits(value, shift) (value << shift)
 
 using u32 = uint32_t;
 using u16 = uint16_t;
