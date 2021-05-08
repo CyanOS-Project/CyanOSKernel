@@ -28,7 +28,7 @@ class TCPSession
 	Result<void> connect(IPv4Address ip, u16 port);
 	void close();
 	Result<void> send(const BufferView& data);
-	Result<void> receive(Buffer& data);
+	Result<size_t> receive(Buffer& data);
 
   private:
 	struct TCPHeader {

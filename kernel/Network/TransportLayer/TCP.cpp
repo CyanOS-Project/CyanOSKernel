@@ -119,7 +119,7 @@ Result<void> TCPSession::send(const BufferView& data)
 	return {};
 }
 
-Result<void> TCPSession::receive(Buffer& data)
+Result<size_t> TCPSession::receive(Buffer& data)
 {
 	ScopedLock local_lock{*m_lock};
 
@@ -131,7 +131,7 @@ Result<void> TCPSession::receive(Buffer& data)
 
 	if (auto error = wait_for_packet(local_lock)) {
 		end_connection();
-		return error;
+		return ResultError{error.error()};
 	}
 
 	size_t data_size = m_buffer_written_pointer - m_buffer_start_pointer;
@@ -146,7 +146,7 @@ Result<void> TCPSession::receive(Buffer& data)
 	data.fill_from(m_buffer.ptr() + m_buffer_start_pointer, 0, data_size);
 	m_local_window_size += data_size;
 
-	return {};
+	return data_size;
 }
 
 void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
