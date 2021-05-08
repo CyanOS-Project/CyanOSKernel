@@ -15,7 +15,8 @@ Result<void> UDP::send(IPv4Address dest_ip, u16 dest_port, const BufferView& dat
 {
 	u16 src_port = m_ports.find_first_clear();
 
-	send_segment(dest_ip, dest_port, src_port, data);
+	if (auto result = send_segment(dest_ip, dest_port, src_port, data))
+		return result;
 
 	m_ports.clear(src_port);
 
@@ -28,7 +29,8 @@ Result<void> UDP::send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const B
 		return ResultError{ERROR_PORT_ALREADY_IN_USE};
 	}
 
-	send_segment(dest_ip, dest_port, src_port, data);
+	if (auto result = send_segment(dest_ip, dest_port, src_port, data))
+		return result;
 
 	m_ports.clear(src_port);
 
