@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Network/NetworkDefinitions.h"
 #include "Tasking/ScopedLock.h"
 #include "Tasking/Semaphore.h"
 #include <Bitmap.h>
@@ -29,6 +30,7 @@ class TCPSession
 	void close();
 	Result<void> send(const BufferView& data);
 	Result<size_t> receive(Buffer& data);
+	Result<size_t> receive(Buffer& data, SocketAddress& src_address);
 
   private:
 	struct TCPHeader {

@@ -149,6 +149,14 @@ Result<size_t> TCPSession::receive(Buffer& data)
 	return data_size;
 }
 
+Result<size_t> TCPSession::receive(Buffer& data, SocketAddress& src_address)
+{
+	src_address.ip = m_remote_ip;
+	src_address.port = m_remote_port;
+
+	return receive(data);
+}
+
 void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 {
 	ScopedLock local_lock{*m_lock};

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Network/NetworkDefinitions.h"
 #include "Tasking/WaitQueue.h"
 #include <Bitmap.h>
 #include <BufferView.h>
@@ -7,11 +8,6 @@
 #include <Result.h>
 #include <Types.h>
 #include <Vector.h>
-
-struct SocketAddress {
-	IPv4Address ip;
-	u16 port;
-};
 
 class Network;
 class UDP
