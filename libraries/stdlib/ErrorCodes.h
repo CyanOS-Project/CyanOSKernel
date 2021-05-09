@@ -25,3 +25,4 @@
 #define ERROR_BUFFER_OVERFLOW       22
 #define ERROR_ECHO_BAD_REPLY        23
 #define ERROR_ECHO_TIMEOUT          24
+#define ERROR_DNS_UNRESOLVABLE      25

@@ -19,10 +19,10 @@ void Network::start()
 {
 	m_ipv4.start();
 
-	// m_icmp.send_echo_request(IPv4Address{10, 0, 2, 2});
+	// m_icmp.send_echo_request(IPv4Address{216, 58, 211, 196});
 	// auto& connection = m_tcp.accept(80);
 
-	auto client_thread = [this]() { DNS(m_udp, IPv4Address{8, 8, 8, 8}).reslove("www.google.com"); };
+	auto client_thread = [this]() { DNS(m_udp, m_icmp, IPv4Address{8, 8, 8, 8}).reslove("www.google.com"); };
 
 	Thread::create_thread(Thread::current->parent_process(), client_thread, ThreadPrivilege::Kernel);
 

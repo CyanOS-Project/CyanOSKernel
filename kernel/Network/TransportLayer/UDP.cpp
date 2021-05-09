@@ -103,7 +103,7 @@ Result<UDP::DatagramInfo> UDP::receive_segment(u16 dest_port, Buffer& buffer)
 	ScopedLock local_lock{m_lock};
 
 	ASSERT(!m_connections_list.contains([dest_port](const Connection& i) { return dest_port == i.dest_port; }));
-
+	// FIXME: handle overflow.
 	auto& connection = *m_connections_list.emplace_back(dest_port, buffer);
 
 	connection.wait_queue.wait(local_lock);
