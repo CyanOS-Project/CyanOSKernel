@@ -3,6 +3,7 @@
 #include "Tasking/WaitQueue.h"
 #include <BufferView.h>
 #include <IPv4Address.h>
+#include <Result.h>
 #include <Types.h>
 #include <Vector.h>
 
@@ -13,7 +14,7 @@ class ICMP
   public:
 	ICMP(Network& network);
 
-	void send_echo_request(IPv4Address address);
+	Result<void> send_echo_request(IPv4Address address);
 	void handle_icmp_reply(IPv4Address source_ip, const BufferView& data);
 	void handle_echo_reply(IPv4Address source_ip, const BufferView& data);
 	bool is_icmp_reply_ok(const BufferView& data);

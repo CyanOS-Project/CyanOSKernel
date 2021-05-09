@@ -2,11 +2,12 @@
 #include "Network/Network.h"
 #include <Buffer.h>
 #include <Endianess.h>
+#include <ErrorCodes.h>
 #include <NetworkAlgorithms.h>
 
 ICMP::ICMP(Network& network) : m_network{network}, m_lock{}, m_connection_list{} {}
 
-void ICMP::send_echo_request(IPv4Address address)
+Result<void> ICMP::send_echo_request(IPv4Address address)
 {
 	ScopedLock local_lock{m_lock};
 
@@ -24,14 +25,22 @@ void ICMP::send_echo_request(IPv4Address address)
 	m_network.ipv4_provider().send(address, IPv4Protocols::ICMP, icmp_raw_packet);
 	auto& connection = *m_connection_list.emplace_back(address);
 
-	connection.wait_queue.wait(local_lock);
+	connection.wait_queue.wait(local_lock, 1000);
 
-	if (connection.state == State::SuccessfulReply) {
-		info() << "Pinging " << address << " returned successful reply.";
-	} else if (connection.state == State::BadReply) {
-		info() << "Pinging " << address << " returned unsuccessful reply.";
-	}
+	auto state = connection.state;
+
 	m_connection_list.remove_if([&connection](const Connection& i) { return i.dest == connection.dest; });
+
+	if (state == State::SuccessfulReply) {
+		info() << "Pinging " << address << " returned successful reply.";
+		return {};
+	} else if (state == State::BadReply) {
+		info() << "Pinging " << address << " returned unsuccessful reply.";
+		return ResultError{ERROR_ECHO_BAD_REPLY};
+	} else if (state == State::Sent) {
+		info() << "Pinging " << address << "  timeout.";
+		return ResultError{ERROR_ECHO_TIMEOUT};
+	}
 }
 void ICMP::handle_icmp_reply(IPv4Address source_ip, const BufferView& data)
 {
