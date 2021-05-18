@@ -5,6 +5,8 @@
 #include "Network/TransportLayer/UDP.h"
 #include "Tasking/Thread.h"
 
+Network* Network::default_network_ptr = nullptr;
+
 Network::Network(NetworkAdapter& network_adapter) :
     m_network_adapter{network_adapter},
     m_udp{*this},
@@ -13,6 +15,8 @@ Network::Network(NetworkAdapter& network_adapter) :
     m_arp{*this},
     m_ipv4{*this}
 {
+	if (!default_network_ptr)
+		default_network_ptr = this;
 }
 
 void Network::start()
@@ -67,4 +71,12 @@ UDP& Network::udp_provider()
 TCP& Network::tcp_provider()
 {
 	return m_tcp;
+}
+
+Network& Network::default_network()
+{
+	if (!default_network_ptr) {
+		warn() << "No network available.";
+	}
+	return *default_network_ptr;
 }

@@ -22,6 +22,7 @@ class Network
 	IPv4Address device_ip() const;
 	MACAddress device_mac() const;
 
+	static Network& default_network();
 	~Network();
 
   private:
@@ -31,4 +32,5 @@ class Network
 	ICMP m_icmp;
 	ARP m_arp;
 	IPv4 m_ipv4;
+	static Network* default_network_ptr;
 };
