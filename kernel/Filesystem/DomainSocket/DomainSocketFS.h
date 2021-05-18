@@ -1,7 +1,7 @@
 #pragma once
 
+#include "DomainSocket.h"
 #include "Filesystem/FSNode.h"
-#include "Socket.h"
 #include "Tasking/WaitQueue.h"
 #include <CircularBuffer.h>
 #include <List.h>
@@ -10,18 +10,18 @@
 #include <Types.h>
 #include <UniquePointer.h>
 
-class SocketFS : public FSNode
+class DomainSocketFS : public FSNode
 {
 
   public:
 	static UniquePointer<FSNode> alloc(const StringView& name);
-	~SocketFS();
+	~DomainSocketFS();
 	Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) override;
 	Result<FSNode&> dir_lookup(const StringView& file_name) override;
 
   private:
-	List<Socket> m_children;
+	List<DomainSocket> m_children;
 	Spinlock m_lock;
 
-	explicit SocketFS(const StringView& name);
+	explicit DomainSocketFS(const StringView& name);
 };

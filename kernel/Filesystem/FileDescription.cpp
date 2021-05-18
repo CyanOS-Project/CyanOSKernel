@@ -53,7 +53,7 @@ Result<UniquePointer<FileDescription>> FileDescription::connect()
 {
 	auto connection_desc = m_node.connect();
 	if (connection_desc.is_error())
-		ResultError(connection_desc.error());
+		return ResultError(connection_desc.error());
 
 	return UniquePointer<FileDescription>::make_unique(connection_desc.value(), OpenMode::OM_CLIENT);
 }
@@ -62,7 +62,7 @@ Result<UniquePointer<FileDescription>> FileDescription::accept()
 {
 	auto connection_desc = m_node.accept();
 	if (connection_desc.is_error())
-		ResultError(connection_desc.error());
+		return ResultError(connection_desc.error());
 
 	return UniquePointer<FileDescription>::make_unique(connection_desc.value(), OpenMode::OM_SERVER);
 }

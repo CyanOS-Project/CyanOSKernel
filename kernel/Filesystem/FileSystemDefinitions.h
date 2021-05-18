@@ -14,7 +14,8 @@ enum class NodeType
 	Pipe,
 	Link,
 	Device,
-	Socket,
+	DomainSocket,
+	IPSocket,
 	Connection
 };
 enum OpenFlags

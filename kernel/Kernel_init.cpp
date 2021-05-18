@@ -13,8 +13,8 @@
 #include "Devices/Keyboard/Keyboard.h"
 #include "Devices/RTC/Rtc.h"
 #include "Devices/Timer/Pit.h"
+#include "Filesystem/DomainSocket/DomainSocketFS.h"
 #include "Filesystem/Pipes/PipeFS.h"
-#include "Filesystem/Socket/SocketFS.h"
 #include "Filesystem/Ustar/TarFS.h"
 #include "Tasking/Process.h"
 #include "Tasking/Scheduler.h"
@@ -46,7 +46,7 @@ extern "C" void kernel_init(BootloaderInfo* boot_info)
 	VFS::mount(TarFS::alloc("tar", boot_info->ramdisk.start, boot_info->ramdisk.size));
 	VFS::mount(PipeFS::alloc("pipes"));
 	VFS::mount(DeviceFS::alloc("devices"));
-	VFS::mount(SocketFS::alloc("sockets"));
+	VFS::mount(DomainSocketFS::alloc("sockets"));
 	info() << "Done!";
 
 	info() << "Setting up devices... ";

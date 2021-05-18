@@ -1,7 +1,7 @@
-#include "Socket.h"
+#include "DomainSocket.h"
 
-Socket::Socket(const StringView& name) :
-    FSNode{name, 0, 0, NodeType::Socket, 0},
+DomainSocket::DomainSocket(const StringView& name) :
+    FSNode{name, 0, 0, NodeType::DomainSocket, 0},
     m_connections{},
     m_server_wait_queue{},
     m_connections_wait_queue{},
@@ -9,19 +9,19 @@ Socket::Socket(const StringView& name) :
 {
 }
 
-Socket::~Socket() {}
+DomainSocket::~DomainSocket() {}
 
-Result<void> Socket::open(FileDescription&)
+Result<void> DomainSocket::open(FileDescription&)
 {
 	return ResultError(ERROR_SUCCESS);
 }
 
-bool Socket::can_accept()
+bool DomainSocket::can_accept()
 {
 	return false;
 }
 
-Result<FSNode&> Socket::accept()
+Result<FSNode&> DomainSocket::accept()
 {
 	ScopedLock local_lock(m_lock);
 
@@ -35,7 +35,7 @@ Result<FSNode&> Socket::accept()
 	return new_connection;
 }
 
-Result<FSNode&> Socket::connect()
+Result<FSNode&> DomainSocket::connect()
 {
 	ScopedLock local_lock(m_lock);
 
@@ -48,7 +48,7 @@ Result<FSNode&> Socket::connect()
 	return *pending_connection.connection;
 }
 
-Result<void> Socket::close(FileDescription&)
+Result<void> DomainSocket::close(FileDescription&)
 {
 	// connection are destroyed by the destructor.
 	return ResultError(ERROR_SUCCESS);

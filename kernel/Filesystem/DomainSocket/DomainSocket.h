@@ -10,11 +10,11 @@
 #include <Types.h>
 #include <UniquePointer.h>
 
-class Socket : public FSNode
+class DomainSocket : public FSNode
 {
   public:
-	explicit Socket(const StringView& name);
-	~Socket();
+	explicit DomainSocket(const StringView& name);
+	~DomainSocket();
 	Result<void> open(FileDescription&) override;
 	bool can_accept() override;
 	Result<FSNode&> accept() override;

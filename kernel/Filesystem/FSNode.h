@@ -28,40 +28,28 @@ class FSNode
 	{
 	}
 
+#define INVALID_OP return ResultError(ERROR_INVALID_OPERATION)
+
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 	virtual ~FSNode() = default;
-	virtual Result<void> open(UNUSEDARG FileDescription&) { return ResultError(ERROR_INVALID_OPERATION); }
-	virtual Result<void> close(UNUSEDARG FileDescription&) { return ResultError(ERROR_INVALID_OPERATION); }
-	virtual bool can_read(UNUSEDARG FileDescription&) { return false; }
-	virtual bool can_write(UNUSEDARG FileDescription&) { return false; }
+	virtual Result<void> open(FileDescription&) { INVALID_OP; }
+	virtual Result<void> close(FileDescription&) { INVALID_OP; }
+	virtual bool can_read(FileDescription&) { return false; }
+	virtual bool can_write(FileDescription&) { return false; }
 	virtual bool can_accept() { return false; }
 	virtual bool is_connected() { return false; }
-	virtual Result<void> remove() { return ResultError(ERROR_INVALID_OPERATION); }
-	virtual Result<void> link(UNUSEDARG FSNode& node) { return ResultError(ERROR_INVALID_OPERATION); }
-	virtual Result<void> unlink(UNUSEDARG FSNode& node) { return ResultError(ERROR_INVALID_OPERATION); }
-	virtual Result<FSNode&> connect() { return ResultError(ERROR_INVALID_OPERATION); }
-	virtual Result<FSNode&> accept() { return ResultError(ERROR_INVALID_OPERATION); }
-	virtual Result<size_t> read(UNUSEDARG FileDescription&, UNUSEDARG void* buff, UNUSEDARG size_t offset,
-	                            UNUSEDARG size_t size)
-	{
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-	virtual Result<size_t> write(UNUSEDARG FileDescription&, UNUSEDARG const void* buff, UNUSEDARG size_t offset,
-	                             UNUSEDARG size_t size)
-	{
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-	virtual Result<FSNode&> dir_lookup(UNUSEDARG const StringView& file_name)
-	{
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-	virtual Result<FSNode&> create(UNUSEDARG const StringView& name, UNUSEDARG OpenMode mode, UNUSEDARG OpenFlags flags)
-	{
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-	virtual Result<void> mkdir(UNUSEDARG const StringView& name, UNUSEDARG int flags, UNUSEDARG int access)
-	{
-		return ResultError(ERROR_INVALID_OPERATION);
-	}
-	virtual Result<FSNode&> dir_query(UNUSEDARG size_t index) { return ResultError(ERROR_INVALID_OPERATION); }
+	virtual Result<void> remove() { INVALID_OP; }
+	virtual Result<void> link(FSNode& node) { INVALID_OP; }
+	virtual Result<void> unlink(FSNode& node) { INVALID_OP; }
+	virtual Result<FSNode&> connect() { INVALID_OP; }
+	virtual Result<FSNode&> accept() { INVALID_OP; }
+	virtual Result<size_t> read(FileDescription&, void*, size_t, size_t) { INVALID_OP; }
+	virtual Result<size_t> write(FileDescription&, const void* buff, size_t offset, size_t size) { INVALID_OP; }
+	virtual Result<FSNode&> dir_lookup(const StringView& file_name) { INVALID_OP; }
+	virtual Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) { INVALID_OP; }
+	virtual Result<void> mkdir(const StringView& name, int flags, int access) { INVALID_OP; }
+	virtual Result<FSNode&> dir_query(size_t index) { INVALID_OP; }
+#pragma GCC diagnostic pop
+
 	friend class VFS;
 };
