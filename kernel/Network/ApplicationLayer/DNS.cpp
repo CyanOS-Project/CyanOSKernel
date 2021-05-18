@@ -5,8 +5,8 @@ DNS::DNS(UDP& udp, ICMP& icmp, IPv4Address dns_server) : m_udp{udp}, m_icmp{icmp
 
 Result<IPv4Address> DNS::reslove(StringView domain_name)
 {
-	if (auto error = send_dns_query(domain_name))
-		return ResultError{error.error()};
+	if (auto result = send_dns_query(domain_name))
+		return ResultError{result.error()};
 
 	return get_dns_response();
 }
@@ -84,16 +84,15 @@ Result<IPv4Address> DNS::select_dns_response(const BufferView& answers_buffer, s
 
 bool DNS::test_ip(IPv4Address ip)
 {
-	return m_icmp.send_echo_request(ip);
+	// FIXME: test the ip first.
+	return true;
+	// return m_icmp.send_echo_request(ip);
 }
 
 Buffer DNS::convert_to_dns_notation(StringView domain_name)
 {
 	Buffer dns_notation{domain_name.length() + 2};
 	dns_notation.fill_from(domain_name.data(), 1, domain_name.length());
-
-	// www.google.com
-	// /3www/6google/3com
 
 	size_t curr_dot = domain_name.find('.');
 	dns_notation[0] = curr_dot;
