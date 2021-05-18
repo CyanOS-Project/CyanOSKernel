@@ -16,8 +16,6 @@ class ICMP
 
 	Result<void> send_echo_request(IPv4Address address);
 	void handle_icmp_reply(IPv4Address source_ip, const BufferView& data);
-	void handle_echo_reply(IPv4Address source_ip, const BufferView& data);
-	bool is_icmp_reply_ok(const BufferView& data);
 
   private:
 	struct ICMPHeader {
@@ -48,6 +46,9 @@ class ICMP
 		WaitQueue wait_queue;
 		Connection(IPv4Address t_dest) : state{State::Sent}, dest{t_dest}, wait_queue{} {}
 	};
+
+	void handle_echo_reply(IPv4Address source_ip, const BufferView& data);
+	bool is_icmp_reply_ok(const BufferView& data);
 
 	Network& m_network;
 	Spinlock m_lock;

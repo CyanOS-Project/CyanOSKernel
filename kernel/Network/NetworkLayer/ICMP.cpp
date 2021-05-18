@@ -41,6 +41,9 @@ Result<void> ICMP::send_echo_request(IPv4Address address)
 		info() << "Pinging " << address << "  timeout.";
 		return ResultError{ERROR_ECHO_TIMEOUT};
 	}
+
+	ASSERT_NOT_REACHABLE();
+	return {};
 }
 void ICMP::handle_icmp_reply(IPv4Address source_ip, const BufferView& data)
 {
