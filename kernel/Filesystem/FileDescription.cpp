@@ -49,13 +49,14 @@ Result<size_t> FileDescription::write(const void* buff, size_t size)
 	return m_node.write(*this, buff, offset, size);
 }
 
-Result<UniquePointer<FileDescription>> FileDescription::connect()
+Result<void> FileDescription::connect()
 {
 	auto connection_desc = m_node.connect();
 	if (connection_desc.is_error())
 		return ResultError(connection_desc.error());
 
-	return UniquePointer<FileDescription>::make_unique(connection_desc.value(), OpenMode::OM_CLIENT);
+	return {};
+	// return UniquePointer<FileDescription>::make_unique(connection_desc.value(), OpenMode::OM_CLIENT);
 }
 
 Result<UniquePointer<FileDescription>> FileDescription::accept()

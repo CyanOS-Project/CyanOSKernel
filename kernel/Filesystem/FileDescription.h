@@ -21,7 +21,7 @@ class FileDescription
 	~FileDescription();
 	Result<size_t> read(void* buff, size_t size);
 	Result<size_t> write(const void* buff, size_t size);
-	Result<UniquePointer<FileDescription>> connect();
+	Result<void> connect();
 	Result<UniquePointer<FileDescription>> accept();
 	Result<void> seek(int offset, SeekOrigin origin);
 	Result<void> ioctl();

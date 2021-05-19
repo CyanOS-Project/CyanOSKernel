@@ -143,17 +143,17 @@ void test_client(uintptr_t arg)
 		return;
 	}
 
-	auto connection_fd = fd.value()->connect();
-	if (connection_fd.is_error()) {
+	fd.value()->connect();
+	if (fd.is_error()) {
 		warn() << "error accepting the connection, error: " << fd.error();
 		HLT();
 		return;
 	}
 
-	auto result = connection_fd.value()->write("I'm the client", 15);
+	auto result = fd.value()->write("I'm the client", 15);
 
 	char buff[0x20];
-	auto result2 = connection_fd.value()->read(buff, 15);
+	auto result2 = fd.value()->read(buff, 15);
 	Logger(DebugColor::Bright_Magenta) << "I'm the client, message from server : " << buff;
 	while (true) {
 		HLT();

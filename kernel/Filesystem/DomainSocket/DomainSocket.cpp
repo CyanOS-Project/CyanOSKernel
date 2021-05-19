@@ -35,9 +35,9 @@ Result<FSNode&> DomainSocket::accept()
 	return new_connection;
 }
 
-Result<FSNode&> DomainSocket::connect()
+Result<void> DomainSocket::connect()
 {
-	ScopedLock local_lock(m_lock);
+	/*ScopedLock local_lock(m_lock);
 
 	NewPendingConnection& pending_connection = m_pending_connections.emplace_back();
 	m_server_wait_queue.wake_up();
@@ -45,7 +45,7 @@ Result<FSNode&> DomainSocket::connect()
 	m_connections_wait_queue.wait_on_event([&]() { return pending_connection.is_accepted == false; }, local_lock);
 
 	ASSERT(pending_connection.connection);
-	return *pending_connection.connection;
+	return *pending_connection.connection;*/
 }
 
 Result<void> DomainSocket::close(FileDescription&)
