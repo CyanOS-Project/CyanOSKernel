@@ -35,7 +35,7 @@ Result<FSNode&> DomainSocket::accept()
 	return new_connection;
 }
 
-Result<void> DomainSocket::connect(SocketAddress)
+Result<void> DomainSocket::connect()
 {
 	/*ScopedLock local_lock(m_lock);
 

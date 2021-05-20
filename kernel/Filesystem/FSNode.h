@@ -1,7 +1,6 @@
 #pragma once
 
 #include "FileSystemDefinitions.h"
-#include "Network/NetworkDefinitions.h"
 #include <ErrorCodes.h>
 #include <Result.h>
 #include <String.h>
@@ -42,8 +41,8 @@ class FSNode
 	virtual Result<void> remove() { INVALID_OP; }
 	virtual Result<void> link(FSNode& node) { INVALID_OP; }
 	virtual Result<void> unlink(FSNode& node) { INVALID_OP; }
-	virtual Result<void> connect(SocketAddress) { INVALID_OP; }
-	virtual Result<void> listen(SocketAddress) { INVALID_OP; }
+	virtual Result<void> connect() { INVALID_OP; }
+	virtual Result<void> listen() { INVALID_OP; }
 	virtual Result<FSNode&> accept() { INVALID_OP; }
 	virtual Result<size_t> read(FileDescription&, void*, size_t, size_t) { INVALID_OP; }
 	virtual Result<size_t> write(FileDescription&, const void* buff, size_t offset, size_t size) { INVALID_OP; }
