@@ -49,9 +49,9 @@ Result<size_t> FileDescription::write(const void* buff, size_t size)
 	return m_node.write(*this, buff, offset, size);
 }
 
-Result<void> FileDescription::connect()
+Result<void> FileDescription::connect(SocketAddress address)
 {
-	auto connection_desc = m_node.connect();
+	auto connection_desc = m_node.connect(address);
 	if (connection_desc.is_error())
 		return ResultError(connection_desc.error());
 

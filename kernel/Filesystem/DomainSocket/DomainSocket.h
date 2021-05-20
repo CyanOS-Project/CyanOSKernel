@@ -17,7 +17,7 @@ class DomainSocket : public FSNode
 	~DomainSocket();
 	Result<void> open(FileDescription&) override;
 	bool can_accept() override;
-	Result<void> connect() override;
+	Result<void> connect(SocketAddress) override;
 	Result<FSNode&> accept() override;
 	Result<void> close(FileDescription&) override;
 
