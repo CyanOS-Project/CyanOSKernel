@@ -24,13 +24,13 @@ class TCPSession
 		Server,
 		Client
 	};
-	TCPSession(Network& network, Bitmap& port_bitmap, Type type);
+	TCPSession(Network& network, Bitmap& port_bitmap, Type type); // FIXME: should be private.
 	Result<void> accept(u16 port);
 	Result<void> connect(IPv4Address ip, u16 port);
 	void close();
-	Result<void> send(const BufferView& data);
+	Result<size_t> send(const BufferView& data);
 	Result<size_t> receive(Buffer& data);
-	Result<size_t> receive(Buffer& data, SocketAddress& src_address);
+	SocketAddress address() const;
 
   private:
 	struct TCPHeader {
@@ -139,8 +139,8 @@ class TCP
 {
   public:
 	TCP(Network&);
-	TCPSession& accept(u16 port);
-	TCPSession& connect(IPv4Address ip, u16 port);
+	Result<TCPSession&> accept(u16 port);
+	Result<TCPSession&> connect(IPv4Address ip, u16 port);
 	void handle(IPv4Address src_ip, const BufferView& data);
 
 	Network& m_network;

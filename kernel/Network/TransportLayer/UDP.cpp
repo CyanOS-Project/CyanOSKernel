@@ -11,30 +11,29 @@
 // TODO: refactor network structures so one function will handle convertions to/from big endian.
 UDP::UDP(Network& network) : m_network{network} {}
 
-Result<void> UDP::send(IPv4Address dest_ip, u16 dest_port, const BufferView& data)
+Result<size_t> UDP::send(IPv4Address dest_ip, u16 dest_port, const BufferView& data)
 {
 	u16 src_port = m_ports.find_first_clear();
 
 	if (auto result = send_segment(dest_ip, dest_port, src_port, data))
-		return result;
-
+		return ResultError{result.error()};
 	m_ports.clear(src_port);
 
-	return {};
+	return data.size();
 }
 
-Result<void> UDP::send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
+Result<size_t> UDP::send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
 {
 	if (m_ports.check_set(src_port)) {
 		return ResultError{ERROR_PORT_ALREADY_IN_USE};
 	}
 
 	if (auto result = send_segment(dest_ip, dest_port, src_port, data))
-		return result;
+		return ResultError{result.error()};
 
 	m_ports.clear(src_port);
 
-	return {};
+	return data.size();
 }
 
 Result<size_t> UDP::receive(u16 dest_port, Buffer& buffer)

@@ -17,17 +17,27 @@ void TCP::handle(IPv4Address src_ip, const BufferView& data)
 		warn() << "TCP packet received, with no known session, packet dropped.";
 	}
 }
-TCPSession& TCP::accept(u16 port)
+Result<TCPSession&> TCP::accept(u16 port)
 {
 	auto& server = *m_connection_sessions.emplace_back(m_network, m_ports, TCPSession::Type::Server);
-	server.accept(port);
+
+	if (auto result = server.accept(port)) {
+		// FIXME: remove from `m_connection_sessions` list.
+		return ResultError{result.error()};
+	}
+
 	return server;
 }
 
-TCPSession& TCP::connect(IPv4Address ip, u16 port)
+Result<TCPSession&> TCP::connect(IPv4Address ip, u16 port)
 {
 	auto& client = *m_connection_sessions.emplace_back(m_network, m_ports, TCPSession::Type::Client);
-	client.connect(ip, port);
+	;
+	if (auto result = client.connect(ip, port)) {
+		// FIXME: remove from `m_connection_sessions` list.
+		return ResultError{result.error()};
+	}
+
 	return client;
 }
 
@@ -103,7 +113,7 @@ void TCPSession::close()
 	end_connection();
 }
 
-Result<void> TCPSession::send(const BufferView& data)
+Result<size_t> TCPSession::send(const BufferView& data)
 {
 	ScopedLock local_lock{*m_lock};
 
@@ -111,12 +121,12 @@ Result<void> TCPSession::send(const BufferView& data)
 		return ResultError{ERROR_CONNECTION_CLOSED};
 	}
 
-	if (auto error = send_payload(local_lock, data)) {
+	if (auto result = send_payload(local_lock, data)) {
 		end_connection();
-		return error;
+		return ResultError{result.error()};
 	}
 
-	return {};
+	return data.size();
 }
 
 Result<size_t> TCPSession::receive(Buffer& data)
@@ -147,14 +157,6 @@ Result<size_t> TCPSession::receive(Buffer& data)
 	m_local_window_size += data_size;
 
 	return data_size;
-}
-
-Result<size_t> TCPSession::receive(Buffer& data, SocketAddress& src_address)
-{
-	src_address.ip = m_remote_ip;
-	src_address.port = m_remote_port;
-
-	return receive(data);
 }
 
 void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
@@ -205,6 +207,11 @@ void TCPSession::handle(IPv4Address src_ip, const BufferView& data)
 	}
 
 	m_data_waitqueue.wake_up_all();
+}
+
+SocketAddress TCPSession::address() const
+{
+	return SocketAddress{m_remote_ip, m_remote_port};
 }
 
 void TCPSession::handle_syn(IPv4Address src_ip, const BufferView& data)

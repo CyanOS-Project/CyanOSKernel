@@ -15,8 +15,8 @@ class UDP
 
   public:
 	UDP(Network&);
-	Result<void> send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
-	Result<void> send(IPv4Address dest_ip, u16 dest_port, const BufferView& data);
+	Result<size_t> send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
+	Result<size_t> send(IPv4Address dest_ip, u16 dest_port, const BufferView& data);
 	Result<size_t> receive(u16 dest_port, Buffer& buffer);
 	Result<size_t> receive(u16 dest_port, Buffer& buffer, SocketAddress& source_address);
 	void handle(IPv4Address src_ip, const BufferView& data);
