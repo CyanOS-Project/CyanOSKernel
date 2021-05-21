@@ -2,9 +2,10 @@
 
 #include "Assert.h"
 #include "Buffer.h"
-#include "BufferView.h"
 #include "Rule5.h"
 #include "TypeTraits.h"
+
+class BufferMutableView;
 
 class BufferView
 {
@@ -15,12 +16,12 @@ class BufferView
 	DEFAULT_COPY(BufferView)
 	DEFAULT_MOVE(BufferView)
 
-	BufferView(const Buffer&, size_t offset = 0, size_t size = 0);
-	BufferView(const BufferView&, size_t offset = 0, size_t size = 0);
+	BufferView(const Buffer&, size_t src_offset = 0, size_t src_size = 0);
+	BufferView(const BufferView&, size_t src_offset = 0, size_t src_size = 0);
+	BufferView(const BufferMutableView&, size_t src_offset = 0, size_t src_size = 0);
 	BufferView(const void*, size_t);
-	BufferView& operator=(const Buffer&);
 
-	void copy_to(void* dest, size_t src_offset, size_t size) const;
+	void copy_to(void* dest, size_t src_offset, size_t src_size) const;
 	const u8* ptr() const;
 	u8 operator[](size_t index) const;
 	size_t size() const;
