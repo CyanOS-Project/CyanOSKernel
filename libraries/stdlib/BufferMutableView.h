@@ -11,9 +11,8 @@ class BufferMutableView
   public:
 	DEFAULT_CONSTRUCTOR(BufferMutableView)
 	DEFAULT_DESTRUCTOR(BufferMutableView)
-	DEFAULT_COPY(BufferMutableView)
-	DEFAULT_MOVE(BufferMutableView)
 
+	BufferMutableView& operator=(const BufferMutableView&) = default;
 	BufferMutableView(const BufferMutableView&, size_t src_offset = 0, size_t src_size = 0);
 	BufferMutableView(void*, size_t);
 

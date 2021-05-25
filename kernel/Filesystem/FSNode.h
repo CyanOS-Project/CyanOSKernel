@@ -1,6 +1,8 @@
 #pragma once
 
 #include "FileSystemDefinitions.h"
+#include <BufferMutableView.h>
+#include <BufferView.h>
 #include <ErrorCodes.h>
 #include <Result.h>
 #include <String.h>
@@ -44,8 +46,8 @@ class FSNode
 	virtual Result<void> connect() { INVALID_OP; }
 	virtual Result<void> listen() { INVALID_OP; }
 	virtual Result<FSNode&> accept() { INVALID_OP; }
-	virtual Result<size_t> read(FileDescription&, void*, size_t, size_t) { INVALID_OP; }
-	virtual Result<size_t> write(FileDescription&, const void* buff, size_t offset, size_t size) { INVALID_OP; }
+	virtual Result<size_t> read(FileDescription&, BufferMutableView dest, size_t offset) { INVALID_OP; }
+	virtual Result<size_t> write(FileDescription&, BufferView src, size_t offset) { INVALID_OP; }
 	virtual Result<FSNode&> dir_lookup(const StringView& file_name) { INVALID_OP; }
 	virtual Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) { INVALID_OP; }
 	virtual Result<void> mkdir(const StringView& name, int flags, int access) { INVALID_OP; }

@@ -222,13 +222,13 @@ Result<ExecutableInformation> Process::load_executable(PathView path)
 	FileInfo file_info;
 	fd.value()->file_query(file_info);
 	// FIXME: use a Buffer data structure here.
-	auto buff = UniquePointer(new char[file_info.size]());
-	auto result = fd.value()->read(buff.ptr(), file_info.size);
+	Buffer buff{file_info.size};
+	auto result = fd.value()->read(buff);
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}
 
-	auto execable_info = ELFLoader::load(buff.ptr(), file_info.size);
+	auto execable_info = ELFLoader::load(buff);
 	if (execable_info.is_error()) {
 		return ResultError(execable_info.error());
 	}

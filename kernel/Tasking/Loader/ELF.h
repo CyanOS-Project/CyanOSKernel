@@ -11,8 +11,8 @@ struct ExecutableInformation {
 class ELFLoader
 {
   private:
-	static bool load_segments(const char* file, const ELFParser& elf);
+	static bool load_segments(BufferView file, const ELFParser& elf);
 
   public:
-	static Result<ExecutableInformation> load(const char* file, size_t size);
+	static Result<ExecutableInformation> load(BufferView file);
 };

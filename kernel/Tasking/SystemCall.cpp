@@ -88,7 +88,7 @@ Result<int> ReadFile(Handle handle, void* buff, size_t size)
 		return ResultError(ERROR_INVALID_HANDLE);
 
 	auto& description = Thread::current->parent_process().handles().get_file_description(handle);
-	auto result = description.read(buff, size);
+	auto result = description.read(BufferMutableView{buff, size});
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}
@@ -101,7 +101,7 @@ Result<int> WriteFile(Handle handle, void* buff, size_t size)
 		return ResultError(ERROR_INVALID_HANDLE);
 
 	auto& description = Thread::current->parent_process().handles().get_file_description(handle);
-	auto result = description.write(buff, size);
+	auto result = description.write(BufferView{buff, size});
 	if (result.is_error()) {
 		return ResultError(result.error());
 	}

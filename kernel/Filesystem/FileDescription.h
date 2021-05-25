@@ -1,6 +1,8 @@
 #pragma once
 
 #include "FSNode.h"
+#include <BufferMutableView.h>
+#include <BufferView.h>
 #include <PathView.h>
 #include <Result.h>
 #include <Rule5.h>
@@ -19,8 +21,8 @@ class FileDescription
 	static Result<UniquePointer<FileDescription>> open(PathView path, OpenMode mode, OpenFlags flags);
 	FileDescription(FSNode& node, OpenMode mode);
 	~FileDescription();
-	Result<size_t> read(void* buff, size_t size);
-	Result<size_t> write(const void* buff, size_t size);
+	Result<size_t> read(BufferMutableView);
+	Result<size_t> write(BufferView);
 	Result<void> connect();
 	Result<UniquePointer<FileDescription>> accept();
 	Result<void> seek(int offset, SeekOrigin origin);

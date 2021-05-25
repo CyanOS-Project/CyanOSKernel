@@ -30,15 +30,14 @@ Result<void> Console::close(FileDescription&)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<size_t> Console::write(FileDescription&, const void* buff, size_t offset, size_t size)
+Result<size_t> Console::write(FileDescription&, BufferView buff, size_t offset)
 {
 	UNUSED(offset);
 
-	const char* _buff = reinterpret_cast<const char*>(buff);
-	for (size_t i = 0; i < size; i++) {
-		put_char(_buff[i]);
+	for (size_t i = 0; i < buff.size(); i++) {
+		put_char(buff[i]);
 	}
-	return size;
+	return buff.size();
 }
 
 bool Console::can_write(FileDescription&)

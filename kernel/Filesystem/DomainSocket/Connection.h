@@ -15,8 +15,8 @@ class Connection : public FSNode
 	explicit Connection(const StringView& name);
 	~Connection();
 	Result<void> open(FileDescription&) override;
-	Result<size_t> read(FileDescription&, void* buff, size_t offset, size_t size) override;
-	Result<size_t> write(FileDescription&, const void* buff, size_t offset, size_t size) override;
+	Result<size_t> read(FileDescription&, BufferMutableView dest, size_t offset) override;
+	Result<size_t> write(FileDescription&, BufferView src, size_t offset) override;
 	bool can_read(FileDescription&) override;
 	bool can_write(FileDescription&) override;
 	Result<void> close(FileDescription&) override;
@@ -27,10 +27,10 @@ class Connection : public FSNode
 	WaitQueue m_server_wait_queue, m_client_wait_queue;
 	Spinlock m_server_lock, m_client_lock;
 
-	size_t read_client_buffer(FileDescription&, void* buff, size_t size);
-	size_t read_server_buffer(FileDescription&, void* buff, size_t size);
-	size_t write_client_buffer(FileDescription&, const void* buff, size_t size);
-	size_t write_server_buffer(FileDescription&, const void* buff, size_t size);
+	size_t read_client_buffer(FileDescription&, BufferMutableView dest);
+	size_t read_server_buffer(FileDescription&, BufferMutableView dest);
+	size_t write_client_buffer(FileDescription&, BufferView src);
+	size_t write_server_buffer(FileDescription&, BufferView src);
 
 	friend class Socket;
 };

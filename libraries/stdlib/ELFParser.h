@@ -3,12 +3,12 @@
 #include "ELF.h"
 #include "StringView.h"
 #include "Types.h"
+#include <BufferView.h>
 
 class ELFParser
 {
   private:
-	const char* m_file;
-	size_t m_size;
+	BufferView m_file;
 	const elf32_hdr* m_elf_header;
 	const elf32_phdr* m_program_headers_array;
 	const elf32_shdr* m_section_headers_array;
@@ -19,7 +19,7 @@ class ELFParser
 	const char* find_string_table() const;
 
   public:
-	ELFParser(const char* file, size_t size);
+	ELFParser(BufferView file);
 	bool is_valid() const;
 	const elf32_hdr& elf_header() const;
 	const elf32_phdr& program_header_by_index(size_t index) const;

@@ -18,7 +18,7 @@ class Keyboard : public FSNode
 	~Keyboard();
 	Result<void> open(FileDescription&) override;
 	Result<void> close(FileDescription&) override;
-	Result<size_t> read(FileDescription&, void* buff, size_t offset, size_t size) override;
+	Result<size_t> read(FileDescription&, BufferMutableView dest, size_t offset) override;
 	bool can_read(FileDescription&) override;
 
   private:

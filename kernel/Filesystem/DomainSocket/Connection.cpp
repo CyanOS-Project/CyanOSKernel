@@ -19,28 +19,28 @@ Result<void> Connection::open(FileDescription&)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<size_t> Connection::read(FileDescription& desc, void* buff, size_t offset, size_t size)
+Result<size_t> Connection::read(FileDescription& desc, BufferMutableView dest, size_t offset)
 {
 	UNUSED(offset);
 	size_t ret = 0;
 	if (desc.m_mode == OM_SERVER) {
-		ret = read_server_buffer(desc, buff, size);
+		ret = read_server_buffer(desc, dest);
 	} else if (desc.m_mode == OM_CLIENT) {
-		ret = read_client_buffer(desc, buff, size);
+		ret = read_client_buffer(desc, dest);
 	} else {
 		ASSERT_NOT_REACHABLE();
 	}
 	return ret;
 }
 
-Result<size_t> Connection::write(FileDescription& desc, const void* buff, size_t offset, size_t size)
+Result<size_t> Connection::write(FileDescription& desc, BufferView src, size_t offset)
 {
 	UNUSED(offset);
 	size_t ret = 0;
 	if (desc.m_mode == OM_SERVER) {
-		ret = write_server_buffer(desc, buff, size);
+		ret = write_server_buffer(desc, src);
 	} else if (desc.m_mode == OM_CLIENT) {
-		ret = write_client_buffer(desc, buff, size);
+		ret = write_client_buffer(desc, src);
 	} else {
 		ASSERT_NOT_REACHABLE();
 	}
@@ -76,17 +76,16 @@ Result<void> Connection::close(FileDescription&)
 	return ResultError(ERROR_SUCCESS);
 }
 
-size_t Connection::read_server_buffer(FileDescription& desc, void* buff, size_t size)
+size_t Connection::read_server_buffer(FileDescription& desc, BufferMutableView dest)
 {
 	ScopedLock local_lock(m_server_lock);
 
 	m_server_wait_queue.wait_on_event([&]() { return !can_read(desc); }, local_lock);
 
-	size_t size_to_read = min(size, m_server_buffer.size());
+	size_t size_to_read = min(dest.size(), m_server_buffer.size());
 
-	char* _buf = static_cast<char*>(buff);
 	for (size_t i = 0; i < size_to_read; i++) {
-		_buf[i] = m_server_buffer.dequeue();
+		dest[i] = m_server_buffer.dequeue();
 	}
 
 	m_server_wait_queue.wake_up_all();
@@ -94,17 +93,16 @@ size_t Connection::read_server_buffer(FileDescription& desc, void* buff, size_t 
 	return size_to_read;
 }
 
-size_t Connection::read_client_buffer(FileDescription& desc, void* buff, size_t size)
+size_t Connection::read_client_buffer(FileDescription& desc, BufferMutableView dest)
 {
 	ScopedLock local_lock(m_client_lock);
 
 	m_client_wait_queue.wait_on_event([&]() { return !can_read(desc); }, local_lock);
 
-	size_t size_to_read = min(size, m_client_buffer.size());
+	size_t size_to_read = min(dest.size(), m_client_buffer.size());
 
-	char* _buf = static_cast<char*>(buff);
 	for (size_t i = 0; i < size_to_read; i++) {
-		_buf[i] = m_client_buffer.dequeue();
+		dest[i] = m_client_buffer.dequeue();
 	}
 
 	m_client_wait_queue.wake_up_all();
@@ -112,17 +110,16 @@ size_t Connection::read_client_buffer(FileDescription& desc, void* buff, size_t 
 	return size_to_read;
 }
 
-size_t Connection::write_client_buffer(FileDescription& desc, const void* buff, size_t size)
+size_t Connection::write_client_buffer(FileDescription& desc, BufferView src)
 {
 	ScopedLock local_lock(m_server_lock);
 
 	m_server_wait_queue.wait_on_event([&]() { return !can_write(desc); }, local_lock);
 
-	size_t size_to_write = min(size, m_server_buffer.available_size());
+	size_t size_to_write = min(src.size(), m_server_buffer.available_size());
 
-	const char* _buf = static_cast<const char*>(buff);
 	for (size_t i = 0; i < size_to_write; i++) {
-		m_server_buffer.queue(_buf[i]);
+		m_server_buffer.queue(src[i]);
 	}
 
 	m_server_wait_queue.wake_up();
@@ -130,17 +127,16 @@ size_t Connection::write_client_buffer(FileDescription& desc, const void* buff, 
 	return size_to_write;
 }
 
-size_t Connection::write_server_buffer(FileDescription& desc, const void* buff, size_t size)
+size_t Connection::write_server_buffer(FileDescription& desc, BufferView src)
 {
 	ScopedLock local_lock(m_client_lock);
 
 	m_client_wait_queue.wait_on_event([&]() { return !can_write(desc); }, local_lock);
 
-	size_t size_to_write = min(size, m_client_buffer.available_size());
+	size_t size_to_write = min(src.size(), m_client_buffer.available_size());
 
-	const char* _buf = static_cast<const char*>(buff);
 	for (size_t i = 0; i < size_to_write; i++) {
-		m_client_buffer.queue(_buf[i]);
+		m_client_buffer.queue(src[i]);
 	}
 
 	m_client_wait_queue.wake_up();

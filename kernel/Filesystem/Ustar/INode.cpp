@@ -26,13 +26,13 @@ Result<void> INode::close(FileDescription&)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<size_t> INode::read(FileDescription&, void* buff, size_t offset, size_t size)
+Result<size_t> INode::read(FileDescription&, BufferMutableView dest, size_t offset)
 {
 	ScopedLock local_lock(m_lock);
 
-	size_t size_to_read = min(size, m_size - offset);
+	size_t size_to_read = min(dest.size(), m_size - offset);
 
-	memcpy(buff, m_data + offset, size);
+	dest.fill_from(m_data, offset, size_to_read);
 
 	return size_to_read;
 }

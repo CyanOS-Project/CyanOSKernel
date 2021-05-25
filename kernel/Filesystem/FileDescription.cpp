@@ -31,22 +31,22 @@ FileDescription::~FileDescription()
 	m_node.close(*this);
 }
 
-Result<size_t> FileDescription::read(void* buff, size_t size)
+Result<size_t> FileDescription::read(BufferMutableView buffer)
 {
-	size_t reading_size = m_current_position + size;
+	size_t reading_size = m_current_position + buffer.size();
 	if (reading_size > m_node.m_size && m_node.m_size != 0) {
 		return ResultError(ERROR_EOF);
 	}
-	return m_node.read(*this, buff, m_current_position, size);
+	return m_node.read(*this, buffer, m_current_position);
 }
 
-Result<size_t> FileDescription::write(const void* buff, size_t size)
+Result<size_t> FileDescription::write(BufferView buffer)
 {
-	size_t offset = m_current_position + size;
+	size_t offset = m_current_position + buffer.size();
 	if (offset > m_node.m_size && m_node.m_size != 0) {
 		return ResultError(ERROR_EOF);
 	}
-	return m_node.write(*this, buff, offset, size);
+	return m_node.write(*this, buffer, offset);
 }
 
 Result<void> FileDescription::connect()

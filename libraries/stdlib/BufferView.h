@@ -13,9 +13,8 @@ class BufferView
   public:
 	DEFAULT_CONSTRUCTOR(BufferView)
 	DEFAULT_DESTRUCTOR(BufferView)
-	DEFAULT_COPY(BufferView)
-	DEFAULT_MOVE(BufferView)
 
+	BufferView& operator=(const BufferView&) = default;
 	BufferView(const Buffer&, size_t src_offset = 0, size_t src_size = 0);
 	BufferView(const BufferView&, size_t src_offset = 0, size_t src_size = 0);
 	BufferView(const BufferMutableView&, size_t src_offset = 0, size_t src_size = 0);

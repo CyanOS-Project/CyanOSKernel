@@ -21,7 +21,7 @@ class INode : public FSNode
 	~INode();
 	Result<void> open(FileDescription&) override;
 	Result<void> close(FileDescription&) override;
-	Result<size_t> read(FileDescription&, void* buff, size_t offset, size_t size) override;
+	Result<size_t> read(FileDescription&, BufferMutableView dest, size_t offset) override;
 	bool can_read(FileDescription&) override;
 	Result<FSNode&> dir_lookup(const StringView& file_name) override;
 	Result<FSNode&> dir_query(size_t index) override;

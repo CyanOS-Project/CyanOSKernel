@@ -2,9 +2,9 @@
 #include "VirtualMemory/Memory.h"
 #include <ErrorCodes.h>
 
-Result<ExecutableInformation> ELFLoader::load(const char* file, size_t size)
+Result<ExecutableInformation> ELFLoader::load(BufferView file)
 {
-	ELFParser elf(file, size);
+	ELFParser elf(file);
 	if (!elf.is_valid()) {
 		return ResultError(ERROR_INVALID_EXECUTABLE);
 	}
@@ -19,7 +19,7 @@ Result<ExecutableInformation> ELFLoader::load(const char* file, size_t size)
 	                             .constructors_array_count = init_array_section.sh_size / sizeof(uintptr_t)};
 }
 
-bool ELFLoader::load_segments(const char* file, const ELFParser& elf)
+bool ELFLoader::load_segments(BufferView file, const ELFParser& elf)
 {
 	for (size_t i = 0; i < elf.programs_number(); i++) {
 		if (elf.program_header_by_index(i).p_memsz == 0) {
@@ -31,7 +31,7 @@ bool ELFLoader::load_segments(const char* file, const ELFParser& elf)
 		if (!addr) {
 			return false;
 		}
-		memcpy(addr, file + elf.program_header_by_index(i).p_offset, elf.program_header_by_index(i).p_filesz);
+		file.copy_to(addr, elf.program_header_by_index(i).p_offset, elf.program_header_by_index(i).p_filesz);
 	}
 	return true;
 }

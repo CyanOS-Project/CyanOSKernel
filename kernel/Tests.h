@@ -26,7 +26,7 @@ void test_pipe1(uintptr_t arg)
 	}
 	char* buff = (char*)valloc(0, 0xc00, PAGE_READWRITE);
 	memset(buff, 0, 4096);
-	auto result = fd.value()->read(buff, 12);
+	auto result = fd.value()->read(BufferMutableView{buff, 0xc00});
 	dbg() << "got it, read";
 	dbg() << buff;
 	if (result.is_error())
@@ -46,7 +46,7 @@ void test_pipe2(uintptr_t arg)
 	}
 	char* buff = (char*)valloc(0, 0xc00, PAGE_READWRITE);
 	memset(buff, 0, 4096);
-	auto result = fd.value()->write(static_cast<const void*>("Hello there"), 12);
+	auto result = fd.value()->write(BufferView{"Hello there", 12});
 	dbg() << "got it, write";
 	dbg() << buff;
 	if (result.is_error())
@@ -64,10 +64,10 @@ void test_keyboard(uintptr_t arg)
 		HLT();
 		return;
 	}
-	char buff[1];
+	Buffer buff{1};
 	while (true) {
-		auto result = fd.value()->read(buff, 1);
-		Logger(DebugColor::Cyan) << buff;
+		auto result = fd.value()->read(buff);
+		Logger(DebugColor::Cyan) << buff[0];
 	}
 	HLT();
 }
@@ -82,10 +82,10 @@ void test_keyboard2(uintptr_t arg)
 		HLT();
 		return;
 	}
-	char buff[1];
+	Buffer buff{1};
 	while (true) {
-		auto result = fd.value()->read(buff, 1);
-		Logger(DebugColor::Red) << buff;
+		auto result = fd.value()->read(buff);
+		Logger(DebugColor::Red) << buff[0];
 	}
 	HLT();
 }
@@ -100,7 +100,7 @@ void test_console(uintptr_t arg)
 		HLT();
 		return;
 	}
-	auto result = fd.value()->write("Hello there", 12);
+	auto result = fd.value()->write(BufferView{"Hello there", 12});
 	HLT();
 }
 
@@ -122,11 +122,11 @@ void test_server(uintptr_t arg)
 		return;
 	}
 
-	auto result = connection_fd.value()->write("I'm the server", 15);
+	auto result = connection_fd.value()->write(BufferView{"I'm the server", 15});
 
-	char buff[0x20];
-	auto result2 = connection_fd.value()->read(buff, 15);
-	Logger(DebugColor::Bright_Magenta) << "I'm the server, message from server : " << buff;
+	Buffer buff{0x20};
+	auto result2 = connection_fd.value()->read(buff);
+	Logger(DebugColor::Bright_Magenta) << "I'm the server, message from server : " << &buff.const_convert_to<char>();
 	while (true) {
 		HLT();
 	}
@@ -143,18 +143,18 @@ void test_client(uintptr_t arg)
 		return;
 	}
 
-	fd.value()->connect();
+	// fd.value()->connect();
 	if (fd.is_error()) {
 		warn() << "error accepting the connection, error: " << fd.error();
 		HLT();
 		return;
 	}
 
-	auto result = fd.value()->write("I'm the client", 15);
+	auto result = fd.value()->write(BufferView{"I'm the client", 15});
 
-	char buff[0x20];
-	auto result2 = fd.value()->read(buff, 15);
-	Logger(DebugColor::Bright_Magenta) << "I'm the client, message from server : " << buff;
+	Buffer buff{0x20};
+	auto result2 = fd.value()->read(buff);
+	Logger(DebugColor::Bright_Magenta) << "I'm the client, message from server : " << &buff.const_convert_to<char>();
 	while (true) {
 		HLT();
 	}
@@ -229,11 +229,10 @@ void test_elf()
 	FileInfo file_info;
 	fd.value()->file_query(file_info);
 
-	char* buff = static_cast<char*>(valloc(0, file_info.size, PAGE_READWRITE));
-	memset(buff, 0, file_info.size);
-	auto result = fd.value()->read(buff, file_info.size);
+	Buffer buff{file_info.size};
+	auto result = fd.value()->read(buff);
 
-	ELFParser elf(buff, file_info.size);
+	ELFParser elf(buff);
 	if (!elf.is_valid()) {
 		info() << "Not valid ELF";
 		return;

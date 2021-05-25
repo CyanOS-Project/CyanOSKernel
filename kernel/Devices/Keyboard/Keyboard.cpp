@@ -36,7 +36,7 @@ Result<void> Keyboard::close(FileDescription&)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<size_t> Keyboard::read(FileDescription& desc, void* buff, size_t offset, size_t size)
+Result<size_t> Keyboard::read(FileDescription& desc, BufferMutableView dest, size_t offset)
 {
 	UNUSED(offset);
 
@@ -44,11 +44,10 @@ Result<size_t> Keyboard::read(FileDescription& desc, void* buff, size_t offset, 
 
 	m_wait_queue.wait_on_event([&]() { return !can_read(desc); }, local_lock);
 
-	size_t size_to_read = min(size, m_buffer.size());
+	size_t size_to_read = min(dest.size(), m_buffer.size());
 
-	char* _buf = static_cast<char*>(buff);
 	for (size_t i = 0; i < size_to_read; i++) {
-		_buf[i] = m_buffer.dequeue();
+		dest[i] = m_buffer.dequeue();
 	}
 
 	return size_to_read;

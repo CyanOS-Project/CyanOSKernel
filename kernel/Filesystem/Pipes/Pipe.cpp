@@ -49,23 +49,22 @@ Result<void> Pipe::close(FileDescription& disc)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<size_t> Pipe::read(FileDescription& desc, void* buff, size_t offset, size_t size)
+Result<size_t> Pipe::read(FileDescription& desc, BufferMutableView dest, size_t offset)
 {
 	UNUSED(offset);
 
 	ScopedLock local_lock(m_lock);
 
-	if (size > BUFFER_SIZE) {
+	if (dest.size() > BUFFER_SIZE) {
 		return ResultError(ERROR_EOF);
 	}
 
 	m_wait_queue.wait_on_event([&]() { return !can_read(desc); }, local_lock);
 
-	size_t size_to_read = min(size, m_buffer.size());
+	size_t size_to_read = min(dest.size(), m_buffer.size());
 
-	char* _buf = static_cast<char*>(buff);
 	for (size_t i = 0; i < size_to_read; i++) {
-		_buf[i] = m_buffer.dequeue();
+		dest[i] = m_buffer.dequeue();
 	}
 
 	m_wait_queue.wake_up();
@@ -73,23 +72,22 @@ Result<size_t> Pipe::read(FileDescription& desc, void* buff, size_t offset, size
 	return size_to_read;
 }
 
-Result<size_t> Pipe::write(FileDescription& desc, const void* buff, size_t offset, size_t size)
+Result<size_t> Pipe::write(FileDescription& desc, BufferView src, size_t offset)
 {
 	UNUSED(offset);
 
 	ScopedLock local_lock(m_lock);
 
-	if (size > BUFFER_SIZE) {
+	if (src.size() > BUFFER_SIZE) {
 		return ResultError(ERROR_EOF);
 	}
 
 	m_wait_queue.wait_on_event([&]() { return !can_write(desc); }, local_lock);
 
-	size_t size_to_write = min(size, m_buffer.available_size());
+	size_t size_to_write = min(src.size(), m_buffer.available_size());
 
-	const char* _buf = static_cast<const char*>(buff);
 	for (size_t i = 0; i < size_to_write; i++) {
-		m_buffer.queue(_buf[i]);
+		m_buffer.queue(src[i]);
 	}
 
 	m_wait_queue.wake_up();

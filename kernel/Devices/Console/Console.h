@@ -39,7 +39,7 @@ class Console : public FSNode
 	~Console();
 	Result<void> open(FileDescription&) override;
 	Result<void> close(FileDescription&) override;
-	Result<size_t> write(FileDescription&, const void* buff, size_t offset, size_t size) override;
+	Result<size_t> write(FileDescription&, BufferView src, size_t offset) override;
 	bool can_write(FileDescription&) override;
 
   private:

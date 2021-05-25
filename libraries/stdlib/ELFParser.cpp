@@ -2,18 +2,14 @@
 #include "Assert.h"
 #include "Clib.h"
 
-ELFParser::ELFParser(const char* file, size_t size) :
-    m_file{file},
-    m_size{size},
-    m_elf_header{reinterpret_cast<const elf32_hdr*>(file)}
+ELFParser::ELFParser(BufferView file) : m_file{file}, m_elf_header{reinterpret_cast<const elf32_hdr*>(file.ptr())}
 {
-	ASSERT(m_file);
 	if (!is_valid()) {
 		return;
 	}
 
-	m_program_headers_array = reinterpret_cast<const elf32_phdr*>(m_file + m_elf_header->e_phoff);
-	m_section_headers_array = reinterpret_cast<const elf32_shdr*>(m_file + m_elf_header->e_shoff);
+	m_program_headers_array = reinterpret_cast<const elf32_phdr*>(m_file.ptr() + m_elf_header->e_phoff);
+	m_section_headers_array = reinterpret_cast<const elf32_shdr*>(m_file.ptr() + m_elf_header->e_shoff);
 	m_programs_number = m_elf_header->e_phnum;
 	m_sections_number = m_elf_header->e_shnum;
 	m_string_table = find_string_table();
@@ -92,7 +88,7 @@ const char* ELFParser::find_string_table() const
 {
 	if (m_elf_header->e_shstrndx != SHN_UNDEF &&
 	    m_section_headers_array[m_elf_header->e_shstrndx].sh_type == SHT_STRTAB) {
-		return m_file + m_section_headers_array[m_elf_header->e_shstrndx].sh_offset;
+		return (const char*)(m_file.ptr() + m_section_headers_array[m_elf_header->e_shstrndx].sh_offset);
 	} else {
 		return nullptr;
 	}
