@@ -125,7 +125,7 @@ String PathView::full_path() const
 	return full_path_str;
 }
 
-bool PathView::is_valid(const StringView& path)
+bool PathView::is_valid(StringView path)
 {
 	if (path.length() == 0)
 		return false;
@@ -136,7 +136,7 @@ bool PathView::is_valid(const StringView& path)
 	return true;
 }
 
-PathType PathView::get_type(const StringView& path)
+PathType PathView::get_type(StringView path)
 {
 	ASSERT(is_valid(path));
 
@@ -149,7 +149,7 @@ PathType PathView::get_type(const StringView& path)
 	}
 }
 
-StringView PathView::get_element_from_full_path(const StringView& path, size_t index) const
+StringView PathView::get_element_from_full_path(StringView path, size_t index) const
 {
 	int pos = 0;
 	if (path[0] == SPLITER) {
@@ -228,7 +228,7 @@ StringView PathView::sub_relative_path(size_t start_index, size_t end_index) con
 	}
 }
 
-size_t PathView::count_elements(const StringView& path) const
+size_t PathView::count_elements(StringView path) const
 {
 	if (path[0] == SPLITER && path.length() == 1) {
 		return 0;

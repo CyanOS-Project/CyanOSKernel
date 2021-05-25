@@ -12,7 +12,7 @@ class String
 	                               // TODO : implement capacity.
 
   public:
-	String(const StringView& str);
+	String(StringView str);
 	String(const char* str);
 	String(const char* str, size_t len);
 	String(String&& other);
@@ -28,10 +28,10 @@ class String
 	String operator+(const String& other) const;
 	char operator[](size_t off) const;
 
-	bool operator==(const StringView& other) const;
+	bool operator==(StringView other) const;
 	bool operator==(const String& other) const;
 	bool operator==(const char* other) const;
-	bool operator!=(const StringView& other) const;
+	bool operator!=(StringView other) const;
 	bool operator!=(const String& other) const;
 	bool operator!=(const char* other) const;
 	String substr(size_t pos, size_t len) const;

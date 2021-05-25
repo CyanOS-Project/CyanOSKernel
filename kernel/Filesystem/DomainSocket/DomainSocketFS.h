@@ -14,14 +14,14 @@ class DomainSocketFS : public FSNode
 {
 
   public:
-	static UniquePointer<FSNode> alloc(const StringView& name);
+	static UniquePointer<FSNode> alloc(StringView name);
 	~DomainSocketFS();
-	Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) override;
-	Result<FSNode&> dir_lookup(const StringView& file_name) override;
+	Result<FSNode&> create(StringView name, OpenMode mode, OpenFlags flags) override;
+	Result<FSNode&> dir_lookup(StringView file_name) override;
 
   private:
 	List<DomainSocket> m_children;
 	Spinlock m_lock;
 
-	explicit DomainSocketFS(const StringView& name);
+	explicit DomainSocketFS(StringView name);
 };

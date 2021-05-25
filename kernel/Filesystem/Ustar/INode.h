@@ -15,7 +15,7 @@ class INode : public FSNode
 	List<INode> m_children;
 
   public:
-	explicit INode(const StringView& name, NodeType type, size_t size, char* data);
+	explicit INode(StringView name, NodeType type, size_t size, char* data);
 	INode& operator=(const INode& other) = delete;
 	INode& operator=(INode&& other) = delete;
 	~INode();
@@ -23,7 +23,7 @@ class INode : public FSNode
 	Result<void> close(FileDescription&) override;
 	Result<size_t> read(FileDescription&, BufferMutableView dest, size_t offset) override;
 	bool can_read(FileDescription&) override;
-	Result<FSNode&> dir_lookup(const StringView& file_name) override;
+	Result<FSNode&> dir_lookup(StringView file_name) override;
 	Result<FSNode&> dir_query(size_t index) override;
 
 	friend class TarFS;

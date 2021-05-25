@@ -12,7 +12,7 @@
 class Pipe : public FSNode
 {
   public:
-	explicit Pipe(const StringView& name);
+	explicit Pipe(StringView name);
 	~Pipe();
 	Result<void> open(FileDescription&) override;
 	Result<void> close(FileDescription&) override;

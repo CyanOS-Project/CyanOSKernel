@@ -125,7 +125,7 @@ Result<FSNode&> VFS::traverse_node(PathView path)
 	return *current;
 }
 
-FSNode* VFS::get_root_node(const StringView& root_name)
+FSNode* VFS::get_root_node(StringView root_name)
 {
 	for (auto&& i : fs_roots) {
 		if (i->m_name == root_name) {

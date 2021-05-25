@@ -3,7 +3,7 @@
 #include "Tasking/ScopedLock.h"
 #include <ErrorCodes.h>
 
-Pipe::Pipe(const StringView& name) :
+Pipe::Pipe(StringView name) :
     FSNode(name, 0, 0, NodeType::Pipe, BUFFER_SIZE),
     m_children{},
     m_buffer{BUFFER_SIZE},

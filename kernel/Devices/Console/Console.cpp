@@ -5,12 +5,12 @@
 #include "VirtualMemory/Memory.h"
 #include <Clib.h>
 
-UniquePointer<FSNode> Console::alloc(const StringView& name)
+UniquePointer<FSNode> Console::alloc(StringView name)
 {
 	return UniquePointer<FSNode>(new Console(name));
 }
 
-Console::Console(const StringView& name) : FSNode(name, 0, 0, NodeType::Root, 0)
+Console::Console(StringView name) : FSNode(name, 0, 0, NodeType::Root, 0)
 {
 	initiate_console();
 }

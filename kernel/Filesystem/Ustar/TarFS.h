@@ -12,7 +12,8 @@
 #define MAX_TAR_FILE_NAME  100
 #define TAR_ALIGNMENT      512
 #define TAR_OCTAL_SIZE_LEN 12
-enum USTARFileType {
+enum USTARFileType
+{
 	Normal = '0',
 	HardLink = '1',
 	SymbolicLink = '2',
@@ -45,17 +46,17 @@ struct TarHeader {                 /* byte offset */
 class TarFS : public INode
 {
   public:
-	static UniquePointer<FSNode> alloc(const StringView& name, void* tar_address, size_t size);
+	static UniquePointer<FSNode> alloc(StringView name, void* tar_address, size_t size);
 	Result<void> open(UNUSEDARG FileDescription&) override;
-	Result<FSNode&> dir_lookup(const StringView& file_name) override;
+	Result<FSNode&> dir_lookup(StringView file_name) override;
 	Result<FSNode&> dir_query(UNUSEDARG size_t index) override;
 	~TarFS() override;
 
   private:
 	TarHeader* m_tar_address;
 
-	explicit TarFS(const StringView& name, void* tar_address, size_t size);
-	INode& add_child_node(INode& parent, const StringView& name, char type, const size_t size, char* data);
+	explicit TarFS(StringView name, void* tar_address, size_t size);
+	INode& add_child_node(INode& parent, StringView name, char type, const size_t size, char* data);
 	String regulate_path(const char* path);
 	size_t octal_to_decimal(const char* octal);
 	void parse_ustar(size_t size);

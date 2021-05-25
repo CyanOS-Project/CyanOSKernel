@@ -4,7 +4,7 @@
 #include <Clib.h>
 #include <ErrorCodes.h>
 
-INode::INode(const StringView& name, NodeType type, size_t size, char* data) :
+INode::INode(StringView name, NodeType type, size_t size, char* data) :
     FSNode(name, 0, 0, type, size),
     m_data{data},
     m_lock{},
@@ -42,7 +42,7 @@ bool INode::can_read(FileDescription&)
 	return true;
 }
 
-Result<FSNode&> INode::dir_lookup(const StringView& file_name)
+Result<FSNode&> INode::dir_lookup(StringView file_name)
 {
 	ScopedLock local_lock(m_lock);
 	for (auto& i : m_children) {

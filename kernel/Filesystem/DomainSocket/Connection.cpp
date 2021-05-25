@@ -1,7 +1,7 @@
 #include "Connection.h"
 #include "Filesystem/FileDescription.h"
 
-Connection::Connection(const StringView& name) :
+Connection::Connection(StringView name) :
     FSNode{name, 0, 0, NodeType::Connection, 0},
     m_server_buffer{BUFFER_SIZE},
     m_client_buffer{BUFFER_SIZE},

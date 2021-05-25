@@ -21,7 +21,7 @@ class FSNode
 	NodeType m_type;
 	size_t m_size;
 
-	FSNode(const StringView& name, int permission, int owner, NodeType type, size_t size) :
+	FSNode(StringView name, int permission, int owner, NodeType type, size_t size) :
 	    m_name{name},
 	    m_permission{permission},
 	    m_owner{owner},
@@ -48,9 +48,9 @@ class FSNode
 	virtual Result<FSNode&> accept() { INVALID_OP; }
 	virtual Result<size_t> read(FileDescription&, BufferMutableView dest, size_t offset) { INVALID_OP; }
 	virtual Result<size_t> write(FileDescription&, BufferView src, size_t offset) { INVALID_OP; }
-	virtual Result<FSNode&> dir_lookup(const StringView& file_name) { INVALID_OP; }
-	virtual Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) { INVALID_OP; }
-	virtual Result<void> mkdir(const StringView& name, int flags, int access) { INVALID_OP; }
+	virtual Result<FSNode&> dir_lookup(StringView file_name) { INVALID_OP; }
+	virtual Result<FSNode&> create(StringView name, OpenMode mode, OpenFlags flags) { INVALID_OP; }
+	virtual Result<void> mkdir(StringView name, int flags, int access) { INVALID_OP; }
 	virtual Result<FSNode&> dir_query(size_t index) { INVALID_OP; }
 #pragma GCC diagnostic pop
 

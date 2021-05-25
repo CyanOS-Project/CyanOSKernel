@@ -34,7 +34,7 @@ typedef enum
 class Console : public FSNode
 {
   public:
-	static UniquePointer<FSNode> alloc(const StringView& name);
+	static UniquePointer<FSNode> alloc(StringView name);
 
 	~Console();
 	Result<void> open(FileDescription&) override;
@@ -50,7 +50,7 @@ class Console : public FSNode
 	static const size_t VGA_WIDTH = 80;
 	static const size_t VGA_HEIGHT = 25;
 
-	explicit Console(const StringView& name);
+	explicit Console(StringView name);
 	void set_mode(TerminalMode Mode);
 	void set_color(VGAColor color, VGAColor backcolor);
 	void put_char(const char str);

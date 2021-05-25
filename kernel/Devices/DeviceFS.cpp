@@ -5,12 +5,12 @@
 
 List<UniquePointer<FSNode>>* DeviceFS::children = nullptr;
 
-UniquePointer<FSNode> DeviceFS::alloc(const StringView& name)
+UniquePointer<FSNode> DeviceFS::alloc(StringView name)
 {
 	return UniquePointer<FSNode>(new DeviceFS(name));
 }
 
-DeviceFS::DeviceFS(const StringView& name) : FSNode{name, 0, 0, NodeType::Root, 0}
+DeviceFS::DeviceFS(StringView name) : FSNode{name, 0, 0, NodeType::Root, 0}
 {
 	ASSERT(children == 0);
 	// FIXME: lock me.
@@ -35,14 +35,14 @@ Result<void> DeviceFS::add_device(UniquePointer<FSNode>&& new_device)
 	return ResultError(ERROR_SUCCESS);
 }
 
-Result<void> DeviceFS::remove_device(const StringView& name)
+Result<void> DeviceFS::remove_device(StringView name)
 {
 	UNUSED(name);
 	// ScopedLock local_lock(m_lock);
 	return ResultError(ERROR_INVALID_OPERATION);
 }
 
-Result<FSNode&> DeviceFS::dir_lookup(const StringView& file_name)
+Result<FSNode&> DeviceFS::dir_lookup(StringView file_name)
 {
 	// ScopedLock local_lock(m_lock);
 	for (auto& i : *children) {

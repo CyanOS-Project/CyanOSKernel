@@ -13,7 +13,7 @@
 const size_t String::END = -1;
 const size_t String::NOT_FOUND = -1;
 
-String::String(const StringView& str) : m_size{str.length()}, m_data{new char[m_size + 1]}
+String::String(StringView str) : m_size{str.length()}, m_data{new char[m_size + 1]}
 {
 	ASSERT(m_data);
 	memcpy(m_data, str.m_data, m_size);
@@ -235,7 +235,7 @@ char& String::operator[](size_t off)
 	return m_data[off];
 }
 
-bool String::operator==(const StringView& other) const
+bool String::operator==(StringView other) const
 {
 	if (m_size != other.m_size)
 		return false;
@@ -260,7 +260,7 @@ bool String::operator==(const char* other) const
 	return true;
 }
 
-bool String::operator!=(const StringView& other) const
+bool String::operator!=(StringView other) const
 {
 	if (m_size == other.m_size)
 		return false;

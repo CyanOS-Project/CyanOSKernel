@@ -32,7 +32,7 @@ class VFS
 	static Result<FSNode&> get_node(PathView, OpenMode mode, OpenFlags flags);
 	static Result<FSNode&> create_new_node(PathView, OpenMode mode, OpenFlags flags);
 	static Result<FSNode&> open_existing_node(PathView);
-	static FSNode* get_root_node(const StringView& root_name);
+	static FSNode* get_root_node(StringView root_name);
 
 	friend class FileDescription;
 };

@@ -1,6 +1,6 @@
 #include "DomainSocket.h"
 
-DomainSocket::DomainSocket(const StringView& name) :
+DomainSocket::DomainSocket(StringView name) :
     FSNode{name, 0, 0, NodeType::DomainSocket, 0},
     m_connections{},
     m_server_wait_queue{},

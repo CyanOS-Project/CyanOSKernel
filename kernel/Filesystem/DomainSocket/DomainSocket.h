@@ -13,7 +13,7 @@
 class DomainSocket : public FSNode
 {
   public:
-	explicit DomainSocket(const StringView& name);
+	explicit DomainSocket(StringView name);
 	~DomainSocket();
 	Result<void> open(FileDescription&) override;
 	bool can_accept() override;

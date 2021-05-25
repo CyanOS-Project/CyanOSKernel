@@ -13,16 +13,16 @@
 class PipeFS : public FSNode
 {
   public:
-	static UniquePointer<FSNode> alloc(const StringView& name);
+	static UniquePointer<FSNode> alloc(StringView name);
 
 	~PipeFS();
-	Result<FSNode&> create(const StringView& name, OpenMode mode, OpenFlags flags) override;
-	Result<FSNode&> dir_lookup(const StringView& file_name) override;
+	Result<FSNode&> create(StringView name, OpenMode mode, OpenFlags flags) override;
+	Result<FSNode&> dir_lookup(StringView file_name) override;
 	Result<FSNode&> dir_query(size_t index) override;
 
   private:
 	List<Pipe> m_children;
 	Spinlock m_lock;
 
-	explicit PipeFS(const StringView& name);
+	explicit PipeFS(StringView name);
 };

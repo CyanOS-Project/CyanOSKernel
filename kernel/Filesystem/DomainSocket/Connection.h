@@ -12,7 +12,7 @@
 class Connection : public FSNode
 {
   public:
-	explicit Connection(const StringView& name);
+	explicit Connection(StringView name);
 	~Connection();
 	Result<void> open(FileDescription&) override;
 	Result<size_t> read(FileDescription&, BufferMutableView dest, size_t offset) override;

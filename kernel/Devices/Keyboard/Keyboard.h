@@ -13,7 +13,7 @@ class Keyboard : public FSNode
 {
   public:
 	static void keyboard_driver_handler(ISRContextFrame&);
-	static UniquePointer<FSNode> alloc(const StringView& name);
+	static UniquePointer<FSNode> alloc(StringView name);
 
 	~Keyboard();
 	Result<void> open(FileDescription&) override;
@@ -37,7 +37,7 @@ class Keyboard : public FSNode
 	    {0, 0},     {0, 0},       {0, 0},     {' ', ' '},
 	};
 
-	explicit Keyboard(const StringView& name);
+	explicit Keyboard(StringView name);
 	void enqueue_keystoke(unsigned char data);
 	constexpr char key_pressed(char key);
 	constexpr char key_released(char key);
