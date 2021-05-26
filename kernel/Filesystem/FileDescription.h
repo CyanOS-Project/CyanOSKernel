@@ -1,6 +1,7 @@
 #pragma once
 
 #include "FSNode.h"
+#include "Network/NetworkDefinitions.h"
 #include <BufferMutableView.h>
 #include <BufferView.h>
 #include <PathView.h>
@@ -19,6 +20,7 @@ class FileDescription
 	const OpenMode m_mode;
 
 	static Result<UniquePointer<FileDescription>> open(PathView path, OpenMode mode, OpenFlags flags);
+	static Result<UniquePointer<FileDescription>> socket(SocketAddress addr, SocketProtocol protocol, size_t flags);
 	FileDescription(FSNode& node, OpenMode mode);
 	~FileDescription();
 	Result<size_t> read(BufferMutableView);

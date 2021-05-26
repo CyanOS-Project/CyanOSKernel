@@ -28,8 +28,8 @@ class TCPSession
 	Result<void> accept(u16 port);
 	Result<void> connect(IPv4Address ip, u16 port);
 	void close();
-	Result<size_t> send(const BufferView& data);
-	Result<size_t> receive(Buffer& data);
+	Result<size_t> send(BufferView data);
+	Result<size_t> receive(BufferMutableView data);
 	SocketAddress address() const;
 
   private:

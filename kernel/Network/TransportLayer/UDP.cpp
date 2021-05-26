@@ -11,7 +11,7 @@
 // TODO: refactor network structures so one function will handle convertions to/from big endian.
 UDP::UDP(Network& network) : m_network{network} {}
 
-Result<size_t> UDP::send(IPv4Address dest_ip, u16 dest_port, const BufferView& data)
+Result<size_t> UDP::send(IPv4Address dest_ip, u16 dest_port, BufferView data)
 {
 	u16 src_port = m_ports.find_first_clear();
 
@@ -22,7 +22,7 @@ Result<size_t> UDP::send(IPv4Address dest_ip, u16 dest_port, const BufferView& d
 	return data.size();
 }
 
-Result<size_t> UDP::send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
+Result<size_t> UDP::send(IPv4Address dest_ip, u16 dest_port, u16 src_port, BufferView data)
 {
 	if (m_ports.check_set(src_port)) {
 		return ResultError{ERROR_PORT_ALREADY_IN_USE};
@@ -36,7 +36,7 @@ Result<size_t> UDP::send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const
 	return data.size();
 }
 
-Result<size_t> UDP::receive(u16 dest_port, Buffer& buffer)
+Result<size_t> UDP::receive(u16 dest_port, BufferMutableView buffer)
 {
 	auto result = receive_segment(dest_port, buffer);
 	if (result)
@@ -45,7 +45,7 @@ Result<size_t> UDP::receive(u16 dest_port, Buffer& buffer)
 	return result.value().data_size;
 }
 
-Result<size_t> UDP::receive(u16 dest_port, Buffer& buffer, SocketAddress& source_address)
+Result<size_t> UDP::receive(u16 dest_port, BufferMutableView buffer, SocketAddress& source_address)
 {
 	auto result = receive_segment(dest_port, buffer);
 	if (result)
@@ -57,7 +57,7 @@ Result<size_t> UDP::receive(u16 dest_port, Buffer& buffer, SocketAddress& source
 	return result.value().data_size;
 }
 
-void UDP::handle(IPv4Address src_ip, const BufferView& data)
+void UDP::handle(IPv4Address src_ip, BufferView data)
 {
 	ScopedLock local_lock{m_lock};
 
@@ -80,7 +80,7 @@ void UDP::handle(IPv4Address src_ip, const BufferView& data)
 	}
 }
 
-Result<void> UDP::send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data)
+Result<void> UDP::send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, BufferView data)
 {
 	Buffer udp_raw_segment{sizeof(UDPHeader) + data.size()};
 	auto& udp_segment = udp_raw_segment.convert_to<UDPHeader>();
@@ -97,7 +97,7 @@ Result<void> UDP::send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port,
 	return {};
 }
 
-Result<UDP::DatagramInfo> UDP::receive_segment(u16 dest_port, Buffer& buffer)
+Result<UDP::DatagramInfo> UDP::receive_segment(u16 dest_port, BufferMutableView buffer)
 {
 	ScopedLock local_lock{m_lock};
 

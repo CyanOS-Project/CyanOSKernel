@@ -1,6 +1,7 @@
 #include "FileDescription.h"
 #include "FSNode.h"
 #include "FileSystemDefinitions.h"
+#include "IPSocket/IPSocket.h"
 #include "VirtualFilesystem.h"
 #include <Clib.h>
 #include <ErrorCodes.h>
@@ -10,16 +11,31 @@ Result<UniquePointer<FileDescription>> FileDescription::open(PathView path, Open
 	// FIXME: Fail if there is someone already has a handle with writing permission.
 
 	auto node = VFS::get_node(path, mode, flags);
-	if (node.error()) {
-		return ResultError(node.error());
-	}
+	if (node.error())
+		return ResultError{node.error()};
 
 	auto description = UniquePointer<FileDescription>::make_unique(node.value(), mode);
 
 	auto open_ret = node.value().open(*description);
-	if (open_ret.is_error()) {
-		return ResultError(open_ret.error());
-	}
+	if (open_ret.is_error())
+		return ResultError{open_ret.error()};
+
+	return description;
+}
+
+Result<UniquePointer<FileDescription>> FileDescription::socket(SocketAddress addr, SocketProtocol protocol,
+                                                               size_t flags)
+{
+	auto node = create_socket(addr, protocol, flags);
+	if (node.error())
+		return ResultError{node.error()};
+
+	// FIXME: there should be OpenMode paramter here.
+	auto description = UniquePointer<FileDescription>::make_unique(node.value(), OpenMode::OM_SERVER);
+
+	auto open_ret = node.value().open(*description);
+	if (open_ret.is_error())
+		return ResultError{open_ret.error()};
 
 	return description;
 }

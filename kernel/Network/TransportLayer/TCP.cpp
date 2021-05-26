@@ -113,7 +113,7 @@ void TCPSession::close()
 	end_connection();
 }
 
-Result<size_t> TCPSession::send(const BufferView& data)
+Result<size_t> TCPSession::send(BufferView data)
 {
 	ScopedLock local_lock{*m_lock};
 
@@ -129,7 +129,7 @@ Result<size_t> TCPSession::send(const BufferView& data)
 	return data.size();
 }
 
-Result<size_t> TCPSession::receive(Buffer& data)
+Result<size_t> TCPSession::receive(BufferMutableView data)
 {
 	ScopedLock local_lock{*m_lock};
 
@@ -146,6 +146,7 @@ Result<size_t> TCPSession::receive(Buffer& data)
 
 	size_t data_size = m_buffer_written_pointer - m_buffer_start_pointer;
 	if (data_size > data.size()) {
+		// FIXME: no need for buffer overlow, just read the desired
 		return ResultError{ERROR_BUFFER_OVERFLOW};
 	}
 

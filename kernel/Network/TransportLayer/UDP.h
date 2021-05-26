@@ -15,11 +15,11 @@ class UDP
 
   public:
 	UDP(Network&);
-	Result<size_t> send(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
-	Result<size_t> send(IPv4Address dest_ip, u16 dest_port, const BufferView& data);
-	Result<size_t> receive(u16 dest_port, Buffer& buffer);
-	Result<size_t> receive(u16 dest_port, Buffer& buffer, SocketAddress& source_address);
-	void handle(IPv4Address src_ip, const BufferView& data);
+	Result<size_t> send(IPv4Address dest_ip, u16 dest_port, u16 src_port, BufferView data);
+	Result<size_t> send(IPv4Address dest_ip, u16 dest_port, BufferView data);
+	Result<size_t> receive(u16 dest_port, BufferMutableView buffer);
+	Result<size_t> receive(u16 dest_port, BufferMutableView buffer, SocketAddress& source_address);
+	void handle(IPv4Address src_ip, BufferView data);
 
   private:
 	struct UDPHeader {
@@ -39,14 +39,14 @@ class UDP
 		u16 dest_port;
 		u16 src_port;
 		IPv4Address src_ip;
-		Buffer* buffer;
+		Reference<BufferMutableView> buffer;
 		size_t data_size;
 		WaitQueue wait_queue;
-		Connection(u16 t_port, Buffer& t_buffer) : dest_port{t_port}, buffer{&t_buffer}, wait_queue{} {}
+		Connection(u16 t_port, BufferMutableView& t_buffer) : dest_port{t_port}, buffer{t_buffer}, wait_queue{} {}
 	};
 
-	Result<void> send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, const BufferView& data);
-	Result<DatagramInfo> receive_segment(u16 dest_port, Buffer& buffer);
+	Result<void> send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, BufferView data);
+	Result<DatagramInfo> receive_segment(u16 dest_port, BufferMutableView buffer);
 
 	Spinlock m_lock;
 	Network& m_network;
