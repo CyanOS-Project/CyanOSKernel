@@ -52,14 +52,14 @@ void DHCP::handle_dhcp_ack(const BufferView& buffer)
 void DHCP::send_dhcp_discovery()
 {
 	Buffer dhcp_raw_segment = make_dhcp_segment(IPv4Address::Zero, DCHPMessageType::Discover);
-	m_network.udp_provider().send(IPv4Address::Broadcast, 67, 68, dhcp_raw_segment);
+	m_network.udp_provider().send(SocketAddress{IPv4Address::Broadcast, 67}, 68, dhcp_raw_segment);
 	m_state = DHCPState::Discovery;
 }
 
 void DHCP::send_dhcp_request(IPv4Address requested_ip)
 {
 	Buffer dhcp_raw_segment = make_dhcp_segment(requested_ip, DCHPMessageType::Request);
-	m_network.udp_provider().send(IPv4Address::Broadcast, 67, 68, dhcp_raw_segment);
+	m_network.udp_provider().send(SocketAddress{IPv4Address::Broadcast, 67}, 68, dhcp_raw_segment);
 	m_state = DHCPState::Request;
 }
 

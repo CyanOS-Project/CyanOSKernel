@@ -13,20 +13,22 @@ UDPSocket::UDPSocket(SocketAddress address) :
 
 UDPSocket::~UDPSocket() {}
 
-Result<void> UDPSocket::open(FileDescription&) {}
-
-Result<size_t> UDPSocket::read(FileDescription&, BufferMutableView dest, size_t offset)
+Result<void> UDPSocket::open(FileDescription&)
 {
-	// FIXME: handle offset.
-	// return m_udp->receive(buff);
+	return {};
 }
 
-Result<size_t> UDPSocket::write(FileDescription&, BufferView src, size_t offset)
+Result<size_t> UDPSocket::read(FileDescription&, BufferMutableView dest, size_t)
 {
-	// return m_udp->receive(buff);
+	return m_udp->receive(m_address.port, dest);
+}
+
+Result<size_t> UDPSocket::write(FileDescription&, BufferView src, size_t)
+{
+	return m_udp->send(m_address, src);
 }
 
 Result<void> UDPSocket::close(FileDescription&)
 {
-	// delete node.
+	return {};
 }

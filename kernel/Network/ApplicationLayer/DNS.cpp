@@ -32,7 +32,7 @@ Result<void> DNS::send_dns_query(StringView domain_name)
 	dns_request[header_offset + 2] = 0x00;
 	dns_request[header_offset + 3] = DNS_MESSAGE_CLASS_IN;
 
-	return ResultError{m_udp.send(m_dns_server, 53, 53, dns_request)};
+	return ResultError{m_udp.send(SocketAddress{m_dns_server, 53}, 53, dns_request)};
 }
 
 Result<IPv4Address> DNS::get_dns_response()

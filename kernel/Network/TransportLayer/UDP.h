@@ -15,8 +15,8 @@ class UDP
 
   public:
 	UDP(Network&);
-	Result<size_t> send(IPv4Address dest_ip, u16 dest_port, u16 src_port, BufferView data);
-	Result<size_t> send(IPv4Address dest_ip, u16 dest_port, BufferView data);
+	Result<size_t> send(SocketAddress dest, u16 src_port, BufferView data);
+	Result<size_t> send(SocketAddress dest, BufferView data);
 	Result<size_t> receive(u16 dest_port, BufferMutableView buffer);
 	Result<size_t> receive(u16 dest_port, BufferMutableView buffer, SocketAddress& source_address);
 	void handle(IPv4Address src_ip, BufferView data);
@@ -45,7 +45,7 @@ class UDP
 		Connection(u16 t_port, BufferMutableView& t_buffer) : dest_port{t_port}, buffer{t_buffer}, wait_queue{} {}
 	};
 
-	Result<void> send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, BufferView data);
+	Result<void> send_segment(SocketAddress dest, u16 src_port, BufferView data);
 	Result<DatagramInfo> receive_segment(u16 dest_port, BufferMutableView buffer);
 
 	Spinlock m_lock;

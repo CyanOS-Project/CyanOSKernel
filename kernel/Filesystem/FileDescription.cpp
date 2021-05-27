@@ -44,6 +44,7 @@ FileDescription::FileDescription(FSNode& node, OpenMode mode) : m_type{node.m_ty
 
 FileDescription::~FileDescription()
 {
+	// FIXME: delete socket too here.
 	m_node.close(*this);
 }
 

@@ -4,4 +4,4 @@
 #include "Network/NetworkDefinitions.h"
 
 Result<FSNode> create_socket(SocketAddress addr, SocketProtocol protocol, size_t flags);
-Result<FSNode> close_socket(FSNode& node);
+Result<void> close_socket(FSNode& node);

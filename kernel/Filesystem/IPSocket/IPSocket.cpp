@@ -18,4 +18,14 @@ Result<FSNode> create_socket(SocketAddress addr, SocketProtocol protocol, size_t
 	}
 }
 
-Result<FSNode> close_socket(FSNode& node) {}
+Result<void> close_socket(FSNode& node)
+{
+	auto found_node = sockets.find_if([&node](auto& i) { return i.ptr() == &node; });
+	if (found_node == sockets.end()) {
+		ASSERT_NOT_REACHABLE();
+		ResultError{ERROR_INVALID_PARAMETER};
+	}
+
+	sockets.remove(found_node);
+	return {};
+}

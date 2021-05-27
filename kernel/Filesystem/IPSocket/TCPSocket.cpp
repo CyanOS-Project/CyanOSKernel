@@ -21,7 +21,10 @@ TCPSocket::TCPSocket(TCPSession& session) :
 
 TCPSocket::~TCPSocket() {}
 
-Result<void> TCPSocket::open(FileDescription&) {}
+Result<void> TCPSocket::open(FileDescription&)
+{
+	return {};
+}
 
 Result<void> TCPSocket::connect()
 {
@@ -54,27 +57,22 @@ Result<FSNode&> TCPSocket::accept()
 	return *sockets.emplace_back(result.value());
 }
 
-Result<size_t> TCPSocket::read(FileDescription&, BufferMutableView dest, size_t offset)
+Result<size_t> TCPSocket::read(FileDescription&, BufferMutableView dest, size_t)
 {
-	UNUSED(offset);
-
 	if (!m_session.is_valid())
 		return ResultError{ERROR_INVALID_OPERATION};
 	return m_session->receive(dest);
 }
 
-Result<size_t> TCPSocket::write(FileDescription&, BufferView src, size_t offset)
+Result<size_t> TCPSocket::write(FileDescription&, BufferView src, size_t)
 {
-	UNUSED(offset);
-
 	if (!m_session.is_valid())
 		return ResultError{ERROR_INVALID_OPERATION};
 
-	// FIXME: handle offset.
 	return m_session->send(src);
 }
 
 Result<void> TCPSocket::close(FileDescription&)
 {
-	// delete node.
+	return {};
 }

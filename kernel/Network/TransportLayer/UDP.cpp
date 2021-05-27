@@ -11,24 +11,24 @@
 // TODO: refactor network structures so one function will handle convertions to/from big endian.
 UDP::UDP(Network& network) : m_network{network} {}
 
-Result<size_t> UDP::send(IPv4Address dest_ip, u16 dest_port, BufferView data)
+Result<size_t> UDP::send(SocketAddress dest, BufferView data)
 {
 	u16 src_port = m_ports.find_first_clear();
 
-	if (auto result = send_segment(dest_ip, dest_port, src_port, data))
+	if (auto result = send_segment(dest, src_port, data))
 		return ResultError{result.error()};
 	m_ports.clear(src_port);
 
 	return data.size();
 }
 
-Result<size_t> UDP::send(IPv4Address dest_ip, u16 dest_port, u16 src_port, BufferView data)
+Result<size_t> UDP::send(SocketAddress dest, u16 src_port, BufferView data)
 {
 	if (m_ports.check_set(src_port)) {
 		return ResultError{ERROR_PORT_ALREADY_IN_USE};
 	}
 
-	if (auto result = send_segment(dest_ip, dest_port, src_port, data))
+	if (auto result = send_segment(dest, src_port, data))
 		return ResultError{result.error()};
 
 	m_ports.clear(src_port);
@@ -80,19 +80,19 @@ void UDP::handle(IPv4Address src_ip, BufferView data)
 	}
 }
 
-Result<void> UDP::send_segment(IPv4Address dest_ip, u16 dest_port, u16 src_port, BufferView data)
+Result<void> UDP::send_segment(SocketAddress dest, u16 src_port, BufferView data)
 {
 	Buffer udp_raw_segment{sizeof(UDPHeader) + data.size()};
 	auto& udp_segment = udp_raw_segment.convert_to<UDPHeader>();
 
 	udp_segment.source_port = network_word16(src_port);
-	udp_segment.destination_port = network_word16(dest_port);
+	udp_segment.destination_port = network_word16(dest.port);
 	udp_segment.total_length = network_word16(sizeof(UDPHeader) + data.size());
 	udp_segment.checksum = 0;
 
 	udp_raw_segment.fill_from(data.ptr(), sizeof(UDPHeader), data.size());
 
-	m_network.ipv4_provider().send(dest_ip, IPv4Protocols::UDP, udp_raw_segment);
+	m_network.ipv4_provider().send(dest.ip, IPv4Protocols::UDP, udp_raw_segment);
 
 	return {};
 }
