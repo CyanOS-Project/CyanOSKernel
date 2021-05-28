@@ -23,41 +23,6 @@ Result<void> VFS::unmount()
 	return ResultError(ERROR_INVALID_PARAMETER);
 }
 
-Result<void> VFS::remove()
-{
-	return ResultError(ERROR_INVALID_PARAMETER);
-}
-
-Result<void> VFS::make_directory()
-{
-	return ResultError(ERROR_INVALID_PARAMETER);
-}
-
-Result<void> VFS::remove_directory()
-{
-	return ResultError(ERROR_INVALID_PARAMETER);
-}
-
-Result<void> VFS::rename()
-{
-	return ResultError(ERROR_INVALID_PARAMETER);
-}
-
-Result<void> VFS::chown()
-{
-	return ResultError(ERROR_INVALID_PARAMETER);
-}
-
-Result<void> VFS::make_link()
-{
-	return ResultError(ERROR_INVALID_PARAMETER);
-}
-
-Result<void> VFS::remove_link()
-{
-	return ResultError(ERROR_INVALID_PARAMETER);
-}
-
 bool VFS::check_exitsts(PathView path)
 {
 	auto node = get_node(path, OM_READ, OF_OPEN_EXISTING);

@@ -14,13 +14,6 @@ class VFS
   public:
 	static Result<void> mount(UniquePointer<FSNode>&& fs_root);
 	static Result<void> unmount();
-	static Result<void> remove();
-	static Result<void> make_directory();
-	static Result<void> remove_directory();
-	static Result<void> rename();
-	static Result<void> chown();
-	static Result<void> make_link();
-	static Result<void> remove_link();
 	static bool check_exitsts(PathView path);
 	static PathView resolve_path(PathView path);
 
