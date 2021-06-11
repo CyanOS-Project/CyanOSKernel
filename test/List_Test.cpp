@@ -2,8 +2,8 @@
 	#undef __STRICT_ANSI__
 #endif
 
+#include <List.h>
 #include <gtest/gtest.h>
-#include <stdlib/List.h>
 
 auto get_iterator_at_pos = [](List<int>& lst, int pos) {
 	auto itr = lst.begin();

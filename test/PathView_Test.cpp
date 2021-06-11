@@ -2,8 +2,8 @@
 	#undef __STRICT_ANSI__
 #endif
 
+#include <PathView.h>
 #include <gtest/gtest.h>
-#include <stdlib/PathView.h>
 
 #define MAX_PATH_ELEMENT 256
 TEST(PathView_Test, ElementsCounting)

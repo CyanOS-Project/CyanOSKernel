@@ -5,6 +5,7 @@
 	#include <assert.h>
 	#include <stdio.h>
 	#include <string.h>
+	#include "Types.h"
 	#define ASSERT(x) assert(x)
 #else
 	#include "Clib.h"

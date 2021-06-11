@@ -1,8 +1,8 @@
 #ifdef __STRICT_ANSI__
 	#undef __STRICT_ANSI__
 #endif
+#include <Vector.h>
 #include <gtest/gtest.h>
-#include <stdlib/Vector.h>
 
 TEST(Vector_Test, Iteration)
 {

@@ -2,8 +2,8 @@
 	#undef __STRICT_ANSI__
 #endif
 
+#include <Stack.h>
 #include <gtest/gtest.h>
-#include <stdlib/Stack.h>
 
 TEST(Stack_Test, Initialization)
 {

@@ -2,8 +2,8 @@
 	#undef __STRICT_ANSI__
 #endif
 
+#include <ArgumentParser.h>
 #include <gtest/gtest.h>
-#include <stdlib/ArgumentParser.h>
 
 #define MAX_PATH_ELEMENT 256
 TEST(ArgumentParser_Test, ElementsCounting)

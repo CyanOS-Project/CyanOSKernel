@@ -7,7 +7,14 @@ enable_language(ASM_NASM)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(CyanOS VERSION 0.1.0)
 
+message("${CMAKE_CURRENT_SOURCE}")
+
 # Unit Tests
+include(ExternalProject)
+ExternalProject_Add("test"
+                    PREFIX "test"
+                    DOWNLOAD_COMMAND ""
+                    SOURCE_DIR "${CMAKE_CURRENT_SOURCE}/test")
 
 
 

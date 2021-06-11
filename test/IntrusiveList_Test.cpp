@@ -2,9 +2,9 @@
 	#undef __STRICT_ANSI__
 #endif
 
+#include <IntrusiveList.h>
+#include <TypeTraits.h>
 #include <gtest/gtest.h>
-#include <stdlib/IntrusiveList.h>
-#include <stdlib/TypeTraits.h>
 
 struct Int : public IntrusiveListNode<Int> {
 	int x;
