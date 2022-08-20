@@ -1,5 +1,3 @@
-
-
 SET(CMAKE_TOOLCHAIN_FILE "Toolchain.i686-pe.cmake")
 
 cmake_minimum_required(VERSION 3.0.0)
@@ -7,17 +5,15 @@ enable_language(ASM_NASM)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 project(CyanOS VERSION 0.1.0)
 
-message("${CMAKE_CURRENT_SOURCE}")
+set(PROJECT_TESTS_DIR "${CMAKE_SOURCE_DIR}/test")
+set(PROJECT_SOURCE_DIR "${CMAKE_SOURCE_DIR}/src")
 
 # Unit Tests
 include(ExternalProject)
 ExternalProject_Add("test"
                     PREFIX "test"
                     DOWNLOAD_COMMAND ""
-                    SOURCE_DIR "${CMAKE_CURRENT_SOURCE}/test")
-
-
-
+                    SOURCE_DIR ${PROJECT_TESTS_DIR})
 
 # Building the kernel
 SET(KERNEL_EXE "kernel.bin")
@@ -61,9 +57,9 @@ macro(generate_library lib_name)
     add_library(${lib_name} ${SOURCES})
 endmacro(generate_library)
 
-add_subdirectory("kernel")
-add_subdirectory("userspace")
-add_subdirectory("libraries")
+add_subdirectory("src/kernel")
+add_subdirectory("src/userspace")
+add_subdirectory("src/libraries")
 
 
 get_property(__generated_bins GLOBAL PROPERTY generated_bins)

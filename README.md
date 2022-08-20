@@ -28,6 +28,11 @@ sudo apt-get update
 sudo apt-get install gcc-multilib g++-multilib build-essential nasm python3 cmake grub2 xorriso mtools qemu 
 ```
 For Windows users, you can build and run the system on WSL1/WSL2 (Windows Subsystem for Linux).
+#### Building Cross compiler GCC/GDB
+```
+sudo chmod -x build_cross_compiling_tools.sh
+sudo ./build_cross_compiling_tools.sh
+```
 
 #### Building
 First, you need to build cross compiler gcc,  check out how in this [osdev wiki page](https://wiki.osdev.org/GCC_Cross-Compiler).<br>
