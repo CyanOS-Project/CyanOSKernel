@@ -1,6 +1,6 @@
 #pragma once
-#include "SlabAllocator.h"
-#include <Types.h>
+#include "slab_allocator.h"
+#include <types.h>
 
 class Heap
 {

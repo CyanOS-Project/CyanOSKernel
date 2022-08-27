@@ -1,7 +1,7 @@
 extern "C" {
 
 #include "icxxabi.h"
-#include "../Types.h"
+#include "../types.h"
 
 atexitFuncEntry_t __atexitFuncs[ATEXIT_FUNC_MAX];
 uarch_t __atexitFuncCount = 0;

@@ -1,6 +1,6 @@
 #include "iostream.h"
-#include "../Systemcalls/Systemcalls.h"
-#include <Clib.h>
+#include "../systemcalls/systemcalls.h"
+#include <clib.h>
 
 Handle con_fd = -1;
 Handle kb_fd = -1;

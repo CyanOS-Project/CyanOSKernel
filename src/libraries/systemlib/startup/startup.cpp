@@ -1,7 +1,7 @@
 
-#include "../Systemcalls/Systemcalls.h"
-#include "../Types.h"
-#include "kernel/Tasking/ProcessDefinitions.h"
+#include "../systemcalls/systemcalls.h"
+#include "../types.h"
+#include "kernel/tasking/process_definitions.h"
 
 extern "C" int main(int argc, const char* argv[]);
 

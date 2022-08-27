@@ -8,7 +8,7 @@ SET(CMAKE_CXX_FLAGS  "-Wall -Wextra --pedantic -ffreestanding -fno-exceptions -f
 SET(CMAKE_EXE_LINKER_FLAGS  "-nostdlib -Wl,-estartup")
 
 include_directories("../libraries/stdlib")
-add_subdirectory("Shell")
-add_subdirectory("TestApp")
-add_subdirectory("Cat")
+add_subdirectory("shell")
+add_subdirectory("test_app")
+add_subdirectory("cat")
 

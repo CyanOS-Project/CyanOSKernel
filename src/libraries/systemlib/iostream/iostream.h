@@ -1,5 +1,5 @@
 #pragma once
-#include "../Types.h"
+#include "../types.h"
 
 void printf(const char*);
 void putchar(char c);
